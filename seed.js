@@ -26,6 +26,7 @@ const test = async () => {
 //making tables
 const Item = sequelize.define('item', {
     name: { type: DataTypes.STRING, allowNull: false },
+    icon: { type: DataTypes.STRING }, //links to png?
     stacksTo: { type: DataTypes.INTEGER, defaultValue: 1 },
     price: { type: DataTypes.FLOAT },
     description: { type: DataTypes.STRING },
@@ -58,6 +59,7 @@ const Profession = sequelize.define('profession', {
 const Recipe = sequelize.define('recipe', {
     // item: { type: DataTypes.INTEGER, allowNull: false, references: { model: Item, key: 'id' } },
     name: { type: DataTypes.STRING, allowNull: false },
+    numberCrafted: { type: DataTypes.INTEGER, defaultValue: 1 },
     // profession: { type: DataTypes.INTEGER, allowNull: false, references: { model: Profession, key: 'id' } },
     requiredProfessionLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
     category: { type: DataTypes.STRING },
@@ -137,6 +139,22 @@ Bonus.belongsTo(Specialization);
 // Specialization.hasMany(Specialization);
 // Specialization.belongsTo(Specialization);
 
+async function createItem(name){
+    let item = await Item.create({name: name});
+    return item;
+}
+
+async function createItem(name, stacksTo){
+    let item = await Item.create({name: name, stacksTo: stacksTo});
+    return item;
+}
+
+async function createItem(name, minIlvl, maxIlvl){
+    let item = await Item.create({name: name, itemLevelMin: minIlvl, itemLevelMax: maxIlvl});
+    return item;
+}
+
+
 // MAKING TABLES
 // TIME TO SYNC
 const makeTables = async () => {
@@ -188,6 +206,7 @@ const makeTables = async () => {
             const titanTrainingMatrixTwo = await Item.create({name: 'Titan Training Matrix II', stacksTo: 1000});
             const titanTrainingMatrixThree = await Item.create({name: 'Titan Training Matrix III', stacksTo: 1000});
             const titanTrainingMatrixFour = await Item.create({name: 'Titan Training Matrix IV', stacksTo: 1000});
+            const illustriousInsight = await Item.create({name: "Illustrious Insight", stacksTo: 1000});
 
             //tailoring drops & items
             const tatteredWildercloth = await Item.create({name: 'Tattered Wildercloth', stacksTo: 1000});
@@ -279,20 +298,115 @@ const makeTables = async () => {
         // MADE WITH PROFESSIONS
             
             //tailoring items
-            const wilderclothBandageItem = await Item.create({name: 'Wildercloth Bandage', stacksTo: 200});
+            const wilderclothBandage = await Item.create({name: 'Wildercloth Bandage', stacksTo: 200});
             const surveyorsClothBands = await Item.create({name: "Surveyor's Cloth Bands", itemLevelMin: 306, itemLevelMax: 316});
             const surveyorsClothTreads = await Item.create({name: "Surveyor's Cloth Treads", itemLevelMin: 306, itemLevelMax: 316});
             const surveyorsClothRobe = await Item.create({name: "Surveyor's Cloth Robe", itemLevelMin: 306, itemLevelMax: 316});
             const wilderclothBolt = await Item.create({name: 'Wildercloth Bolt', stacksTo: 1000});
-            const wilderclothTailorsCoat = await Item.create({name: "Wildercloth Tailor's Coat", itemLevelMin: 317, itemLevelMax: 332});
             const surveyorsSeasonedCord = await Item.create({name: "Surveyor's Seasoned Cord", itemLevelMin: 333, itemLevelMax: 343});
             const surveyorsSeasonedGloves = await Item.create({name: "Surveyor's Seasoned Gloves", itemLevelMin: 333, itemLevelMax: 343});
             const surveyorsSeasonedHood = await Item.create({name: "Surveyor's Seasoned Hood", itemLevelMin: 333, itemLevelMax: 343});
             const surveyorsSeasonedPants = await Item.create({name: "Surveyor's Seasoned Pants", itemLevelMin: 333, itemLevelMax: 343});
             const surveyorsSeasonedShoulders = await Item.create({name: "Surveyor's Seasoned Shoulders", itemLevelMin: 333, itemLevelMax: 343});
             const surveyorsTailoredCloak = await Item.create({name: "Surveyor's Tailored Cloak", itemLevelMin: 306, itemLevelMax: 316});
+            const vibrantWilderclothBolt = await Item.create({name: "Vibrant Wildercloth Bolt", stacksTo: 1000});
+            const infuriousWilderclothBolt = await Item.create({name: "Infurious Wildercloth Bolt", stacksTo: 1000});
+            const blueSilkenLining = await Item.create({name: "Blue Silken Lining", stacksTo: 1000});
+            const bronzedGripWrappings = await Item.create({name: "Bronzed Grip Wrappings", stacksTo: 1000});
+            const abrasivePolishingCloth = await Item.create({name: "Abrasive Polishing Cloth", stacksTo: 1000});
+            const vibrantPolishingCloth = await Item.create({name: "Vibrant Polishing Cloth", stacksTo: 1000});
+            const chromaticEmbroideryThread = await Item.create({name: "Chromatic Embroidery Thread", stacksTo: 1000});
+            const shimmeringEmbroideryThread = await Item.create({name: "Shimmering Embroidery Thread", stacksTo: 1000});
+            const blazingEmbroideryThread = await Item.create({name: "Blazing Embroidery Thread", stacksTo: 1000});
+            const vibrantWilderclothGirdle = await Item.create({name: "Vibrant Wildercloth Girdle", itemLevelMin: 382, itemLevelMax: 392});
+            const vibrantWilderclothHandwraps = await Item.create({name: "Vibrant Wildercloth Handwraps", itemLevelMin: 382, itemLevelMax: 392});
+            const vibrantWilderclothHeadcover = await Item.create({name: "Vibrant Wildercloth Headcover", itemLevelMin: 382, itemLevelMax: 392});
+            const vibrantWilderclothShawl = await Item.create({name: "Vibrant Wildercloth Shawl", itemLevelMin: 382, itemLevelMax: 392});
+            const vibrantWilderclothShoulderspikes = await Item.create({name: "Vibrant Wildercloth Shoulderspikes", itemLevelMin: 382, itemLevelMax: 392});
+            const vibrantWilderclothSlacks = await Item.create({name: "Vibrant Wildercloth Slacks", itemLevelMin: 382, itemLevelMax: 392});
+            const vibrantWilderclothSlippers = await Item.create({name: "Vibrant Wildercloth Slippers", itemLevelMin: 382, itemLevelMax: 392});
+            const vibrantWilderclothVestments = await Item.create({name: "Vibrant Wildercloth Vestments", itemLevelMin: 382, itemLevelMax: 392});
+            const vibrantWilderclothWristwraps = await Item.create({name: "Vibrant Wildercloth Wristwraps", itemLevelMin: 382, itemLevelMax: 392});
+            //need to put pvp ilvls for the next set
+            const crimsonCombatantsWilderclothBands = await Item.create({name: "Crimson Combatant's Wildercloth Bands", itemLevelMin: 333, itemLevelMax: 343});
+            const crimsonCombatantsWilderclothCloak = await Item.create({name: "Crimson Combatant's Wildercloth Cloak", itemLevelMin: 333, itemLevelMax: 343});
+            const crimsonCombatantsWilderclothGloves = await Item.create({name: "Crimson Combatant's Wildercloth Gloves", itemLevelMin: 333, itemLevelMax: 343});
+            const crimsonCombatantsWilderclothHood = await Item.create({name: "Crimson Combatant's Wildercloth Hood", itemLevelMin: 333, itemLevelMax: 343});
+            const crimsonCombatantsWilderclothLeggings = await Item.create({name: "Crimson Combatant's Wildercloth Leggings", itemLevelMin: 333, itemLevelMax: 343});
+            const crimsonCombatantsWilderclothSash = await Item.create({name: "Crimson Combatant's Wildercloth Sash", itemLevelMin: 333, itemLevelMax: 343});
+            const crimsonCombatantsWilderclothShoulderpads = await Item.create({name: "Crimson Combatant's Wildercloth Shoulderpads", itemLevelMin: 333, itemLevelMax: 343});
+            const crimsonCombatantsWilderclothTreads = await Item.create({name: "Crimson Combatant's Wildercloth Treads", itemLevelMin: 333, itemLevelMax: 343});
+            const crimsonCombatantsWilderclothTunic = await Item.create({name: "Crimson Combatant's Wildercloth Tunic", itemLevelMin: 333, itemLevelMax: 343});
+            //pvp done
+            const amiceOfTheBlue = await Item.create({name: "Amice of the Blue", itemLevelMin: 382, itemLevelMax: 392});
+            const azureweaveMantle = await Item.create({name: "Azureweave Mantle", itemLevelMin: 382, itemLevelMax: 392});
+            const azureweaveRobe = await Item.create({name: "Azureweave Robe", itemLevelMin: 382, itemLevelMax: 392});
+            const azureweaveSlippers = await Item.create({name: "Azureweave Slippers", itemLevelMin: 382, itemLevelMax: 392});
+            const blueDragonSoles = await Item.create({name: "Blue Dragon Soles", itemLevelMin: 382, itemLevelMax: 392});
+            //below item needs pvp ilvl
+            const infuriousBindingOfGesticulation = await Item.create({name: "Infurious Binding of Gesticulation", itemLevelMin: 382, itemLevelMax: 392});
+            const alliedWristguardsOfTimeDilation = await Item.create({name: "Allied Wristguards of Time Dilation", itemLevelMin: 382, itemLevelMax: 392});
+            const chronoclothGloves = await Item.create({name: "Chronocloth Gloves", itemLevelMin: 382, itemLevelMax: 392});
+            const chronoclothLeggings = await Item.create({name: "Chronocloth Leggings", itemLevelMin: 382, itemLevelMax: 392});
+            const chronoclothSash = await Item.create({name: "Chronocloth Sash", itemLevelMin: 382, itemLevelMax: 392});
+            const hoodOfSurgingTime = await Item.create({name: "Hood of Surging Time", itemLevelMin: 382, itemLevelMax: 392});
+            //below item needs pvp ilvl
+            const infuriousLegwrapsOfPossibility = await Item.create({name: "Infurious Legwraps of Possibility", itemLevelMin: 382, itemLevelMax: 392});
+            const dragonclothTailoringVestments = await Item.create({name: "Dragoncloth Tailoring Vestments", itemLevelMin: 382, itemLevelMax: 397});
+            const mastersWilderclothAlchemistsRobe = await Item.create({name: "Master's Wildercloth Alchemist's Robe", itemLevelMin: 356, itemLevelMax: 371});
+            const mastersWilderclothChefsHat = await Item.create({name: "Master's Wildercloth Chef's Hat", itemLevelMin: 356, itemLevelMax: 371});
+            const mastersWilderclothEnchantersHat = await Item.create({name: "Master's Wildercloth Enchanter's Hat", itemLevelMin: 356, itemLevelMax: 371});
+            const mastersWilderclothFishingCap = await Item.create({name: "Master's Wildercloth Fishing Cap", itemLevelMin: 356, itemLevelMax: 371});
+            const mastersWilderclothGardeningHat = await Item.create({name: "Master's Wildercloth Gardening Hat", itemLevelMin: 356, itemLevelMax: 371});
+            const wilderclothEnchantersHat = await Item.create({name: "Wildercloth Enchanter's Hat", itemLevelMin: 317, itemLevelMax: 332});
+            const wilderclothAlchemistsRobe = await Item.create({name: "Wildercloth Alchemist's Robe", itemLevelMin: 317, itemLevelMax: 332});
+            const wilderclothFishingCap = await Item.create({name: "Wildercloth Fishing Cap", itemLevelMin: 317, itemLevelMax: 332});
+            const wilderclothChefsHat = await Item.create({name: "Wildercloth Chef's Hat", itemLevelMin: 317, itemLevelMax: 332});
+            const wilderclothGardeningHat = await Item.create({name: "Wildercloth Gardening Hat", itemLevelMin: 317, itemLevelMax: 332});
+            const wilderclothTailorsCoat = await Item.create({name: "Wildercloth Tailor's Coat", itemLevelMin: 317, itemLevelMax: 332});
+            const frozenSpellthread = await Item.create({name: "Frozen Spellthread", stacksTo: 1000});
+            const temporalSpellthread = await Item.create({name: "Temporal Spellthread", stacksTo: 1000});
+            const vibrantSpellthread = await Item.create({name: "Vibrant Spellthread", stacksTo: 1000});
+            const azureweaveExpeditionPack = await Item.create({name: "Azureweave Expedition Pack"});
+            const chronoclothReagentBag = await Item.create({name: "Chronocloth Reagent Bag"});
+            const wilderclothBag = await Item.create({name: "Wildercloth Bag"});
+            const simplyStitchedReagentBag = await Item.create({name: "Simply Stitched Reagent Bag"});
+            const explorersBannerOfGeology = await Item.create({name: "Explorer's Banner of Geology"});
+            const explorersBannerOfHerbology = await Item.create({name: "Explorer's Banner of Herbology"});
+            const duckStuffedDuckLovie = await Item.create({name: "Duck-Stuffed Duck Lovie"});
+            const forlornFuneralPall = await Item.create({name: "Forlorn Funeral Pall"});
+            const dragonscaleExpeditionsExpeditionTent = await Item.create({name: "Dragonscale Expedition's Expedition Tent"});
+            const coldCushion = await Item.create({name: "Cold Cushion"});
+            const cushionOfTimeTravel = await Item.create({name: "Cushion of Time Travel"});
+            const marketTent = await Item.create({name: "Market Tent"});
 
-    const wilderclothBandageRecipe = await Recipe.create({name: 'Wildercloth Bandage', professionId: tailoring.id, itemId: wilderclothBandageItem.id, requiredProfessionLevel: 1, category: 'Assorted Embroidery', difficulty: 100, notes: "It's a bandage." });
+            //engineering items
+            const arclightCapacitor = await Item.create({name: "Arclight Capacitor", stacksTo: 1000});
+            const reinforcedMachineChassis = await Item.create({name: "Reinforced Machine Chassis", stacksTo: 1000});
+            const assortedSafetyFuses = await Item.create({name: "Assorted Safety Fuses", stacksTo: 1000});
+            const everburningBlastingPowder = await Item.create({name: "Everburning Blasting Powder", stacksTo: 1000});
+            const greasedUpGears = await Item.create({name: "Greased-Up Gears", stacksTo: 1000});
+            const shockSpringCoil = await Item.create({name: "Shock-Spring Coil", stacksTo: 1000});
+            const handfulOfSereviteBolts = await Item.create({name: "Handful of Serevite Bolts", stacksTo: 1000});
+            const overchargedOverclocker = await Item.create({name: "Overcharged Overclocker", stacksTo: 1000});
+            const haphazardlyTetheredWires = await Item.create({name: "Haphazardly Tethered Wires", stacksTo: 1000});
+            const calibratedSafetySwitch = await Item.create({name: "Calibrated Safety Switch", stacksTo: 1000});
+            const criticalFailurePreventionUnit = await Item.create({name: "Critical Failure Prevention Unit", stacksTo: 1000});
+            const magazineOfHealingDarts = await Item.create({name: "Magazine of Healing Darts", stacksTo: 1000});
+            const springLoadedCapacitorCasing = await Item.create({name: "Spring-Loaded Capacitor Casing", stacksTo: 1000});
+            const tinkerAlarmOTurret = await Item.create({name: "Tinker: Alarm-O-Turret", stacksTo: 1000});
+            const tinkerArclightVitalCorrectors = await Item.create({name: "Tinker: Arclight Vital Correctors", stacksTo: 1000});
+            const tinkerPolarityAmplifier = await Item.create({name: "Tinker: Polarity Amplifier", stacksTo: 1000});
+            const tinkerSupercollideOTron = await Item.create({name: "Tinker: Supercollide-O-Tron", stacksTo: 1000});
+            const tinkerGroundedCircuitry = await Item.create({name: "Tinker: Grounded Circuitry", stacksTo: 1000});
+            const tinkerBreathOfNeltharion = await Item.create({name: "Tinker: Breath of Neltharion", stacksTo: 1000});
+            const tinkerPlaneDisplacer = await Item.create({name: "Tinker: Plane Displacer", stacksTo: 1000});
+            const battleReadyBinoculars = await Item.create({name: "Battle-Ready Binoculars", itemLevelMin: 382, itemLevelMax: 392});
+            const lightweightOcularLenses = await Item.create({name: "Lightweight Ocular Lenses", itemLevelMin: 382, itemLevelMax: 392});
+            const oscillatingWildernessOpticals = await Item.create({name: "", itemLevelMin: 382, itemLevelMax: 392});
+
+
+    const wilderclothBandageRecipe = await Recipe.create({name: 'Wildercloth Bandage', professionId: tailoring.id, itemId: wilderclothBandage.id, requiredProfessionLevel: 1, category: 'Assorted Embroidery', difficulty: 100, notes: "It's a bandage." });
     console.log('Data seeded successfully.');
 
     const professions = await Profession.findAll();
