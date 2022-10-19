@@ -26,7 +26,9 @@ const test = async () => {
 //making tables
 const Item = sequelize.define('item', {
     name: { type: DataTypes.STRING, allowNull: false },
-    stacksTo: { type: DataTypes.INTEGER, defaultValue: 1 }
+    stacksTo: { type: DataTypes.INTEGER, defaultValue: 1 },
+    price: { type: DataTypes.FLOAT },
+    description: { type: DataTypes.STRING }
     //has many Materials, FinishingReagents, has one Recipe
 },{
     underscored: true
@@ -142,13 +144,53 @@ const makeTables = async () => {
     const vendor = await Profession.create({name: "Vendor"});
     const gathering = await Profession.create({name: "Gathering"});
     const tailoring = await Profession.create({name: "Tailoring"});
-    
+
     //
-    // seeding items & recipes
+    // SEEDING: ITEMS
     //
 
-    // SEEDING: ITEMS
-    
+        //vendor items
+            //should draconic vial be part of alchemy items?
+            //const draconicVial = await Item.create({name: 'Draconic Vial', stacksTo: 1000, price: 10});
+            const primalFlux = await Item.create({name: 'Primal Flux', stacksTo: 1000, price: 15});
+            const smudgedLens = await Item.create({name: 'Smudged Lens', stacksTo: 1000, price: 32.5});
+            const enchantingVellum = await Item.create({name: 'Enchanting Vellum', stacksTo: 1000, price: 0.1});
+            const glitteringParchment = await Item.create({name: 'Glittering Parchment', stacksTo: 1000, price: 1});
+            const iridescentWater = await Item.create({name: 'Iridescent Water', stacksTo: 1000, price: 1});
+            const misshapedFiligree = await Item.create({name: 'Misshapen Filigree', stacksTo: 1000, price: 0.5});
+            const draconicStopper = await Item.create({name: 'Draconic Stopper', stacksTo: 1000, price: 5});
+            const threeCheeseBlend = await Item.create({name: 'Three-Cheese Blend', stacksTo: 1000, price: 0.3});
+            const pastryPackets = await Item.create({name: 'Pastry Packets', stacksTo: 1000, price: 0.5});
+            const convenientlyPackagedIngredients = await Item.create({name: 'Conveniently Packaged Ingredients', stacksTo: 1000, price: 1.25});
+            const thaldraszianCocoaPowder = await Item.create({name: 'Thaldraszian Cocoa Powder', stacksTo: 1000, price: 3});
+
+        //dropped items
+            const sparkOfIngenuity = await Item.create({name: 'Spark of Ingenuity', stacksTo: 1000});
+            const artisansMettle = await Item.create({name: "Artisan's Mettle", stacksTo: 1000});
+            const primalChaos = await Item.create({name: 'Primal Chaos', stacksTo: 1000});
+            const rousingAir = await Item.create({name: 'Rousing Air', stacksTo: 1000});
+            const rousingEarth = await Item.create({name: 'Rousing Earth', stacksTo: 1000});
+            const rousingFire = await Item.create({name: 'Rousing Fire', stacksTo: 1000});
+            const rousingFrost = await Item.create({name: 'Rousing Frost', stacksTo: 1000});
+            const rousingIre = await Item.create({name: 'Rousing Ire', stacksTo: 1000});
+            const rousingDecay = await Item.create({name: 'Rousing Decay', stacksTo: 1000});
+            const rousingOrder = await Item.create({name: 'Rousing Order', stacksTo: 1000});
+            const awakenedAir = await Item.create({name: 'Awakened Air', stacksTo: 1000});
+            const awakenedEarth = await Item.create({name: 'Awakened Earth', stacksTo: 1000});
+            const awakenedFire = await Item.create({name: 'Awakened Fire', stacksTo: 1000});
+            const awakenedFrost = await Item.create({name: 'Awakened Frost', stacksTo: 1000});
+            const awakenedIre = await Item.create({name: 'Awakened Ire', stacksTo: 1000});
+            const awakenedDecay = await Item.create({name: 'Awakened Decay', stacksTo: 1000});
+            const awakenedOrder = await Item.create({name: 'Awakened Order', stacksTo: 1000});
+            const airySoul = await Item.create({name: 'Airy Soul', stacksTo: 1000});
+            const fierySoul = await Item.create({name: 'Fiery Soul', stacksTo: 1000});
+            const frostySoul = await Item.create({name: 'Frosty Soul', stacksTo: 1000});
+            const earthenSoul = await Item.create({name: 'Earthen Soul', stacksTo: 1000});
+            const centaursTrophyNecklace = await Item.create({name: "Centaur's Trophy Necklace", stacksTo: 1000});
+            const titanTrainingMatrixOne = await Item.create({name: 'Titan Training Matrix I', stacksTo: 1000});
+            const titanTrainingMatrixTwo = await Item.create({name: 'Titan Training Matrix II', stacksTo: 1000});
+            const titanTrainingMatrixThree = await Item.create({name: 'Titan Training Matrix III', stacksTo: 1000});
+            const titanTrainingMatrixFour = await Item.create({name: 'Titan Training Matrix IV', stacksTo: 1000});
 
     const wilderclothBandageItem = await Item.create({name: 'Wildercloth Bandage', stacksTo: 200});
     const wilderclothBandageRecipe = await Recipe.create({name: 'Wildercloth Bandage', professionId: tailoring.id, itemId: wilderclothBandageItem.id, requiredProfessionLevel: 1, category: 'Assorted Embroidery', difficulty: 100, notes: "It's a bandage." });
