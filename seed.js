@@ -139,18 +139,37 @@ Bonus.belongsTo(Specialization);
 // Specialization.hasMany(Specialization);
 // Specialization.belongsTo(Specialization);
 
-async function createItem(name){
-    let item = await Item.create({name: name});
-    return item;
+// async function createItem(name){
+//     let item = await Item.create({name: name});
+//     return item;
+// }
+
+// async function createItem(name, stacksTo){
+//     let item = await Item.create({name: name, stacksTo: stacksTo});
+//     return item;
+// }
+
+// async function createItem(name, minIlvl, maxIlvl){
+//     let item = await Item.create({name: name, itemLevelMin: minIlvl, itemLevelMax: maxIlvl});
+//     return item;
+// }
+
+const isNotNullAndUndefined = value => {
+    return (value != undefined && value != null)
 }
 
-async function createItem(name, stacksTo){
-    let item = await Item.create({name: name, stacksTo: stacksTo});
-    return item;
-}
-
-async function createItem(name, minIlvl, maxIlvl){
-    let item = await Item.create({name: name, itemLevelMin: minIlvl, itemLevelMax: maxIlvl});
+async function createItem(name, stacksTo, itemLevelMin, itemLevelMax){
+    let item = Item.build({name: name});
+    if(isNotNullAndUndefined(stacksTo)){
+        item.stacksTo = stacksTo;
+    }
+    if(isNotNullAndUndefined(itemLevelMin)){
+        item.itemLevelMin = itemLevelMin;
+    }
+    if(isNotNullAndUndefined(itemLevelMax)){
+        item.itemLevelMax = itemLevelMax
+    }
+    await item.save();
     return item;
 }
 
@@ -548,6 +567,67 @@ const makeTables = async () => {
             const crystalMagicalLockpick = await Item.create({name: "Crystal Magical Lockpick", stacksTo: 1000});
 
             //alchemy items
+            //the next five are not really items...
+            const advancedPhialExperimentation = await Item.create({name: "Advanced Phial Alchemical Experimentation"});
+            const advancedPotionExperimentation = await Item.create({name: "Advanced Potion Alchemical Experimentation"});
+            const basicPhialExperimentation = await Item.create({name: "Basic Phial Alchemical Experimentation"});
+            const basicPotionExperimentation = await Item.create({name: "Basic Potion Alchemical Experimentation"});
+            const reclaimConcoctions = await Item.create({name: "Reclaim Concoctions"});
+            //back to actual items
+            const dragonsAlchemicalSolution = await Item.create({name: "Dragon's Alchemical Solution", stacksTo: 1000});
+            const residualNeuralChannelingAgent = await Item.create({name: "Residual Neural Channeling Agent", stacksTo: 1000});
+            const bottledPutrescence = await Item.create({name: "Bottled Putrescence", stacksTo: 1000});
+            const potionOfGusts = await Item.create({name: "Potion of Gusts", stacksTo: 1000});
+            const potionOfShockingDisclosure = await Item.create({name: "Potion of Shocking Disclosure", stacksTo: 1000});
+            const potionOfTheHushedZephyr = await Item.create({name: "Potion of the Hushed Zephyr", stacksTo: 1000});
+            const aeratedManaPotion = await Item.create({name: "Aerated Mana Potion", stacksTo: 1000});
+            const potionOfChilledClarity = await Item.create({name: "Potion of Chilled Clarity", stacksTo: 1000});
+            const delicateSuspensionOfSpores = await Item.create({name: "Delicate Suspension of Spores", stacksTo: 1000});
+            const potionOfFrozenFocus = await Item.create({name: "Potion of Frozen Focus", stacksTo: 1000});
+            const potionOfWitheringVitality = await Item.create({name: "Potion of Withering Vitality", stacksTo: 1000});
+            const potionOfFrozenFatality = await Item.create({name: "Potion of Frozen Fatality", stacksTo: 1000});
+            const refreshingHealingPotion = await Item.create({name: "Refreshing Healing Potion", stacksTo: 1000});
+            const potionCauldronOfUltimatePower = await Item.create({name: "Potion Cauldron of Ultimate Power", stacksTo: 1000});
+            const potionCauldronOfPower = await Item.create({name: "Potion Cauldron of Power", stacksTo: 1000});
+            const cauldronOfThePooka = await Item.create({name: "Cauldron of the Pooka", stacksTo: 1000});
+            const elementalPotionOfUltimatePower = await Item.create({name: "Elemental Potion of Ultimate Power", stacksTo: 1000});
+            const elementalPotionOfPower = await Item.create({name: "Elemental Potion of Power", stacksTo: 1000});
+            const phialOfElementalChaos = await Item.create({name: "Phial of Elemental Chaos", stacksTo: 1000});
+            const phialOfChargedIsolation = await Item.create({name: "Phial of Charged Isolation", stacksTo: 1000});
+            const phialOfStaticEmpowerment = await Item.create({name: "Phial of Static Empowerment", stacksTo: 1000});
+            const phialOfStillAir = await Item.create({name: "Phial of Still Air", stacksTo: 1000});
+            const phialOfTheEyeInTheStorm = await Item.create({name: "Phial of the Eye in the Storm", stacksTo: 1000});
+            const aeratedPhialOfDeftness = await Item.create({name: "Aerated Phial of Deftness", stacksTo: 1000});
+            const chargedPhialOfAlacrity = await Item.create({name: "Charged Phial of Alacrity", stacksTo: 1000});
+            const aeratedPhialOfQuickHands = await Item.create({name: "Aerated Phial of Quick Hands", stacksTo: 1000});
+            const phialOfIcyPreservation = await Item.create({name: "Phial of Icy Preservation", stacksTo: 1000});
+            const icedPhialOfCorruptingRage = await Item.create({name: "Iced Phial of Corrupting Rage", stacksTo: 1000});
+            const phialOfGlacialFury = await Item.create({name: "Phial of Glacial Fury", stacksTo: 1000});
+            const steamingPhialOfFinesse = await Item.create({name: "Steaming Phial of Finesse", stacksTo: 1000});
+            const crystallinePhialOfPerception = await Item.create({name: "Crystalline Phial of Perception", stacksTo: 1000});
+            const phialOfTepidVersatility = await Item.create({name: "Phial of Tepid Versatility", stacksTo: 1000});
+            //next 6 aren't really items either...
+            const transmuteDecayToElements = await Item.create({name: "Transmute: Decay to Elements"});
+            const transmuteOrderToElements = await Item.create({name: "Transmute: Order to Elements"});
+            const transmuteAwakenedAir = await Item.create({name: "Transmute: Awakened Air"});
+            const transmuteAwakenedEarth = await Item.create({name: "Transmute: Awakened Earth"});
+            const transmuteAwakenedFire = await Item.create({name: "Transmute: Awakened Fire"});
+            const transmuteAwakenedFrost = await Item.create({name: "Transmute: Awakened Frost"});
+            //back to actual items
+            const potionAbsorptionInhibitor = await Item.create({name: "Potion Absorption Inhibitor", stacksTo: 1000});
+            const writhefireOil = await Item.create({name: "Writhefire Oil", stacksTo: 1000});
+            const broodSalt = await Item.create({name: "Brood Salt", stacksTo: 1000});
+            const stableFluidicDraconium = await Item.create({name: "Stable Fluidic Draconium", stacksTo: 1000});
+            const agitatingPotionAugmentation = await Item.create({name: "Agitating Potion Augmentation", stacksTo: 1000});
+            const reactivePhialEmbellishment = createItem("Reactive Phial Embellishment", 1000);
+            const sagaciousIncense = createItem("Sagacious Incense", 1000);
+            const exultantIncense = createItem("Exultant Incense", 1000);
+            const fervidIncense = createItem("Fervid Incense", 1000);
+            const somniferousIncense = createItem("Somniferous Incense", 1000);
+            const alacritousAlchemistStone = createItem("Alacritous Alchemist Stone", 1, 382, 392);
+            const sustainingAlchemistStone = createItem("Sustaining Alchemist Stone", 1, 382, 392);
+
+
 
     const wilderclothBandageRecipe = await Recipe.create({name: 'Wildercloth Bandage', professionId: tailoring.id, itemId: wilderclothBandage.id, requiredProfessionLevel: 1, category: 'Assorted Embroidery', difficulty: 100, notes: "It's a bandage." });
     console.log('Data seeded successfully.');
