@@ -189,7 +189,7 @@ const makeTables = async () => {
     //
 
         //vendor items
-            const draconicVial = await Item.create({name: 'Draconic Vial', stacksTo: 1000, price: 10});
+            
             const primalFlux = await Item.create({name: 'Primal Flux', stacksTo: 1000, price: 15});
             const smudgedLens = await Item.create({name: 'Smudged Lens', stacksTo: 1000, price: 32.5});
             const enchantingVellum = await Item.create({name: 'Enchanting Vellum', stacksTo: 1000, price: 0.1});
@@ -262,20 +262,7 @@ const makeTables = async () => {
             const frostfireAlloy = await Item.create({name: 'Frostfire Alloy', stacksTo: 1000});
             const obsidianSearedAlloy = await Item.create({name: 'Obsidian Seared Alloy', stacksTo: 1000});
             const infuriousAlloy = await Item.create({name: 'Infurious Alloy', stacksTo: 1000});
-            const silkenGemdust = await Item.create({name: 'Silken Gemdust', stacksTo: 1000});
-            const glossyStone = await Item.create({name: 'Glossy Stone', stacksTo: 1000});
-            const framelessLens = await Item.create({name: 'Frameless Lens', stacksTo: 1000});
-            const queensRuby = await Item.create({name: "Queen's Ruby", stacksTo: 1000});
-            const mysticSapphire = await Item.create({name: 'Mystic Sapphire', stacksTo: 1000});
-            const vibrantEmerald = await Item.create({name: 'Vibrant Emerald', stacksTo: 1000});
-            const sunderedOnyx = await Item.create({name: 'Sundered Onyx', stacksTo: 1000});
-            const eternityAmber = await Item.create({name: 'Eternity Amber', stacksTo: 1000});
-            const alexstraszite = await Item.create({name: 'Alexstraszite', stacksTo: 1000});
-            const malygite = await Item.create({name: 'Malygite', stacksTo: 1000});
-            const ysemerald = await Item.create({name: 'Ysemerald', stacksTo: 1000});
-            const neltharite = await Item.create({name: 'Neltharite', stacksTo: 1000});
-            const nozdorite = await Item.create({name: 'Nozdorite', stacksTo: 1000});
-            const illimitedDiamond = await Item.create({name: 'Illimited Diamond', stacksTo: 1000});
+            
 
             //herb, alch, & inscription drops & items
             const hochenblume = await Item.create({name: 'Hochenblume', stacksTo: 1000});
@@ -560,8 +547,8 @@ const makeTables = async () => {
             const scepterOfSpectacleEarth = await Item.create({name: "Scepter of Spectacle: Earth"});
             const scepterOfSpectacleFire = await Item.create({name: "Scepter of Spectacle: Fire"});
             //are these next two really items?
-            const crystallineShatter = await Item.create({name: "Crystalline Shatter"});
-            const elementalShatter = await Item.create({name: "Elemental Shatter"});
+            // const crystallineShatter = await Item.create({name: "Crystalline Shatter"});
+            // const elementalShatter = await Item.create({name: "Elemental Shatter"});
             //idk. maybe comment the two above.
             const sophicAmalgamation = await Item.create({name: "Sophic Amalgamation"});
             const crystalMagicalLockpick = await Item.create({name: "Crystal Magical Lockpick", stacksTo: 1000});
@@ -572,7 +559,7 @@ const makeTables = async () => {
             const advancedPotionExperimentation = await Item.create({name: "Advanced Potion Alchemical Experimentation"});
             const basicPhialExperimentation = await Item.create({name: "Basic Phial Alchemical Experimentation"});
             const basicPotionExperimentation = await Item.create({name: "Basic Potion Alchemical Experimentation"});
-            const reclaimConcoctions = await Item.create({name: "Reclaim Concoctions"});
+            // const reclaimConcoctions = await Item.create({name: "Reclaim Concoctions"});
             //back to actual items
             const dragonsAlchemicalSolution = await Item.create({name: "Dragon's Alchemical Solution", stacksTo: 1000});
             const residualNeuralChannelingAgent = await Item.create({name: "Residual Neural Channeling Agent", stacksTo: 1000});
@@ -628,7 +615,7 @@ const makeTables = async () => {
             const sustainingAlchemistStone = createItem("Sustaining Alchemist Stone", 1, 382, 392);
 
             //inscription items
-            const dragonIslesMilling = createItem("Dragon Isles Milling"); //not a real item
+            // const dragonIslesMilling = createItem("Dragon Isles Milling"); //not a real item
             const shimmeringPigment = createItem("Shimmering Pigment", 1000);
             const serenePigment = createItem("Serene Pigment", 1000);
             const flourishingPigment = createItem("Flourishing Pigment", 1000);
@@ -727,6 +714,102 @@ const makeTables = async () => {
             const cliffsideWylderdrakeRedHair = createItem("Cliffside Wylderdrake: Red Hair");
             const cliffsideWylderdrakeTripleHeadHorns = createItem("Cliffside Wylderdrake: Triple Head Horns");
 
+            //jewelcrafting items
+            //dragon isles crushing
+            //dragon isles prospecting
+            const silkenGemdust = await Item.create({name: 'Silken Gemdust', stacksTo: 1000});
+            const queensRuby = await Item.create({name: "Queen's Ruby", stacksTo: 1000});
+            const mysticSapphire = await Item.create({name: 'Mystic Sapphire', stacksTo: 1000});
+            const vibrantEmerald = await Item.create({name: 'Vibrant Emerald', stacksTo: 1000});
+            const sunderedOnyx = await Item.create({name: 'Sundered Onyx', stacksTo: 1000});
+            const eternityAmber = await Item.create({name: 'Eternity Amber', stacksTo: 1000});
+            const alexstraszite = await Item.create({name: 'Alexstraszite', stacksTo: 1000});
+            const malygite = await Item.create({name: 'Malygite', stacksTo: 1000});
+            const ysemerald = await Item.create({name: 'Ysemerald', stacksTo: 1000});
+            const neltharite = await Item.create({name: 'Neltharite', stacksTo: 1000});
+            const nozdorite = await Item.create({name: 'Nozdorite', stacksTo: 1000});
+            const illimitedDiamond = await Item.create({name: 'Illimited Diamond', stacksTo: 1000});
+            const elementalHarmony = createItem("Elemental Harmony", 1000);
+            const blottingSand = createItem("Blotting Sand", 1000);
+            const pounce = createItem("Pounce", 1000);
+            const emptySoulCage = createItem("Empty Soul Cage", 1000);
+            const draconicVial = createItem("Draconic Vial", 1000);
+            const framelessLens = createItem("Frameless Lens", 1000);
+            const glossyStone = await Item.create({name: 'Glossy Stone', stacksTo: 1000});
+            const shimmeringClasp = createItem("Shimmering Clasp", 1000);
+            const energizedVibrantEmerald = createItem("Energized Vibrant Emerald", 1000);
+            const zenMysticSapphire = createItem("Zen Mystic Sapphire", 1000);
+            const craftyQueensRuby = createItem("Crafy Queen's Ruby", 1000);
+            const senseisSunderedOnyx = createItem("Sensei's Sundered Onyx", 1000);
+            const solidEternityAmber = createItem("Solid Eternity Amber", 1000);
+            const quickYsemerald = createItem("Quick Ysemerald", 1000);
+            const craftyAlexstraszite = createItem("Crafty Alexstraszite", 1000);
+            const energizedMalygite = createItem("Energized Malygite", 1000);
+            const forcefulNozdorite = createItem("Forceful Nozdorite", 1000);
+            const keenNeltharite = createItem("Keen Neltharite", 1000);
+            const puissantNozdorite = createItem("Puissant Nozdorite", 1000);
+            const fracturedNeltharite = createItem("Fractured Neltharite", 1000);
+            const keenYsemerald = createItem("Keen Ysemerald", 1000);
+            const senseisAlexstraszite = createItem("Sensei's Alexstraszite", 1000);
+            const zenMalygite = createItem("Zen Malygite", 1000);
+            const radiantMalygite = createItem("Radiant Malygite", 1000);
+            const craftyYsemerald = createItem("Crafty Ysemerald", 1000);
+            const deadlyAlexstraszite = createItem("Deadly Alexstraszite", 1000);
+            const jaggedNozdorite = createItem("Jagged Nozdorite", 1000);
+            const senseisNeltharite = createItem("Sensei's Neltharite", 1000);
+            const energizedYsemerald = createItem("Energized Ysemerald", 1000);
+            const radiantAlexstraszite = createItem("Radiant Alexstraszite", 1000);
+            const steadyNozdorite = createItem("Steady Nozdorite", 1000);
+            const stormyMalygite = createItem("Stormy Malygite", 1000);
+            const zenNeltharite = createItem("Zen Neltharite", 1000);
+            const fierceIllimitedDiamond = createItem("Fierce Illimited Diamond", 1000);
+            const inscribedIllimitedDiamond = createItem("Inscribed Illimited Diamond", 1000);
+            const resplendentIllimitedDiamond = createItem("Resplendent Illimited Diamond", 1000);
+            const skillfulIllimitedDiamond = createItem("Skillful Illimited Diamond", 1000);
+            const tieredMedallionSetting = createItem("Tiered Medallion Setting", 1000);
+            const idolOfTheDreamer = createItem("Idol of the Dreamer", 1, 382, 392);
+            const idolOfTheEarthWarder = createItem("Idol of the Earth Warder", 1, 382, 392);
+            const idolOfTheLifebinder = createItem("Idol of the Lifebinder", 1, 382, 392);
+            const idolOfTheSpellWeaver = createItem("Idol of the Spell-Weaver", 1, 382, 392);
+            const chokerOfShielding = createItem("Choker of Shielding", 1, 382, 392);
+            const elementalLariat = createItem("Elemental Lariat", 1, 382, 392);
+            const ringBoundHourglass = createItem("Ring-Bound Hourglass", 1, 382, 392);
+            const signetOfTitanicInsight = createItem("Signet of Titanic Insight", 1, 382, 392);
+            const torcOfPassedTime = createItem("Torc of Passed Time", 1, 382, 392);
+            //next 2 need pvp ilvls
+            const crimsonCombatantsJeweledAmulet = createItem("Crimson Combatant's Jeweled Amulet", 1, 333, 343);
+            const crimsonCombatantsJeweledSignet = createItem("Crimson Combatant's Jeweled Signet", 1, 333, 343);
+            const bandOfNewBeginnings = createItem("Band of New Beginnings", 1, 306, 316);
+            const pendantOfImpendingPerils = createItem("Pendant of Impending Perils", 1, 306, 316);
+            const djaradinsPinata = createItem(`Djaradin's "Pinata"`, 1000);
+            const narcissistsSculpture = createItem("Narcissist's Sculpture", 1000);
+            const kaluakFigurine = createItem("Kalu'ak Figurine", 1000);
+            const statueOfTyrsHerald = createItem("Statue of Tyr's Herald", 1000);
+            const revitalizingRedCarving = createItem("Revitalizing Red Carving", 1000);
+            const jeweledAmberWhelpling = createItem("Jeweled Amber Whelpling");
+            const jeweledEmeraldWhelpling = createItem("Jeweled Emerald Whelpling");
+            const jeweledOnyxWhelpling = createItem("Jeweled Onyx Whelpling");
+            const jeweledRubyWhelpling = createItem("Jeweled Ruby Whelpling");
+            const jeweledSapphireWhelpling = createItem("Jeweled Sapphire Whelpling");
+            const convergentPrism = createItem("Convergent Prism");
+            const jeweledOffering = createItem("Jeweled Offering");
+            const projectionPrism = createItem("Projection Prism", 1000);
+            const rhinestoneSunglasses = createItem('"Rhinestone" Sunglasses');
+            const splitLensSpecs = createItem("Split-Lens Specs");
+            const alexstrasziteLoupes = createItem("Alexstraszite Loupes", 1, 356, 371);
+            const finePrintTrifocals = createItem("Fine-Print Trifocals", 1, 356, 371);
+            const magnificentMarginMagnifier = createItem("Magnificent Margin Magnifier", 1, 356, 371);
+            const resonantFocus = createItem("Resonant Focus", 1, 356, 371);
+            const boldPrintBifocals = createItem("Bold-Print Bifocals", 1, 317, 332);
+            const chromaticFocus = createItem("Chromatic Focus", 1, 317, 332);
+            const leftHandedMagnifyingGlass = createItem("Left-Handed Magnifying Glass", 1, 317, 332);
+            const sunderedOnyxLoupes = createItem("Sundered Onyx Loupes", 1, 317, 332);
+            const jeweledDragonsHeart = createItem("Jeweled Dragon's Heart");
+            const dreamersVision = createItem("Dreamer's Vision");
+            const earthwardensPrize = createItem("Earthwarden's Prize");
+            const keepersGlory = createItem("Keeper's Glory");
+            const queensGift = createItem("Queen's Gift");
+            const timewatchersPatience = createItem("Timewatcher's Patience");
 
 
     const wilderclothBandageRecipe = await Recipe.create({name: 'Wildercloth Bandage', professionId: tailoring.id, itemId: wilderclothBandage.id, requiredProfessionLevel: 1, category: 'Assorted Embroidery', difficulty: 100, notes: "It's a bandage." });
