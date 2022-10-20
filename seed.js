@@ -189,7 +189,6 @@ const makeTables = async () => {
     //
 
         //vendor items
-            
             const primalFlux = await Item.create({name: 'Primal Flux', stacksTo: 1000, price: 15});
             const smudgedLens = await Item.create({name: 'Smudged Lens', stacksTo: 1000, price: 32.5});
             const enchantingVellum = await Item.create({name: 'Enchanting Vellum', stacksTo: 1000, price: 0.1});
@@ -258,11 +257,6 @@ const makeTables = async () => {
             const sereviteOre = await Item.create({name: 'Serevite Ore', stacksTo: 1000});
             const draconiumOre = await Item.create({name: 'Draconium Ore', stacksTo: 1000});
             const khazgoriteOre = await Item.create({name: "Khaz'gorite Ore", stacksTo: 1000});
-            const primalMoltenAlloy = await Item.create({name: 'Primal Molten Alloy', stacksTo: 1000});
-            const frostfireAlloy = await Item.create({name: 'Frostfire Alloy', stacksTo: 1000});
-            const obsidianSearedAlloy = await Item.create({name: 'Obsidian Seared Alloy', stacksTo: 1000});
-            const infuriousAlloy = await Item.create({name: 'Infurious Alloy', stacksTo: 1000});
-            
 
             //herb, alch, & inscription drops & items
             const hochenblume = await Item.create({name: 'Hochenblume', stacksTo: 1000});
@@ -811,6 +805,98 @@ const makeTables = async () => {
             const queensGift = createItem("Queen's Gift");
             const timewatchersPatience = createItem("Timewatcher's Patience");
 
+            //blacksmithing items
+            const obsidianSearedAlloy = createItem("Obsidian Seared Alloy", 1000);
+            const frostfireAlloy = createItem("Frostfire Alloy", 1000);
+            const infuriousAlloy = createItem("Infurious Alloy", 1000);
+            const primalMoltenAlloy = createItem("Primal Molten Alloy", 1000);
+            const armorSpikes = createItem("Armor Spikes", 1000);
+            const alliedChestplateOfGenerosity = createItem("Allied Chestplate of Generosity", 1, 382, 392);
+            const alliedWristguardOfCompanionship = createItem("Allied Wristguard of Companionship", 1, 382, 392);
+            const frostfireLegguardsOfPreparation = createItem("Frostfire Legguards of Preparation", 1, 382, 392);
+            //next two items need pvp ilvl
+            const infuriousHelmOfVengeance = createItem("Infurious Helm of Vengeance", 1, 382, 392);
+            const infuriousWarbootsOfImpunity = createItem("Infurious Warboots of Impunity", 1, 382, 392);
+            const primalMoltenBreastplate = createItem("Primal Molten Breastplate", 1, 382, 392);
+            const primalMoltenGauntlets = createItem("Primal Molten Gauntlets", 1, 382, 392);
+            const primalMoltenGreatbelt = createItem("Primal Molten Greatbelt", 1, 382, 392);
+            const primalMoltenHelm = createItem("Primal Molten Helm", 1, 382, 392);
+            const primalMoltenLegplates = createItem("Primal Molten Legplates", 1, 382, 392);
+            const primalMoltenPauldrons = createItem("Primal Molten Pauldrons", 1, 382, 392);
+            const primalMoltenSabatons = createItem("Primal Molten Sabatons", 1, 382, 392);
+            const primalMoltenVambraces = createItem("Primal Molten Vambraces", 1, 382, 392);
+            const unstableFrostfireBelt = createItem("Unstable Frostfire Belt", 1, 382, 392);
+            const explorersExpertHelm = createItem("Explorer's Expert Helm", 1, 333, 343);
+            const explorersExpertSpaulders = createItem("Explorer's Expert Spaulders", 1, 333, 343);
+            const explorersExpertGauntlets = createItem("Explorer's Expert Gauntlets", 1, 333, 343);
+            const explorersExpertGreaves = createItem("Explorer's Expert Greaves", 1, 333, 343);
+            const explorersExpertClasp = createItem("Explorer's Expert Clasp", 1, 333, 343);
+            const explorersPlateChestguard = createItem("Explorer's Plate Chestguard", 1, 306, 316);
+            const explorersPlateBoots = createItem("Explorer's Plate Boots", 1, 306, 316);
+            const explorersPlateBracers = createItem("Explorer's Plate Bracers", 1, 306, 316);
+            //all of the next bunch need pvp ilvls
+            const crimsonCombatantsDraconiumArmguards = createItem("Crimson Combatant's Draconium Armguards", 1, 333, 343);
+            const crimsonCombatantsDraconiumBreastplate = createItem("Crimson Combatant's Draconium Breastplate", 1, 333, 343);
+            const crimsonCombatantsDraconiumGauntlets = createItem("Crimson Combatant's Draconium Gauntlets", 1, 333, 343);
+            const crimsonCombatantsDraconiumGreaves = createItem("Crimson Combatant's Draconium Greaves", 1, 333, 343);
+            const crimsonCombatantsDraconiumHelm = createItem("Crimson Combatant's Draconium Helm", 1, 333, 343);
+            const crimsonCombatantsDraconiumPauldrons = createItem("Crimson Combatant's Draconium Pauldrons", 1, 333, 343);
+            const crimsonCombatantsDraconiumSabatons = createItem("Crimson Combatant's Draconium Sabatons", 1, 333, 343);
+            const crimsonCombatantsDraconiumWaistguard = createItem("Crimson Combatant's Draconium Waistguard", 1, 333, 343);
+            //end of pvp block
+            const primalMoltenDefender = createItem("Primal Molten Defender", 1, 382, 392);
+            const shieldOfTheHearth = createItem("Shield of the Hearth", 1, 382, 392);
+            const draconiumDefender = createItem("Draconium Defender", 1, 333, 343);
+            const obsidianSearedClaymore = createItem("Obsidian Seared Claymore", 1, 382, 392);
+            const obsidianSearedCrusher = createItem("Obsidian Seared Crusher", 1, 382, 392);
+            const obsidianSearedFacesmasher = createItem("Obsidian Seared Facesmasher", 1, 382, 392);
+            const obsidianSearedHalberd = createItem("Obsidian Seared Halberd", 1, 382, 392);
+            const obsidianSearedHexsword = createItem("Obsidian Seared Hexsword", 1, 382, 392);
+            const obsidianSearedInvoker = createItem("Obsidian Seared Invoker", 1, 382, 392);
+            const obsidianSearedRuneaxe = createItem("Obsidian Seared Runeaxe", 1, 382, 392);
+            const obsidianSearedSlicer = createItem("Obsidian Seared Slicer", 1, 382, 392);
+            const primalMoltenGreataxe = createItem("Primal Molten Greataxe", 1, 382, 392);
+            const primalMoltenLongsword = createItem("Primal Molten Longsword", 1, 382, 392);
+            const primalMoltenMace = createItem("Primal Molten Mace", 1, 382, 392);
+            const primalMoltenShortblade = createItem("Primal Molten Shortblade", 1, 382, 392);
+            const primalMoltenSpellblade = createItem("Primal Molten Spellblade", 1, 382, 392);
+            const primalMoltenWarglaive = createItem("Primal Molten Warglaive", 1, 382, 392);
+            const draconiumGreatMace = createItem("Draconium Great Mace", 1, 333, 343);
+            const draconiumStiletto = createItem("Draconium Stiletto", 1, 333, 343);
+            const draconiumGreatAxe = createItem("Draconium Great Axe", 1, 333, 343);
+            const draconiumKnuckles = createItem("Draconium Knuckles", 1, 333, 343);
+            const draconiumSword = createItem("Draconium Sword", 1, 333, 343);
+            const draconiumAxe = createItem("Draconium Axe", 1, 333, 343);
+            const draconiumDirk = createItem("Draconium Dirk", 1, 333, 343);
+            const blackDragonTouchedHammer = createItem("Black Dragon Touched Hammer", 1, 382, 397);
+            const khazgoriteBlacksmithsHammer = createItem("Khaz'gorite Blacksmith's Hammer", 1, 356, 371);
+            const khazgoriteBlacksmithsToolbox = createItem("Khaz'gorite Blacksmith's Toolbox", 1, 356, 371);
+            const khazgoriteLeatherworkersKnife = createItem("Khaz'gorite Leatherworker's Knife", 1, 356, 371);
+            const khazgoriteLeatherworkersToolset = createItem("Khaz'gorite Leatherworker's Toolset", 1, 356, 371);
+            const khazgoriteNeedleSet = createItem("Khaz'gorite Needle Set", 1, 356, 371);
+            const khazgoritePickaxe = createItem("Khaz'gorite Pickaxe", 1, 356, 371);
+            const khazgoriteSickle = createItem("Khaz'gorite Sickle", 1, 356, 371);
+            const khazgoriteSkinningKnife = createItem("Khaz'gorite Skinning Knife", 1, 356, 371);
+            const draconiumNeedleSet = createItem("Draconium Needle Set", 1, 317, 332);
+            const draconiumLeatherworkersKnife = createItem("Draconium Leatherworker's Knife", 1, 317, 332);
+            const draconiumLeatherworkersToolset = createItem("Draconium Leatherworker's Toolset", 1, 317, 332);
+            const draconiumBlacksmithsToolbox = createItem("Draconium Blacksmith's Toolbox", 1, 317, 332);
+            const draconiumBlacksmithsHammer = createItem("Draconium Blacksmith's Hammer", 1, 317, 332);
+            const draconiumSkinningKnife = createItem("Draconium Skinning Knife", 1, 317, 332);
+            const draconiumSickle = createItem("Draconium Sickle", 1, 317, 332);
+            const draconiumPickaxe = createItem("Draconium Pickaxe", 1, 317, 332);
+            const mastersHammer = createItem("Master's Hammer");
+            const sturdyExpeditionShovel = createItem("Sturdy Expedition Shovel", 1000);
+            const sereviteRepairHammer = createItem("Serevite Repair Hammer", 1000);
+            const sereviteSkeletonKey = createItem("Serevite Skeleton Key", 1000);
+            const primalRazorstone = createItem("Primal Razorstone", 1000);
+            const primalWhetstone = createItem("Primal Whetstone", 1000);
+            const primalWeightstone = createItem("Primal Weightstone", 1000);
+            const alvinTheAnvil = createItem("Alvin the Anvil");
+            const prototypeExplorersBardingFramework = createItem("Prototype Explorer's Barding Framework");
+            const prototypeRegalBardingFramework = createItem("Prototype Regal Barding Framework");
+
+            //leatherworking items
 
     const wilderclothBandageRecipe = await Recipe.create({name: 'Wildercloth Bandage', professionId: tailoring.id, itemId: wilderclothBandage.id, requiredProfessionLevel: 1, category: 'Assorted Embroidery', difficulty: 100, notes: "It's a bandage." });
     console.log('Data seeded successfully.');
