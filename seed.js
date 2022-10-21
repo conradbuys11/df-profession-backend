@@ -1054,11 +1054,11 @@ const makeTables = async () => {
             const hoardOfDraconicDelicacies = createItem("Hoard of Draconic Delicacies", 1000);
             const yusasHeartyStew = createItem("Yusa's Hearty Stew", 1000);
 
-    const wilderclothBandageRecipe = await Recipe.create({name: 'Wildercloth Bandage', professionId: tailoring.id, itemId: wilderclothBandage.id, requiredProfessionLevel: 1, category: 'Assorted Embroidery', difficulty: 100, notes: "It's a bandage." });
-    console.log('Data seeded successfully.');
+    // const wilderclothBandageRecipe = await Recipe.create({name: 'Wildercloth Bandage', professionId: tailoring.id, itemId: wilderclothBandage.id, requiredProfessionLevel: 1, category: 'Assorted Embroidery', difficulty: 100, notes: "It's a bandage." });
+    // console.log('Data seeded successfully.');
 
-    const professions = await Profession.findAll();
-    console.log("All professions:", JSON.stringify(professions, null, 2));
+    // const professions = await Profession.findAll();
+    // console.log("All professions:", JSON.stringify(professions, null, 2));
 }
 
 makeTables();
