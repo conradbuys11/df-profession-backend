@@ -1012,6 +1012,48 @@ const makeTables = async () => {
             const gnollTent = createItem("Gnoll Tent");
             const tuskarrBeanBag = createItem("Tuskarr Bean Bag");
 
+            //cooking items
+            const ooeyGooeyChocolate = createItem("Ooey-Gooey Chocolate", 1000);
+            const impossiblySharpCuttingKnife = createItem("Impossibly Sharp Cutting Knife", 1000);
+            const saladOnTheSide = createItem("Salad on the Side", 1000);
+            const assortedExoticSpices = createItem("Assorted Exotic Spices", 1000);
+            const pebbledRockSalts = createItem("Pebbled Rock Salts", 1000);
+            const breakfastOfDraconicChampions = createItem("Breakfast of Draconic Champions", 1000);
+            const sweetAndSourClamChowder = createItem("Sweet and Sour Clam Chowder", 1000);
+            const probablyProtein = createItem("Probably Protein", 1000);
+            const cheeseAndQuackers = createItem("Cheese and Quackers", 1000);
+            const mackerelSnackerel = createItem("Mackerel Snackerel", 1000);
+            const twiceBakedPotato = createItem("Twice-Baked Potato", 1000);
+            const deliciousDragonSpittle = createItem("Delicious Dragon Spittle", 1000);
+            const churnbellyTea = createItem("Churnbelly Tea", 1000);
+            const zestyWater = createItem("Zesty Water", 1000);
+            const fatedFortuneCookie = createItem("Fated Fortune Cookie", 1000);
+            const blubberyMuffin = createItem("Blubbery Muffin", 1000);
+            const celebratoryCake = createItem("Celebratory Cake", 1000);
+            const snowInACone = createItem("Snow in a Cone", 1000);
+            const tastyHatchlingsTreat = createItem("Tasty Hatchling's Treat", 1000);
+            const braisedBruffalonBrisket = createItem("Braised Bruffalon Brisket", 1000);
+            const charredHornswogSteaks = createItem("Charred Hornswog Steaks", 1000);
+            const hopefullyHealthy = createItem("Hopefully Healthy", 1000);
+            const riversidePicnic = createItem("Riverside Picnic", 1000);
+            const roastDuckDelight = createItem("Roast Duck Delight", 1000);
+            const saltedMeatMash = createItem("Salted Meat Mash", 1000);
+            const scrambledBasiliskEggs = createItem("Scrambled Basilisk Eggs", 1000);
+            const thriceSpicedMammothKabob = createItem("Thrice-Spiced Mammoth Kabob", 1000);
+            const filetOfFangs = createItem("Filet of Fangs", 1000);
+            const saltBakedFishcake = createItem("Salt-Baked Fishcake", 1000);
+            const seamothSurprise = createItem("Seamoth Surprise", 1000);
+            const timelyDemise = createItem("Timely Demise", 1000);
+            const aromaticSeafoodPlatter = createItem("Aromatic Seafood Platter", 1000);
+            const feistyFishSticks = createItem("Feisty Fish Sticks", 1000);
+            const greatCeruleanSea = createItem("Great Cerulean Sea", 1000);
+            const revengeServedCold = createItem("Revenge, Served Cold", 1000);
+            const sizzlingSeafoodMedley = createItem("Sizzling Seafood Medley", 1000);
+            const thousandboneTongueslicer = createItem("Thousandbone Tongueslicer", 1000);
+            const grandBanquetOfTheKaluak = createItem("Grand Banquet of the Kalu'ak", 1000);
+            const hoardOfDraconicDelicacies = createItem("Hoard of Draconic Delicacies", 1000);
+            const yusasHeartyStew = createItem("Yusa's Hearty Stew", 1000);
+
     const wilderclothBandageRecipe = await Recipe.create({name: 'Wildercloth Bandage', professionId: tailoring.id, itemId: wilderclothBandage.id, requiredProfessionLevel: 1, category: 'Assorted Embroidery', difficulty: 100, notes: "It's a bandage." });
     console.log('Data seeded successfully.');
 
