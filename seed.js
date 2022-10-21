@@ -35,7 +35,7 @@ const Item = sequelize.define('item', {
     types: { type: DataTypes.JSONB },
     bindOn: { type: DataTypes.STRING }, //should this be enum?
     isUniqueEquipped: { type: DataTypes.BOOLEAN }
-    //has many Materials, FinishingReagents, has one Recipe
+    //has many Materials, FinishingReagents, Recipe(s)
 },{
     underscored: true
 });
@@ -43,22 +43,14 @@ const Item = sequelize.define('item', {
 const Profession = sequelize.define('profession', {
     name: { type: DataTypes.STRING, allowNull: false },
     icon: { type: DataTypes.STRING }
-    // tool: { type: DataTypes.INTEGER },
-    // //add references: { model: Tool, key: 'id' }
-    // firstAccessory: { type: DataTypes.INTEGER },
-    // //add references: { model: Accessory, key: 'id' }
-    // secondAccessory: { type: DataTypes.INTEGER }
-    // //add references: { model: Accessory, key: 'id' }
-    //has many Recipes, Specializations, SubSpecializations, & SubSubSpecializations
+    //has many Recipes, Specializations, Tools (Items), FirstAccessories (Items), SecondAccessories (Items)
 },{
     underscored: true
 });
 
 const Recipe = sequelize.define('recipe', {
-    // item: { type: DataTypes.INTEGER, allowNull: false, references: { model: Item, key: 'id' } },
     name: { type: DataTypes.STRING, allowNull: false },
     numberCrafted: { type: DataTypes.INTEGER, defaultValue: 1 },
-    // profession: { type: DataTypes.INTEGER, allowNull: false, references: { model: Profession, key: 'id' } },
     requiredProfessionLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
     category: { type: DataTypes.STRING },
     skillUpAmount: { type: DataTypes.INTEGER, defaultValue: 1 },
@@ -67,43 +59,41 @@ const Recipe = sequelize.define('recipe', {
     requiredSpecializationLevel: { type: DataTypes.JSONB },
     notes: { type: DataTypes.STRING }
     //has many Materials & FinishingReagents
+    //belongs to Item & Profession
 },{
     underscored: true
 });
 
 const Material = sequelize.define('material', {
-    // recipe: { type: DataTypes.INTEGER, allowNull: false, references: { model: Recipe, key: 'id' } },
-    // item: { type: DataTypes.INTEGER, allowNull: false, references: { model: Item, key: id } },
     quantity: { type: DataTypes.INTEGER, allowNull: false }
+    //belongs to Recipe, Item
 },{
     underscored: true
 });
 
 const FinishingReagent = sequelize.define('finishingReagent', {
-    // recipe: { type: DataTypes.INTEGER, allowNull: false, references: { model: Recipe, key: 'id' } },
-    // item: { type: DataTypes.INTEGER, allowNull: false, references: { model: Item, key: id } },
     requiredSpecializationLevel: { type: DataTypes.JSONB }
+    //belongs to Recipe, Item
 },{
     underscored: true
 });
 
 const Specialization = sequelize.define('specialization', {
     name: { type: DataTypes.STRING, allowNull: false },
-    // profession: { type: DataTypes.INTEGER, allowNull: false, references: { model: Profession, key: 'id' } },
-    // subSpecializationOf: { type: DataTypes.INTEGER, references: { model: Specialization, key: 'id' } },
     description: { type: DataTypes.STRING },
     totalPoints: { type: DataTypes.INTEGER, allowNull: false },
     groupCrafts: { type: DataTypes.STRING },
     eachPointGives: { type: DataTypes.STRING, defaultValue: "1 Skill" }
     //has many Bonuses & Specializations
+    //belongs to Profession & Specialization
 },{
     underscored: true
 });
 
 const Bonus = sequelize.define('bonus', {
-    // specialization: { type: DataTypes.INTEGER, allowNull: false, references: { model: Specialization, key: 'id' } },
     level: { type: DataTypes.INTEGER, allowNull: false },
     bonus: { type: DataTypes.STRING, allowNull: false }
+    //belongs to Specialization
 },{
     underscored: true
 });
@@ -120,7 +110,7 @@ Profession.hasMany(Item, {as: 'Tools', foreignKey: 'toolsId'});
 Profession.hasMany(Item, {as: 'FirstAccessory', foreignKey: 'firstAccessoryId'})
 Item.belongsTo(Profession, {as: 'ProfessionEquipment'});
 
-Item.hasOne(Recipe);
+Item.hasMany(Recipe);
 Recipe.belongsTo(Item);
 
 Recipe.hasMany(Material);
@@ -183,7 +173,8 @@ async function createItem(name, stacksTo, itemLevelMin, itemLevelMax, descriptio
 
 async function createRecipe(name, itemMade, numberCrafted, profession, materials, requiredProfLevel, category, skillUpAmount, difficulty,
     requiredRenownLevel, requiredSpecializationLevel, notes, finishingReagents){
-        let recipe = Recipe.build({name: name, itemMade: itemMade, profession: profession, materials: materials});
+        let recipe = Recipe.build({name: name, itemMade: itemMade, profession: profession});
+
         if(isNotNullAndUndefined(numberCrafted)){ recipe.numberCrafted = numberCrafted; }
         if(isNotNullAndUndefined(requiredProfLevel)){ recipe.requiredProfLevel = requiredProfLevel; }
         if(isNotNullAndUndefined(category)){ recipe.category = category; }
@@ -192,9 +183,20 @@ async function createRecipe(name, itemMade, numberCrafted, profession, materials
         if(isNotNullAndUndefined(requiredRenownLevel)){ recipe.requiredRenownLevel = requiredRenownLevel; }
         if(isNotNullAndUndefined(requiredSpecializationLevel)){ recipe.requiredSpecializationLevel = requiredSpecializationLevel; }
         if(isNotNullAndUndefined(notes)){ recipe.notes = notes; }
+        await recipe.save();
+        console.log(`${recipe.name}'s ID: ${recipe.id}`);
 
+            //for materials, write as so:
+            //[[item.id, //item
+            //  1, //quantity 
+            //  recipe]]
 }
 
+async function createMaterial(item, quantity, recipe){
+    let material = Material.build({itemId: item.id, quantity: quantity, recipeId: recipe.id});
+    await material.save();
+    return material;
+}
 
 // MAKING TABLES
 // TIME TO SYNC
@@ -1088,7 +1090,7 @@ const makeTables = async () => {
     // SEEDING RECIPES
     //
 
-        const dragonIslesUnraveling
+        // const dragonIslesUnraveling
 
     // const wilderclothBandageRecipe = await Recipe.create({name: 'Wildercloth Bandage', professionId: tailoring.id, itemId: wilderclothBandage.id, requiredProfessionLevel: 1, category: 'Assorted Embroidery', difficulty: 100, notes: "It's a bandage." });
     // console.log('Data seeded successfully.');

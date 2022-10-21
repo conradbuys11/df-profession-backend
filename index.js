@@ -17,36 +17,26 @@ const Item = sequelize.define('item', {
     price: { type: DataTypes.FLOAT },
     description: { type: DataTypes.STRING },
     itemLevelMin: { type: DataTypes.INTEGER },
-    itemLevelMax: { type: DataTypes.INTEGER }
-    //has many Materials, FinishingReagents, has one Recipe
+    itemLevelMax: { type: DataTypes.INTEGER },
+    types: { type: DataTypes.JSONB },
+    bindOn: { type: DataTypes.STRING }, //should this be enum?
+    isUniqueEquipped: { type: DataTypes.BOOLEAN }
+    //has many Materials, FinishingReagents, Recipe(s)
 },{
     underscored: true
 });
 
-// TO-DO: CREATE TOOL
-
-// TO-DO: CREATE ACCESSORY
-
-
 const Profession = sequelize.define('profession', {
     name: { type: DataTypes.STRING, allowNull: false },
     icon: { type: DataTypes.STRING }
-    // tool: { type: DataTypes.INTEGER },
-    // //add references: { model: Tool, key: 'id' }
-    // firstAccessory: { type: DataTypes.INTEGER },
-    // //add references: { model: Accessory, key: 'id' }
-    // secondAccessory: { type: DataTypes.INTEGER }
-    // //add references: { model: Accessory, key: 'id' }
-    //has many Recipes, Specializations, SubSpecializations, & SubSubSpecializations
+    //has many Recipes, Specializations, Tools (Items), FirstAccessories (Items), SecondAccessories (Items)
 },{
     underscored: true
 });
 
 const Recipe = sequelize.define('recipe', {
-    // item: { type: DataTypes.INTEGER, allowNull: false, references: { model: Item, key: 'id' } },
     name: { type: DataTypes.STRING, allowNull: false },
     numberCrafted: { type: DataTypes.INTEGER, defaultValue: 1 },
-    // profession: { type: DataTypes.INTEGER, allowNull: false, references: { model: Profession, key: 'id' } },
     requiredProfessionLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
     category: { type: DataTypes.STRING },
     skillUpAmount: { type: DataTypes.INTEGER, defaultValue: 1 },
@@ -55,43 +45,41 @@ const Recipe = sequelize.define('recipe', {
     requiredSpecializationLevel: { type: DataTypes.JSONB },
     notes: { type: DataTypes.STRING }
     //has many Materials & FinishingReagents
+    //belongs to Item & Profession
 },{
     underscored: true
 });
 
 const Material = sequelize.define('material', {
-    // recipe: { type: DataTypes.INTEGER, allowNull: false, references: { model: Recipe, key: 'id' } },
-    // item: { type: DataTypes.INTEGER, allowNull: false, references: { model: Item, key: id } },
     quantity: { type: DataTypes.INTEGER, allowNull: false }
+    //belongs to Recipe, Item
 },{
     underscored: true
 });
 
 const FinishingReagent = sequelize.define('finishingReagent', {
-    // recipe: { type: DataTypes.INTEGER, allowNull: false, references: { model: Recipe, key: 'id' } },
-    // item: { type: DataTypes.INTEGER, allowNull: false, references: { model: Item, key: id } },
     requiredSpecializationLevel: { type: DataTypes.JSONB }
+    //belongs to Recipe, Item
 },{
     underscored: true
 });
 
 const Specialization = sequelize.define('specialization', {
     name: { type: DataTypes.STRING, allowNull: false },
-    // profession: { type: DataTypes.INTEGER, allowNull: false, references: { model: Profession, key: 'id' } },
-    // subSpecializationOf: { type: DataTypes.INTEGER, references: { model: Specialization, key: 'id' } },
     description: { type: DataTypes.STRING },
     totalPoints: { type: DataTypes.INTEGER, allowNull: false },
     groupCrafts: { type: DataTypes.STRING },
     eachPointGives: { type: DataTypes.STRING, defaultValue: "1 Skill" }
     //has many Bonuses & Specializations
+    //belongs to Profession & Specialization
 },{
     underscored: true
 });
 
 const Bonus = sequelize.define('bonus', {
-    // specialization: { type: DataTypes.INTEGER, allowNull: false, references: { model: Specialization, key: 'id' } },
     level: { type: DataTypes.INTEGER, allowNull: false },
     bonus: { type: DataTypes.STRING, allowNull: false }
+    //belongs to Specialization
 },{
     underscored: true
 });
@@ -104,7 +92,11 @@ Recipe.belongsTo(Profession);
 Profession.hasMany(Specialization);
 Specialization.belongsTo(Profession);
 
-Item.hasOne(Recipe);
+Profession.hasMany(Item, {as: 'Tools', foreignKey: 'toolsId'});
+Profession.hasMany(Item, {as: 'FirstAccessory', foreignKey: 'firstAccessoryId'})
+Item.belongsTo(Profession, {as: 'ProfessionEquipment'});
+
+Item.hasMany(Recipe);
 Recipe.belongsTo(Item);
 
 Recipe.hasMany(Material);
@@ -121,6 +113,9 @@ FinishingReagent.belongsTo(Item);
 
 Specialization.hasMany(Bonus);
 Bonus.belongsTo(Specialization);
+
+// Specialization.hasMany(Specialization);
+// Specialization.belongsTo(Specialization);
 
 //actual routing
 app.get("/", (req, res) => {
