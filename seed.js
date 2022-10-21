@@ -31,7 +31,10 @@ const Item = sequelize.define('item', {
     price: { type: DataTypes.FLOAT },
     description: { type: DataTypes.STRING },
     itemLevelMin: { type: DataTypes.INTEGER },
-    itemLevelMax: { type: DataTypes.INTEGER }
+    itemLevelMax: { type: DataTypes.INTEGER },
+    types: { type: DataTypes.JSONB },
+    bindOn: { type: DataTypes.STRING }, //should this be enum?
+    isUniqueEquipped: { type: DataTypes.BOOLEAN }
     //has many Materials, FinishingReagents, has one Recipe
 },{
     underscored: true
@@ -158,7 +161,7 @@ const isNotNullAndUndefined = value => {
     return (value != undefined && value != null)
 }
 
-async function createItem(name, stacksTo, itemLevelMin, itemLevelMax){
+async function createItem(name, stacksTo, itemLevelMin, itemLevelMax, description, types, bindOn, isUniqueEquipped){
     let item = Item.build({name: name});
     if(isNotNullAndUndefined(stacksTo)){
         item.stacksTo = stacksTo;
@@ -167,7 +170,19 @@ async function createItem(name, stacksTo, itemLevelMin, itemLevelMax){
         item.itemLevelMin = itemLevelMin;
     }
     if(isNotNullAndUndefined(itemLevelMax)){
-        item.itemLevelMax = itemLevelMax
+        item.itemLevelMax = itemLevelMax;
+    }
+    if(isNotNullAndUndefined(description)){
+        item.description = description;
+    }
+    if(isNotNullAndUndefined(types)){
+        item.types = types;
+    }
+    if(isNotNullAndUndefined(bindOn)){
+        item.bindOn = bindOn;
+    }
+    if(isNotNullAndUndefined(isUniqueEquipped)){
+        item.isUniqueEquipped = isUniqueEquipped;
     }
     await item.save();
     return item;
@@ -241,9 +256,8 @@ const makeTables = async () => {
             const resilientLeather = await Item.create({name: 'Resilient Leather', stacksTo: 1000});
             const adamantScales = await Item.create({name: 'Adamant Scales', stacksTo: 1000});
             const denseHide = await Item.create({name: 'Dense Hide', stacksTo: 1000});
-            const stonecrustHide = await Item.create({name: 'Stonecrust Hide', stacksTo: 1000});
             const lustrousScaledHide = await Item.create({name: 'Lustrous Scaled Hide', stacksTo: 1000});
-            const frostbiteScales = await Item.create({name: 'Frostbite Scales', stacksTo: 1000});
+            
             const crystalspineFur = await Item.create({name: 'Crystalspine Fur', stacksTo: 1000});
             const salamantherScales = await Item.create({name: 'Salamanther Scales', stacksTo: 1000});
             const cacophonousThunderscale = await Item.create({name: 'Cacophonous Thunderscale', stacksTo: 1000});
@@ -897,6 +911,106 @@ const makeTables = async () => {
             const prototypeRegalBardingFramework = createItem("Prototype Regal Barding Framework");
 
             //leatherworking items
+            const lifeBoundBelt = createItem("Life-Bound Belt", 1, 382, 392);
+            const lifeBoundBindings = createItem("Life-Bound Bindings", 1, 382, 392);
+            const lifeBoundBoots = createItem("Life-Bound Boots", 1, 382, 392);
+            const lifeBoundCap = createItem("Life-Bound Cap", 1, 382, 392);
+            const lifeBoundChestpiece = createItem("Life-Bound Chestpiece", 1, 382, 392);
+            const lifeBoundGloves = createItem("Life-Bound Gloves", 1, 382, 392);
+            const lifeBoundShoulderpads = createItem("Life-Bound Shoulderpads", 1, 382, 392);
+            const lifeBoundTrousers = createItem("Life-Bound Trousers", 1, 382, 392);
+            const pioneersPracticedCowl = createItem("Pioneer's Practiced Cowl", 1, 333, 343);
+            const pioneersPracticedLeggings = createItem("Pioneer's Practiced Leggings", 1, 333, 343);
+            const pioneersPracticedShoulders = createItem("Pioneer's Practiced Shoulders", 1, 333, 343);
+            const pioneersPracticedGloves = createItem("Pioneer's Practiced Gloves", 1, 333, 343);
+            const pioneersPracticedBelt = createItem("Pioneer's Practiced Belt", 1, 333, 343);
+            const pioneersLeatherTunic = createItem("Pioneer's Leather Tunic", 1, 306, 316);
+            const pioneersLeatherBoots = createItem("Pioneer's Leather Boots", 1, 306, 316);
+            const pioneersLeatherWristguards = createItem("Pioneer's Leather Wristguards", 1, 306, 316);
+            const flameTouchedChain = createItem("Flame-Touched Chain", 1, 382, 392);
+            const flameTouchedChainmail = createItem("Flame-Touched Chainmail", 1, 382, 392);
+            const flameTouchedCuffs = createItem("Flame-Touched Cuffs", 1, 382, 392);
+            const flameTouchedHandguards = createItem("Flame-Touched Handguards", 1, 382, 392);
+            const flameTouchedHelmet = createItem("Flame-Touched Helmet", 1, 382, 392);
+            const flameTouchedLegguards = createItem("Flame-Touched Legguards", 1, 382, 392);
+            const flameTouchedSpaulders = createItem("Flame-Touched Spaulders", 1, 382, 392);
+            const flameTouchedTreads = createItem("Flame-Touched Treads", 1, 382, 392);
+            const trailblazersToughenedCoif = createItem("Trailblazer's Toughened Coif", 1, 333, 343);
+            const trailblazersToughenedLegguards = createItem("Trailblazer's Toughened Legguards", 1, 333, 343);
+            const trailblazersToughenedSpikes = createItem("Trailblazer's Toughened Spikes", 1, 333, 343);
+            const trailblazersToughenedChainbelt = createItem("Trailblazer's Toughened Chainbelt", 1, 333, 343);
+            const trailblazersScaleVest = createItem("Trailblazer's Scale Vest", 1, 306, 316);
+            const trailblazersScaleBoots = createItem("Trailblazer's Scale Boots", 1, 306, 316);
+            const trailblazersScaleBracers = createItem("Trailblazer's Scale Bracers", 1, 306, 316);
+            const expertAlchemistsHat = createItem("Expert Alchemist's Hat", 1, 356, 371);
+            const expertSkinnersCap = createItem("Expert Skinner's Cap", 1, 356, 371);
+            const flameproofApron = createItem("Flameproof Apron", 1, 356, 371);
+            const lavishFloralPack = createItem("Lavish Floral Pack", 1, 356, 371);
+            const masterworkSmock = createItem("Masterwork Smock", 1, 356, 371);
+            const reinforcedPack = createItem("Reinforced Pack", 1, 356, 371);
+            const resplendentCover = createItem("Resplendent Cover", 1, 356, 371);
+            const shockproofGloves = createItem("Shockproof Gloves", 1, 356, 371);
+            const alchemistsHat = createItem("Alchemist's Hat", 1, 317, 332);
+            const smithingApron = createItem("Smithing Apron", 1, 317, 332);
+            const jewelersCover = createItem("Jeweler's Cover", 1, 317, 332);
+            const protectiveGloves = createItem("Protective Gloves", 1, 317, 332);
+            const durablePack = createItem("Durable Pack", 1, 317, 332);
+            const floralBasket = createItem("Floral Basket", 1, 317, 332);
+            const skinnersCap = createItem("Skinner's Cap", 1, 317, 332);
+            const resilientSmock = createItem("Resilient Smock", 1, 317, 332);
+            const bonewroughtCrossbow = createItem("Bonewrought Crossbow", 1, 317, 332);
+            const ancestorsDewDrippers = createItem("Ancestor's Dew Drippers", 1, 382, 392);
+            const flaringCowl = createItem("Flaring Cowl", 1, 382, 392);
+            const oldSpiritsWristwraps = createItem("Old Spirit's Wristwraps", 1, 382, 392);
+            const scaleReinGrips = createItem("Scale Rein Grips", 1, 382, 392);
+            const snowballMakers = createItem("Snowball Makers", 1, 382, 392);
+            const stringOfSpiritualKnickKnacks = createItem("String of Spiritual Knick-Knacks", 1, 382, 392);
+            const windSpiritsLasso = createItem("Wind Spirit's Lasso", 1, 382, 392);
+            const alliedHeartwarmingFurCoat = createItem("Allied Heartwarming Fur Coat", 1, 382, 392);
+            const alliedLegguardsOfSansokKhan = createItem("Allied Legguards of Sansok Khan", 1, 382, 392);
+            const bowOfTheDragonHunters = createItem("Bow of the Dragon Hunters", 1, 382, 392);
+            //this block below need pvp ilvls
+            const infuriousBootsOfReprieve = createItem("Infurious Boots of Reprieve", 1, 382, 392);
+            const infuriousChainhelmProtector = createItem("Infurious Chainhelm Protector", 1, 382, 392);
+            const infuriousFootwrapsOfIndemnity = createItem("Infurious Footwraps of Indemnity", 1, 382, 392);
+            const infuriousSpiritsHood = createItem("Infurious Spirit's Hood", 1, 382, 392);
+            const crimsonCombatantsAdamantChainmail = createItem("Crimson Combatant's Adamant Chainmail", 1, 333, 343);
+            const crimsonCombatantsAdamantCowl = createItem("Crimson Combatant's Adamant Cowl", 1, 333, 343);
+            const crimsonCombatantsAdamantCuffs = createItem("Crimson Combatant's Adamant Cuffs", 1, 333, 343);
+            const crimsonCombatantsAdamantEpaulettes = createItem("Crimson Combatant's Adamant Epaulettes", 1, 333, 343);
+            const crimsonCombatantsAdamantGauntlets = createItem("Crimson Combatant's Adamant Gauntlets", 1, 333, 343);
+            const crimsonCombatantsAdamantGirdle = createItem("Crimson Combatant's Adamant Girdle", 1, 333, 343);
+            const crimsonCombatantsAdamantLeggings = createItem("Crimson Combatant's Adamant Leggings", 1, 333, 343);
+            const crimsonCombatantsAdamantTreads = createItem("Crimson Combatant's Adamant Treads", 1, 333, 343);
+            const crimsonCombatantsResilientBelt = createItem("Crimson Combatant's Resilient Belt", 1, 333, 343);
+            const crimsonCombatantsResilientBoots = createItem("Crimson Combatant's Resilient Boots", 1, 333, 343);
+            const crimsonCombatantsResilientChestpiece = createItem("Crimson Combatant's Resilient Chestpiece", 1, 333, 343);
+            const crimsonCombatantsResilientGloves = createItem("Crimson Combatant's Resilient Gloves", 1, 333, 343);
+            const crimsonCombatantsResilientMask = createItem("Crimson Combatant's Resilient Mask", 1, 333, 343);
+            const crimsonCombatantsResilientShoulderpads = createItem("Crimson Combatant's Resilient Shoulderpads", 1, 333, 343);
+            const crimsonCombatantsResilientTrousers = createItem("Crimson Combatant's Resilient Trousers", 1, 333, 343);
+            const crimsonCombatantsResilientWristwraps = createItem("Crimson Combatant's Resilient Wristwraps", 1, 333, 343);
+            const acidicHailstoneTreads = createItem("Acidic Hailstone Treads", 1, 382, 392);
+            const slimyExpulsionBoots = createItem("Slimy Expulsion Boots", 1, 382, 392);
+            const toxicThornFootwraps = createItem("Toxic Thorn Footwraps", 1, 382, 392);
+            const venomSteepedStompers = createItem("Venom-Steeped Stompers", 1, 382, 392);
+            const witherrotTome = createItem("Witherrot Tome", 1, 382, 392);
+            const finishedPrototypeExplorersBarding = createItem("Finished Prototype Explorer's Barding");
+            const finishedPrototypeRegalBarding = createItem("Finished Prototype Regal Barding");
+            const earthshineScales = createItem("Earthshine Scales", 1000);
+            const frostbiteScales = createItem("Frostbite Scales", 1000);
+            const infuriousHide = createItem("Infurious Hide", 1000);
+            const infuriousScales = createItem("Infurious Scales", 1000);
+            const mireslushHide = createItem("Mireslush Hide", 1000);
+            const stonecrustHide = createItem("Stonecrust Hide", 1000);
+            const fangAdornments = createItem("Fang Adornments", 1000);
+            const toxifiedArmorPatch = createItem("Toxified Armor Patch", 1000);
+            const frostedArmorKit = createItem("Frosted Armor Kit", 1000);
+            const reinforcedArmorKit = createItem("Reinforced Armor Kit", 1000);
+            const feralHideDrums = createItem("Feral Hide Drums", 1000);
+            const artisansSign = createItem("Artisan's Sign");
+            const gnollTent = createItem("Gnoll Tent");
+            const tuskarrBeanBag = createItem("Tuskarr Bean Bag");
 
     const wilderclothBandageRecipe = await Recipe.create({name: 'Wildercloth Bandage', professionId: tailoring.id, itemId: wilderclothBandage.id, requiredProfessionLevel: 1, category: 'Assorted Embroidery', difficulty: 100, notes: "It's a bandage." });
     console.log('Data seeded successfully.');
