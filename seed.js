@@ -173,7 +173,7 @@ async function createItem(name, stacksTo, itemLevelMin, itemLevelMax, descriptio
 
 async function createRecipe(name, itemMade, numberCrafted, profession, materials, requiredProfLevel, category, skillUpAmount, difficulty,
     requiredRenownLevel, requiredSpecializationLevel, notes, finishingReagents){
-        let recipe = Recipe.build({name: name, itemMade: itemMade, profession: profession});
+        let recipe = Recipe.build({name: name, itemId: itemMade.id, professionId: profession.id});
 
         if(isNotNullAndUndefined(numberCrafted)){ recipe.numberCrafted = numberCrafted; }
         if(isNotNullAndUndefined(requiredProfLevel)){ recipe.requiredProfLevel = requiredProfLevel; }
