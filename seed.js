@@ -30,11 +30,10 @@ const Item = sequelize.define('item', {
     stacksTo: { type: DataTypes.INTEGER, defaultValue: 1 },
     price: { type: DataTypes.FLOAT },
     description: { type: DataTypes.STRING },
+    notes: { type: DataTypes.STRING },
     itemLevelMin: { type: DataTypes.INTEGER },
     itemLevelMax: { type: DataTypes.INTEGER },
     types: { type: DataTypes.JSONB },
-    bindOn: { type: DataTypes.STRING }, //should this be enum?
-    isUniqueEquipped: { type: DataTypes.BOOLEAN }
     //has many Materials, FinishingReagents, Recipe(s)
 },{
     underscored: true
@@ -132,7 +131,7 @@ Bonus.belongsTo(Specialization);
 // Specialization.belongsTo(Specialization));
 
 const isNotNullAndUndefined = value => {
-    return (value != undefined && value != null)
+    return (value != undefined || value != null)
 }
 
 async function createProfession(name, icon){
@@ -144,29 +143,14 @@ async function createProfession(name, icon){
     return profession;
 }
 
-async function createItem(name, stacksTo, itemLevelMin, itemLevelMax, description, types, bindOn, isUniqueEquipped){
+async function createItem(name, stacksTo, itemLevelMin, itemLevelMax, description, notes, types){
     let item = Item.build({name: name});
-    if(isNotNullAndUndefined(stacksTo)){
-        item.stacksTo = stacksTo;
-    }
-    if(isNotNullAndUndefined(itemLevelMin)){
-        item.itemLevelMin = itemLevelMin;
-    }
-    if(isNotNullAndUndefined(itemLevelMax)){
-        item.itemLevelMax = itemLevelMax;
-    }
-    if(isNotNullAndUndefined(description)){
-        item.description = description;
-    }
-    if(isNotNullAndUndefined(types)){
-        item.types = types;
-    }
-    if(isNotNullAndUndefined(bindOn)){
-        item.bindOn = bindOn;
-    }
-    if(isNotNullAndUndefined(isUniqueEquipped)){
-        item.isUniqueEquipped = isUniqueEquipped;
-    }
+    if(isNotNullAndUndefined(stacksTo)){ item.stacksTo = stacksTo; }
+    if(isNotNullAndUndefined(itemLevelMin)){ item.itemLevelMin = itemLevelMin; }
+    if(isNotNullAndUndefined(itemLevelMax)){ item.itemLevelMax = itemLevelMax; }
+    if(isNotNullAndUndefined(description)){ item.description = description; }
+    if(isNotNullAndUndefined(notes)){ item.notes = notes; }
+    if(isNotNullAndUndefined(types)){ item.types = types; }
     await item.save();
     return item;
 }
@@ -526,7 +510,7 @@ const makeTables = async () => {
 
 
         //enchanting items
-        const chromaticDust = await(createItem("Chromatic Dust", 1000));
+        const chromaticDust = await(createItem("Chromatic Dust", 1000, null, null, "Gathered by players with the Enchanting skill by disenchanting items. Can be bought and sold on the auction house.", "Received from DEing green items."));
         const vibrantShard = await(createItem("Vibrant Shard", 1000));
         const resonantCrystal = await(createItem("Resonant Crystal", 1000));
         const gracefulAvoidance = await(createItem("Graceful Avoidance"));
