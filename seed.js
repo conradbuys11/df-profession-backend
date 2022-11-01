@@ -34,7 +34,7 @@ const Item = sequelize.define('item', {
     itemLevelMin: { type: DataTypes.INTEGER },
     itemLevelMax: { type: DataTypes.INTEGER },
     types: { type: DataTypes.JSONB },
-    //has many Materials, FinishingReagents, Recipe(s)
+    //has many Materials, Recipe(s)
 },{
     underscored: true
 });
@@ -50,13 +50,14 @@ const Profession = sequelize.define('profession', {
 const Recipe = sequelize.define('recipe', {
     name: { type: DataTypes.STRING, allowNull: false },
     numberCrafted: { type: DataTypes.INTEGER, defaultValue: 1 },
-    requiredProfessionLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
+    requiredProfessionLevel: { type: DataTypes.INTEGER },
     category: { type: DataTypes.STRING },
     skillUpAmount: { type: DataTypes.INTEGER, defaultValue: 1 },
     difficulty: { type: DataTypes.INTEGER, defaultValue: 0 },
     requiredRenownLevel: { type: DataTypes.JSONB },
     requiredSpecializationLevel: { type: DataTypes.JSONB },
-    notes: { type: DataTypes.STRING }
+    notes: { type: DataTypes.STRING },
+    requiredLocation: { type: DataTypes.STRING }
     //has many Materials & FinishingReagents
     //belongs to Item & Profession
 },{
@@ -71,8 +72,9 @@ const Material = sequelize.define('material', {
 });
 
 const FinishingReagent = sequelize.define('finishingReagent', {
+    reagentType: { type: DataTypes.STRING },
     requiredSpecializationLevel: { type: DataTypes.JSONB }
-    //belongs to Recipe, Item
+    //belongs to Recipe
 },{
     underscored: true
 });
@@ -121,9 +123,6 @@ FinishingReagent.belongsTo(Recipe);
 Item.hasMany(Material);
 Material.belongsTo(Item);
 
-Item.hasMany(FinishingReagent);
-FinishingReagent.belongsTo(Item);
-
 Specialization.hasMany(Bonus);
 Bonus.belongsTo(Specialization);
 
@@ -159,7 +158,7 @@ async function createItem(name, stacksTo, itemLevelMin, itemLevelMax, descriptio
 }
 
 async function createRecipe(name, itemMade, numberCrafted, profession, materials, requiredProfLevel, category, skillUpAmount, difficulty,
-    requiredRenownLevel, requiredSpecializationLevel, notes, finishingReagents){
+    requiredRenownLevel, requiredSpecializationLevel, notes, finishingReagents, requiredLocation){
         let recipe = Recipe.build({name: name, itemId: itemMade.id, professionId: profession.id});
 
 
@@ -171,6 +170,7 @@ async function createRecipe(name, itemMade, numberCrafted, profession, materials
         if(isNotNullAndUndefined(requiredRenownLevel)){ recipe.requiredRenownLevel = requiredRenownLevel; }
         if(isNotNullAndUndefined(requiredSpecializationLevel)){ recipe.requiredSpecializationLevel = requiredSpecializationLevel; }
         if(isNotNullAndUndefined(notes)){ recipe.notes = notes; }
+        if(isNotNullAndUndefined(requiredLocation)){ recipe.requiredLocation = requiredLocation; }
         await recipe.save();
         console.log(`${recipe.name}'s ID: ${recipe.id}`);
 
@@ -197,12 +197,13 @@ async function createRecipe(name, itemMade, numberCrafted, profession, materials
         //for finishing reagents, write as so:
         /*
         [
-            [item, {SpecializationName: SpecializationLevel, OtherSpecializationName: SpecializationLevel, etc.}],
+            ["Reagent Type", {SpecializationName: SpecializationLevel, OtherSpecializationName: SpecializationLevel, etc.}],
             etc.
         ]
         ie:
         [
-            lesserIllustriousInsight, {ChemicalSynthesis: 35}
+            ["Lesser Illustrious Insight", {ChemicalSynthesis: 35}],
+            ["Alchemical Catalyst", {PotionMastery: 30}]
         ]
         */
         if(isNotNullAndUndefined(finishingReagents)){
@@ -220,8 +221,8 @@ async function createMaterial(item, quantity, recipe){
     return material;
 }
 
-async function createFinishingReagent(item, requiredSpecializationLevel, recipe){
-    let finishingReagent = FinishingReagent.build({itemId: item.id, requiredSpecializationLevel: requiredSpecializationLevel, recipeId: recipe.id})
+async function createFinishingReagent(reagentType, requiredSpecializationLevel, recipe){
+    let finishingReagent = FinishingReagent.build({reagentType: reagentType, requiredSpecializationLevel: requiredSpecializationLevel, recipeId: recipe.id})
     await finishingReagent.save();
     return finishingReagent;
 }
@@ -1122,15 +1123,30 @@ const makeTables = async () => {
     //
 
         /*base recipe method to copy/paste, and an example:
-        
+        createRecipe("Name", itemName, amountMade, profession, material array, profSkill, "Category", skillUpAmount, difficulty, requiredRenown, requiredSpecialization, notes, finishing reagent array)
+        material array: [ [item, amount needed], [item, amount needed], etc. ]
+        required renown (if not null): {NameOfRep: "Renown Needed"}
+        required specialization (if not null): {NameOfSpecialization: Level}
+        finishing reagent array: [ [item, {SpecializationNeeded: Level}], [item, {SpecializationNeeded: Level}], etc. ]
         */
 
         //alchemy recipes
-        const primalConvergentRecipe = createRecipe("Primal Convergent", primalConvergent, 2, alchemy, [ [awakenedEarth, 1], [awakenedFire, 1], [awakenedAir, 1], [awakenedFrost, 1], [awakenedOrder, 1] ], 20, "Reagents", 1, 275, null, null, null, );
+        //advancedPhialExperimentation
+        //advancedPotionExperimentation
+        //basicPhialExperimentation
+        //basicPotionExperimentation
+        //reclaimConcoctions
+        const primalConvergentRecipe = createRecipe("Primal Convergent", primalConvergent, 2, alchemy, [[awakenedEarth, 1], [awakenedFire, 1], [awakenedAir, 1], [awakenedFrost, 1], [awakenedOrder, 1]], 20, "Reagents", 1, 275, null, null, null, [["Lesser Illustrious Insight", {ChemicalSynthesis: 35}]], "Alchemist's Lab Bench");
+        const omniumDraconisRecipe = createRecipe("Omnium Draconis", omniumDraconis, 1, alchemy, [[writhebark, 1], [saxifrage, 1], [hochenblume, 5], [bubblePoppy, 1]], 10, "Reagents", 1, 325, null, null, null, [["Lesser Illustrious Insight", {ChemicalSynthesis: 35}]], "Alchemist's Lab Bench");
+        const residualNeuralChannelingAgentRecipe = createRecipe("Residual Neural Channeling Agent", residualNeuralChannelingAgent, 5, alchemy, [[awakenedAir, 1], [awakenedEarth, 1], [draconicVial, 5], [saxifrage, 10]], null, "Air Potions", 1, 400, null, null, "Learned via Potion Experimentation.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]], "Alchemist's Lab Bench");
+        const bottledPutrescenceRecipe = createRecipe("Bottled Putrescence", bottledPutrescence, 5, alchemy, [[awakenedAir, 1], [awakenedDecay, 2], [draconicVial, 5], [hochenblume, 30]], null, "Air Potions", 1, 450, null, {Decayology: 1}, "Learned via Potion Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]], "Altar of Decay");
+        const potionOfGustsRecipe = createRecipe("Potion of Gusts", potionOfGusts, 5, alchemy, [[awakenedAir, 1], [draconicVial, 5], [saxifrage, 5], [hochenblume, 20]], null, "Air Potions", 1, 150, null, null, "Learned via Potion Experimentation.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]], "Alchemist's Lab Bench");
+        const potionOfShockingDisclosureRecipe = createRecipe("Potion of Shocking Disclosure", potionOfShockingDisclosure, 5, alchemy, [[awakenedAir, 1], [awakenedEarth, 1], [draconicVial, 5], [hochenblume, 10]], null, "Air Potions", 1, 150, null, null, "Learned via Potion Experimentation.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]], "Alchemist's Lab Bench");
+        const potionOfTheHushedZephyrRecipe = createRecipe("Potion of Shocking Disclosure", potionOfShockingDisclosure, 5, alchemy, [[awakenedAir, 1], [draconicVial, 5], [hochenblume, 20], [saxifrage, 8]], null, "Air Potions", 1, 150, null, null, "Learned via Potion Experimentation.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]], "Alchemist's Lab Bench");
+        const aeratedManaPotionRecipe = createRecipe("Aerated Mana Potion", aeratedManaPotion, 5, alchemy, [[rousingAir, 1], [draconicVial, 5], [hochenblume, 15]], 5, "Air Potions", 1, 60, null, null, null, [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]]);
+        const potionOfChilledClarityRecipe = createRecipe("Potion of Chilled Clairty", potionOfChilledClarity, 5, alchemy, [[awakenedFrost, 1], [awakenedDecay, 1], [draconicVial, 5], [bubblePoppy, 10]], null, "Frost Potions", 1, 450, null, {Decayology: 1}, "Learned via Potion Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {FrostFormulatedPotions: 30, PotionLore: 25}]]);
 
-        // const dragonIslesUnraveling
 
-    // const wilderclothBandageRecipe = await Recipe.create({name: 'Wildercloth Bandage', professionId: tailoring.id, itemId: wilderclothBandage.id, requiredProfessionLevel: 1, category: 'Assorted Embroidery', difficulty: 100, notes: "It's a bandage." }));
     // console.log('Data seeded successfully.'));
 
     // const professions = await Profession.findAll());
