@@ -56,6 +56,7 @@ const Recipe = sequelize.define('recipe', {
     difficulty: { type: DataTypes.INTEGER, defaultValue: 0 },
     requiredRenownLevel: { type: DataTypes.JSONB },
     requiredSpecializationLevel: { type: DataTypes.JSONB },
+    specialAcquisitionMethod: { type: DataTypes.STRING },
     notes: { type: DataTypes.STRING },
     requiredLocation: { type: DataTypes.STRING }
     //has many Materials & FinishingReagents
@@ -158,7 +159,7 @@ async function createItem(name, stacksTo, itemLevelMin, itemLevelMax, descriptio
 }
 
 async function createRecipe(name, itemMade, numberCrafted, profession, materials, requiredProfLevel, category, skillUpAmount, difficulty,
-    requiredRenownLevel, requiredSpecializationLevel, notes, finishingReagents, requiredLocation){
+    requiredRenownLevel, requiredSpecializationLevel, specialAcquisitionMethod, requiredLocation, notes, finishingReagents){
         let recipe = Recipe.build({name: name, itemId: itemMade.id, professionId: profession.id});
 
 
@@ -169,8 +170,9 @@ async function createRecipe(name, itemMade, numberCrafted, profession, materials
         if(isNotNullAndUndefined(difficulty)){ recipe.difficulty = difficulty; }
         if(isNotNullAndUndefined(requiredRenownLevel)){ recipe.requiredRenownLevel = requiredRenownLevel; }
         if(isNotNullAndUndefined(requiredSpecializationLevel)){ recipe.requiredSpecializationLevel = requiredSpecializationLevel; }
-        if(isNotNullAndUndefined(notes)){ recipe.notes = notes; }
+        if(isNotNullAndUndefined(specialAcquisitionMethod)){ recipe.specialAcquisitionMethod = specialAcquisitionMethod; }
         if(isNotNullAndUndefined(requiredLocation)){ recipe.requiredLocation = requiredLocation; }
+        if(isNotNullAndUndefined(notes)){ recipe.notes = notes; }
         await recipe.save();
         console.log(`${recipe.name}'s ID: ${recipe.id}`);
 
@@ -1136,15 +1138,15 @@ const makeTables = async () => {
         //basicPhialExperimentation
         //basicPotionExperimentation
         //reclaimConcoctions
-        const primalConvergentRecipe = createRecipe("Primal Convergent", primalConvergent, 2, alchemy, [[awakenedEarth, 1], [awakenedFire, 1], [awakenedAir, 1], [awakenedFrost, 1], [awakenedOrder, 1]], 20, "Reagents", 1, 275, null, null, null, [["Lesser Illustrious Insight", {ChemicalSynthesis: 35}]], "Alchemist's Lab Bench");
-        const omniumDraconisRecipe = createRecipe("Omnium Draconis", omniumDraconis, 1, alchemy, [[writhebark, 1], [saxifrage, 1], [hochenblume, 5], [bubblePoppy, 1]], 10, "Reagents", 1, 325, null, null, null, [["Lesser Illustrious Insight", {ChemicalSynthesis: 35}]], "Alchemist's Lab Bench");
+        const primalConvergentRecipe = createRecipe("Primal Convergent", primalConvergent, 2, alchemy, [[awakenedEarth, 1], [awakenedFire, 1], [awakenedAir, 1], [awakenedFrost, 1], [awakenedOrder, 1]], 20, "Reagents", 1, 275, null, null, null, "Alchemist's Lab Bench", null, [["Lesser Illustrious Insight", {ChemicalSynthesis: 35}]]);
+        const omniumDraconisRecipe = createRecipe("Omnium Draconis", omniumDraconis, 1, alchemy, [[writhebark, 1], [saxifrage, 1], [hochenblume, 5], [bubblePoppy, 1]], 10, "Reagents", 1, 325, null, null, null, "Alchemist's Lab Bench", null [["Lesser Illustrious Insight", {ChemicalSynthesis: 35}]]);
         const residualNeuralChannelingAgentRecipe = createRecipe("Residual Neural Channeling Agent", residualNeuralChannelingAgent, 5, alchemy, [[awakenedAir, 1], [awakenedEarth, 1], [draconicVial, 5], [saxifrage, 10]], null, "Air Potions", 1, 400, null, null, "Learned via Potion Experimentation.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]], "Alchemist's Lab Bench");
-        const bottledPutrescenceRecipe = createRecipe("Bottled Putrescence", bottledPutrescence, 5, alchemy, [[awakenedAir, 1], [awakenedDecay, 2], [draconicVial, 5], [hochenblume, 30]], null, "Air Potions", 1, 450, null, {Decayology: 1}, "Learned via Potion Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]], "Altar of Decay");
-        const potionOfGustsRecipe = createRecipe("Potion of Gusts", potionOfGusts, 5, alchemy, [[awakenedAir, 1], [draconicVial, 5], [saxifrage, 5], [hochenblume, 20]], null, "Air Potions", 1, 150, null, null, "Learned via Potion Experimentation.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]], "Alchemist's Lab Bench");
-        const potionOfShockingDisclosureRecipe = createRecipe("Potion of Shocking Disclosure", potionOfShockingDisclosure, 5, alchemy, [[awakenedAir, 1], [awakenedEarth, 1], [draconicVial, 5], [hochenblume, 10]], null, "Air Potions", 1, 150, null, null, "Learned via Potion Experimentation.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]], "Alchemist's Lab Bench");
-        const potionOfTheHushedZephyrRecipe = createRecipe("Potion of Shocking Disclosure", potionOfShockingDisclosure, 5, alchemy, [[awakenedAir, 1], [draconicVial, 5], [hochenblume, 20], [saxifrage, 8]], null, "Air Potions", 1, 150, null, null, "Learned via Potion Experimentation.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]], "Alchemist's Lab Bench");
-        const aeratedManaPotionRecipe = createRecipe("Aerated Mana Potion", aeratedManaPotion, 5, alchemy, [[rousingAir, 1], [draconicVial, 5], [hochenblume, 15]], 5, "Air Potions", 1, 60, null, null, null, [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]]);
-        const potionOfChilledClarityRecipe = createRecipe("Potion of Chilled Clairty", potionOfChilledClarity, 5, alchemy, [[awakenedFrost, 1], [awakenedDecay, 1], [draconicVial, 5], [bubblePoppy, 10]], null, "Frost Potions", 1, 450, null, {Decayology: 1}, "Learned via Potion Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {FrostFormulatedPotions: 30, PotionLore: 25}]]);
+        const bottledPutrescenceRecipe = createRecipe("Bottled Putrescence", bottledPutrescence, 5, alchemy, [[awakenedAir, 1], [awakenedDecay, 2], [draconicVial, 5], [hochenblume, 30]], null, "Air Potions", 1, 450, null, {Decayology: 1}, "Potion Experimentation", "Altar of Decay", "Learned via Potion Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]]);
+        const potionOfGustsRecipe = createRecipe("Potion of Gusts", potionOfGusts, 5, alchemy, [[awakenedAir, 1], [draconicVial, 5], [saxifrage, 5], [hochenblume, 20]], null, "Air Potions", 1, 150, null, null, "Potion Experimentation", "Alchemist's Lab Bench", "Learned via Potion Experimentation.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]]);
+        const potionOfShockingDisclosureRecipe = createRecipe("Potion of Shocking Disclosure", potionOfShockingDisclosure, 5, alchemy, [[awakenedAir, 1], [awakenedEarth, 1], [draconicVial, 5], [hochenblume, 10]], null, "Air Potions", 1, 150, null, null, "Potion Experimentation", "Alchemist's Lab Bench", "Learned via Potion Experimentation.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]]);
+        const potionOfTheHushedZephyrRecipe = createRecipe("Potion of Shocking Disclosure", potionOfShockingDisclosure, 5, alchemy, [[awakenedAir, 1], [draconicVial, 5], [hochenblume, 20], [saxifrage, 8]], null, "Air Potions", 1, 150, null, null, "Potion Experimentation", "Alchemist's Lab Bench", "Learned via Potion Experimentation.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]]);
+        const aeratedManaPotionRecipe = createRecipe("Aerated Mana Potion", aeratedManaPotion, 5, alchemy, [[rousingAir, 1], [draconicVial, 5], [hochenblume, 15]], 5, "Air Potions", 1, 60, null, null, null, null, null, [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {PotionLore: 25, AirFormulatedPotions: 30}]]);
+        const potionOfChilledClarityRecipe = createRecipe("Potion of Chilled Clairty", potionOfChilledClarity, 5, alchemy, [[awakenedFrost, 1], [awakenedDecay, 1], [draconicVial, 5], [bubblePoppy, 10]], null, "Frost Potions", 1, 450, null, {Decayology: 1}, "Potion Experimentation", "Altar of Decay", "Learned via Potion Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.", [["Alchemical Catalyst", {PotionMastery: 30}], ["Lesser Illustrious Insight", {FrostFormulatedPotions: 30, PotionLore: 25}]]);
 
 
     // console.log('Data seeded successfully.'));
