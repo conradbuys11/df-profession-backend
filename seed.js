@@ -143,14 +143,17 @@ async function createProfession(name, icon){
     return profession;
 }
 
-async function createItem(name, stacksTo, itemLevelMin, itemLevelMax, description, notes, types){
+async function createItem(name, stacksTo, itemLevelMin, itemLevelMax, description, notes, types, icon){
     let item = Item.build({name: name});
+    let iconURL = "https://wow.zamimg.com/images/wow/icons/large/";
+
     if(isNotNullAndUndefined(stacksTo)){ item.stacksTo = stacksTo; }
     if(isNotNullAndUndefined(itemLevelMin)){ item.itemLevelMin = itemLevelMin; }
     if(isNotNullAndUndefined(itemLevelMax)){ item.itemLevelMax = itemLevelMax; }
     if(isNotNullAndUndefined(description)){ item.description = description; }
     if(isNotNullAndUndefined(notes)){ item.notes = notes; }
     if(isNotNullAndUndefined(types)){ item.types = types; }
+    if(isNotNullAndUndefined(icon)){ item.icon = iconURL + icon + ".jpg"; }
     await item.save();
     return item;
 }
@@ -158,6 +161,7 @@ async function createItem(name, stacksTo, itemLevelMin, itemLevelMax, descriptio
 async function createRecipe(name, itemMade, numberCrafted, profession, materials, requiredProfLevel, category, skillUpAmount, difficulty,
     requiredRenownLevel, requiredSpecializationLevel, notes, finishingReagents){
         let recipe = Recipe.build({name: name, itemId: itemMade.id, professionId: profession.id});
+
 
         if(isNotNullAndUndefined(numberCrafted)){ recipe.numberCrafted = numberCrafted; }
         if(isNotNullAndUndefined(requiredProfLevel)){ recipe.requiredProfLevel = requiredProfLevel; }
@@ -170,10 +174,43 @@ async function createRecipe(name, itemMade, numberCrafted, profession, materials
         await recipe.save();
         console.log(`${recipe.name}'s ID: ${recipe.id}`);
 
-            //for materials, write as so:
-            //[[item.id, //item
-            //  1, //quantity 
-            //  recipe]]
+        //for materials, write as so:
+        /*
+        [
+            [item, numberUsed],
+            [item, numberUsed],
+            etc.
+        ]
+        ie:
+        [
+            [awakenedAir, 1],
+            [awakenedEarth, 1],
+            [primalFlux, 10]
+        ]
+        */
+        if(isNotNullAndUndefined(materials)){
+            for(let material of materials){
+                await createMaterial(material[0], material[1], recipe);
+            }
+        }
+
+        //for finishing reagents, write as so:
+        /*
+        [
+            [item, {SpecializationName: SpecializationLevel, OtherSpecializationName: SpecializationLevel, etc.}],
+            etc.
+        ]
+        ie:
+        [
+            lesserIllustriousInsight, {ChemicalSynthesis: 35}
+        ]
+        */
+        if(isNotNullAndUndefined(finishingReagents)){
+            for(let freagent of finishingReagents){
+                await createFinishingReagent(freagent[0], freagent[1], recipe);
+            }
+        }
+
         return recipe;
 }
 
@@ -181,6 +218,12 @@ async function createMaterial(item, quantity, recipe){
     let material = Material.build({itemId: item.id, quantity: quantity, recipeId: recipe.id});
     await material.save();
     return material;
+}
+
+async function createFinishingReagent(item, requiredSpecializationLevel, recipe){
+    let finishingReagent = FinishingReagent.build({itemId: item.id, requiredSpecializationLevel: requiredSpecializationLevel, recipeId: recipe.id})
+    await finishingReagent.save();
+    return finishingReagent;
 }
 
 // MAKING TABLES
@@ -219,53 +262,53 @@ const makeTables = async () => {
     //
 
         //vendor items
-        const primalFlux = await(createItem("Primal Flux", 1000));
-        const smudgedLens = await(createItem("Smudged Lens", 1000));
-        const enchantingVellum = await(createItem("Enchanting Vellum", 1000));
-        const glitteringParchment = await(createItem("Glittering Parchment", 1000));
-        const iridescentWater = await(createItem("Iridescent Water", 1000));
-        const misshapedFiligree = await(createItem("Misshaped Filigree", 1000));
-        const draconicStopper = await(createItem("Draconic Stopper", 1000));
+        const primalFlux = await(createItem("Primal Flux", 1000, null, null, "Used for removing impurities from metal. Sold by Blacksmithing vendors.", "Blacksmithing Reagent, bought from vendors.", {otherType: "craftingReagent"}, "inv_herbalism_70_starlightrosedust"));
+        const smudgedLens = await(createItem("Smudged Lens", 1000, null, null, null, "Reagent for Engineering goggles, bought from vendors."));
+        const enchantingVellum = await(createItem("Enchanting Vellum", 1000, null, null, null, "Makes enchantments tradeable, bought from vendors."));
+        const glitteringParchment = await(createItem("Glittering Parchment", 1000, null, null, null, "Inscription Reagent, bought from vendors."));
+        const iridescentWater = await(createItem("Iridescent Water", 1000, null, null, null, "Inscription Reagent used to make inks, bought from vendors."));
+        const misshapedFiligree = await(createItem("Misshaped Filigree", 1000, null, null, null, "Jewelcrafting Reagent, bought from vendors."));
+        const draconicStopper = await(createItem("Draconic Stopper", 1000, null, null, null, "Reagent used for making Draconic Vials w/ Jewelcrafting. Bought from vendors."));
 
         //dropped items
-        const sparkOfIngenuity = await(createItem("Spark of Ingenuity", 1000));
-        const artisansMettle = await(createItem("Artisans Mettle", 1000));
-        const primalChaos = await(createItem("Primal Chaos", 1000));
-        const rousingAir = await(createItem("Rousing Air", 1000));
-        const rousingEarth = await(createItem("Rousing Earth", 1000));
-        const rousingFire = await(createItem("Rousing Fire", 1000));
-        const rousingFrost = await(createItem("Rousing Frost", 1000));
-        const rousingIre = await(createItem("Rousing Ire", 1000));
-        const rousingDecay = await(createItem("Rousing Decay", 1000));
-        const rousingOrder = await(createItem("Rousing Order", 1000));
-        const awakenedAir = await(createItem("Awakened Air", 1000));
-        const awakenedEarth = await(createItem("Awakened Earth", 1000));
-        const awakenedFire = await(createItem("Awakened Fire", 1000));
-        const awakenedFrost = await(createItem("Awakened Frost", 1000));
-        const awakenedIre = await(createItem("Awakened Ire", 1000));
-        const awakenedDecay = await(createItem("Awakened Decay", 1000));
-        const awakenedOrder = await(createItem("Awakened Order", 1000));
-        const airySoul = await(createItem("Airy Soul", 1000));
-        const fierySoul = await(createItem("Fiery Soul", 1000));
-        const frostySoul = await(createItem("Frosty Soul", 1000));
-        const earthenSoul = await(createItem("Earthen Soul", 1000));
-        const centaursTrophyNecklace = await(createItem("Centuar's Trophy Necklace", 1000));
-        const titanTrainingMatrixOne = await(createItem("Titan Training Matrix I", 1000));
-        const titanTrainingMatrixTwo = await(createItem("Titan Training Matrix II", 1000));
-        const titanTrainingMatrixThree = await(createItem("Titan Training Matrix III", 1000));
-        const titanTrainingMatrixFour = await(createItem("Titan Training Matrix IV", 1000));
-        const illustriousInsight = await(createItem("Illustrious Insight", 1000));
-        const lesserIllustriousInsight = await(createItem("Lesser Illustrious Insight", 1000));
+        const sparkOfIngenuity = await(createItem("Spark of Ingenuity", 1000, null, null, null, "Made with the Engine of Innovation in Valdrakken. More info later."));
+        const artisansMettle = await(createItem("Artisans Mettle", 1000, null, null, null, "Received for first crafts, profession daily quests, and some other sources. Can be used to buy recipes from the Artisan's Consortium, make Illustrious Insight, or make higher level Profession Equipment."));
+        const primalChaos = await(createItem("Primal Chaos", 1000, null, null, null, "Reagent received from... dungeon & raid bosses? More info later."));
+        const rousingAir = await(createItem("Rousing Air", 1000, null, null, null, "Received mostly from air elementals. Lesser reagent. 10 Rousing can combine into 1 Awakened."));
+        const rousingEarth = await(createItem("Rousing Earth", 1000, null, null, null, "Received mostly from earth elementals. Lesser reagent. 10 Rousing can combine into 1 Awakened."));
+        const rousingFire = await(createItem("Rousing Fire", 1000, null, null, null, "Received mostly from fire elementals. Lesser reagent. 10 Rousing can combine into 1 Awakened."));
+        const rousingFrost = await(createItem("Rousing Frost", 1000, null, null, null, "Received mostly from ice elementals. Lesser reagent. 10 Rousing can combine into 1 Awakened."));
+        const rousingIre = await(createItem("Rousing Ire", 1000, null, null, null, "Received from pvp kills? I think? Lesser reagent. 10 Rousing can combine into 1 Awakened."));
+        const rousingDecay = await(createItem("Rousing Decay", 1000, null, null, null, "Received mostly from decayed mobs. Lesser reagent. 10 Rousing can combine into 1 Awakened."));
+        const rousingOrder = await(createItem("Rousing Order", 1000, null, null, null, "Received mostly from titan-touched gathering nodes. Lesser reagent. 10 Rousing can combine into 1 Awakened."));
+        const awakenedAir = await(createItem("Awakened Air", 1000, null, null, null, "Received mostly from air elementals. Greater reagent. 1 Awakened can split into 10 Rousing."));
+        const awakenedEarth = await(createItem("Awakened Earth", 1000, null, null, null, "Received mostly from earth elementals. Greater reagent. 1 Awakened can split into 10 Rousing."));
+        const awakenedFire = await(createItem("Awakened Fire", 1000, null, null, null, "Received mostly from fire elementals. Greater reagent. 1 Awakened can split into 10 Rousing."));
+        const awakenedFrost = await(createItem("Awakened Frost", 1000, null, null, null, "Received mostly from ice elementals. Greater reagent. 1 Awakened can split into 10 Rousing."));
+        const awakenedIre = await(createItem("Awakened Ire", 1000, null, null, null, "Received from pvp kills? I think? Greater reagent. 1 Awakened can split into 10 Rousing."));
+        const awakenedDecay = await(createItem("Awakened Decay", 1000, null, null, null, "Received mostly from decayed mobs. Greater reagent. 1 Awakened can split into 10 Rousing."));
+        const awakenedOrder = await(createItem("Awakened Order", 1000, null, null, null, "Received mostly from titan-touched gathering nodes. Greater reagent. 1 Awakened can split into 10 Rousing."));
+        const airySoul = await(createItem("Airy Soul", 1000, null, null, null, "Received from using a Zapthrottle Soul Inhaler (Engineering) & Empty Soul Cage (Jewelcrafting) on an air elemental."));
+        const fierySoul = await(createItem("Fiery Soul", 1000, null, null, null, "Received from using a Zapthrottle Soul Inhaler (Engineering) & Empty Soul Cage (Jewelcrafting) on a fire elemental."));
+        const frostySoul = await(createItem("Frosty Soul", 1000, null, null, null, "Received from using a Zapthrottle Soul Inhaler (Engineering) & Empty Soul Cage (Jewelcrafting) on an ice elemental."));
+        const earthenSoul = await(createItem("Earthen Soul", 1000, null, null, null, "Received from using a Zapthrottle Soul Inhaler (Engineering) & Empty Soul Cage (Jewelcrafting) on an earth elemental."));
+        const centaursTrophyNecklace = await(createItem("Centaur's Trophy Necklace", 1000, null, null, null, "Received from Centaur Wild Hunts?"));
+        const titanTrainingMatrixOne = await(createItem("Titan Training Matrix I", 200, null, null, null, "Sets ilvl of crafted piece to 333-343, binds on pickup, and requires Level 64."));
+        const titanTrainingMatrixTwo = await(createItem("Titan Training Matrix II", 200, null, null, null, "Sets ilvl of crafted piece to 346-356, binds on pickup, and requires Level 70."));
+        const titanTrainingMatrixThree = await(createItem("Titan Training Matrix III", 200, null, null, null, "Sets ilvl of crafted piece to 359-369, binds on pickup, and requires Level 70."));
+        const titanTrainingMatrixFour = await(createItem("Titan Training Matrix IV", 200, null, null, null, "Sets ilvl of crafted piece to 372-382, binds on pickup, and requires level 70."));
+        const illustriousInsight = await(createItem("Illustrious Insight", 200, null, null, null, "Optional Reagent that increases Skill when crafting a bigger item by 30. Made with Artisan's Mettle by all professions. 1 Illustrious Insight can break down into 5 Lesser Illustrious Insight."));
+        const lesserIllustriousInsight = await(createItem("Lesser Illustrious Insight", 200, null, null, null, "Optional Reagent that increases Skill when crafting a smaller item by 30. Made with Artisan's Mettle by all professions. 5 Lesser Illustrious Insight can combine into 1 Illustrious Insight."));
 
         //tailoring drops & items
-        const tatteredWildercloth = await(createItem("Tattered Wildercloth", 1000));
-        const wildercloth = await(createItem("Wildercloth", 1000));
-        const decayedWildercloth = await(createItem("Decayed Wildercloth", 1000));
-        const frostbittenWildercloth = await(createItem("Frostbitten Wildercloth", 1000));
-        const singedWildercloth = await(createItem("Singed Wildercloth", 1000));
-        const spoolOfWilderthread = await(createItem("Spool of Wilderthread", 1000));
-        const chronoclothBolt = await(createItem("Chronocloth Bolt", 1000));
-        const azureweaveBolt = await(createItem("Azureweave Bolt", 1000));
+        const tatteredWildercloth = await(createItem("Tattered Wildercloth", 1000, null, null, null, "Lesser cloth for Tailors. 5 of them can be spun into Spool(s) of Wilderthread."));
+        const wildercloth = await(createItem("Wildercloth", 1000, null, null, null, "Standard cloth for Tailors. Can be spun into Spools, but this is the only dropped cloth that can actually be used in recipes, so I wouldn't."));
+        const decayedWildercloth = await(createItem("Decayed Wildercloth", 1000, null, null, null, "Cloth infused with decay. 5 of them can be spun into Spools of Wilderthread."));
+        const frostbittenWildercloth = await(createItem("Frostbitten Wildercloth", 1000, null, null, null, "Cloth infused with frost. 5 of them can be spun into Spools of Wilderthread."));
+        const singedWildercloth = await(createItem("Singed Wildercloth", 1000, null, null, null, "Cloth infused with fire. 5 of them can be spun into Spools of Wilderthread."));
+        const spoolOfWilderthread = await(createItem("Spool of Wilderthread", 1000, null, null, null, "Tailoring reagent, used by spinning 5 cloth together."));
+        const chronoclothBolt = await(createItem("Chronocloth Bolt", 1000, null, null, null, "Specialty cloth for Tailors used to craft high-end cloth pieces. Has a CD on crafting."));
+        const azureweaveBolt = await(createItem("Azureweave Bolt", 1000, null, null, null, "Specialty cloth for Tailors used to craft high-end cloth pieces. Has a CD on crafting."));
 
         //LW & skinning drops & items
         const contouredFowlfeather = await(createItem("Contoured Fowlfeather", 1000));
@@ -1077,6 +1120,13 @@ const makeTables = async () => {
     //
     // SEEDING RECIPES
     //
+
+        /*base recipe method to copy/paste, and an example:
+        
+        */
+
+        //alchemy recipes
+        const primalConvergentRecipe = createRecipe("Primal Convergent", primalConvergent, 2, alchemy, [ [awakenedEarth, 1], [awakenedFire, 1], [awakenedAir, 1], [awakenedFrost, 1], [awakenedOrder, 1] ], 20, "Reagents", 1, 275, null, null, null, );
 
         // const dragonIslesUnraveling
 
