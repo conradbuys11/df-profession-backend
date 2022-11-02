@@ -277,6 +277,7 @@ const makeTables = async () => {
         const iridescentWater = await(createItem("Iridescent Water", 1000, null, null, null, "Inscription Reagent used to make inks, bought from vendors."));
         const misshapedFiligree = await(createItem("Misshaped Filigree", 1000, null, null, null, "Jewelcrafting Reagent, bought from vendors."));
         const draconicStopper = await(createItem("Draconic Stopper", 1000, null, null, null, "Reagent used for making Draconic Vials w/ Jewelcrafting. Bought from vendors."));
+        const sereviteRod = await(createItem("Serevite Rod", 1));
 
         //dropped items
         const sparkOfIngenuity = await(createItem("Spark of Ingenuity", 1000, null, null, null, "Made with the Engine of Innovation in Valdrakken. More info later."));
@@ -383,6 +384,7 @@ const makeTables = async () => {
         const largeSturdyFemur = await(createItem("Large Sturdy Femur", 1000));
         const primalBearSpine = await(createItem("Primal Bear Spine", 1000));
         const mastodonTusk = await(createItem("Mastodon Tusk", 1000));
+        const iridescentPlume = await(createItem("Iridescent Plume", 1000));
 
         // MADE WITH PROFESSIONS
         
@@ -1297,7 +1299,7 @@ const makeTables = async () => {
 
 
 
-        //enchanting recipes - # total
+        //enchanting recipes - 68 total
         const illustriousInsightRecipeEnchanting = await(createRecipe("Illustrious Insight", illustriousInsight, 1, enchanting, [[artisansMettle, 50]], null, "Finishing Reagents", 1, null, null, null, "Various Specializations", "Enchanter's Lectern"));
         const gracefulAvoidanceRecipe = await(createRecipe("Graceful Avoidance", gracefulAvoidance, 1, enchanting, [[chromaticDust, 8], [vibrantShard, 3]], null, "Cloak Enchantments", 1, 400, {DragonscaleExpedition: 9}, null, null, null, null, [["Lesser Illustrious Insight", {Adaptive: 30}]]));
         const homeboundSpeedRecipe = await(createRecipe("Homebound Speed", homeboundSpeed, 1, enchanting, [[chromaticDust, 8], [vibrantShard, 3]], null, "Cloak Enchantments", 1, 400, {ValdrakkenAccord: 11}, null, null, null, null, [["Lesser Illustrious Insight", {Adaptive: 30}]]));
@@ -1336,7 +1338,37 @@ const makeTables = async () => {
         const frozenWritRecipe = await(createRecipe("Frozen Writ", frozenWrit, 1, enchanting, [[chromaticDust, 15], [resonantCrystal, 2], [awakenedFrost, 4]], 50, "Weapon Enchantments", 1, 300, null, null, null, null, null, [["Illustrious Insight", {Frozen: 10}]]));
         const sophicWritRecipe = await(createRecipe("Sophic Writ", sophicWrit, 1, enchanting, [[chromaticDust, 15], [resonantCrystal, 2], [awakenedOrder, 3]], 50, "Weapon Enchantments", 1, 300, null, null, null, null, null, [["Illustrious Insight", {Sophic: 10}]]));
         const waftingWritRecipe = await(createRecipe("Wafting Writ", waftingWrit, 1, enchanting, [[chromaticDust, 15], [resonantCrystal, 2], [awakenedAir, 4]], 50, "Weapon Enchantments", 1, 300, null, null, null, null, null, [["Illustrious Insight", {Wafting: 10}]]));
-        
+        const draconicDeftnessRecipe = await(createRecipe("Draconic Deftness", draconicDeftness, 1, enchanting, [[vibrantShard, 4], [resonantCrystal, 2], [iridescentPlume, 3]], null, "Profession Tool Enchantments", 1, 400, {ArtisansConsortium: "Valued"}, null, null, null, null, [["Illustrious Insight", {Artistry: 30}]]));
+        const draconicFinesseRecipe = await(createRecipe("Draconic Finesse", draconicFinesse, 1, enchanting, [[vibrantShard, 4], [resonantCrystal, 2], [iridescentPlume, 3]], null, "Profession Tool Enchantments", 1, 400, {ArtisansConsortium: "Valued"}, null, null, null, null, [["Illustrious Insight", {Artistry: 30}]]));
+        const draconicInspirationRecipe = await(createRecipe("Draconic Inspiration", draconicInspiration, 1, enchanting, [[vibrantShard, 4], [resonantCrystal, 2], [iridescentPlume, 3]], null, "Profession Tool Enchantments", 1, 400, null, {Artistry: 0}, null, null, null, [["Illustrious Insight", {Artistry: 30}]]));
+        const draconicPerceptionRecipe = await(createRecipe("Draconic Perception", draconicPerception, 1, enchanting, [[vibrantShard, 4], [resonantCrystal, 2], [iridescentPlume, 3]], null, "Profession Tool Enchantments", 1, 400, {ArtisansConsortium: "Valued"}, null, null, null, null, [["Illustrious Insight", {Artistry: 30}]]));
+        const draconicResourcefulnessRecipe = await(createRecipe("Draconic Resourcefulness", draconicResourcefulness, 1, enchanting, [[vibrantShard, 4], [resonantCrystal, 2], [iridescentPlume, 3]], null, "Profession Tool Enchantments", 1, 400, null, {Artistry: 15}, null, null, null, [["Illustrious Insight", {Artistry: 30}]]));
+        const torchOfPrimalAwakeningRecipe = await(createRecipe("Torch of Primal Awakening", torchOfPrimalAwakening, 1, enchanting, [[sparkOfIngenuity, 1], [primalChaos, 120], [vibrantShard, 2], [resonantCrystal, 3], [runedWrithebark, 2], [primalMoltenAlloy, 2]], null, "Rods and Wands", 1, 265, null, {RodsAndWands: 30}, null, "Enchanter's Lectern", null, [["Missive", {RodsAndWands: 0}], ["Primal Infusion", {RodsAndWands: 20}], ["Embellishment", {}], ["Illustrious Insight", {RodsAndWands: 45}]]));
+        const runedKhazgoriteRodRecipe = await(createRecipe("Runed Khaz'gorite Rod", runedKhazgoriteRod, 1, enchanting, [[artisansMettle, 300], [vibrantShard, 5], [resonantCrystal, 1], [khazgoriteOre, 4], [runedWrithebark, 2]], null, "Rods and Wands", 1, 350, null, {RodsAndWands: 10}, null, "Enchanter's Lectern", null, [["Missive", {}], ["Illustrious Insight", {RodsAndWands: 45}]]));
+        const runedDraconiumRodRecipe = await(createRecipe("Runed Draconium Rod", runedDraconiumRod, 1, enchanting, [[chromaticDust, 4], [draconiumOre, 3], [writhebark, 2]], 10, "Rods and Wands", 3, 80, null, null, null, "Enchanter's Lectern", null, [["Missive", {}], ["Lesser Illustrious Insight", {RodsAndWands: 45}]]));
+        const enchantedWrithebarkWandRecipe = await(createRecipe("Enchanted Writhebark Wand", enchantedWrithebarkWand, 1, enchanting, [[chromaticDust, 6], [writhebark, 2]], 5, "Rods and Wands", 3, 60, null, null, null, "Enchanter's Lectern", null, [["Training Matrix", {}], ["Missive", {RodsAndWands: 0}], ["Lesser Illustrious Insight", {RodsAndWands: 45}]]));
+        const runedSereviteRodRecipe = await(createRecipe("Runed Serevite Rod", runedSereviteRod, 1, enchanting, [[chromaticDust, 3], [sereviteRod, 1]], 1, "Rods and Wands", 1, 40, null, null, null, "Enchanter's Lectern", "Learned by default.", [["Missive", {}], ["Lesser Illustrious Insight", {RodsAndWands: 45}]]));
+        const illusionPrimalAirRecipe = await(createRecipe("Illusion: Primal Air", illusionPrimalAir, 1, enchanting, [[resonantCrystal, 2], [awakenedAir, 20]], null, "Illusory Goods", 1, null, null, null, "World Drop", "Enchanter's Lectern", "Drops during Primal Storms."));
+        const illusionPrimalEarthRecipe = await(createRecipe("Illusion: Primal Earth", illusionPrimalEarth, 1, enchanting, [[resonantCrystal, 2], [awakenedEarth, 20]], null, "Illusory Goods", 1, null, null, null, "World Drop", "Enchanter's Lectern", "Drops during Primal Storms."));
+        const illusionPrimalFireRecipe = await(createRecipe("Illusion: Primal Fire", illusionPrimalFire, 1, enchanting, [[resonantCrystal, 2], [awakenedFire, 20]], null, "Illusory Goods", 1, null, null, null, "World Drop", "Enchanter's Lectern", "Drops during Primal Storms."));
+        const illusionPrimalFrostRecipe = await(createRecipe("Illusion: Primal Frost", illusionPrimalFrost, 1, enchanting, [[resonantCrystal, 2], [awakenedFrost, 20]], null, "Illusory Goods", 1, null, null, null, "World Drop", "Enchanter's Lectern", "Drops during Primal Storms."));
+        const illusionPrimalMasteryRecipe = await(createRecipe("Illusion: Primal Mastery", illusionPrimalMastery, 1, enchanting, [[resonantCrystal, 5], [awakenedAir, 5], [awakenedEarth, 5], [awakenedFire, 5], [awakenedFrost, 5]], null, "Illusory Goods", 1, null, null, null, "Raid Drop", "Enchanter's Lectern", "Drops from Kurog Grimtotem in Vault of the Incarnates."));
+        const primalInvocationExtractRecipe = await(createRecipe("Primal Invocation Extract", primalInvocationExtract, 1, enchanting, [[awakenedAir, 1], [awakenedEarth, 1], [awakenedFire, 1], [awakenedFrost, 1], [awakenedOrder, 1]], null, "Illusory Goods", 1, 300, null, null, "Other", "Enchanter's Lectern", "Received from 'Primal Extraction - Glimmers of Insight'?", [["Lesser Illustrious Insight", {Burning: 10, Earthen: 10, Sophic: 10, Frozen: 10, Wafting: 10}]]));
+        const khadgarsDisenchantingRodRecipe = await(createRecipe("Khadgar's Disenchanting Rod", khadgarsDisenchantingRod, 1, enchanting, [[chromaticDust, 12], [vibrantShard, 6], [resonantCrystal, 3]], null, "Illusory Goods", 1, null, null, {IllusoryGoods: 30}, null, "Enchanter's Lectern"));
+        const illusoryAdornmentOrderRecipe = await(createRecipe("Illusory Adornment: Order", illusoryAdornmentOrder, 1, enchanting, [[chromaticDust, 2], [rousingOrder, 2]], null, "Illusory Goods", 1, 275, null, {IllusoryGoods: 20}, null, null, null, [["Lesser Illustrious Insight", {Sophic: 10}]]));
+        const illusoryAdornmentAirRecipe = await(createRecipe("Illusory Adornment: Air", illusoryAdornmentAir, 1, enchanting, [[chromaticDust, 2], [rousingAir, 2]], 40, "Illusory Goods", 1, 275, null, null, null, null, null, [["Lesser Illustrious Insight", {Wafting: 10}]]));
+        const illusoryAdornmentEarthRecipe = await(createRecipe("Illusory Adornment: Earth", illusoryAdornmentEarth, 1, enchanting, [[chromaticDust, 2], [rousingEarth, 2]], 40, "Illusory Goods", 1, 275, null, null, null, null, null, [["Lesser Illustrious Insight", {Earthen: 10}]]));
+        const illusoryAdornmentFireRecipe = await(createRecipe("Illusory Adornment: Fire", illusoryAdornmentFire, 1, enchanting, [[chromaticDust, 2], [rousingFire, 2]], 40, "Illusory Goods", 1, 275, null, null, null, null, null, [["Lesser Illustrious Insight", {Burning: 10}]]));
+        const illusoryAdornmentFrostRecipe = await(createRecipe("Illusory Adornment: Frost", illusoryAdornmentFrost, 1, enchanting, [[chromaticDust, 2], [rousingFrost, 2]], 40, "Illusory Goods", 1, 275, null, null, null, null, null, [["Lesser Illustrious Insight", {Frozen: 10}]]));
+        const scepterOfSpectacleOrderRecipe = await(createRecipe("Scepter of Spectacle: Order", scepterOfSpectacleOrder, 1, enchanting, [[chromaticDust, 1], [rousingOrder, 3], [writhebark, 1]], null, "Illusory Goods", 1, null, null, {IllusoryGoods: 10}, null, "Enchanter's Lectern"));
+        const scepterOfSpectacleAirRecipe = await(createRecipe("Scepter of Spectacle: Air", scepterOfSpectacleAir, 1, enchanting, [[chromaticDust, 1], [rousingAir, 3], [writhebark, 1]], 20, "Illusory Goods", 1, null, null, null, null, "Enchanter's Lectern"));
+        const scepterOfSpectacleFrostRecipe = await(createRecipe("Scepter of Spectacle: Frost", scepterOfSpectacleFrost, 1, enchanting, [[chromaticDust, 1], [rousingFrost, 3], [writhebark, 1]], 20, "Illusory Goods", 1, null, null, null, null, "Enchanter's Lectern"));
+        const scepterOfSpectacleEarthRecipe = await(createRecipe("Scepter of Spectacle: Earth", scepterOfSpectacleEarth, 1, enchanting, [[chromaticDust, 1], [rousingEarth, 3], [writhebark, 1]], 1, "Illusory Goods", 1, null, null, null, null, "Enchanter's Lectern", "Learned by default."));
+        const scepterOfSpectacleFireRecipe = await(createRecipe("Scepter of Spectacle: Fire", scepterOfSpectacleFire, 1, enchanting, [[chromaticDust, 1], [rousingFire, 3], [writhebark, 1]], 1, "Illusory Goods", 1, null, null, null, null, "Enchanter's Lectern", "Learned by default."));
+        const crystallineShatterResonantCrystal = await(createRecipe("Crystalline Shatter", vibrantShard, 3, enchanting, [[resonantCrystal, 1]], null, "Shatters", 0, null, null, {DraconicDisenchantment: 10}));
+        const crystallineShatterVibrantShard = await(createRecipe("Crystalline Shatter", chromaticDust, 3, enchanting, [[vibrantShard, 1]], null, "Shatters", 0, null, null, {DraconicDisenchantment: 10}));
+        // const elementalShatter = await(createRecipe("Elemental Shatter", null, 1, enchanting, [[awakenedAir, 1]], null, "Shatters", 0, null, null, {PrimalExtraction: 10}, null, null, "Gain an element's power for 10 minutes."));
+        const sophicAmalgamationRecipe = await(createRecipe("Sophic Amalgamation", sophicAmalgamation, 1, enchanting, [[resonantCrystal, 3], [awakenedOrder, 3]], null, "Magical Merchandise", 1, null, null, {PrimalExtraction: 20}, null, "Enchanter's Lectern"));
 
 
     // console.log('Data seeded successfully.'));
