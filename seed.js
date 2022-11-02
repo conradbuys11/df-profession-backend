@@ -381,6 +381,8 @@ const makeTables = async () => {
         const glowingTitanOrb = await(createItem("Glowing Titan Orb", 200));
         const aquaticMaw = await(createItem("Aquatic Maw", 1000));
         const largeSturdyFemur = await(createItem("Large Sturdy Femur", 1000));
+        const primalBearSpine = await(createItem("Primal Bear Spine", 1000));
+        const mastodonTusk = await(createItem("Mastodon Tusk", 1000));
 
         // MADE WITH PROFESSIONS
         
@@ -1143,7 +1145,7 @@ const makeTables = async () => {
         finishing reagent array: [ [item, {SpecializationNeeded: Level}], [item, {SpecializationNeeded: Level}], etc. ]
         */
 
-        //alchemy recipes
+        //alchemy recipes - 56 total
         //advancedPhialExperimentation
         //advancedPotionExperimentation
         //basicPhialExperimentation
@@ -1204,7 +1206,7 @@ const makeTables = async () => {
 
 
 
-        //blacksmithing recipes
+        //blacksmithing recipes - 86 total
         const obsidianSearedAlloyRecipe = await(createRecipe("Obsidian Seared Alloy", obsidianSearedAlloy, 2, blacksmithing, [[awakenedOrder, 1], [awakenedFire, 1], [primalFlux, 6], [draconiumOre, 10], [khazgoriteOre, 8]], null, "Smelting", 1, 325, null, null, "Quest", "Earth-Warder's Forge", "Unlocked via 'A Head For Metal' quest in the Waking Shores.", [["Lesser Illustrious Insight", {SpecialtySmithing: 40}]]));
         const frostfireAlloyRecipe = await(createRecipe("Frostfire Alloy", frostfireAlloy, 2, blacksmithing, [[awakenedFire, 1], [awakenedFrost, 1], [primalFlux, 4], [draconiumOre, 5], [khazgoriteOre, 4]], 25, "Smelting", 1, 325, null, null, null, "Forge", null, [["Lesser Illustrious Insight", {SpecialtySmithing: 40}]]));
         const infuriousAlloyRecipe = await(createRecipe("Infurious Alloy", infuriousAlloy, 2, blacksmithing, [[awakenedIre, 2], [primalFlux, 3], [draconiumOre, 4], [khazgoriteOre, 2]], null, "Smelting", 1, 200, null, null, "PvP Victory", "Forge", "Received from Arena, BGs, or WM?", [["Lesser Illustrious Insight", {SpecialtySmithing: 40}]]));
@@ -1282,6 +1284,21 @@ const makeTables = async () => {
         const draconiumSickleRecipe = await(createRecipe("Draconium Sickle", draconiumSickle, 1, blacksmithing, [[primalFlux, 4], [draconiumOre, 2], [sereviteOre, 10]], 10, "Profession Tools and Accessories", 3, 80, null, null, null, "Anvil", null, [["Missive", {}], ["Quenching Fluid", {Blades: 30, Toolsmithing: 30}], ["Lesser Illustrious Insight", {LongBlades: 25, SpecialtySmithing: 40}]]));
         const draconiumPickaxeRecipe = await(createRecipe("Draconium Pickaxe", draconiumPickaxe, 1, blacksmithing, [[primalFlux, 4], [draconiumOre, 2], [sereviteOre, 10]], 5, "Profession Tools and Accessories", 3, 80, null, null, null, "Anvil", null, [["Missive", {}], ["Quenching Fluid", {Hafted: 30, Toolsmithing: 30}], ["Lesser Illustrious Insight", {AxesPicksAndPolearms: 25, SpecialtySmithing: 40}]]));
         const draconiumBlacksmithsHammerRecipe = await(createRecipe("Draconium Blacksmith's Hammer", draconiumBlacksmithsHammer, 1, blacksmithing, [[primalFlux, 4], [draconiumOre, 2], [sereviteOre, 10]], 1, "Profession Tools and Accessories", 3, 80, null, null, null, "Anvil", "Learned by default.", [["Missive", {}], ["Quenching Fluid", {Hafted: 30, Toolsmithing: 30}], ["Lesser Illustrious Insight", {MacesAndHammers: 25, SpecialtySmithing: 40}]]));
+        const mastersHammerRecipe = await(createRecipe("Master's Hammer", mastersHammer, 1, blacksmithing, [[primalFlux, 10], [obsidianSearedAlloy, 1], [primalMoltenAlloy, 2], [frostfireAlloy, 2]], null, "Consumable Tools", 1, null, null, null, "Various Specializations", "Anvil", "Similar to Illustrious Insight - any Specialization rank that mentions Master's Hammer gives you this recipe."));
+        const sturdyExpeditionShovelRecipe = await(createRecipe("Sturdy Expedition Shovel", sturdyExpeditionShovel, 2, blacksmithing, [[primalFlux, 2], [sereviteOre, 10]], null, "Consumable Tools", 1, null, {DragonscaleExpedition: "?"}, null, null, "Anvil", null, [["Quenching Fluid", {Toolsmithing: 30}]]));
+        const sereviteRepairHammerRecipe = await(createRecipe("Serevite Repair Hammer", sereviteRepairHammer, 1, blacksmithing, [[primalFlux, 3], [sereviteOre, 8]], 15, "Consumable Tools", 1, null, null, null, null, "Anvil", null, [["Quenching Fluid", {Toolsmithing: 30}]]));
+        const sereviteSkeletonKeyRecipe = await(createRecipe("Serevite Skeleton Key", sereviteSkeletonKey, 5, blacksmithing, [[primalFlux, 3], [sereviteOre, 20]], 5, "Consumable Tools", 1, null, null, null, null, "Anvil", null, [["Quenching Fluid", {Toolsmithing: 30}]]));
+        const primalRazorstoneRecipe = await(createRecipe("Primal Razorstone", primalRazorstone, 5, blacksmithing, [[glossyStone, 4], [silkenGemdust, 1]], null, "Stonework", 1, 325, {ArtisansConsortium: "Valued"}, null, null, null, null, [["Lesser Illustrious Insight", {SpecialtySmithing: 40}]]));
+        const primalWhetstoneRecipe = await(createRecipe("Primal Whetstone", primalWhetstone, 5, blacksmithing, [[awakenedFire, 1], [glossyStone, 4]], 35, "Stonework", 1, 325, null, null, null, null, null, [["Lesser Illustrious Insight", {SpecialtySmithing: 40}]]));
+        const primalWeightstoneRecipe = await(createRecipe("Primal Weightstone", primalWeightstone, 5, blacksmithing, [[awakenedEarth, 1], [glossyStone, 4]], 30, "Stonework", 1, 325, null, null, null, null, null, [["Lesser Illustrious Insight", {SpecialtySmithing: 40}]]));
+        const alvinTheAnvilRecipe = await(createRecipe("Alvin the Anvil", alvinTheAnvil, 1, blacksmithing, [[earthenSoul, 1], [primalMoltenAlloy, 6], [frostfireAlloy, 6], [infuriousAlloy, 6]], null, "Pets", 1, null, null, null, "World Drop", "Anvil", "Drops from 'Powerful Blacksmiths'?"));
+        const prototypeExplorersBardingFrameworkRecipe = await(createRecipe("Prototype Explorer's Barding Framework", prototypeExplorersBardingFramework, 1, blacksmithing, [[primalFlux, 5], [primalBearSpine, 3], [sereviteOre, 20], [primalMoltenAlloy, 1], [obsidianSearedAlloy, 2]], null, "Dragon Riding", 1, null, {MaruukCentaur: 22}, null, null, "Anvil"));
+        const prototypeRegalBardingFrameworkRecipe = await(createRecipe("Prototype Regal Barding Framework", prototypeRegalBardingFramework, 1, blacksmithing, [[primalFlux, 5], [mastodonTusk, 3], [sereviteOre, 20], [frostfireAlloy, 1], [obsidianSearedAlloy, 2]], null, "Dragon Riding", 1, null, null, null, "World Drop", "Anvil", "Drops from Draconic Recipe in a Bottle."));
+
+
+
+        //enchanting recipes - # total
+
 
 
     // console.log('Data seeded successfully.'));
