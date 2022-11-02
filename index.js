@@ -4,7 +4,10 @@ const parser = require('body-parser')
 const {Sequelize,DataTypes} = require('sequelize')
 const sequelize = new Sequelize('postgres://conrad:password@localhost:5432/df_professions')
 const app = express()
-const port = 3001
+const port = 3001;
+//const port = process.env.PORT || 3001;
+const internalURL = "postgres://conrad:NQTL5xEl88OV0pX33AJu1uFhO259JHWb@dpg-cda17c2rrk09hiorhi10-a/df_professions"
+const externalURL = "postgres://conrad:NQTL5xEl88OV0pX33AJu1uFhO259JHWb@dpg-cda17c2rrk09hiorhi10-a.oregon-postgres.render.com/df_professions"
 
 //SETTING UP APP
 app.use(parser.urlencoded({extended: true}))
