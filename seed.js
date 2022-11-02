@@ -80,33 +80,38 @@ const FinishingReagent = sequelize.define('finishingReagent', {
     underscored: true
 });
 
-const Specialization = sequelize.define('specialization', {
-    name: { type: DataTypes.STRING, allowNull: false },
-    description: { type: DataTypes.STRING },
-    totalPoints: { type: DataTypes.INTEGER, allowNull: false },
-    groupCrafts: { type: DataTypes.STRING },
-    eachPointGives: { type: DataTypes.STRING, defaultValue: "1 Skill" }
-    //has many Bonuses & Specializations
-    //belongs to Profession & Specialization
-},{
-    underscored: true
-});
 
-const Bonus = sequelize.define('bonus', {
-    level: { type: DataTypes.INTEGER, allowNull: false },
-    bonus: { type: DataTypes.STRING, allowNull: false }
-    //belongs to Specialization
-},{
-    underscored: true
-});
+// Specializations are too much work rn and is way better covered by wowhead, anyway.
+// Maybe later. Focusing on Items & Recipes rn.
+
+
+// const Specialization = sequelize.define('specialization', {
+//     name: { type: DataTypes.STRING, allowNull: false },
+//     description: { type: DataTypes.STRING },
+//     totalPoints: { type: DataTypes.INTEGER, allowNull: false },
+//     groupCrafts: { type: DataTypes.STRING },
+//     eachPointGives: { type: DataTypes.STRING, defaultValue: "1 Skill" }
+//     //has many Bonuses & Specializations
+//     //belongs to Profession & Specialization
+// },{
+//     underscored: true
+// });
+
+// const Bonus = sequelize.define('bonus', {
+//     level: { type: DataTypes.INTEGER, allowNull: false },
+//     bonus: { type: DataTypes.STRING, allowNull: false }
+//     //belongs to Specialization
+// },{
+//     underscored: true
+// });
 
 
 // setting up some ORM
 Profession.hasMany(Recipe);
 Recipe.belongsTo(Profession);
 
-Profession.hasMany(Specialization);
-Specialization.belongsTo(Profession);
+// Profession.hasMany(Specialization);
+// Specialization.belongsTo(Profession);
 
 Profession.hasMany(Item, {as: 'Tools', foreignKey: 'toolsId'});
 Profession.hasMany(Item, {as: 'FirstAccessory', foreignKey: 'firstAccessoryId'})
@@ -124,8 +129,8 @@ FinishingReagent.belongsTo(Recipe);
 Item.hasMany(Material);
 Material.belongsTo(Item);
 
-Specialization.hasMany(Bonus);
-Bonus.belongsTo(Specialization);
+// Specialization.hasMany(Bonus);
+// Bonus.belongsTo(Specialization);
 
 // Specialization.hasMany(Specialization));
 // Specialization.belongsTo(Specialization));
@@ -241,8 +246,8 @@ const makeTables = async () => {
     // SEEDING PROFESSIONS
     //
 
-        const vendor = await(createProfession('Vendor'));
-        const worldDropAndGathering = await(createProfession('World Drop & Gathering'));
+        // const vendor = await(createProfession('Vendor'));
+        // const worldDropAndGathering = await(createProfession('World Drop & Gathering'));
         const tailoring = await(createProfession('Tailoring'));
         const enchanting = await(createProfession('Enchanting'));
         const engineering = await(createProfession('Engineering'));
@@ -1255,6 +1260,28 @@ const makeTables = async () => {
         const primalMoltenWarglaiveRecipe = await(createRecipe("Primal Molten Warglaive", primalMoltenWarglaive, 1, blacksmithing, [[sparkOfIngenuity, 1], [primalChaos, 80], [primalMoltenAlloy, 17]], null, "Weapons", 1, 300, null, {LongBlades: 5}, null, "Anvil", null, [["Primal Infusion", {Weaponsmithing: 0}], ["Missive", {Blades: 0}], ["Embellishment", {}], ["Quenching Fluid", {Blades: 30}], ["Illustrious Insight", {LongBlades: 25}]]));
         const draconiumGreatMaceRecipe = await(createRecipe("Draconium Great Mace", draconiumGreatMace, 1, blacksmithing, [[primalFlux, 6], [draconiumOre, 10], [sereviteOre, 20]], 50, "Weapons", 2, 60, null, null, null, "Anvil", null, [["Training Matrix", {}], ["Missive", {Hafted: 0}], ["Quenching Fluid", {Hafted: 30}], ["Lesser Illustrious Insight", {MacesAndHammers: 25}]]));
         const draconiumStilettoRecipe = await(createRecipe("Draconium Stiletto", draconiumStiletto, 1, blacksmithing, [[primalFlux, 6], [draconiumOre, 6], [sereviteOre, 12]], 45, "Weapons", 2, 60, null, null, null, "Anvil", null, [["Training Matrix", {}], ["Missive", {Blades: 0}], ["Quenching Fluid", {Blades: 30}], ["Lesser Illustrious Insight", {ShortBlades: 25}]]));
+        const draconiumGreatAxeRecipe = await(createRecipe("Draconium Great Axe", draconiumGreatAxe, 1, blacksmithing, [[primalFlux, 6], [draconiumOre, 10], [sereviteOre, 20]], 40, "Weapons", 2, 60, null, null, null, "Anvil", null, [["Training Matrix", {}], ["Missive", {Hafted: 0}], ["Quenching Fluid", {Hafted: 30}], ["Lesser Illustrious Insight", {AxesPicksAndPolearms: 25}]]));
+        const draconiumKnucklesRecipe = await(createRecipe("Draconium Knuckles", draconiumKnuckles, 1, blacksmithing, [[primalFlux, 6], [draconiumOre, 6], [sereviteOre, 12]], 30, "Weapons", 2, 60, null, null, null, "Anvil", null, [["Training Matrix", {}], ["Missive", {Blades: 0}], ["Quenching Fluid", {Blades: 30}], ["Lesser Illustrious Insight", {ShortBlades: 25}]]));
+        const draconiumSwordRecipe = await(createRecipe("Draconium Sword", draconiumSword, 1, blacksmithing, [[primalFlux, 5], [draconiumOre, 6], [sereviteOre, 12]], 30, "Weapons", 2, 60, null, null, null, "Anvil", null, [["Training Matrix", {}], ["Missive", {Blades: 0}], ["Quenching Fluid", {Blades: 30}], ["Lesser Illustrious Insight", {LongBlades: 25}]]));
+        const draconiumAxeRecipe = await(createRecipe("Draconium Axe", draconiumAxe, 1, blacksmithing, [[primalFlux, 5], [draconiumOre, 6], [sereviteOre, 12]], 25, "Weapons", 2, 60, null, null, null, "Anvil", null, [["Training Matrix", {}], ["Missive", {Hafted: 0}], ["Quenching Fluid", {Hafted: 30}], ["Lesser Illustrious Insight", {AxesPicksAndPolearms: 25}]]));
+        const draconiumDirkRecipe = await(createRecipe("Draconium Dirk", draconiumDirk, 1, blacksmithing, [[primalFlux, 6], [draconiumOre, 6], [sereviteOre, 12]], 20, "Weapons", 2, 60, null, null, null, "Anvil", null, [["Training Matrix", {}], ["Missive", {Blades: 0}], ["Quenching Fluid", {Blades: 30}], ["Lesser Illustrious Insight", {ShortBlades: 25}]]));
+        const blackDragonTouchedHammerRecipe = await(createRecipe("Black Dragon Touched Hammer", blackDragonTouchedHammer, 1, blacksmithing, [[artisansMettle, 400], [earthenSoul, 1], [obsidianSearedAlloy, 7]], null, "Profession Tools and Accessories", 1, 450, null, null, "World Drop", "Earth-Warder's Forge", "Dropped from Rohzor Forgesmash in the Waking Shores.", [["Missive", {}], ["Quenching Fluid", {Hafted: 30, Toolsmithing: 30}], ["Illustrious Insight", {MacesAndHammers: 25, SpecialtySmithing: 40}]]));
+        const khazgoriteBlacksmithsHammerRecipe = await(createRecipe("Khaz'gorite Blacksmith's Hammer", khazgoriteBlacksmithsHammer, 1, blacksmithing, [[artisansMettle, 225], [primalFlux, 15], [khazgoriteOre, 40], [sereviteOre, 100]], null, "Profession Tools and Accessories", 1, 425, null, {MacesAndHammers: 10}, null, "Anvil", null, [["Missive", {}], ["Quenching Fluid", {Hafted: 30, Toolsmithing: 30}], ["Illustrious Insight", {MacesAndHammers: 25, SpecialtySmithing: 40}]]));
+        const khazgoriteBlacksmithsToolboxRecipe = await(createRecipe("Khaz'gorite Blacksmith's Toolbox", khazgoriteBlacksmithsToolbox, 1, blacksmithing, [[artisansMettle, 225], [primalFlux, 12], [khazgoriteOre, 40], [sereviteOre, 100]], null, "Profession Tools and Accessories", 1, 400, null, {Toolsmithing: 10}, null, "Anvil", null, [["Quenching Fluid", {Toolsmithing: 30}], ["Illustrious Insight", {SpecialtySmithing: 40}]]));
+        const khazgoriteLeatherworkersKnifeRecipe = await(createRecipe("Khaz'gorite Leatherworker's Knife", khazgoriteLeatherworkersKnife, 1, blacksmithing, [[artisansMettle, 225], [primalFlux, 15], [khazgoriteOre, 40], [sereviteOre, 100]], null, "Profession Tools and Accessories", 1, 425, {MaruukCentaur: 18}, null, null, "Anvil", null, [["Missive", {}], ["Quenching Fluid", {Blades: 30, Toolsmithing: 30}], ["Illustrious Insight", {ShortBlades: 25, SpecialtySmithing: 40}]]));
+        const khazgoriteLeatherworkersToolsetRecipe = await(createRecipe("Khaz'gorite Leatherworker's Toolset", khazgoriteLeatherworkersToolset, 1, blacksmithing, [[artisansMettle, 300], [primalFlux, 12], [khazgoriteOre, 40], [sereviteOre, 100]], null, "Profession Tools and Accessories", 1, 400, {ValdrakkenAccord: 19}, null, null, "Anvil", null, [["Quenching Fluid", {Toolsmithing: 30}], ["Illustrious Insight", {SpecialtySmithing: 40}]]));
+        const khazgoriteNeedleSetRecipe = await(createRecipe("Khaz'gorite Needle Set", khazgoriteNeedleSet, 1, blacksmithing, [[artisansMettle, 300], [primalFlux, 12], [khazgoriteOre, 35], [sereviteOre, 100]], null, "Profession Tools and Accessories", 1, 400, {ValdrakkenAccord: 19}, null, null, "Anvil", null, [["Quenching Fluid", {Toolsmithing: 30}], ["Illustrious Insight", {SpecialtySmithing: 40}]]));
+        const khazgoritePickaxeRecipe = await(createRecipe("Khaz'gorite Pickaxe", khazgoritePickaxe, 1, blacksmithing, [[artisansMettle, 300], [primalFlux, 15], [khazgoriteOre, 45], [sereviteOre, 100]], null, "Profession Tools and Accessories", 1, 425, null, {AxesPicksAndPolearms: 10}, null, "Anvil", null, [["Missive", {}], ["Quenching Fluid", {Hafted: 30, Toolsmithing: 30}], ["Illustrious Insight", {AxesPicksAndPolearms: 25, SpecialtySmithing: 40}]]));
+        const khazgoriteSickleRecipe = await(createRecipe("Khaz'gorite Sickle", khazgoriteSickle, 1, blacksmithing, [[artisansMettle, 300], [primalFlux, 15], [khazgoriteOre, 40], [sereviteOre, 100]], null, "Profession Tools and Accessories", 1, 425, {ValdrakkenAccord: 19}, null, null, "Anvil", null, [["Missive", {}], ["Quenching Fluid", {Blades: 30, Toolsmithing: 30}], ["Illustrious Insight", {LongBlades: 25, SpecialtySmithing: 40}]]));
+        const khazgoriteSkinningKnifeRecipe = await(createRecipe("Khaz'gorite Skinning Knife", khazgoriteSkinningKnife, 1, blacksmithing, [[artisansMettle, 300], [primalFlux, 15], [khazgoriteOre, 40], [sereviteOre, 100]], null, "Profession Tools and Accessories", 1, 425, {MaruukCentaur: 18}, null, null, "Anvil", null, [["Missive", {}], ["Quenching Fluid", {Blades: 30, Toolsmithing: 30}], ["Illustrious Insight", {ShortBlades: 25, SpecialtySmithing: 40}]]));
+        const draconiumNeedleSetRecipe = await(createRecipe("Draconium Needle Set", draconiumNeedleSet, 1, blacksmithing, [[primalFlux, 3], [draconiumOre, 4], [sereviteOre, 10]], 30, "Profession Tools and Accessories", 2, 80, null, null, null, "Anvil", null, [["Quenching Fluid", {Toolsmithing: 30}], ["Lesser Illustrious Insight", {SpecialtySmithing: 40}]]));
+        const draconiumLeatherworkersToolsetRecipe = await(createRecipe("Draconium Leatherworker's Toolset", draconiumLeatherworkersToolset, 1, blacksmithing, [[primalFlux, 3], [sereviteOre, 12], [draconiumOre, 3]], 25, "Profession Tools and Accessories", 3, 80, null, null, null, "Anvil", null, [["Quenching Fluid", {Toolsmithing: 30}], ["Lesser Illustrious Insight", {SpecialtySmithing: 40}]]));
+        const draconiumLeatherworkersKnifeRecipe = await(createRecipe("Draconium Leatherworker's Knife", draconiumLeatherworkersKnife, 1, blacksmithing, [[primalFlux, 4], [draconiumOre, 3], [sereviteOre, 12]], 20, "Profession Tools and Accessories", 3, 80, null, null, null, "Anvil", null, [["Missive", {}], ["Quenching Fluid", {Blades: 30, Toolsmithing: 30}], ["Lesser Illustrious Insight", {ShortBlades: 25, SpecialtySmithing: 40}]]));
+        const draconiumBlacksmithsToolboxRecipe = await(createRecipe("Draconium Blacksmith's Toolbox", draconiumBlacksmithsToolbox, 1, blacksmithing, [[primalFlux, 3], [sereviteOre, 12], [draconiumOre, 3]], 15, "Profession Tools and Accessories", 3, 80, null, null, null, "Anvil", null, [["Quenching Fluid", {Toolsmithing: 30}], ["Lesser Illustrious Insight", {SpecialtySmithing: 40}]]));
+        const draconiumSkinningKnifeRecipe = await(createRecipe("Draconium Skinning Knife", draconiumSkinningKnife, 1, blacksmithing, [[primalFlux, 4], [draconiumOre, 3], [sereviteOre, 10]], 15, "Profession Tools and Accessories", 3, 80, null, null, null, "Anvil", null, [["Missive", {}], ["Quenching Fluid", {Blades: 30, Toolsmithing: 30}], ["Lesser Illustrious Insight", {ShortBlades: 25, SpecialtySmithing: 40}]]));
+        const draconiumSickleRecipe = await(createRecipe("Draconium Sickle", draconiumSickle, 1, blacksmithing, [[primalFlux, 4], [draconiumOre, 2], [sereviteOre, 10]], 10, "Profession Tools and Accessories", 3, 80, null, null, null, "Anvil", null, [["Missive", {}], ["Quenching Fluid", {Blades: 30, Toolsmithing: 30}], ["Lesser Illustrious Insight", {LongBlades: 25, SpecialtySmithing: 40}]]));
+        const draconiumPickaxeRecipe = await(createRecipe("Draconium Pickaxe", draconiumPickaxe, 1, blacksmithing, [[primalFlux, 4], [draconiumOre, 2], [sereviteOre, 10]], 5, "Profession Tools and Accessories", 3, 80, null, null, null, "Anvil", null, [["Missive", {}], ["Quenching Fluid", {Hafted: 30, Toolsmithing: 30}], ["Lesser Illustrious Insight", {AxesPicksAndPolearms: 25, SpecialtySmithing: 40}]]));
+        const draconiumBlacksmithsHammerRecipe = await(createRecipe("Draconium Blacksmith's Hammer", draconiumBlacksmithsHammer, 1, blacksmithing, [[primalFlux, 4], [draconiumOre, 2], [sereviteOre, 10]], 1, "Profession Tools and Accessories", 3, 80, null, null, null, "Anvil", "Learned by default.", [["Missive", {}], ["Quenching Fluid", {Hafted: 30, Toolsmithing: 30}], ["Lesser Illustrious Insight", {MacesAndHammers: 25, SpecialtySmithing: 40}]]));
 
 
     // console.log('Data seeded successfully.'));
