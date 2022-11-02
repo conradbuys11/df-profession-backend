@@ -13,18 +13,19 @@ const externalURL = "postgres://conrad:NQTL5xEl88OV0pX33AJu1uFhO259JHWb@dpg-cda1
 app.use(parser.urlencoded({extended: true}))
 
 //MEAT & POTATOES
+
+//tables
 const Item = sequelize.define('item', {
     name: { type: DataTypes.STRING, allowNull: false },
     icon: { type: DataTypes.STRING }, //links to png?
     stacksTo: { type: DataTypes.INTEGER, defaultValue: 1 },
     price: { type: DataTypes.FLOAT },
     description: { type: DataTypes.STRING },
+    notes: { type: DataTypes.STRING },
     itemLevelMin: { type: DataTypes.INTEGER },
     itemLevelMax: { type: DataTypes.INTEGER },
     types: { type: DataTypes.JSONB },
-    bindOn: { type: DataTypes.STRING }, //should this be enum?
-    isUniqueEquipped: { type: DataTypes.BOOLEAN }
-    //has many Materials, FinishingReagents, Recipe(s)
+    //has many Materials, Recipe(s)
 },{
     underscored: true
 });
@@ -40,13 +41,15 @@ const Profession = sequelize.define('profession', {
 const Recipe = sequelize.define('recipe', {
     name: { type: DataTypes.STRING, allowNull: false },
     numberCrafted: { type: DataTypes.INTEGER, defaultValue: 1 },
-    requiredProfessionLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
+    requiredProfessionLevel: { type: DataTypes.INTEGER },
     category: { type: DataTypes.STRING },
     skillUpAmount: { type: DataTypes.INTEGER, defaultValue: 1 },
     difficulty: { type: DataTypes.INTEGER, defaultValue: 0 },
     requiredRenownLevel: { type: DataTypes.JSONB },
     requiredSpecializationLevel: { type: DataTypes.JSONB },
-    notes: { type: DataTypes.STRING }
+    specialAcquisitionMethod: { type: DataTypes.STRING },
+    notes: { type: DataTypes.STRING },
+    requiredLocation: { type: DataTypes.STRING }
     //has many Materials & FinishingReagents
     //belongs to Item & Profession
 },{
@@ -61,39 +64,45 @@ const Material = sequelize.define('material', {
 });
 
 const FinishingReagent = sequelize.define('finishingReagent', {
+    reagentType: { type: DataTypes.STRING },
     requiredSpecializationLevel: { type: DataTypes.JSONB }
-    //belongs to Recipe, Item
+    //belongs to Recipe
 },{
     underscored: true
 });
 
-const Specialization = sequelize.define('specialization', {
-    name: { type: DataTypes.STRING, allowNull: false },
-    description: { type: DataTypes.STRING },
-    totalPoints: { type: DataTypes.INTEGER, allowNull: false },
-    groupCrafts: { type: DataTypes.STRING },
-    eachPointGives: { type: DataTypes.STRING, defaultValue: "1 Skill" }
-    //has many Bonuses & Specializations
-    //belongs to Profession & Specialization
-},{
-    underscored: true
-});
 
-const Bonus = sequelize.define('bonus', {
-    level: { type: DataTypes.INTEGER, allowNull: false },
-    bonus: { type: DataTypes.STRING, allowNull: false }
-    //belongs to Specialization
-},{
-    underscored: true
-});
+// Specializations are too much work rn and is way better covered by wowhead, anyway.
+// Maybe later. Focusing on Items & Recipes rn.
+
+
+// const Specialization = sequelize.define('specialization', {
+//     name: { type: DataTypes.STRING, allowNull: false },
+//     description: { type: DataTypes.STRING },
+//     totalPoints: { type: DataTypes.INTEGER, allowNull: false },
+//     groupCrafts: { type: DataTypes.STRING },
+//     eachPointGives: { type: DataTypes.STRING, defaultValue: "1 Skill" }
+//     //has many Bonuses & Specializations
+//     //belongs to Profession & Specialization
+// },{
+//     underscored: true
+// });
+
+// const Bonus = sequelize.define('bonus', {
+//     level: { type: DataTypes.INTEGER, allowNull: false },
+//     bonus: { type: DataTypes.STRING, allowNull: false }
+//     //belongs to Specialization
+// },{
+//     underscored: true
+// });
 
 
 // setting up some ORM
 Profession.hasMany(Recipe);
 Recipe.belongsTo(Profession);
 
-Profession.hasMany(Specialization);
-Specialization.belongsTo(Profession);
+// Profession.hasMany(Specialization);
+// Specialization.belongsTo(Profession);
 
 Profession.hasMany(Item, {as: 'Tools', foreignKey: 'toolsId'});
 Profession.hasMany(Item, {as: 'FirstAccessory', foreignKey: 'firstAccessoryId'})
@@ -111,14 +120,22 @@ FinishingReagent.belongsTo(Recipe);
 Item.hasMany(Material);
 Material.belongsTo(Item);
 
-Item.hasMany(FinishingReagent);
-FinishingReagent.belongsTo(Item);
+// Specialization.hasMany(Bonus);
+// Bonus.belongsTo(Specialization);
 
-Specialization.hasMany(Bonus);
-Bonus.belongsTo(Specialization);
+// Specialization.hasMany(Specialization));
+// Specialization.belongsTo(Specialization));
 
-// Specialization.hasMany(Specialization);
-// Specialization.belongsTo(Specialization);
+//some helper methods
+// man i should really figure out async shenanigans more
+// async function getProfessionByName(name) {
+//     let profession = await(Profession.findOne({
+//         where: {
+//             name: name
+//         }
+//     }));
+//     return profession;
+// }
 
 //actual routing
 app.get("/", (req, res) => {
@@ -132,6 +149,48 @@ app.get("/items", async (req, res) => {
     res.send(items);
 })
 
+app.get("/professions/by_name/:professionName", async (req, res) => {
+    let profession = (await(Profession.findOne({
+        where: {
+            name: req.params.professionName
+        }
+    }))).toJSON();
+    res.send(profession);
+})
+
+app.get("/recipes/by_profession/:professionId", async (req, res) => {
+    //getting all recipes by profession
+    let recipes = (await(Recipe.findAll({
+        where: {
+            professionId: req.params.professionId
+        }
+    }))).map(recipe => recipe.toJSON());
+    res.send(recipes);
+});
+
+app.get("/recipes/by_profession_name/:professionName", async (req, res) => {
+    //first, gotta find profession by name
+    let profession = (await(Profession.findOne({
+        where: {
+            name: req.params.professionName
+        }
+    })));
+
+    //then, we get all recipes with that profession's id
+    let recipes = (await(Recipe.findAll({
+        where: {
+            professionId: profession.id
+        }
+    }))).map(recipe => recipe.toJSON());
+    res.send(recipes);
+});
+
+app.get("/recipes/:recipeId", async (req, res) => {
+    //getting all recipes, then mapping them to json
+    let recipe = (await(Recipe.findByPk(req.params.recipeId))).toJSON();
+    res.send(recipe);
+});
+
 app.get("/items/:itemId", async (req, res) => {
     //find by primary key, convert to json - :itemId gets inserted into req.params object
     try{
@@ -141,6 +200,7 @@ app.get("/items/:itemId", async (req, res) => {
         res.send(error);
     }
 })
+
 
 // app.get("items/names/:name", async (req, res) => {
 //     //find by name, convert to json
