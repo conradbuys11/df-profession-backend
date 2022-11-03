@@ -34,6 +34,7 @@ const Item = sequelize.define('item', {
     itemLevelMin: { type: DataTypes.INTEGER },
     itemLevelMax: { type: DataTypes.INTEGER },
     types: { type: DataTypes.JSONB },
+    quality: { type: DataTypes.STRING }
     //has many Materials, Recipe(s)
 },{
     underscored: true
@@ -139,18 +140,21 @@ const isNotNullAndUndefined = value => {
     return (value != undefined || value != null)
 }
 
+const makeIcon = fileName => {
+    return `https://wow.zamimg.com/images/wow/icons/large/${fileName}.jpg`;
+}
+
 async function createProfession(name, icon){
     let profession = Profession.build({name: name});
     if(isNotNullAndUndefined(icon)){
-        profession.icon = icon;
+        profession.icon = makeIcon(icon);
     }
     await profession.save();
     return profession;
 }
 
-async function createItem(name, stacksTo, itemLevelMin, itemLevelMax, description, notes, types, icon){
+async function createItem(name, stacksTo, itemLevelMin, itemLevelMax, description, notes, types, icon, quality){
     let item = Item.build({name: name});
-    let iconURL = "https://wow.zamimg.com/images/wow/icons/large/";
 
     if(isNotNullAndUndefined(stacksTo)){ item.stacksTo = stacksTo; }
     if(isNotNullAndUndefined(itemLevelMin)){ item.itemLevelMin = itemLevelMin; }
@@ -158,7 +162,8 @@ async function createItem(name, stacksTo, itemLevelMin, itemLevelMax, descriptio
     if(isNotNullAndUndefined(description)){ item.description = description; }
     if(isNotNullAndUndefined(notes)){ item.notes = notes; }
     if(isNotNullAndUndefined(types)){ item.types = types; }
-    if(isNotNullAndUndefined(icon)){ item.icon = iconURL + icon + ".jpg"; }
+    if(isNotNullAndUndefined(icon)){ item.icon = makeIcon(icon); }
+    if(isNotNullAndUndefined(quality)){ item.quality = quality; }
     await item.save();
     return item;
 }
@@ -179,7 +184,7 @@ async function createRecipe(name, itemMade, numberCrafted, profession, materials
         if(isNotNullAndUndefined(requiredLocation)){ recipe.requiredLocation = requiredLocation; }
         if(isNotNullAndUndefined(notes)){ recipe.notes = notes; }
         await recipe.save();
-        console.log(`${recipe.name}'s ID: ${recipe.id}`);
+        // console.log(`${recipe.name}'s ID: ${recipe.id}`);
 
         //for materials, write as so:
         /*
@@ -248,20 +253,20 @@ const makeTables = async () => {
 
         // const vendor = await(createProfession('Vendor'));
         // const worldDropAndGathering = await(createProfession('World Drop & Gathering'));
-        const tailoring = await(createProfession('Tailoring'));
-        const enchanting = await(createProfession('Enchanting'));
-        const engineering = await(createProfession('Engineering'));
-        const alchemy = await(createProfession('Alchemy'));
-        const inscription = await(createProfession('Inscription'));
-        const jewelcrafting = await(createProfession('Jewelcrafting'));
-        const blacksmithing = await(createProfession('Blacksmithing'));
-        const leatherworking = await(createProfession('Leatherworking'));
-        const herbalism = await(createProfession('Herbalism'));
-        const mining = await(createProfession('Mining'));
-        const skinning = await(createProfession('Skinning'));
-        const cooking = await(createProfession('Cooking'));
-        const fishing = await(createProfession('Fishing'));
-        const archaeology = await(createProfession('Archaeology'));
+        const tailoring = await(createProfession('Tailoring', 'ui_profession_tailoring'));
+        const enchanting = await(createProfession('Enchanting', 'ui_profession_enchanting'));
+        const engineering = await(createProfession('Engineering', 'ui_profession_engineering'));
+        const alchemy = await(createProfession('Alchemy', 'ui_profession_alchemy'));
+        const inscription = await(createProfession('Inscription', 'ui_profession_inscription'));
+        const jewelcrafting = await(createProfession('Jewelcrafting', 'ui_profession_jewelcrafting'));
+        const blacksmithing = await(createProfession('Blacksmithing', 'ui_profession_blacksmithing'));
+        const leatherworking = await(createProfession('Leatherworking', 'ui_profession_leatherworking'));
+        const herbalism = await(createProfession('Herbalism', 'ui_profession_herbalism'));
+        const mining = await(createProfession('Mining', 'ui_profession_mining'));
+        const skinning = await(createProfession('Skinning', 'ui_profession_skinning'));
+        const cooking = await(createProfession('Cooking', 'ui_profession_cooking'));
+        const fishing = await(createProfession('Fishing', 'ui_profession_fishing'));
+        const archaeology = await(createProfession('Archaeology', 'ui_profession_archaeology'));
 
 
 
@@ -270,39 +275,39 @@ const makeTables = async () => {
     //
 
         //vendor items
-        const primalFlux = await(createItem("Primal Flux", 1000, null, null, "Used for removing impurities from metal. Sold by Blacksmithing vendors.", "Blacksmithing Reagent, bought from vendors.", {otherType: "craftingReagent"}, "inv_herbalism_70_starlightrosedust"));
-        const smudgedLens = await(createItem("Smudged Lens", 1000, null, null, null, "Reagent for Engineering goggles, bought from vendors."));
-        const enchantingVellum = await(createItem("Enchanting Vellum", 1000, null, null, null, "Makes enchantments tradeable, bought from vendors."));
-        const glitteringParchment = await(createItem("Glittering Parchment", 1000, null, null, null, "Inscription Reagent, bought from vendors."));
-        const iridescentWater = await(createItem("Iridescent Water", 1000, null, null, null, "Inscription Reagent used to make inks, bought from vendors."));
-        const misshapedFiligree = await(createItem("Misshaped Filigree", 1000, null, null, null, "Jewelcrafting Reagent, bought from vendors."));
-        const draconicStopper = await(createItem("Draconic Stopper", 1000, null, null, null, "Reagent used for making Draconic Vials w/ Jewelcrafting. Bought from vendors."));
-        const sereviteRod = await(createItem("Serevite Rod", 1));
+        const primalFlux = await(createItem("Primal Flux", 1000, null, null, "Used for removing impurities from metal. Sold by Blacksmithing vendors.", "Blacksmithing Reagent, bought from vendors.", {otherType: "Crafting Reagent"}, "inv_herbalism_70_starlightrosedust", "Common"));
+        const smudgedLens = await(createItem("Smudged Lens", 1000, null, null, "A misshapen piece of glass that is sufficient for use in the creation of goggles, assuming clear vision isn't a necessity. Can be purchased from Engineering suppliers across the Dragon Isles.", "Reagent for Engineering goggles, bought from vendors.", {otherType: "Crafting Reagent"}, "inv_misc_orb_yellow", "Common"));
+        const enchantingVellum = await(createItem("Enchanting Vellum", 1000, null, null, "Enchanters can use vellum in place of a weapon or armor to store an enchantment for later use.", "Makes enchantments tradeable, bought from vendors.", null, "inv_inscription_armorscroll01", "Common"));
+        const glitteringParchment = await(createItem("Glittering Parchment", 1000, null, null, "A sparkling parchment frequently used by Scribes. Can be purchased from vendors.", "Inscription Reagent, bought from vendors.", {otherType: "Crafting Reagent"}, "inv_inscription_parchmentvar06", "Common"));
+        const iridescentWater = await(createItem("Iridescent Water", 1000, null, null, "A light and bubbly liquid frequently used by Scribes. Can be purchased from vendors.", "Inscription Reagent used to make inks, bought from vendors.", {otherType: "Crafting Reagent"}, "shaman_pvp_ripplingwaters", "Common"));
+        const misshapenFiligree = await(createItem("Misshapen Filigree", 1000, null, null, "Purchased from Jewelcrafting vendors across the Dragon Isles. Can be bought and sold on the auction house.", "Jewelcrafting Reagent, bought from vendors.", {otherType: "Crafting Reagent"}, "inv_misc_primitive_ring29", "Common"));
+        const draconicStopper = await(createItem("Draconic Stopper", 1000, null, null, null, "Reagent used for making Draconic Vials w/ Jewelcrafting. Bought from vendors.", {otherType: "Crafting Reagent"}, "trade_archaeology_vrykul_runestick", "Common"));
+        const sereviteRod = await(createItem("Serevite Rod", 1, null, null, "Needed by an Enchanter to make a runed enchanting rod.", "A reagent for the most basic Enchanting tool.", {otherType: "Crafting Reagent"}, "inv_rod_platinum", "Common"));
 
         //dropped items
-        const sparkOfIngenuity = await(createItem("Spark of Ingenuity", 1000, null, null, null, "Made with the Engine of Innovation in Valdrakken. More info later."));
-        const artisansMettle = await(createItem("Artisans Mettle", 1000, null, null, null, "Received for first crafts, profession daily quests, and some other sources. Can be used to buy recipes from the Artisan's Consortium, make Illustrious Insight, or make higher level Profession Equipment."));
-        const primalChaos = await(createItem("Primal Chaos", 1000, null, null, null, "Reagent received from... dungeon & raid bosses? More info later."));
-        const rousingAir = await(createItem("Rousing Air", 1000, null, null, null, "Received mostly from air elementals. Lesser reagent. 10 Rousing can combine into 1 Awakened."));
-        const rousingEarth = await(createItem("Rousing Earth", 1000, null, null, null, "Received mostly from earth elementals. Lesser reagent. 10 Rousing can combine into 1 Awakened."));
-        const rousingFire = await(createItem("Rousing Fire", 1000, null, null, null, "Received mostly from fire elementals. Lesser reagent. 10 Rousing can combine into 1 Awakened."));
-        const rousingFrost = await(createItem("Rousing Frost", 1000, null, null, null, "Received mostly from ice elementals. Lesser reagent. 10 Rousing can combine into 1 Awakened."));
-        const rousingIre = await(createItem("Rousing Ire", 1000, null, null, null, "Received from pvp kills? I think? Lesser reagent. 10 Rousing can combine into 1 Awakened."));
-        const rousingDecay = await(createItem("Rousing Decay", 1000, null, null, null, "Received mostly from decayed mobs. Lesser reagent. 10 Rousing can combine into 1 Awakened."));
-        const rousingOrder = await(createItem("Rousing Order", 1000, null, null, null, "Received mostly from titan-touched gathering nodes. Lesser reagent. 10 Rousing can combine into 1 Awakened."));
-        const awakenedAir = await(createItem("Awakened Air", 1000, null, null, null, "Received mostly from air elementals. Greater reagent. 1 Awakened can split into 10 Rousing."));
-        const awakenedEarth = await(createItem("Awakened Earth", 1000, null, null, null, "Received mostly from earth elementals. Greater reagent. 1 Awakened can split into 10 Rousing."));
-        const awakenedFire = await(createItem("Awakened Fire", 1000, null, null, null, "Received mostly from fire elementals. Greater reagent. 1 Awakened can split into 10 Rousing."));
-        const awakenedFrost = await(createItem("Awakened Frost", 1000, null, null, null, "Received mostly from ice elementals. Greater reagent. 1 Awakened can split into 10 Rousing."));
-        const awakenedIre = await(createItem("Awakened Ire", 1000, null, null, null, "Received from pvp kills? I think? Greater reagent. 1 Awakened can split into 10 Rousing."));
-        const awakenedDecay = await(createItem("Awakened Decay", 1000, null, null, null, "Received mostly from decayed mobs. Greater reagent. 1 Awakened can split into 10 Rousing."));
-        const awakenedOrder = await(createItem("Awakened Order", 1000, null, null, null, "Received mostly from titan-touched gathering nodes. Greater reagent. 1 Awakened can split into 10 Rousing."));
-        const airySoul = await(createItem("Airy Soul", 1000, null, null, null, "Received from using a Zapthrottle Soul Inhaler (Engineering) & Empty Soul Cage (Jewelcrafting) on an air elemental."));
-        const fierySoul = await(createItem("Fiery Soul", 1000, null, null, null, "Received from using a Zapthrottle Soul Inhaler (Engineering) & Empty Soul Cage (Jewelcrafting) on a fire elemental."));
-        const frostySoul = await(createItem("Frosty Soul", 1000, null, null, null, "Received from using a Zapthrottle Soul Inhaler (Engineering) & Empty Soul Cage (Jewelcrafting) on an ice elemental."));
-        const earthenSoul = await(createItem("Earthen Soul", 1000, null, null, null, "Received from using a Zapthrottle Soul Inhaler (Engineering) & Empty Soul Cage (Jewelcrafting) on an earth elemental."));
-        const centaursTrophyNecklace = await(createItem("Centaur's Trophy Necklace", 1000, null, null, null, "Received from Centaur Wild Hunts?"));
-        const titanTrainingMatrixOne = await(createItem("Titan Training Matrix I", 200, null, null, null, "Sets ilvl of crafted piece to 333-343, binds on pickup, and requires Level 64."));
+        const sparkOfIngenuity = await(createItem("Spark of Ingenuity", 1000, null, null, "Created by the Engine of Innovation in Valdrakken, this unique crafting material can help an item achieve expertise beyond that of mortal ability.", "Made with the Engine of Innovation in Valdrakken. More info later.", {otherType: "Crafting Reagent"}, "inv_10_misc_titansspark_color1", "Epic"));
+        const artisansMettle = await(createItem("Artisans Mettle", 1000, null, null, "A mystery of the Dragon Isles, this reagent coalesces each time you gain more profession Knowledge. It has myriad uses, including for recrafting Dragon Isles crafted equipment.", "Received for first crafts, profession daily quests, and some other sources. Can be used to buy recipes from the Artisan's Consortium, make Illustrious Insight, or make higher level Profession Equipment.", {otherType: "Crafting Reagent"}, "inv_10_gearcraft_artisansmettle_color4", "Rare"));
+        const primalChaos = await(createItem("Primal Chaos", 1000, null, null, "Formed from untamed elements attracted by the mightiest inhabitants of the Dragon Isles, it is essential for crafting powerful items and equipment.", "Reagent received from... dungeon & raid bosses? More info later.", {otherType: "Crafting Reagent"}, "inv_10_gearcraft_primalchaos_color1", "Epic"));
+        const rousingAir = await(createItem("Rousing Air", 1000, null, null, null, "Received mostly from air elementals. Lesser reagent. 10 Rousing can combine into 1 Awakened.", {otherType: "Crafting Reagent", onUse: "Turn ten Rousing Air into Awakened Air."}, "inv_10_elementalshardfoozles_air", "Rare"));
+        const rousingEarth = await(createItem("Rousing Earth", 1000, null, null, null, "Received mostly from earth elementals. Lesser reagent. 10 Rousing can combine into 1 Awakened.", {otherType: "Crafting Reagent", onUse: "Turn ten Rousing Earth into Awakened Earth."}, "inv_10_elementalshardfoozles_earth", "Rare"));
+        const rousingFire = await(createItem("Rousing Fire", 1000, null, null, null, "Received mostly from fire elementals. Lesser reagent. 10 Rousing can combine into 1 Awakened.", {otherType: "Crafting Reagent", onUse: "Turn ten Rousing Fire into Awakened Fire."}, "inv_10_elementalshardfoozles_fire", "Rare"));
+        const rousingFrost = await(createItem("Rousing Frost", 1000, null, null, null, "Received mostly from ice elementals. Lesser reagent. 10 Rousing can combine into 1 Awakened.", {otherType: "Crafting Reagent", onUse: "Turn ten Rousing Frost into Awakened Frost."}, "inv_10_elementalshardfoozles_frost", "Rare"));
+        const rousingIre = await(createItem("Rousing Ire", 1000, null, null, "Gathered from various sources throughout the Dragon Isles while engaging in War Mode or from participating in instanced PvP.", "Received from pvp kills? I think? Lesser reagent. 10 Rousing can combine into 1 Awakened.", {otherType: "Crafting Reagent", onUse: "Turn ten Rousing Ire into Awakened Ire."}, "inv_10_elementalshardfoozles_blood", "Rare"));
+        const rousingDecay = await(createItem("Rousing Decay", 1000, null, null, null, "Received mostly from decayed mobs. Lesser reagent. 10 Rousing can combine into 1 Awakened.", {otherType: "Crafting Reagent", onUse: "Turn ten Rousing Decay into Awakened Decay."}, "inv_10_elementalshardfoozles_decay", "Rare"));
+        const rousingOrder = await(createItem("Rousing Order", 1000, null, null, null, "Received mostly from titan-touched gathering nodes. Lesser reagent. 10 Rousing can combine into 1 Awakened.", {otherType: "Crafting Reagent", onUse: "Turn ten Rousing Order into Awakened Order."}, "inv_10_elementalshardfoozles_titan", "Rare"));
+        const awakenedAir = await(createItem("Awakened Air", 1000, null, null, null, "Received mostly from air elementals. Greater reagent. 1 Awakened can split into 10 Rousing.", {otherType: "Crafting Reagent", onUse: "Turn Awakened Air into ten Rousing Air."}, "inv_10_elementalcombinedfoozles_air", "Rare"));
+        const awakenedEarth = await(createItem("Awakened Earth", 1000, null, null, null, "Received mostly from earth elementals. Greater reagent. 1 Awakened can split into 10 Rousing.", {otherType: "Crafting Reagent", onUse: "Turn Awakened Earth into ten Rousing Earth."}, "inv_10_elementalcombinedfoozles_earth", "Rare"));
+        const awakenedFire = await(createItem("Awakened Fire", 1000, null, null, null, "Received mostly from fire elementals. Greater reagent. 1 Awakened can split into 10 Rousing.", {otherType: "Crafting Reagent", onUse: "Turn Awakened Fire into ten Rousing Fire."}, "inv_10_elementalcombinedfoozles_fire", "Rare"));
+        const awakenedFrost = await(createItem("Awakened Frost", 1000, null, null, null, "Received mostly from ice elementals. Greater reagent. 1 Awakened can split into 10 Rousing.", {otherType: "Crafting Reagent", onUse: "Turn Awakened Frost into ten Rousing Frost."}, "inv_10_elementalcombinedfoozles_frost", "Rare"));
+        const awakenedIre = await(createItem("Awakened Ire", 1000, null, null, "Gathered from various sources throughout the Dragon Isles while engaging in War Mode or from participating in instanced PvP.", "Received from pvp kills? I think? Greater reagent. 1 Awakened can split into 10 Rousing.", {otherType: "Crafting Reagent", onUse: "Turn Awakened Ire into ten Rousing Ire."}, "inv_10_elementalcombinedfoozles_blood", "Rare"));
+        const awakenedDecay = await(createItem("Awakened Decay", 1000, null, null, null, "Received mostly from decayed mobs. Greater reagent. 1 Awakened can split into 10 Rousing.", {otherType: "Crafting Reagent", onUse: "Turn Awakened Decay into ten Rousing Decay."}, "inv_10_elementalcombinedfoozles_decay", "Rare"));
+        const awakenedOrder = await(createItem("Awakened Order", 1000, null, null, null, "Received mostly from titan-touched gathering nodes. Greater reagent. 1 Awakened can split into 10 Rousing.", {otherType: "Crafting Reagent", onUse: "Turn Awakened Order into ten Rousing Order."}, "inv_10_elementalcombinedfoozles_titan", "Rare"));
+        const airySoul = await(createItem("Airy Soul", 1000, null, null, "A wispy soul captured from a powerful elemental foe with a Zapthrottle Soul Inhaler, crafted by Engineers.", "Received from using a Zapthrottle Soul Inhaler (Engineering) & Empty Soul Cage (Jewelcrafting) on an air elemental.", {otherType: "Crafting Reagent", bindOn: "pickup"}, "inv_elementalspiritfoozles_air", "Rare"));
+        const fierySoul = await(createItem("Fiery Soul", 1000, null, null, "A smoldering soul captured from a powerful elemental foe with a Zapthrottle Soul Inhaler, crafted by Engineers.", "Received from using a Zapthrottle Soul Inhaler (Engineering) & Empty Soul Cage (Jewelcrafting) on a fire elemental.", {otherType: "Crafting Reagent", bindOn: "pickup"}, "inv_elementalspiritfoozles_fire", "Rare"));
+        const frostySoul = await(createItem("Frosty Soul", 1000, null, null, "A glacial soul captured from a powerful elemental foe with a Zapthrottle Soul Inhaler, crafted by Engineers.", "Received from using a Zapthrottle Soul Inhaler (Engineering) & Empty Soul Cage (Jewelcrafting) on an ice elemental.", {otherType: "Crafting Reagent", bindOn: "pickup"}, "inv_elementalspiritfoozles_frost", "Rare"));
+        const earthenSoul = await(createItem("Earthen Soul", 1000, null, null, "A terraceous soul captured from a powerful elemental foe with a Zapthrottle Soul Inhaler, crafted by Engineers.", "Received from using a Zapthrottle Soul Inhaler (Engineering) & Empty Soul Cage (Jewelcrafting) on an earth elemental.", {otherType: "Crafting Reagent", bindOn: "pickup"}, "inv_elementalspiritfoozles_earth", "Rare"));
+        const centaursTrophyNecklace = await(createItem("Centaur's Trophy Necklace", 1000, null, null, "A decorative necklace to show one's prowess while hunting as a group. Received rarely when participating in Centaur Hunts.", "Received from Centaur Wild Hunts?", {otherType: "Crafting Reagent", bindOn: "pickup"}, "inv_misc_necklace_feather10", "Rare"));
+        const titanTrainingMatrixOne = await(createItem("Titan Training Matrix I", 200, null, null, "Unfortunately, nobody can be told what the Titan Matrix is. You have to see it for yourself.", "Sets ilvl of crafted piece to 333-343, binds on pickup, and requires Level 64.", {otherType: "Optional Crafting Reagent", bindOn: "pickup", effect: "Set Item Level based on Crafting Quality (333 - 343), add Soulbound and Required Level 64."}, "achievement_dungeon_ulduar77_10man", "Rare"));
         const titanTrainingMatrixTwo = await(createItem("Titan Training Matrix II", 200, null, null, null, "Sets ilvl of crafted piece to 346-356, binds on pickup, and requires Level 70."));
         const titanTrainingMatrixThree = await(createItem("Titan Training Matrix III", 200, null, null, null, "Sets ilvl of crafted piece to 359-369, binds on pickup, and requires Level 70."));
         const titanTrainingMatrixFour = await(createItem("Titan Training Matrix IV", 200, null, null, null, "Sets ilvl of crafted piece to 372-382, binds on pickup, and requires level 70."));
