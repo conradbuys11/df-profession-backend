@@ -1,7 +1,7 @@
 //PACKAGES
 const express = require('express')
-const parser = require('body-parser')
-const {Sequelize,DataTypes} = require('sequelize')
+const cors = require('cors')
+const {Sequelize,DataTypes,Op} = require('sequelize')
 const sequelize = new Sequelize('postgres://conrad:password@localhost:5432/df_professions')
 const app = express()
 const port = 3001;
@@ -10,7 +10,9 @@ const internalURL = "postgres://conrad:NQTL5xEl88OV0pX33AJu1uFhO259JHWb@dpg-cda1
 const externalURL = "postgres://conrad:NQTL5xEl88OV0pX33AJu1uFhO259JHWb@dpg-cda17c2rrk09hiorhi10-a.oregon-postgres.render.com/df_professions"
 
 //SETTING UP APP
-app.use(parser.urlencoded({extended: true}))
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({extended: true}))
 
 //MEAT & POTATOES
 
@@ -25,6 +27,7 @@ const Item = sequelize.define('item', {
     itemLevelMin: { type: DataTypes.INTEGER },
     itemLevelMax: { type: DataTypes.INTEGER },
     types: { type: DataTypes.JSONB },
+    quality: { type: DataTypes.STRING }
     //has many Materials, Recipe(s)
 },{
     underscored: true
@@ -40,7 +43,7 @@ const Profession = sequelize.define('profession', {
 
 const Recipe = sequelize.define('recipe', {
     name: { type: DataTypes.STRING, allowNull: false },
-    numberCrafted: { type: DataTypes.INTEGER, defaultValue: 1 },
+    numberCrafted: { type: DataTypes.STRING, defaultValue: "1" },
     requiredProfessionLevel: { type: DataTypes.INTEGER },
     category: { type: DataTypes.STRING },
     skillUpAmount: { type: DataTypes.INTEGER, defaultValue: 1 },
@@ -168,6 +171,38 @@ app.get("/recipes/by_profession/:professionId", async (req, res) => {
     res.send(recipes);
 });
 
+app.get("/recipes/by_profession/:professionId/only_trainer_recipes", async (req, res) => {
+    //like above, but only getting only the trainer recipes (ie, where the required level is not null)
+    //also going to sort by the number!
+    //we also need to know the actual items included in our material list, so we need to do a few things
+    //first, eagerly fetch the Materials associated with the recipe
+    //then, eagerly fetch the Item asssociated with each Material
+    //next, fetch the Finishing Reagents associated
+    //finally, we're going to be fetching the item associated with this Recipe to get its icon, i guess? there's probably a way to simplify that
+
+    let recipes = (await(Recipe.findAll({
+        where: {
+            professionId: req.params.professionId,
+            requiredProfessionLevel: {
+                [Op.not]: null
+            }
+        },
+        order: [
+            ['requiredProfessionLevel', 'ASC'],
+            ['name', 'ASC']
+        ],
+        include: [
+            {
+                model: Material,
+                include: Item
+            },
+            FinishingReagent,
+            Item
+        ]
+    }))).map(recipe => recipe.toJSON());
+    res.send(recipes);
+});
+
 app.get("/recipes/by_profession_name/:professionName", async (req, res) => {
     //first, gotta find profession by name
     let profession = (await(Profession.findOne({
@@ -190,6 +225,15 @@ app.get("/recipes/:recipeId", async (req, res) => {
     let recipe = (await(Recipe.findByPk(req.params.recipeId))).toJSON();
     res.send(recipe);
 });
+
+// app.get("/materials/by_recipe/:recipeId", async (req, res) => {
+//     //getting all materials
+//     let materials = (await(Material.findAll({
+//         where: {
+//             recipeId: req.params.recipeId
+//         }
+//     })))
+// });
 
 app.get("/items/:itemId", async (req, res) => {
     //find by primary key, convert to json - :itemId gets inserted into req.params object

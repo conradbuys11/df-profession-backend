@@ -174,7 +174,7 @@ async function createRecipe(name, itemMade, numberCrafted, profession, materials
 
         if(isNotNullAndUndefined(name)){ recipe.name = name; } else { recipe.name = itemMade.name; } //item already has the name, right? easy
         if(isNotNullAndUndefined(numberCrafted)){ recipe.numberCrafted = numberCrafted.toString(); }
-        if(isNotNullAndUndefined(requiredProfLevel)){ recipe.requiredProfLevel = requiredProfLevel; }
+        if(isNotNullAndUndefined(requiredProfLevel)){ recipe.requiredProfessionLevel = requiredProfLevel; }
         if(isNotNullAndUndefined(category)){ recipe.category = category; }
         if(isNotNullAndUndefined(skillUpAmount)){ recipe.skillUpAmount = skillUpAmount; }
         if(isNotNullAndUndefined(difficulty)){ recipe.difficulty = difficulty; }
