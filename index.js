@@ -191,6 +191,108 @@ app.get("/recipes/by_profession/:professionId/only_trainer_recipes", async (req,
             ['requiredProfessionLevel', 'ASC'],
             ['name', 'ASC']
         ],
+        attributes: ['id', 'requiredSpecializationLevel', 'name', 'category'],
+        include: [{
+                model: Material,
+                include: [{
+                    model: Item,
+                    attributes: ["name", "icon"]
+                }]
+            },
+            FinishingReagent,
+            {
+                model: Item,
+                attributes: ['icon']
+            }
+        ]
+    }))).map(recipe => recipe.toJSON());
+    res.send(recipes);
+});
+
+app.get("/recipes/by_profession/:professionId/only_renown_recipes", async (req, res) => {
+    //same as above, but only renown recipes now!
+    let recipes = (await(Recipe.findAll({
+        where: {
+            professionId: req.params.professionId,
+            requiredRenownLevel: {
+                [Op.not]: null
+            }
+        },
+        order: [
+            ['requiredRenownLevel', 'ASC'],
+            ['name', 'ASC']
+        ],
+        attributes: ['id', 'requiredRenownLevel', 'name', 'category'],
+        include: [{
+                model: Material,
+                include: [{
+                    model: Item,
+                    attributes: ["name", "icon"]
+                }]
+            },
+            FinishingReagent,
+            {
+                model: Item,
+                attributes: ['icon']
+            }
+        ]
+    }))).map(recipe => recipe.toJSON());
+    res.send(recipes);
+});
+
+app.get("/recipes/by_profession/:professionId/only_specialization_recipes", async (req, res) => {
+    //same as above, but only specialization recipes now!
+    //to keep in mind: some recipes have a specialization level requirement, but are actually "other" recipes
+    //so we need to check that both specialization is not null, and other is null!
+    let recipes = (await(Recipe.findAll({
+        where: {
+            professionId: req.params.professionId,
+            requiredSpecializationLevel: {
+                [Op.not]: null
+            },
+            specialAcquisitionMethod: {
+                [Op.is]: null
+            }
+        },
+        order: [
+            ['requiredSpecializationLevel', 'ASC'],
+            ['name', 'ASC']
+        ],
+        attributes: ['id', 'requiredSpecializationLevel', 'name', 'category'],
+        include: [{
+                model: Material,
+                include: [{
+                    model: Item,
+                    attributes: ["name", "icon"]
+                }]
+            },
+            FinishingReagent,
+            {
+                model: Item,
+                attributes: ['icon']
+            }
+        ]
+    }))).map(recipe => recipe.toJSON());
+    res.send(recipes);
+});
+
+app.get("/recipes/by_profession/:professionId/only_other_recipes", async (req, res) => {
+    //same as above, but only recipes from other sources!
+    //some of these recipes have both required specialization level && special acquisition method
+    //tbh, front end is gonna take care of that sorting. we're good to just do a normal search
+    //we do include requiredSpecializationLevel in our attributes, though
+    let recipes = (await(Recipe.findAll({
+        where: {
+            professionId: req.params.professionId,
+            specialAcquisitionMethod: {
+                [Op.not]: null
+            }
+        },
+        order: [
+            ['specialAcquisitionMethod', 'ASC'],
+            ['name', 'ASC']
+        ],
+        attributes: ['id', 'specialAcquisitionMethod', 'requiredSpecializationLevel', 'name', 'category'],
         include: [{
                 model: Material,
                 include: [{
