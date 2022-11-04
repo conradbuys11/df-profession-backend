@@ -176,9 +176,9 @@ app.get("/recipes/by_profession/:professionId/only_trainer_recipes", async (req,
     //also going to sort by the number!
     //we also need to know the actual items included in our material list, so we need to do a few things
     //first, eagerly fetch the Materials associated with the recipe
-    //then, eagerly fetch the Item asssociated with each Material
+    //then, eagerly fetch the Item asssociated with each Material (though we're only getting name & icon)
     //next, fetch the Finishing Reagents associated
-    //finally, we're going to be fetching the item associated with this Recipe to get its icon, i guess? there's probably a way to simplify that
+    //finally, we're going to be fetching the item icon associated with this recipe
 
     let recipes = (await(Recipe.findAll({
         where: {
@@ -191,13 +191,18 @@ app.get("/recipes/by_profession/:professionId/only_trainer_recipes", async (req,
             ['requiredProfessionLevel', 'ASC'],
             ['name', 'ASC']
         ],
-        include: [
-            {
+        include: [{
                 model: Material,
-                include: Item
+                include: [{
+                    model: Item,
+                    attributes: ["name", "icon"]
+                }]
             },
             FinishingReagent,
-            Item
+            {
+                model: Item,
+                attributes: ['icon']
+            }
         ]
     }))).map(recipe => recipe.toJSON());
     res.send(recipes);
@@ -208,7 +213,9 @@ app.get("/recipes/by_profession_name/:professionName", async (req, res) => {
     let profession = (await(Profession.findOne({
         where: {
             name: req.params.professionName
-        }
+        },
+        //only getting the id, extra info is extraneous
+        attributes: [id]
     })));
 
     //then, we get all recipes with that profession's id
