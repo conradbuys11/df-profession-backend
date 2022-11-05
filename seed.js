@@ -1872,12 +1872,12 @@ const makeTables = async () => {
         const dragonscaleExpeditionsExpeditionTentRecipe = await(createRecipe(null, dragonscaleExpeditionsExpeditionTent, 1, tailoring, [[tallstriderSinew, 4], [spoolOfWilderthread, 20], [vibrantWilderclothBolt, 40]], null, "Assorted Embroidery", 1, null, {DragonscaleExpedition: 17}, null, null, "Tailor's Work Table", null, [["Embroidery Thread", {Embroidery: 30}]]));
         const coldCushionRecipe = await(createRecipe(null, coldCushion, 1, tailoring, [[contouredFowlfeather, 25], [iridescentPlume, 5], [spoolOfWilderthread, 5], [azureweaveBolt, 1]], null, "Assorted Embroidery", 1, null, {DragonscaleExpedition: 17}, null, null, "Tailor's Work Table", null, [["Embroidery Thread", {Embroidery: 30}]]));
         const cushionOfTimeTravelRecipe = await(createRecipe(null, cushionOfTimeTravel, 1, tailoring, [[contouredFowlfeather, 25], [iridescentPlume, 5], [spoolOfWilderthread, 5], [chronoclothBolt, 1]], null, "Assorted Embroidery", 1, null, {DragonscaleExpedition: 28}, null, null, "Tailor's Work Table", null, [["Embroidery Thread", {Embroidery: 30}]]));
-        const marketTentRecipe = await(createRecipe(null, marketTent, 1, tailoring, [[spoolOfWilderthread, 20], [wilderclothBolt, 50]], null, "Assorted Embroidery", 1, {Outerwear: 25}, null, null, null, "Tailor's Work Table", null, [["Embroidery Thread", {Embroidery: 30}]]));
+        const marketTentRecipe = await(createRecipe(null, marketTent, 1, tailoring, [[spoolOfWilderthread, 20], [wilderclothBolt, 50]], null, "Assorted Embroidery", 1, null, {Outerwear: 25}, null, null, "Tailor's Work Table", null, [["Embroidery Thread", {Embroidery: 30}]]));
         const wilderclothBandageRecipe = await(createRecipe(null, wilderclothBandage, 1, tailoring, [[wildercloth, 2]], 1, "Assorted Embroidery", 1, 40));
 
 
 
-        //cooking recipes - # total
+        //cooking recipes - 41 total
         const ooeyGooeyChocolateRecipe = await(createRecipe(null, ooeyGooeyChocolate, 1, cooking, [[convenientlyPackagedIngredients, 3], [thaldraszianCocoaPowder, 6], [pastryPackets, 4]], null, "Ingredients", 1, null, {ArtisansConsortium: "Esteemed"}, null, null, "Cooking Fire"));
         const impossiblySharpCuttingKnifeRecipe = await(createRecipe(null, impossiblySharpCuttingKnife, 2, cooking, [[saltDeposit, 2], [sereviteOre, 2]], null, "Ingredients", 1, null, {IskaaraTuskarr: 15}, null, null, "Anvil"));
         const saladOnTheSideRecipe = await(createRecipe(null, saladOnTheSide, 2, cooking, [[lavaBeetle, 2], [hochenblume, 1], [saxifrage, 1]], null, "Ingredients", 1, null, {DragonscaleExpedition: 13}, null, null, "Anvil"));
