@@ -191,7 +191,7 @@ app.get("/recipes/by_profession/:professionId/only_trainer_recipes", async (req,
             ['requiredProfessionLevel', 'ASC'],
             ['name', 'ASC']
         ],
-        attributes: ['id', 'requiredSpecializationLevel', 'name', 'category'],
+        attributes: ['id', 'requiredProfessionLevel', 'name', 'category'],
         include: [{
                 model: Material,
                 include: [{
