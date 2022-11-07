@@ -1,23 +1,26 @@
 //PACKAGES
-const express = require('express')
-const cors = require('cors')
-const {Sequelize,DataTypes,Op} = require('sequelize')
-const sequelize = new Sequelize('postgres://conrad:password@localhost:5432/df_professions')
-const app = express()
-const port = 3001;
-//const port = process.env.PORT || 3001;
-const internalURL = "postgres://conrad:NQTL5xEl88OV0pX33AJu1uFhO259JHWb@dpg-cda17c2rrk09hiorhi10-a/df_professions"
-const externalURL = "postgres://conrad:NQTL5xEl88OV0pX33AJu1uFhO259JHWb@dpg-cda17c2rrk09hiorhi10-a.oregon-postgres.render.com/df_professions"
+const express = require("express");
+const cors = require("cors");
+const { Sequelize, DataTypes, Op } = require("sequelize");
+const sequelize = new Sequelize(
+  "postgres://conrad:password@localhost:5432/df_professions"
+);
+const app = express();
+const port = process.env.PORT || 3001;
+// const internalURL
+// const externalURL
 
 //SETTING UP APP
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({extended: true}))
+app.use(express.urlencoded({ extended: true }));
 
 //MEAT & POTATOES
 
 //tables
-const Item = sequelize.define('item', {
+const Item = sequelize.define(
+  "item",
+  {
     name: { type: DataTypes.STRING, allowNull: false },
     icon: { type: DataTypes.STRING }, //links to png?
     stacksTo: { type: DataTypes.INTEGER, defaultValue: 1 },
@@ -27,21 +30,29 @@ const Item = sequelize.define('item', {
     itemLevelMin: { type: DataTypes.INTEGER },
     itemLevelMax: { type: DataTypes.INTEGER },
     types: { type: DataTypes.JSONB },
-    quality: { type: DataTypes.STRING }
+    quality: { type: DataTypes.STRING },
     //has many Materials, Recipe(s)
-},{
-    underscored: true
-});
+  },
+  {
+    underscored: true,
+  }
+);
 
-const Profession = sequelize.define('profession', {
+const Profession = sequelize.define(
+  "profession",
+  {
     name: { type: DataTypes.STRING, allowNull: false },
-    icon: { type: DataTypes.STRING }
+    icon: { type: DataTypes.STRING },
     //has many Recipes, Specializations, Tools (Items), FirstAccessories (Items), SecondAccessories (Items)
-},{
-    underscored: true
-});
+  },
+  {
+    underscored: true,
+  }
+);
 
-const Recipe = sequelize.define('recipe', {
+const Recipe = sequelize.define(
+  "recipe",
+  {
     name: { type: DataTypes.STRING, allowNull: false },
     numberCrafted: { type: DataTypes.STRING, defaultValue: "1" },
     requiredProfessionLevel: { type: DataTypes.INTEGER },
@@ -52,32 +63,40 @@ const Recipe = sequelize.define('recipe', {
     requiredSpecializationLevel: { type: DataTypes.JSONB },
     specialAcquisitionMethod: { type: DataTypes.STRING },
     notes: { type: DataTypes.STRING },
-    requiredLocation: { type: DataTypes.STRING }
+    requiredLocation: { type: DataTypes.STRING },
     //has many Materials & FinishingReagents
     //belongs to Item & Profession
-},{
-    underscored: true
-});
+  },
+  {
+    underscored: true,
+  }
+);
 
-const Material = sequelize.define('material', {
-    quantity: { type: DataTypes.INTEGER, allowNull: false }
+const Material = sequelize.define(
+  "material",
+  {
+    quantity: { type: DataTypes.INTEGER, allowNull: false },
     //belongs to Recipe, Item
-},{
-    underscored: true
-});
+  },
+  {
+    underscored: true,
+  }
+);
 
-const FinishingReagent = sequelize.define('finishingReagent', {
+const FinishingReagent = sequelize.define(
+  "finishingReagent",
+  {
     reagentType: { type: DataTypes.STRING },
-    requiredSpecializationLevel: { type: DataTypes.JSONB }
+    requiredSpecializationLevel: { type: DataTypes.JSONB },
     //belongs to Recipe
-},{
-    underscored: true
-});
-
+  },
+  {
+    underscored: true,
+  }
+);
 
 // Specializations are too much work rn and is way better covered by wowhead, anyway.
 // Maybe later. Focusing on Items & Recipes rn.
-
 
 // const Specialization = sequelize.define('specialization', {
 //     name: { type: DataTypes.STRING, allowNull: false },
@@ -99,7 +118,6 @@ const FinishingReagent = sequelize.define('finishingReagent', {
 //     underscored: true
 // });
 
-
 // setting up some ORM
 Profession.hasMany(Recipe);
 Recipe.belongsTo(Profession);
@@ -107,9 +125,12 @@ Recipe.belongsTo(Profession);
 // Profession.hasMany(Specialization);
 // Specialization.belongsTo(Profession);
 
-Profession.hasMany(Item, {as: 'Tools', foreignKey: 'toolsId'});
-Profession.hasMany(Item, {as: 'FirstAccessory', foreignKey: 'firstAccessoryId'})
-Item.belongsTo(Profession, {as: 'ProfessionEquipment'});
+Profession.hasMany(Item, { as: "Tools", foreignKey: "toolsId" });
+Profession.hasMany(Item, {
+  as: "FirstAccessory",
+  foreignKey: "firstAccessoryId",
+});
+Item.belongsTo(Profession, { as: "ProfessionEquipment" });
 
 Item.hasMany(Recipe);
 Recipe.belongsTo(Item);
@@ -142,36 +163,42 @@ Material.belongsTo(Item);
 
 //actual routing
 app.get("/", (req, res) => {
-    //to-do
-    res.send("<h1>PLACEHOLDER</h1>");
-})
-
-app.get("/items", async (req, res) => {
-    //getting all items, then mapping them to json
-    let items = (await Item.findAll()).map(item => item.toJSON());
-    res.send(items);
-})
-
-app.get("/professions/by_name/:professionName", async (req, res) => {
-    let profession = (await(Profession.findOne({
-        where: {
-            name: req.params.professionName
-        }
-    }))).toJSON();
-    res.send(profession);
-})
-
-app.get("/recipes/by_profession/:professionId", async (req, res) => {
-    //getting all recipes by profession
-    let recipes = (await(Recipe.findAll({
-        where: {
-            professionId: req.params.professionId
-        }
-    }))).map(recipe => recipe.toJSON());
-    res.send(recipes);
+  //to-do
+  res.send("<h1>PLACEHOLDER</h1>");
 });
 
-app.get("/recipes/by_profession/:professionId/only_trainer_recipes", async (req, res) => {
+app.get("/items", async (req, res) => {
+  //getting all items, then mapping them to json
+  let items = (await Item.findAll()).map((item) => item.toJSON());
+  res.send(items);
+});
+
+app.get("/professions/by_name/:professionName", async (req, res) => {
+  let profession = (
+    await Profession.findOne({
+      where: {
+        name: req.params.professionName,
+      },
+    })
+  ).toJSON();
+  res.send(profession);
+});
+
+app.get("/recipes/by_profession/:professionId", async (req, res) => {
+  //getting all recipes by profession
+  let recipes = (
+    await Recipe.findAll({
+      where: {
+        professionId: req.params.professionId,
+      },
+    })
+  ).map((recipe) => recipe.toJSON());
+  res.send(recipes);
+});
+
+app.get(
+  "/recipes/by_profession/:professionId/only_trainer_recipes",
+  async (req, res) => {
     //like above, but only getting only the trainer recipes (ie, where the required level is not null)
     //also going to sort by the number!
     //we also need to know the actual items included in our material list, so we need to do a few things
@@ -180,159 +207,220 @@ app.get("/recipes/by_profession/:professionId/only_trainer_recipes", async (req,
     //next, fetch the Finishing Reagents associated
     //finally, we're going to be fetching the item icon associated with this recipe
 
-    let recipes = (await(Recipe.findAll({
+    let recipes = (
+      await Recipe.findAll({
         where: {
-            professionId: req.params.professionId,
-            requiredProfessionLevel: {
-                [Op.not]: null
-            }
+          professionId: req.params.professionId,
+          requiredProfessionLevel: {
+            [Op.not]: null,
+          },
         },
         order: [
-            ['requiredProfessionLevel', 'ASC'],
-            ['name', 'ASC']
+          ["requiredProfessionLevel", "ASC"],
+          ["name", "ASC"],
         ],
-        attributes: ['id', 'requiredProfessionLevel', 'name', 'category'],
-        include: [{
-                model: Material,
-                include: [{
-                    model: Item,
-                    attributes: ["name", "icon"]
-                }]
-            },
-            FinishingReagent,
-            {
+        attributes: ["id", "requiredProfessionLevel", "name", "category"],
+        include: [
+          {
+            model: Material,
+            include: [
+              {
                 model: Item,
-                attributes: ['icon']
-            }
-        ]
-    }))).map(recipe => recipe.toJSON());
+                attributes: ["name", "icon"],
+              },
+            ],
+          },
+          FinishingReagent,
+          {
+            model: Item,
+            attributes: ["icon"],
+          },
+        ],
+      })
+    ).map((recipe) => recipe.toJSON());
     res.send(recipes);
-});
+  }
+);
 
-app.get("/recipes/by_profession/:professionId/only_renown_recipes", async (req, res) => {
+app.get(
+  "/recipes/by_profession/:professionId/only_renown_recipes",
+  async (req, res) => {
     //same as above, but only renown recipes now!
-    let recipes = (await(Recipe.findAll({
+    let recipes = (
+      await Recipe.findAll({
         where: {
-            professionId: req.params.professionId,
-            requiredRenownLevel: {
-                [Op.not]: null
-            }
+          professionId: req.params.professionId,
+          requiredRenownLevel: {
+            [Op.not]: null,
+          },
         },
         order: [
-            ['requiredRenownLevel', 'ASC'],
-            ['name', 'ASC']
+          ["requiredRenownLevel", "ASC"],
+          ["name", "ASC"],
         ],
-        attributes: ['id', 'requiredRenownLevel', 'name', 'category'],
-        include: [{
-                model: Material,
-                include: [{
-                    model: Item,
-                    attributes: ["name", "icon"]
-                }]
-            },
-            FinishingReagent,
-            {
+        attributes: ["id", "requiredRenownLevel", "name", "category"],
+        include: [
+          {
+            model: Material,
+            include: [
+              {
                 model: Item,
-                attributes: ['icon']
-            }
-        ]
-    }))).map(recipe => recipe.toJSON());
+                attributes: ["name", "icon"],
+              },
+            ],
+          },
+          FinishingReagent,
+          {
+            model: Item,
+            attributes: ["icon"],
+          },
+        ],
+      })
+    ).map((recipe) => recipe.toJSON());
     res.send(recipes);
-});
+  }
+);
 
-app.get("/recipes/by_profession/:professionId/only_specialization_recipes", async (req, res) => {
+app.get(
+  "/recipes/by_profession/:professionId/only_specialization_recipes",
+  async (req, res) => {
     //same as above, but only specialization recipes now!
     //to keep in mind: some recipes have a specialization level requirement, but are actually "other" recipes
     //so we need to check that both specialization is not null, and other is null!
-    let recipes = (await(Recipe.findAll({
+    let recipes = (
+      await Recipe.findAll({
         where: {
-            professionId: req.params.professionId,
-            requiredSpecializationLevel: {
-                [Op.not]: null
-            },
-            specialAcquisitionMethod: {
-                [Op.is]: null
-            }
+          professionId: req.params.professionId,
+          requiredSpecializationLevel: {
+            [Op.not]: null,
+          },
+          specialAcquisitionMethod: {
+            [Op.is]: null,
+          },
         },
         order: [
-            ['requiredSpecializationLevel', 'ASC'],
-            ['name', 'ASC']
+          ["requiredSpecializationLevel", "ASC"],
+          ["name", "ASC"],
         ],
-        attributes: ['id', 'requiredSpecializationLevel', 'name', 'category'],
-        include: [{
-                model: Material,
-                include: [{
-                    model: Item,
-                    attributes: ["name", "icon"]
-                }]
-            },
-            FinishingReagent,
-            {
+        attributes: ["id", "requiredSpecializationLevel", "name", "category"],
+        include: [
+          {
+            model: Material,
+            include: [
+              {
                 model: Item,
-                attributes: ['icon']
-            }
-        ]
-    }))).map(recipe => recipe.toJSON());
+                attributes: ["name", "icon"],
+              },
+            ],
+          },
+          FinishingReagent,
+          {
+            model: Item,
+            attributes: ["icon"],
+          },
+        ],
+      })
+    ).map((recipe) => recipe.toJSON());
     res.send(recipes);
-});
+  }
+);
 
-app.get("/recipes/by_profession/:professionId/only_other_recipes", async (req, res) => {
+app.get(
+  "/recipes/by_profession/:professionId/only_other_recipes",
+  async (req, res) => {
     //same as above, but only recipes from other sources!
     //some of these recipes have both required specialization level && special acquisition method
     //tbh, front end is gonna take care of that sorting. we're good to just do a normal search
     //we do include requiredSpecializationLevel in our attributes, though
-    let recipes = (await(Recipe.findAll({
+    let recipes = (
+      await Recipe.findAll({
         where: {
-            professionId: req.params.professionId,
-            specialAcquisitionMethod: {
-                [Op.not]: null
-            }
+          professionId: req.params.professionId,
+          specialAcquisitionMethod: {
+            [Op.not]: null,
+          },
         },
         order: [
-            ['specialAcquisitionMethod', 'ASC'],
-            ['name', 'ASC']
+          ["specialAcquisitionMethod", "ASC"],
+          ["name", "ASC"],
         ],
-        attributes: ['id', 'specialAcquisitionMethod', 'requiredSpecializationLevel', 'name', 'category'],
-        include: [{
-                model: Material,
-                include: [{
-                    model: Item,
-                    attributes: ["name", "icon"]
-                }]
-            },
-            FinishingReagent,
-            {
+        attributes: [
+          "id",
+          "specialAcquisitionMethod",
+          "requiredSpecializationLevel",
+          "name",
+          "category",
+        ],
+        include: [
+          {
+            model: Material,
+            include: [
+              {
                 model: Item,
-                attributes: ['icon']
-            }
-        ]
-    }))).map(recipe => recipe.toJSON());
+                attributes: ["name", "icon"],
+              },
+            ],
+          },
+          FinishingReagent,
+          {
+            model: Item,
+            attributes: ["icon"],
+          },
+        ],
+      })
+    ).map((recipe) => recipe.toJSON());
     res.send(recipes);
-});
+  }
+);
 
 app.get("/recipes/by_profession_name/:professionName", async (req, res) => {
-    //first, gotta find profession by name
-    let profession = (await(Profession.findOne({
-        where: {
-            name: req.params.professionName
-        },
-        //only getting the id, extra info is extraneous
-        attributes: [id]
-    })));
+  //first, gotta find profession by name
+  let profession = await Profession.findOne({
+    where: {
+      name: req.params.professionName,
+    },
+    //only getting the id, extra info is extraneous
+    attributes: [id],
+  });
 
-    //then, we get all recipes with that profession's id
-    let recipes = (await(Recipe.findAll({
-        where: {
-            professionId: profession.id
-        }
-    }))).map(recipe => recipe.toJSON());
-    res.send(recipes);
+  //then, we get all recipes with that profession's id
+  let recipes = (
+    await Recipe.findAll({
+      where: {
+        professionId: profession.id,
+      },
+    })
+  ).map((recipe) => recipe.toJSON());
+  res.send(recipes);
 });
 
 app.get("/recipes/:recipeId", async (req, res) => {
-    //getting all recipes, then mapping them to json
-    let recipe = (await(Recipe.findByPk(req.params.recipeId))).toJSON();
-    res.send(recipe);
+  //getting singular recipe, then mapping to json
+  let recipe = (
+    await Recipe.findByPk(req.params.recipeId, {
+      include: [
+        {
+          model: Profession,
+          attributes: ["name"],
+        },
+        {
+          model: Material,
+          include: [
+            {
+              model: Item,
+              attributes: ["name", "icon"],
+            },
+          ],
+        },
+        {
+          model: Item,
+          attributes: ["id", "name", "icon"],
+        },
+        FinishingReagent,
+      ],
+    })
+  ).toJSON();
+  res.send(recipe);
 });
 
 // app.get("/materials/by_recipe/:recipeId", async (req, res) => {
@@ -345,15 +433,14 @@ app.get("/recipes/:recipeId", async (req, res) => {
 // });
 
 app.get("/items/:itemId", async (req, res) => {
-    //find by primary key, convert to json - :itemId gets inserted into req.params object
-    try{
-        let item = (await Item.findByPk(req.params.itemId)).toJSON();
-        res.send(item);
-    } catch(error){
-        res.send(error);
-    }
-})
-
+  //find by primary key, convert to json - :itemId gets inserted into req.params object
+  try {
+    let item = (await Item.findByPk(req.params.itemId)).toJSON();
+    res.send(item);
+  } catch (error) {
+    res.send(error);
+  }
+});
 
 // app.get("items/names/:name", async (req, res) => {
 //     //find by name, convert to json
@@ -367,5 +454,5 @@ app.get("/items/:itemId", async (req, res) => {
 // })
 
 app.listen(port, () => {
-    console.log(`App listening on port ${port}.`);
-})
+  console.log(`App listening on port ${port}.`);
+});
