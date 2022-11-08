@@ -27,10 +27,20 @@ const Item = sequelize.define(
     price: { type: DataTypes.FLOAT },
     description: { type: DataTypes.STRING },
     notes: { type: DataTypes.STRING },
-    itemLevelMin: { type: DataTypes.INTEGER },
-    itemLevelMax: { type: DataTypes.INTEGER },
-    types: { type: DataTypes.JSONB },
+    itemLevel: { type: DataTypes.ARRAY() },
+    bindOn: { type: DataTypes.STRING },
     quality: { type: DataTypes.STRING },
+    armorWeaponType: { type: DataTypes.STRING },
+    otherType: { type: DataTypes.STRING },
+    slot: { type: DataTypes.STRING },
+    bindOn: { type: DataTypes.STRING },
+    isUniqueEquipped: { type: DataTypes.BOOLEAN, defaultValue: false },
+    qualityLevels: { type: DataTypes.INTEGER, defaultValue: 1 },
+    finishingReagentType: { type: DataTypes.STRING },
+    primaryStats: { type: DataTypes.ARRAY(DataTypes.ARRAY()) },
+    secondaryStats: { type: DataTypes.ARRAY(DataTypes.ARRAY()) },
+    effect: { type: DataTypes.TEXT },
+    onUse: { type: DataTypes.TEXT },
     //has many Materials, Recipe(s)
   },
   {
@@ -408,7 +418,7 @@ app.get("/recipes/:recipeId", async (req, res) => {
           include: [
             {
               model: Item,
-              attributes: ["name", "icon"],
+              attributes: ["id", "name", "icon"],
             },
           ],
         },
@@ -435,7 +445,21 @@ app.get("/recipes/:recipeId", async (req, res) => {
 app.get("/items/:itemId", async (req, res) => {
   //find by primary key, convert to json - :itemId gets inserted into req.params object
   try {
-    let item = (await Item.findByPk(req.params.itemId)).toJSON();
+    let item = (
+      await Item.findByPk(req.params.itemId, {
+        include: [
+          {
+            model: Material,
+            include: [
+              {
+                model: Recipe,
+                attributes: ["id", "name"],
+              },
+            ],
+          },
+        ],
+      })
+    ).toJSON();
     res.send(item);
   } catch (error) {
     res.send(error);
