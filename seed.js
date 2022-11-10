@@ -48,7 +48,7 @@ const Item = sequelize.define(
     },
     effect: { type: DataTypes.TEXT },
     onUse: { type: DataTypes.TEXT },
-    requiresProfession: { type: DataTypes.JSONB }
+    requiresProfession: { type: DataTypes.JSONB },
     //has many Materials, Recipe(s)
   },
   {
@@ -273,7 +273,7 @@ async function createItem(
     //then each possible amount as the remaining elements
     item.secondaryStats = secondaryStats;
   }
-  if(isNotNullAndUndefined(requiresProfession)){
+  if (isNotNullAndUndefined(requiresProfession)) {
     //do we need a certain prof/level to use this?
     //it's an obj, so an example will look like this:
     //{Engineering: 1}
@@ -1322,22 +1322,24 @@ const makeTables = async () => {
     "Common",
     "Crafting Reagent"
   );
-  const markOfHonor = await createItem("Mark of Honor",
-  "ability_pvp_gladiatormedallion",
-  "Account",
-  1000,
-  "Exchanged for legacy weapons and armor at Player vs. Player vendors.",
-  null,
-  "Rare"
+  const markOfHonor = await createItem(
+    "Mark of Honor",
+    "ability_pvp_gladiatormedallion",
+    "Account",
+    1000,
+    "Exchanged for legacy weapons and armor at Player vs. Player vendors.",
+    null,
+    "Rare"
   );
-  const quackEQuackModulator = await createItem("Quack-E Quack Modulator",
-  "inv_engineering_sonicenvironmentenhancer",
-  "Pickup",
-  1,
-  "Members of the Dragonscale Expedition have been oddly preoccupied with mimicking the sounds of the local waterfowl.",
-  "Bought from Dragonscale Expedition rep vendor?",
-  "Uncommon",
-  "Crafting Reagent"
+  const quackEQuackModulator = await createItem(
+    "Quack-E Quack Modulator",
+    "inv_engineering_sonicenvironmentenhancer",
+    "Pickup",
+    1,
+    "Members of the Dragonscale Expedition have been oddly preoccupied with mimicking the sounds of the local waterfowl.",
+    "Bought from Dragonscale Expedition rep vendor?",
+    "Uncommon",
+    "Crafting Reagent"
   );
   // const pentagoldSeal = await createItem("Pentagold Seal", 1000);
   const rainbowPearl = await createItem(
@@ -2625,7 +2627,7 @@ const makeTables = async () => {
     [346, 352, 358, 365, 372],
     [
       ["Skill", "", "", "", ""],
-      [4,4,4,4,4],
+      [4, 4, 4, 4, 4],
     ],
     [
       ["Crafting Speed", 38, "?", "?", 48, "?"],
@@ -2651,7 +2653,7 @@ const makeTables = async () => {
     [346, 352, 358, 365, 372],
     [
       ["Skill", "", "", "", ""],
-      [6,6,6,6,6],
+      [6, 6, 6, 6, 6],
     ],
     [
       ["Inspiration", 45, "?", "?", 56, "?"],
@@ -2677,7 +2679,7 @@ const makeTables = async () => {
     [346, 352, 358, 365, 372],
     [
       ["Skill", "", "", "", ""],
-      [6,6,6,6,6],
+      [6, 6, 6, 6, 6],
     ]
   );
   const mastersWilderclothGardeningHat = await createItem(
@@ -2699,7 +2701,7 @@ const makeTables = async () => {
     [346, 352, 358, 365, 372],
     [
       ["Skill", "", "", "", ""],
-      [6,6,6,6,6],
+      [6, 6, 6, 6, 6],
     ],
     [
       ["Deftness", 32, "?", "?", 40, "?"],
@@ -2771,7 +2773,7 @@ const makeTables = async () => {
     [320, 326, 332, 339, 346],
     [
       ["Skill", "", "", "", ""],
-      [4,4,4,4,4],
+      [4, 4, 4, 4, 4],
     ]
   );
   const wilderclothChefsHat = await createItem(
@@ -2940,7 +2942,7 @@ const makeTables = async () => {
     null,
     null,
     null,
-    {Mining: 1}
+    { Mining: 1 }
   );
   const explorersBannerOfHerbology = await createItem(
     "Explorer's Banner of Herbology",
@@ -2961,7 +2963,7 @@ const makeTables = async () => {
     null,
     null,
     null,
-    {Herbalism: 1}
+    { Herbalism: 1 }
   );
   const duckStuffedDuckLovie = await createItem(
     "Duck-Stuffed Duck Lovie",
@@ -3330,7 +3332,7 @@ const makeTables = async () => {
       ["Random Stat 1", 633, 633, "?", "?", 664],
       ["Tinker Socket", null, null, null, null, null],
     ],
-    {Engineering: 1}
+    { Engineering: 1 }
   );
   const lightweightOcularLenses = await createItem(
     "Lightweight Ocular Lenses",
@@ -3358,7 +3360,7 @@ const makeTables = async () => {
       ["Random Stat 1", 633, 633, "?", "?", 664],
       ["Tinker Socket", null, null, null, null, null],
     ],
-    {Engineering: 1}
+    { Engineering: 1 }
   );
   const oscillatingWildernessOpticals = await createItem(
     "Oscillating Wilderness Opticals",
@@ -3386,7 +3388,7 @@ const makeTables = async () => {
       ["Random Stat 1", 633, 633, "?", "?", 664],
       ["Tinker Socket", null, null, null, null, null],
     ],
-    {Engineering: 1}
+    { Engineering: 1 }
   );
   const peripheralVisionProjectors = await createItem(
     "Peripheral Vision Projectors",
@@ -3414,7 +3416,7 @@ const makeTables = async () => {
       ["Random Stat 1", 633, 633, "?", "?", 664],
       ["Tinker Socket", null, null, null, null, null],
     ],
-    {Engineering: 1}
+    { Engineering: 1 }
   );
   const deadlineDeadeyes = await createItem(
     "Deadline Deadeyes",
@@ -3443,7 +3445,7 @@ const makeTables = async () => {
       ["Mastery", 86, "?", "?", "?", 100],
       ["Tinker Socket", null, null, null, null, null],
     ],
-    {Engineering: 1}
+    { Engineering: 1 }
   );
   const milestoneMagnifiers = await createItem(
     "Milestone Magnifiers",
@@ -3472,7 +3474,7 @@ const makeTables = async () => {
       ["Versatility", 86, "?", "?", "?", 100],
       ["Tinker Socket", null, null, null, null, null],
     ],
-    {Engineering: 1}
+    { Engineering: 1 }
   );
   const qualityAssuredOptics = await createItem(
     "Quality-Assured Optics",
@@ -3501,7 +3503,7 @@ const makeTables = async () => {
       ["Mastery", 94, "?", "?", "?", 110],
       ["Tinker Socket", null, null, null, null, null],
     ],
-    {Engineering: 1}
+    { Engineering: 1 }
   );
   const sentrysStabilizedSpecs = await createItem(
     "Sentry's Stabilized Specs",
@@ -3530,7 +3532,7 @@ const makeTables = async () => {
       ["Mastery", 86, "?", "?", "?", 100],
       ["Tinker Socket", null, null, null, null, null],
     ],
-    {Engineering: 1}
+    { Engineering: 1 }
   );
   const complicatedCuffs = await createItem(
     "Complicated Cuffs",
@@ -3947,7 +3949,7 @@ const makeTables = async () => {
     null,
     null,
     null,
-    {Engineering: 1}
+    { Engineering: 1 }
   );
   const ezThroGreaseGrenade = await createItem(
     "EZ-Thro Grease Grenade",
@@ -4024,7 +4026,7 @@ const makeTables = async () => {
     null,
     null,
     null,
-    {Engineering: 1}
+    { Engineering: 1 }
   );
   const greaseGrenade = await createItem(
     "Grease Grenade",
@@ -4045,7 +4047,7 @@ const makeTables = async () => {
     null,
     null,
     null,
-    {Engineering: 1}
+    { Engineering: 1 }
   );
   const gravitationalDisplacer = await createItem(
     "Gravitational Displacer",
@@ -4066,7 +4068,7 @@ const makeTables = async () => {
     null,
     null,
     null,
-    {Engineering: 1}
+    { Engineering: 1 }
   );
   const primalDeconstructionCharge = await createItem(
     "Primal Deconstruction Charge",
@@ -4087,7 +4089,7 @@ const makeTables = async () => {
     null,
     null,
     null,
-    {Engineering: 1}
+    { Engineering: 1 }
   );
   const creatureCombustionCanister = await createItem(
     "Creature Combustion Canister",
@@ -4108,7 +4110,7 @@ const makeTables = async () => {
     null,
     null,
     null,
-    {Engineering: 1}
+    { Engineering: 1 }
   );
   const savior = await createItem(
     "S.A.V.I.O.R.",
@@ -4129,7 +4131,7 @@ const makeTables = async () => {
     null,
     null,
     null,
-    {Engineering: 1}
+    { Engineering: 1 }
   );
   const zapthrottleSoulInhaler = await createItem(
     "Zapthrottle Soul Inhaler",
@@ -4263,7 +4265,7 @@ const makeTables = async () => {
     null,
     null,
     null,
-    {Engineering: 1}
+    { Engineering: 1 }
   );
   const portableAlchemistsLabBench = await createItem(
     "Portable Alchemist's Lab Bench",
@@ -4659,7 +4661,7 @@ const makeTables = async () => {
     null,
     null,
     null,
-    {Engineering: 1}
+    { Engineering: 1 }
   );
 
   // //enchanting items
@@ -4803,19 +4805,20 @@ const makeTables = async () => {
   //   1000
   // );
   // const bottledPutrescence = await createItem("Bottled Putrescence", 1000);
-  const potionOfGusts = await createItem("Potion of Gusts", 
-  "inv_10_alchemy_bottle_shape1_green",
-  null,
-  200,
-  null,
-  null,
-  "Common",
-  null,
-  3,
-  null,
-  null,
-  "Drink to be propelled forward a short distance, momentarily weightless. (5 Min Cooldown)"
-);
+  const potionOfGusts = await createItem(
+    "Potion of Gusts",
+    "inv_10_alchemy_bottle_shape1_green",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Drink to be propelled forward a short distance, momentarily weightless. (5 Min Cooldown)"
+  );
   // const potionOfShockingDisclosure = await createItem(
   //   "Potion of Shocking Disclosure",
   //   1000
@@ -5340,105 +5343,115 @@ const makeTables = async () => {
     "Crafting Reagent",
     3
   );
-  const queensRuby = await createItem("Queen's Ruby",
-  "inv_10_jewelcrafting_gem1leveling_uncut_red",
-  null,
-  1000,
-  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
-  null,
-  "Uncommon",
-  "Crafting Reagent",
-  3
+  const queensRuby = await createItem(
+    "Queen's Ruby",
+    "inv_10_jewelcrafting_gem1leveling_uncut_red",
+    null,
+    1000,
+    "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Uncommon",
+    "Crafting Reagent",
+    3
   );
-  const mysticSapphire = await createItem("Mystic Sapphire", 
-  "inv_10_jewelcrafting_gem1leveling_uncut_blue",
-  null,
-  1000,
-  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
-  null,
-  "Uncommon",
-  "Crafting Reagent",
-  3
+  const mysticSapphire = await createItem(
+    "Mystic Sapphire",
+    "inv_10_jewelcrafting_gem1leveling_uncut_blue",
+    null,
+    1000,
+    "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Uncommon",
+    "Crafting Reagent",
+    3
   );
-  const vibrantEmerald = await createItem("Vibrant Emerald", 
-  "inv_10_jewelcrafting_gem1leveling_uncut_green",
-  null,
-  1000,
-  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
-  null,
-  "Uncommon",
-  "Crafting Reagent",
-  3
+  const vibrantEmerald = await createItem(
+    "Vibrant Emerald",
+    "inv_10_jewelcrafting_gem1leveling_uncut_green",
+    null,
+    1000,
+    "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Uncommon",
+    "Crafting Reagent",
+    3
   );
-  const sunderedOnyx = await createItem("Sundered Onyx",
-  "inv_10_jewelcrafting_gem1leveling_uncut_black",
-  null,
-  1000,
-  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
-  null,
-  "Uncommon",
-  "Crafting Reagent",
-  3
+  const sunderedOnyx = await createItem(
+    "Sundered Onyx",
+    "inv_10_jewelcrafting_gem1leveling_uncut_black",
+    null,
+    1000,
+    "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Uncommon",
+    "Crafting Reagent",
+    3
   );
-  const eternityAmber = await createItem("Eternity Amber",
-  "inv_10_jewelcrafting_gem1leveling_uncut_bronze",
-  null,
-  1000,
-  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
-  null,
-  "Uncommon",
-  "Crafting Reagent",
-  3
+  const eternityAmber = await createItem(
+    "Eternity Amber",
+    "inv_10_jewelcrafting_gem1leveling_uncut_bronze",
+    null,
+    1000,
+    "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Uncommon",
+    "Crafting Reagent",
+    3
   );
-  const alexstraszite = await createItem("Alexstraszite",
-  "inv_10_jewelcrafting_gem2standard_uncut_red",
-  null,
-  1000,
-  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
-  null,
-  "Rare",
-  "Crafting Reagent",
-  3
+  const alexstraszite = await createItem(
+    "Alexstraszite",
+    "inv_10_jewelcrafting_gem2standard_uncut_red",
+    null,
+    1000,
+    "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Rare",
+    "Crafting Reagent",
+    3
   );
-  const malygite = await createItem("Malygite",
-  "inv_10_jewelcrafting_gem2standard_uncut_blue",
-  null,
-  1000,
-  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
-  null,
-  "Rare",
-  "Crafting Reagent",
-  3
+  const malygite = await createItem(
+    "Malygite",
+    "inv_10_jewelcrafting_gem2standard_uncut_blue",
+    null,
+    1000,
+    "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Rare",
+    "Crafting Reagent",
+    3
   );
-  const ysemerald = await createItem("Ysemerald",
-  "inv_10_jewelcrafting_gem2standard_uncut_green",
-  null,
-  1000,
-  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
-  null,
-  "Rare",
-  "Crafting Reagent",
-  3
+  const ysemerald = await createItem(
+    "Ysemerald",
+    "inv_10_jewelcrafting_gem2standard_uncut_green",
+    null,
+    1000,
+    "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Rare",
+    "Crafting Reagent",
+    3
   );
-  const neltharite = await createItem("Neltharite",
-  "inv_10_jewelcrafting_gem2standard_uncut_black",
-  null,
-  1000,
-  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
-  null,
-  "Rare",
-  "Crafting Reagent",
-  3
+  const neltharite = await createItem(
+    "Neltharite",
+    "inv_10_jewelcrafting_gem2standard_uncut_black",
+    null,
+    1000,
+    "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Rare",
+    "Crafting Reagent",
+    3
   );
-  const nozdorite = await createItem("Nozdorite",
-  "inv_10_jewelcrafting_gem2standard_uncut_bronze",
-  null,
-  1000,
-  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
-  null,
-  "Rare",
-  "Crafting Reagent",
-  3
+  const nozdorite = await createItem(
+    "Nozdorite",
+    "inv_10_jewelcrafting_gem2standard_uncut_bronze",
+    null,
+    1000,
+    "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Rare",
+    "Crafting Reagent",
+    3
   );
   // const illimitedDiamond = await createItem("Illimited Diamond", 1000);
   const elementalHarmony = await createItem(
@@ -5455,15 +5468,16 @@ const makeTables = async () => {
   // const blottingSand = await createItem("Blotting Sand", 1000);
   // const pounce = await createItem("Pounce", 1000);
   // const emptySoulCage = await createItem("Empty Soul Cage", 1000);
-  const draconicVial = await createItem("Draconic Vial",
-  "inv_10_alchemy_bottle_shape1_empty",
-  null,
-  1000,
-  "Purchased from tradeskill vendors. Jewelcrafters can also craft this item at equal or higher qualities. Can be bought and sold on the auction house.",
-  null,
-  "Common",
-  "Crafting Reagent",
-  3
+  const draconicVial = await createItem(
+    "Draconic Vial",
+    "inv_10_alchemy_bottle_shape1_empty",
+    null,
+    1000,
+    "Purchased from tradeskill vendors. Jewelcrafters can also craft this item at equal or higher qualities. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent",
+    3
   );
   const framelessLens = await createItem(
     "Frameless Lens",
@@ -5474,8 +5488,8 @@ const makeTables = async () => {
     null,
     "Common",
     "Crafting Reagent",
-    3,
-    );
+    3
+  );
   // const glossyStone = await createItem("Glossy Stone", 1000);
   // const shimmeringClasp = await createItem("Shimmering Clasp", 1000);
   // const energizedVibrantEmerald = await createItem(
@@ -5680,17 +5694,18 @@ const makeTables = async () => {
     null,
     "Epic",
     "Crafting Reagent",
-    3,
-    );
-  const frostfireAlloy = await createItem("Frostfire Alloy",
-  "inv_10_blacksmithing_craftedbar_frostfirealloy",
-  null,
-  1000,
-  "Smelted by players with the Blacksmithing skill.",
-  null,
-  "Rare",
-  "Crafting Reagent",
-  3,
+    3
+  );
+  const frostfireAlloy = await createItem(
+    "Frostfire Alloy",
+    "inv_10_blacksmithing_craftedbar_frostfirealloy",
+    null,
+    1000,
+    "Smelted by players with the Blacksmithing skill.",
+    null,
+    "Rare",
+    "Crafting Reagent",
+    3
   );
   // const infuriousAlloy = await createItem("Infurious Alloy", 1000);
   // const primalMoltenAlloy = await createItem("Primal Molten Alloy", 1000);
@@ -6485,38 +6500,41 @@ const makeTables = async () => {
   //   "Finished Prototype Regal Barding"
   // );
   // const earthshineScales = await createItem("Earthshine Scales", 1000);
-  const frostbiteScales = await createItem("Frostbite Scales",
-  "inv_10_skinning_dragonscales_blue",
-  null,
-  1000,
-  "Crafted by players with the Leatherworking skill. Can be bought and sold on the auction house.",
-  null,
-  "Rare",
-  "Crafting Reagent",
-  3,
+  const frostbiteScales = await createItem(
+    "Frostbite Scales",
+    "inv_10_skinning_dragonscales_blue",
+    null,
+    1000,
+    "Crafted by players with the Leatherworking skill. Can be bought and sold on the auction house.",
+    null,
+    "Rare",
+    "Crafting Reagent",
+    3
   );
   // const infuriousHide = await createItem("Infurious Hide", 1000);
   // const infuriousScales = await createItem("Infurious Scales", 1000);
-  const mireslushHide = await createItem("Mireslush Hide",
-  "inv_10_skinning_leather_rarehide_color2",
-  null,
-  1000,
-  "Crafted by players with the Leatherworking skill. Can be bought and sold on the auction house.",
-  null,
-  "Rare",
-  "Crafting Reagent",
-  3,
+  const mireslushHide = await createItem(
+    "Mireslush Hide",
+    "inv_10_skinning_leather_rarehide_color2",
+    null,
+    1000,
+    "Crafted by players with the Leatherworking skill. Can be bought and sold on the auction house.",
+    null,
+    "Rare",
+    "Crafting Reagent",
+    3
   );
 
-  const stonecrustHide = await createItem("Stonecrust Hide",
-  "inv_10_skinning_leather_rarehide_color3",
-  null,
-  1000,
-  "Crafted by players with the Leatherworking skill. Can be bought and sold on the auction house.",
-  null,
-  "Rare",
-  "Crafting Reagent",
-  3,
+  const stonecrustHide = await createItem(
+    "Stonecrust Hide",
+    "inv_10_skinning_leather_rarehide_color3",
+    null,
+    1000,
+    "Crafted by players with the Leatherworking skill. Can be bought and sold on the auction house.",
+    null,
+    "Rare",
+    "Crafting Reagent",
+    3
   );
   // const fangAdornments = await createItem("Fang Adornments", 1000);
   // const toxifiedArmorPatch = await createItem("Toxified Armor Patch", 1000);
