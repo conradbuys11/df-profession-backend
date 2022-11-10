@@ -30,8 +30,8 @@ const Item = sequelize.define(
     icon: { type: DataTypes.STRING }, //links to png?
     stacksTo: { type: DataTypes.INTEGER, defaultValue: 1 },
     price: { type: DataTypes.FLOAT },
-    description: { type: DataTypes.STRING },
-    notes: { type: DataTypes.STRING },
+    description: { type: DataTypes.TEXT },
+    notes: { type: DataTypes.TEXT },
     itemLevel: { type: DataTypes.ARRAY(DataTypes.STRING) },
     bindOn: { type: DataTypes.STRING },
     quality: { type: DataTypes.STRING },
@@ -43,9 +43,12 @@ const Item = sequelize.define(
     qualityLevels: { type: DataTypes.INTEGER, defaultValue: 1 },
     finishingReagentType: { type: DataTypes.STRING },
     primaryStats: { type: DataTypes.ARRAY(DataTypes.ARRAY(DataTypes.STRING)) },
-    secondaryStats: { type: DataTypes.ARRAY(DataTypes.ARRAY(DataTypes.STRING)) },
+    secondaryStats: {
+      type: DataTypes.ARRAY(DataTypes.ARRAY(DataTypes.STRING)),
+    },
     effect: { type: DataTypes.TEXT },
     onUse: { type: DataTypes.TEXT },
+    requiresProfession: { type: DataTypes.JSONB }
     //has many Materials, Recipe(s)
   },
   {
@@ -200,7 +203,8 @@ async function createItem(
   isUniqueEquipped,
   itemLevel,
   primaryStats,
-  secondaryStats
+  secondaryStats,
+  requiresProfession
 ) {
   let item = Item.build({ name: name });
 
@@ -268,6 +272,13 @@ async function createItem(
     //each array starts with the stat name at index 0
     //then each possible amount as the remaining elements
     item.secondaryStats = secondaryStats;
+  }
+  if(isNotNullAndUndefined(requiresProfession)){
+    //do we need a certain prof/level to use this?
+    //it's an obj, so an example will look like this:
+    //{Engineering: 1}
+    //which will become "Requires Dragon Isles Engineering (1)" on the front end
+    item.requiresProfession = requiresProfession;
   }
   await item.save();
   return item;
@@ -1076,33 +1087,36 @@ const makeTables = async () => {
     "Uncommon",
     "Crafting Reagent"
   );
-  const rockfangLeather = await createItem("Rockfang Leather", 
-  "inv_misc_pelt_04",
-  null,
-  1000,
-  "A rare, species-specific material gathered from Rockfangs by players with the Skinning skill. Can be bought and sold on the auction house.",
-  null,
-  "Uncommon",
-  "Crafting Reagent",
-);
-  const pristineVorquinHorn = await createItem("Pristine Vorquin Horn",
-  "inv_10_specialization_leatherworking_pristinevorquinhorn_color2",
-  null,
-  1000,
-  "A rare, species-specific material gathered from Vorquin by players with the Skinning skill. Can be bought and sold on the auction house.",
-  null,
-  "Uncommon",
-  "Crafting Reagent",
-);
-  const windsongPlumage = await createItem("Windsong Plumage", 
-  "inv_misc_feather01a",
-  null,
-  1000,
-  "A rare, species-specific material gathered from Ohuna by players with the Skinning skill. Can be bought and sold on the auction house.",
-  null,
-  "Uncommon",
-  "Crafting Reagent",
-);
+  const rockfangLeather = await createItem(
+    "Rockfang Leather",
+    "inv_misc_pelt_04",
+    null,
+    1000,
+    "A rare, species-specific material gathered from Rockfangs by players with the Skinning skill. Can be bought and sold on the auction house.",
+    null,
+    "Uncommon",
+    "Crafting Reagent"
+  );
+  const pristineVorquinHorn = await createItem(
+    "Pristine Vorquin Horn",
+    "inv_10_specialization_leatherworking_pristinevorquinhorn_color2",
+    null,
+    1000,
+    "A rare, species-specific material gathered from Vorquin by players with the Skinning skill. Can be bought and sold on the auction house.",
+    null,
+    "Uncommon",
+    "Crafting Reagent"
+  );
+  const windsongPlumage = await createItem(
+    "Windsong Plumage",
+    "inv_misc_feather01a",
+    null,
+    1000,
+    "A rare, species-specific material gathered from Ohuna by players with the Skinning skill. Can be bought and sold on the auction house.",
+    null,
+    "Uncommon",
+    "Crafting Reagent"
+  );
   const flawlessProtoDragonScale = await createItem(
     "Flawless Proto Dragon Scale",
     "inv_misc_scales_dragonpaleviolet01",
@@ -1111,7 +1125,7 @@ const makeTables = async () => {
     "A rare, species-specific material gathered from Proto Dragons by players with the Skinning skill. Can be bought and sold on the auction house.",
     null,
     "Rare",
-    "Crafting Reagent",
+    "Crafting Reagent"
   );
   const tallstriderSinew = await createItem(
     "Tallstrider Sinew",
@@ -1121,7 +1135,7 @@ const makeTables = async () => {
     "A bit of fibrous tissue gathered from the tallstriders of the Dragon Isles.",
     null,
     "Common",
-    "Crafting Reagent",
+    "Crafting Reagent"
   );
 
   //mining, BS, & JC drops & items
@@ -1181,7 +1195,7 @@ const makeTables = async () => {
 
   //herb, alch, & inscription drops & items
   const hochenblume = await createItem(
-    "Hochenblume", 
+    "Hochenblume",
     "inv_misc_herb_dragonsbreath",
     null,
     1000,
@@ -1189,58 +1203,63 @@ const makeTables = async () => {
     "The most common DF Herb. Found in every zone.",
     "Common",
     "Crafting Reagent",
-    3,
+    3
   );
-  const saxifrage = await createItem("Saxifrage",
-  "inv_misc_herb_saxifrage",
-  null,
-  1000,
-  "Gathered by players with the Herbalism skill. Can be bought and sold on the auction house.",
-  "An uncommon DF Herb. Found mostly near 'mountains, cliffs, open plains, or scarcely within volcanic regions.'",
-  "Uncommon",
-  "Crafting Reagent",
-  3,
-);
-  const bubblePoppy = await createItem("Bubble Poppy",
-  "inv_misc_herb_bubblepoppy",
-  null,
-  1000,
-  "Gathered by players with the Herbalism skill. Can be bought and sold on the auction house.",
-  "An uncommon DF Herb. Found mostly near 'rivers, coasts, & damp caves.'",
-  "Uncommon",
-  "Crafting Reagent",
-  3,
-);
-  const writhebark = await createItem("Writhebark",
-  "inv_misc_herb_writhebark",
-  null,
-  1000,
-  "Gathered by players with the Herbalism skill. Can be bought and sold on the auction house.",
-  "An uncommon DF Herb. Found mostly near 'an abundance of trees or foliage.'",
-  "Uncommon",
-  "Crafting Reagent",
-  3,
-);
-  const primalConvergent = await createItem("Primal Convergent",
-  "inv_10_elementalshardfoozles_primordial",
-  null,
-  1000,
-  "Created by Alchemists by combining the four fundamental elements with Order.",
-  null,
-  "Uncommon",
-  "Crafting Reagent",
-  3,
-);
-  const omniumDraconis = await createItem("Omnium Draconis",
-  "inv_misc_herb_chamlotus",
-  null,
-  1000,
-  "Created by Alchemists by combining the herbs of the Dragon Isles.",
-  null,
-  "Uncommon",
-  "Crafting Reagent",
-  3,
-);
+  const saxifrage = await createItem(
+    "Saxifrage",
+    "inv_misc_herb_saxifrage",
+    null,
+    1000,
+    "Gathered by players with the Herbalism skill. Can be bought and sold on the auction house.",
+    "An uncommon DF Herb. Found mostly near 'mountains, cliffs, open plains, or scarcely within volcanic regions.'",
+    "Uncommon",
+    "Crafting Reagent",
+    3
+  );
+  const bubblePoppy = await createItem(
+    "Bubble Poppy",
+    "inv_misc_herb_bubblepoppy",
+    null,
+    1000,
+    "Gathered by players with the Herbalism skill. Can be bought and sold on the auction house.",
+    "An uncommon DF Herb. Found mostly near 'rivers, coasts, & damp caves.'",
+    "Uncommon",
+    "Crafting Reagent",
+    3
+  );
+  const writhebark = await createItem(
+    "Writhebark",
+    "inv_misc_herb_writhebark",
+    null,
+    1000,
+    "Gathered by players with the Herbalism skill. Can be bought and sold on the auction house.",
+    "An uncommon DF Herb. Found mostly near 'an abundance of trees or foliage.'",
+    "Uncommon",
+    "Crafting Reagent",
+    3
+  );
+  const primalConvergent = await createItem(
+    "Primal Convergent",
+    "inv_10_elementalshardfoozles_primordial",
+    null,
+    1000,
+    "Created by Alchemists by combining the four fundamental elements with Order.",
+    null,
+    "Uncommon",
+    "Crafting Reagent",
+    3
+  );
+  const omniumDraconis = await createItem(
+    "Omnium Draconis",
+    "inv_misc_herb_chamlotus",
+    null,
+    1000,
+    "Created by Alchemists by combining the herbs of the Dragon Isles.",
+    null,
+    "Uncommon",
+    "Crafting Reagent",
+    3
+  );
 
   //cooking & fishing drops & items
   // const maybeMeat = await createItem("Maybe Meat", 1000);
@@ -1278,40 +1297,58 @@ const makeTables = async () => {
   // );
 
   //other?
-  const tuftOfPrimalWool = await createItem("Tuft of Primal Wool",
-  "inv_misc_pelt_10",
-  null,
-  1000,
-  "A tuft of fuzzy wool from the argali and musken that live on the Dragon Isles.",
-  null,
-  "Common",
-  "Crafting Reagent"
+  const tuftOfPrimalWool = await createItem(
+    "Tuft of Primal Wool",
+    "inv_misc_pelt_10",
+    null,
+    1000,
+    "A tuft of fuzzy wool from the argali and musken that live on the Dragon Isles.",
+    null,
+    "Common",
+    "Crafting Reagent"
   );
   // const glowingTitanOrb = await createItem("Glowing Titan Orb", 200);
   // const aquaticMaw = await createItem("Aquatic Maw", 1000);
   // const largeSturdyFemur = await createItem("Large Sturdy Femur", 1000);
   // const primalBearSpine = await createItem("Primal Bear Spine", 1000);
   // const mastodonTusk = await createItem("Mastodon Tusk", 1000);
-  const iridescentPlume = await createItem("Iridescent Plume",
-  "inv_icon_feather05d",
-  null,
+  const iridescentPlume = await createItem(
+    "Iridescent Plume",
+    "inv_icon_feather05d",
+    null,
+    1000,
+    "A brilliant feather plucked from the harpies and large birds of the Dragon Isles.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const markOfHonor = await createItem("Mark of Honor",
+  "ability_pvp_gladiatormedallion",
+  "Account",
   1000,
-  "A brilliant feather plucked from the harpies and large birds of the Dragon Isles.",
+  "Exchanged for legacy weapons and armor at Player vs. Player vendors.",
   null,
-  "Common",
+  "Rare"
+  );
+  const quackEQuackModulator = await createItem("Quack-E Quack Modulator",
+  "inv_engineering_sonicenvironmentenhancer",
+  "Pickup",
+  1,
+  "Members of the Dragonscale Expedition have been oddly preoccupied with mimicking the sounds of the local waterfowl.",
+  "Bought from Dragonscale Expedition rep vendor?",
+  "Uncommon",
   "Crafting Reagent"
   );
-  // const markOfHonor = await createItem("Mark of Honor", 1000);
-  // const quackEQuackModulator = await createItem("Quack-E Quack Modulator", 1);
   // const pentagoldSeal = await createItem("Pentagold Seal", 1000);
-  const rainbowPearl = await createItem("Rainbow Pearl",
-  "inv_misc_gem_pearl_13",
-  null,
-  1000,
-  "Shines with a prismatic hue.",
-  null,
-  "Rare",
-  "Crafting Reagent"
+  const rainbowPearl = await createItem(
+    "Rainbow Pearl",
+    "inv_misc_gem_pearl_13",
+    null,
+    1000,
+    "Shines with a prismatic hue.",
+    null,
+    "Rare",
+    "Crafting Reagent"
   );
   // const artisanalBerryJuice = await createItem("Artisanal Berry Juice", 1000);
   // const refreshingSpringWater = await createItem(
@@ -1324,7 +1361,7 @@ const makeTables = async () => {
   //tailoring items
   const wilderclothBandage = await createItem(
     "Wildercloth Bandage",
-    "inv_10_skinning_consumable_clothbandages_color2",
+    "inv_tailoring_heavybandage",
     null,
     200,
     null,
@@ -1334,7 +1371,7 @@ const makeTables = async () => {
     3,
     null,
     null,
-    "Heals 33977-46153 damage over 8 seconds. (based on quality)"
+    "Heals 33977/39603/46153 damage (based on quality) over 8 seconds."
   );
   const surveyorsClothBands = await createItem(
     "Surveyor's Cloth Bands",
@@ -1353,11 +1390,14 @@ const makeTables = async () => {
     "Wrist",
     null,
     [306, 308, 310, 313, 316],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 105]],
     [
-      ["Stamina", "?", "?", "?", "?", 257],
-      ["Random Stat 1", "?", "?", "?", "?", 65],
-      ["Random Stat 2", "?", "?", "?", "?", 65],
+      ["Intellect", "", "", "", ""],
+      [96, "?", "?", "?", 105],
+    ],
+    [
+      ["Stamina", 240, "?", "?", "?", 257],
+      ["Random Stat 1", 55, "?", "?", "?", 65],
+      ["Random Stat 2", 55, "?", "?", "?", 65],
     ]
   );
   const surveyorsClothTreads = await createItem(
@@ -1377,11 +1417,14 @@ const makeTables = async () => {
     "Feet",
     null,
     [306, 308, 310, 313, 316],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 140]],
     [
-      ["Stamina", "?", "?", "?", "?", 342],
-      ["Random Stat 1", "?", "?", "?", "?", 86],
-      ["Random Stat 2", "?", "?", "?", "?", 86],
+      ["Intellect", "", "", "", ""],
+      [128, "?", "?", "?", 140],
+    ],
+    [
+      ["Stamina", 319, "?", "?", "?", 342],
+      ["Random Stat 1", 74, "?", "?", "?", 86],
+      ["Random Stat 2", 74, "?", "?", "?", 86],
     ]
   );
   const surveyorsClothRobe = await createItem(
@@ -1401,11 +1444,14 @@ const makeTables = async () => {
     "Chest",
     null,
     [306, 308, 310, 313, 316],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 187]],
     [
-      ["Stamina", "?", "?", "?", "?", 456],
-      ["Random Stat 1", "?", "?", "?", "?", 115],
-      ["Random Stat 2", "?", "?", "?", "?", 115],
+      ["Intellect", "", "", "", ""],
+      [171, "?", "?", "?", 187],
+    ],
+    [
+      ["Stamina", 426, "?", "?", "?", 456],
+      ["Random Stat 1", 98, "?", "?", "?", 115],
+      ["Random Stat 2", 98, "?", "?", "?", 115],
     ]
   );
   const wilderclothBolt = await createItem(
@@ -1436,11 +1482,14 @@ const makeTables = async () => {
     "Waist",
     null,
     [333, 335, 337, 340, 343],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 181]],
     [
-      ["Stamina", "?", "?", "?", "?", 374],
-      ["Random Stat 1", "?", "?", "?", "?", 179],
-      ["Random Stat 2", "?", "?", "?", "?", 179],
+      ["Intellect", "", "", "", ""],
+      [165, "?", "?", "?", 181],
+    ],
+    [
+      ["Stamina", 362, "?", "?", "?", 374],
+      ["Random Stat 1", 138, "?", "?", "?", 179],
+      ["Random Stat 2", 138, "?", "?", "?", 179],
     ]
   );
   const surveyorsSeasonedGloves = await createItem(
@@ -1460,11 +1509,14 @@ const makeTables = async () => {
     "Hands",
     null,
     [333, 335, 337, 340, 343],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 181]],
     [
-      ["Stamina", "?", "?", "?", "?", 374],
-      ["Random Stat 1", "?", "?", "?", "?", 179],
-      ["Random Stat 2", "?", "?", "?", "?", 179],
+      ["Intellect", "", "", "", ""],
+      [165, "?", "?", "?", 181],
+    ],
+    [
+      ["Stamina", 362, "?", "?", "?", 374],
+      ["Random Stat 1", 138, "?", "?", "?", 179],
+      ["Random Stat 2", 138, "?", "?", "?", 179],
     ]
   );
   const surveyorsSeasonedHood = await createItem(
@@ -1484,11 +1536,14 @@ const makeTables = async () => {
     "Head",
     null,
     [333, 335, 337, 340, 343],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 241]],
     [
-      ["Stamina", "?", "?", "?", "?", 498],
-      ["Random Stat 1", "?", "?", "?", "?", 239],
-      ["Random Stat 2", "?", "?", "?", "?", 239],
+      ["Intellect", "", "", "", ""],
+      [219, "?", "?", "?", 241],
+    ],
+    [
+      ["Stamina", 483, "?", "?", "?", 498],
+      ["Random Stat 1", 184, "?", "?", "?", 239],
+      ["Random Stat 2", 184, "?", "?", "?", 239],
     ]
   );
   const surveyorsSeasonedPants = await createItem(
@@ -1508,11 +1563,14 @@ const makeTables = async () => {
     "Legs",
     null,
     [333, 335, 337, 340, 343],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 241]],
     [
-      ["Stamina", "?", "?", "?", "?", 498],
-      ["Random Stat 1", "?", "?", "?", "?", 239],
-      ["Random Stat 2", "?", "?", "?", "?", 239],
+      ["Intellect", "", "", "", ""],
+      [219, "?", "?", "?", 241],
+    ],
+    [
+      ["Stamina", 483, "?", "?", "?", 498],
+      ["Random Stat 1", 184, "?", "?", "?", 239],
+      ["Random Stat 2", 184, "?", "?", "?", 239],
     ]
   );
   const surveyorsSeasonedShoulders = await createItem(
@@ -1532,11 +1590,14 @@ const makeTables = async () => {
     "Chest",
     null,
     [333, 335, 337, 340, 343],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 181]],
     [
-      ["Stamina", "?", "?", "?", "?", 374],
-      ["Random Stat 1", "?", "?", "?", "?", 179],
-      ["Random Stat 2", "?", "?", "?", "?", 179],
+      ["Intellect", "", "", "", ""],
+      [165, "?", "?", "?", 181],
+    ],
+    [
+      ["Stamina", 362, "?", "?", "?", 374],
+      ["Random Stat 1", 138, "?", "?", "?", 179],
+      ["Random Stat 2", 138, "?", "?", "?", 179],
     ]
   );
   const surveyorsTailoredCloak = await createItem(
@@ -1558,12 +1619,12 @@ const makeTables = async () => {
     [306, 308, 310, 313, 316],
     [
       ["Agility", "Intellect", "Strength", "", ""],
-      ["?", "?", "?", "?", 105],
+      [96, "?", "?", "?", 105],
     ],
     [
-      ["Stamina", "?", "?", "?", "?", 257],
-      ["Random Stat 1", "?", "?", "?", "?", 65],
-      ["Random Stat 2", "?", "?", "?", "?", 65],
+      ["Stamina", 240, "?", "?", "?", 257],
+      ["Random Stat 1", 55, "?", "?", "?", 65],
+      ["Random Stat 2", 55, "?", "?", "?", 65],
     ]
   );
   const vibrantWilderclothBolt = await createItem(
@@ -1625,7 +1686,7 @@ const makeTables = async () => {
     "Finishing Crafting Reagent",
     3,
     "Polishing Cloth",
-    "When crafting: You are 9-15% more likely to improve at Jewelcrafting, but Recipe Difficulty is increased by 18-30. (based on quality)"
+    "When crafting: You are 9-15% (based on quality) more likely to improve at Jewelcrafting, but Recipe Difficulty is increased by 18-30."
   );
   const vibrantPolishingCloth = await createItem(
     "Vibrant Polishing Cloth",
@@ -1638,7 +1699,7 @@ const makeTables = async () => {
     "Finishing Crafting Reagent",
     3,
     "Polishing Cloth",
-    "When crafting: Increases bonus Skill from Inspiration by 7-12% and Inspiration by 30-50. (based on quality)"
+    "When crafting: Increases bonus Skill from Inspiration by 7-12% (based on quality) and Inspiration by 30-50."
   );
   const chromaticEmbroideryThread = await createItem(
     "Chromatic Embroidery Thread",
@@ -1651,7 +1712,7 @@ const makeTables = async () => {
     "Finishing Crafting Reagent",
     3,
     "Embroidery Thread",
-    "When crafting: Increases bonus Skill from Inspiration by 7-12% and Crafting Speed by 12-20%. (based on quality)"
+    "When crafting: Increases bonus Skill from Inspiration by 7-12% (based on quality) and Crafting Speed by 12-20%."
   );
   const shimmeringEmbroideryThread = await createItem(
     "Shimmering Embroidery Thread",
@@ -1677,7 +1738,7 @@ const makeTables = async () => {
     "Finishing Crafting Reagent",
     3,
     "Embroidery Thread",
-    "When crafting: You are 9-15% more likely to improve at Tailoring, but Recipe Difficulty is increased by 18-30. (based on quality)"
+    "When crafting: You are 9-15% (based on quality) more likely to improve at Tailoring, but Recipe Difficulty is increased by 18-30."
   );
   const vibrantWilderclothGirdle = await createItem(
     "Vibrant Wildercloth Girdle",
@@ -1696,11 +1757,14 @@ const makeTables = async () => {
     "Waist",
     null,
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 285]],
     [
-      ["Stamina", "?", "?", "?", "?", 679],
-      ["Random Stat 1", "?", "?", "?", "?", 249],
-      ["Random Stat 2", "?", "?", "?", "?", 249],
+      ["Intellect", "", "", "", ""],
+      [260, "?", "?", "?", 285],
+    ],
+    [
+      ["Stamina", 594, "?", "?", "?", 679],
+      ["Random Stat 1", 235, "?", "?", "?", 249],
+      ["Random Stat 2", 235, "?", "?", "?", 249],
     ]
   );
   const vibrantWilderclothHandwraps = await createItem(
@@ -1720,11 +1784,14 @@ const makeTables = async () => {
     "Hands",
     null,
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 285]],
     [
-      ["Stamina", "?", "?", "?", "?", 679],
-      ["Random Stat 1", "?", "?", "?", "?", 249],
-      ["Random Stat 2", "?", "?", "?", "?", 249],
+      ["Intellect", "", "", "", ""],
+      [260, "?", "?", "?", 285],
+    ],
+    [
+      ["Stamina", 594, "?", "?", "?", 679],
+      ["Random Stat 1", 235, "?", "?", "?", 249],
+      ["Random Stat 2", 235, "?", "?", "?", 249],
     ]
   );
   const vibrantWilderclothHeadcover = await createItem(
@@ -1744,11 +1811,14 @@ const makeTables = async () => {
     "Head",
     null,
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 380]],
     [
-      ["Stamina", "?", "?", "?", "?", 905],
-      ["Random Stat 1", "?", "?", "?", "?", 332],
-      ["Random Stat 2", "?", "?", "?", "?", 332],
+      ["Intellect", "", "", "", ""],
+      [346, "?", "?", "?", 380],
+    ],
+    [
+      ["Stamina", 793, "?", "?", "?", 905],
+      ["Random Stat 1", 313, "?", "?", "?", 332],
+      ["Random Stat 2", 313, "?", "?", "?", 332],
     ]
   );
   const vibrantWilderclothShawl = await createItem(
@@ -1770,12 +1840,12 @@ const makeTables = async () => {
     [382, 384, 386, 389, 392],
     [
       ["Agility", "Intellect", "Strength", "", ""],
-      ["?", "?", "?", "?", 214],
+      [195, 198, "?", "?", 214],
     ],
     [
-      ["Stamina", "?", "?", "?", "?", 509],
-      ["Random Stat 1", "?", "?", "?", "?", 187],
-      ["Random Stat 2", "?", "?", "?", "?", 187],
+      ["Stamina", 446, 458, "?", "?", 509],
+      ["Random Stat 1", 176, "?", "?", "?", 187],
+      ["Random Stat 2", 176, "?", "?", "?", 187],
     ]
   );
   const vibrantWilderclothShoulderspikes = await createItem(
@@ -1795,11 +1865,14 @@ const makeTables = async () => {
     "Shoulder",
     null,
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 285]],
     [
-      ["Stamina", "?", "?", "?", "?", 679],
-      ["Random Stat 1", "?", "?", "?", "?", 249],
-      ["Random Stat 2", "?", "?", "?", "?", 249],
+      ["Intellect", "", "", "", ""],
+      [260, "?", "?", "?", 285],
+    ],
+    [
+      ["Stamina", 594, "?", "?", "?", 679],
+      ["Random Stat 1", 235, "?", "?", "?", 249],
+      ["Random Stat 2", 235, "?", "?", "?", 249],
     ]
   );
   const vibrantWilderclothSlacks = await createItem(
@@ -1819,11 +1892,14 @@ const makeTables = async () => {
     "Legs",
     null,
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 380]],
     [
-      ["Stamina", "?", "?", "?", "?", 905],
-      ["Random Stat 1", "?", "?", "?", "?", 332],
-      ["Random Stat 2", "?", "?", "?", "?", 332],
+      ["Intellect", "", "", "", ""],
+      [346, "?", "?", "?", 380],
+    ],
+    [
+      ["Stamina", 793, "?", "?", "?", 905],
+      ["Random Stat 1", 313, "?", "?", "?", 332],
+      ["Random Stat 2", 313, "?", "?", "?", 332],
     ]
   );
   const vibrantWilderclothSlippers = await createItem(
@@ -1843,11 +1919,14 @@ const makeTables = async () => {
     "Feet",
     null,
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 285]],
     [
-      ["Stamina", "?", "?", "?", "?", 679],
-      ["Random Stat 1", "?", "?", "?", "?", 249],
-      ["Random Stat 2", "?", "?", "?", "?", 249],
+      ["Intellect", "", "", "", ""],
+      [260, "?", "?", "?", 285],
+    ],
+    [
+      ["Stamina", 594, "?", "?", "?", 679],
+      ["Random Stat 1", 235, "?", "?", "?", 249],
+      ["Random Stat 2", 235, "?", "?", "?", 249],
     ]
   );
   const vibrantWilderclothVestments = await createItem(
@@ -1867,11 +1946,14 @@ const makeTables = async () => {
     "Chest",
     null,
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 380]],
     [
-      ["Stamina", "?", "?", "?", "?", 905],
-      ["Random Stat 1", "?", "?", "?", "?", 332],
-      ["Random Stat 2", "?", "?", "?", "?", 332],
+      ["Intellect", "", "", "", ""],
+      [346, "?", "?", "?", 380],
+    ],
+    [
+      ["Stamina", 793, "?", "?", "?", 905],
+      ["Random Stat 1", 313, "?", "?", "?", 332],
+      ["Random Stat 2", 313, "?", "?", "?", 332],
     ]
   );
   const vibrantWilderclothWristwraps = await createItem(
@@ -1891,14 +1973,17 @@ const makeTables = async () => {
     "Wrist",
     null,
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 214]],
     [
-      ["Stamina", "?", "?", "?", "?", 509],
-      ["Random Stat 1", "?", "?", "?", "?", 187],
-      ["Random Stat 2", "?", "?", "?", "?", 187],
+      ["Intellect", "", "", "", ""],
+      [195, 198, "?", "?", 214],
+    ],
+    [
+      ["Stamina", 446, 458, "?", "?", 509],
+      ["Random Stat 1", 176, "?", "?", "?", 187],
+      ["Random Stat 2", 176, "?", "?", "?", 187],
     ]
   );
-  //need to put pvp ilvls for the next set
+
   const crimsonCombatantsWilderclothBands = await createItem(
     "Crimson Combatant's Wildercloth Bands",
     "inv_cloth_dragonquest_b_01_bracer",
@@ -1910,17 +1995,20 @@ const makeTables = async () => {
     null,
     5,
     null,
-    "Increases item level to ?-398 in Arenas and Battlegrounds. (based on quality)",
+    "Increases item level to 398 in Arenas and Battlegrounds.",
     null,
     "Cloth",
     "Wrist",
     null,
     [333, 335, 337, 340, 343],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 135]],
     [
-      ["Stamina", "?", "?", "?", "?", 280],
-      ["Random Stat 1", "?", "?", "?", "?", 134],
-      ["Random Stat 2", "?", "?", "?", "?", 134],
+      ["Intellect", "", "", "", ""],
+      [123, "?", "?", "?", 135],
+    ],
+    [
+      ["Stamina", 271, "?", "?", "?", 280],
+      ["Random Stat 1", 104, "?", "?", "?", 134],
+      ["Random Stat 2", 104, "?", "?", "?", 134],
     ]
   );
   const crimsonCombatantsWilderclothCloak = await createItem(
@@ -1934,7 +2022,7 @@ const makeTables = async () => {
     null,
     5,
     null,
-    "Increases item level to ?-398 in Arenas and Battlegrounds. (based on quality)",
+    "Increases item level to 398 in Arenas and Battlegrounds.",
     null,
     null,
     "Back",
@@ -1942,12 +2030,12 @@ const makeTables = async () => {
     [333, 335, 337, 340, 343],
     [
       ["Agility", "Intellect", "Strength", "", ""],
-      ["?", "?", "?", "?", 135],
+      [123, "?", "?", "?", 135],
     ],
     [
-      ["Stamina", "?", "?", "?", "?", 280],
-      ["Random Stat 1", "?", "?", "?", "?", 134],
-      ["Random Stat 2", "?", "?", "?", "?", 134],
+      ["Stamina", 271, "?", "?", "?", 280],
+      ["Random Stat 1", 104, "?", "?", "?", 134],
+      ["Random Stat 2", 104, "?", "?", "?", 134],
     ]
   );
   const crimsonCombatantsWilderclothGloves = await createItem(
@@ -1961,22 +2049,25 @@ const makeTables = async () => {
     null,
     5,
     null,
-    "Increases item level to ?-398 in Arenas and Battlegrounds. (based on quality)",
+    "Increases item level to 398 in Arenas and Battlegrounds.",
     null,
     "Cloth",
     "Hands",
     null,
     [333, 335, 337, 340, 343],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 181]],
     [
-      ["Stamina", "?", "?", "?", "?", 374],
-      ["Random Stat 1", "?", "?", "?", "?", 179],
-      ["Random Stat 2", "?", "?", "?", "?", 179],
+      ["Intellect", "", "", "", ""],
+      [165, "?", "?", "?", 181],
+    ],
+    [
+      ["Stamina", 362, "?", "?", "?", 374],
+      ["Random Stat 1", 138, "?", "?", "?", 179],
+      ["Random Stat 2", 138, "?", "?", "?", 179],
     ]
   );
   const crimsonCombatantsWilderclothHood = await createItem(
     "Crimson Combatant's Wildercloth Hood",
-    "inv_cloth_dragonquest_b_01_helm",
+    "inv_cloth_dragonquest_b_01_helmet",
     "Equip",
     1,
     null,
@@ -1985,17 +2076,20 @@ const makeTables = async () => {
     null,
     5,
     null,
-    "Increases item level to ?-398 in Arenas and Battlegrounds. (based on quality)",
+    "Increases item level to 398 in Arenas and Battlegrounds.",
     null,
     "Cloth",
     "Head",
     null,
     [333, 335, 337, 340, 343],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 241]],
     [
-      ["Stamina", "?", "?", "?", "?", 498],
-      ["Random Stat 1", "?", "?", "?", "?", 239],
-      ["Random Stat 2", "?", "?", "?", "?", 239],
+      ["Intellect", "", "", "", ""],
+      [219, "?", "?", "?", 241],
+    ],
+    [
+      ["Stamina", 483, "?", "?", "?", 498],
+      ["Random Stat 1", 184, "?", "?", "?", 239],
+      ["Random Stat 2", 184, "?", "?", "?", 239],
     ]
   );
   const crimsonCombatantsWilderclothLeggings = await createItem(
@@ -2009,17 +2103,20 @@ const makeTables = async () => {
     null,
     5,
     null,
-    "Increases item level to ?-398 in Arenas and Battlegrounds. (based on quality)",
+    "Increases item level to 398 in Arenas and Battlegrounds.",
     null,
     "Cloth",
     "Legs",
     null,
     [333, 335, 337, 340, 343],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 241]],
     [
-      ["Stamina", "?", "?", "?", "?", 498],
-      ["Random Stat 1", "?", "?", "?", "?", 239],
-      ["Random Stat 2", "?", "?", "?", "?", 239],
+      ["Intellect", "", "", "", ""],
+      [219, "?", "?", "?", 241],
+    ],
+    [
+      ["Stamina", 483, "?", "?", "?", 498],
+      ["Random Stat 1", 184, "?", "?", "?", 239],
+      ["Random Stat 2", 184, "?", "?", "?", 239],
     ]
   );
   const crimsonCombatantsWilderclothSash = await createItem(
@@ -2033,17 +2130,20 @@ const makeTables = async () => {
     null,
     5,
     null,
-    "Increases item level to ?-398 in Arenas and Battlegrounds. (based on quality)",
+    "Increases item level to 398 in Arenas and Battlegrounds.",
     null,
     "Cloth",
     "Waist",
     null,
     [333, 335, 337, 340, 343],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 181]],
     [
-      ["Stamina", "?", "?", "?", "?", 374],
-      ["Random Stat 1", "?", "?", "?", "?", 179],
-      ["Random Stat 2", "?", "?", "?", "?", 179],
+      ["Intellect", "", "", "", ""],
+      [165, "?", "?", "?", 181],
+    ],
+    [
+      ["Stamina", 362, "?", "?", "?", 374],
+      ["Random Stat 1", 138, "?", "?", "?", 179],
+      ["Random Stat 2", 138, "?", "?", "?", 179],
     ]
   );
   const crimsonCombatantsWilderclothShoulderpads = await createItem(
@@ -2057,17 +2157,20 @@ const makeTables = async () => {
     null,
     5,
     null,
-    "Increases item level to ?-398 in Arenas and Battlegrounds. (based on quality)",
+    "Increases item level to 398 in Arenas and Battlegrounds.",
     null,
     "Cloth",
     "Shoulder",
     null,
     [333, 335, 337, 340, 343],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 181]],
     [
-      ["Stamina", "?", "?", "?", "?", 374],
-      ["Random Stat 1", "?", "?", "?", "?", 179],
-      ["Random Stat 2", "?", "?", "?", "?", 179],
+      ["Intellect", "", "", "", ""],
+      [165, "?", "?", "?", 181],
+    ],
+    [
+      ["Stamina", 362, "?", "?", "?", 374],
+      ["Random Stat 1", 138, "?", "?", "?", 179],
+      ["Random Stat 2", 138, "?", "?", "?", 179],
     ]
   );
   const crimsonCombatantsWilderclothTreads = await createItem(
@@ -2081,17 +2184,20 @@ const makeTables = async () => {
     null,
     5,
     null,
-    "Increases item level to ?-398 in Arenas and Battlegrounds. (based on quality)",
+    "Increases item level to 398 in Arenas and Battlegrounds.",
     null,
     "Cloth",
     "Feet",
     null,
     [333, 335, 337, 340, 343],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 181]],
     [
-      ["Stamina", "?", "?", "?", "?", 374],
-      ["Random Stat 1", "?", "?", "?", "?", 179],
-      ["Random Stat 2", "?", "?", "?", "?", 179],
+      ["Intellect", "", "", "", ""],
+      [165, "?", "?", "?", 181],
+    ],
+    [
+      ["Stamina", 362, "?", "?", "?", 374],
+      ["Random Stat 1", 138, "?", "?", "?", 179],
+      ["Random Stat 2", 138, "?", "?", "?", 179],
     ]
   );
   const crimsonCombatantsWilderclothTunic = await createItem(
@@ -2105,20 +2211,23 @@ const makeTables = async () => {
     null,
     5,
     null,
-    "Increases item level to ?-398 in Arenas and Battlegrounds. (based on quality)",
+    "Increases item level to 398 in Arenas and Battlegrounds.",
     null,
     "Cloth",
     "Chest",
     null,
     [333, 335, 337, 340, 343],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 241]],
     [
-      ["Stamina", "?", "?", "?", "?", 498],
-      ["Random Stat 1", "?", "?", "?", "?", 239],
-      ["Random Stat 2", "?", "?", "?", "?", 239],
+      ["Intellect", "", "", "", ""],
+      [219, "?", "?", "?", 241],
+    ],
+    [
+      ["Stamina", 483, "?", "?", "?", 498],
+      ["Random Stat 1", 184, "?", "?", "?", 239],
+      ["Random Stat 2", 184, "?", "?", "?", 239],
     ]
   );
-  //pvp done
+
   const amiceOfTheBlue = await createItem(
     "Amice of the Blue",
     "inv_shoulder_cloth_dragondungeon_c_01",
@@ -2130,17 +2239,20 @@ const makeTables = async () => {
     null,
     5,
     null,
-    "Your damaging spells and abilities have a chance to trigger a burst of Arcane energy at the target's location, dealing ?-14,178 Arcane damage split between nearby enemies. (based on quality)",
+    "Your damaging spells and abilities have a chance to trigger a burst of Arcane energy at the target's location, dealing 11389-14178 Arcane damage (based on quality) split between nearby enemies.",
     null,
     "Cloth",
     "Shoulder",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 285]],
     [
-      ["Stamina", "?", "?", "?", "?", 679],
-      ["Critical Strike", "?", "?", "?", "?", 206],
-      ["Mastery", "?", "?", "?", "?", 292],
+      ["Intellect", "", "", "", ""],
+      [260, "?", "?", 277, 285],
+    ],
+    [
+      ["Stamina", 594, "?", "?", 653, 679],
+      ["Critical Strike", 194, "?", "?", "?", 206],
+      ["Mastery", 275, "?", "?", "?", 292],
     ]
   );
   const azureweaveMantle = await createItem(
@@ -2160,11 +2272,14 @@ const makeTables = async () => {
     "Shoulder",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 285]],
     [
-      ["Stamina", "?", "?", "?", "?", 679],
-      ["Haste", "?", "?", "?", "?", 185],
-      ["Mastery", "?", "?", "?", "?", 313],
+      ["Intellect", "", "", "", ""],
+      [260, "?", "?", 277, 285],
+    ],
+    [
+      ["Stamina", 594, "?", "?", 653, 679],
+      ["Haste", 174, "?", "?", "?", 185],
+      ["Mastery", 295, "?", "?", "?", 313],
     ]
   );
   const azureweaveRobe = await createItem(
@@ -2184,11 +2299,14 @@ const makeTables = async () => {
     "Chest",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 380]],
     [
-      ["Stamina", "?", "?", "?", "?", 905],
-      ["Versatility", "?", "?", "?", "?", 209],
-      ["Mastery", "?", "?", "?", "?", 455],
+      ["Intellect", "", "", "", ""],
+      [346, "?", "?", "?", 380],
+    ],
+    [
+      ["Stamina", 793, "?", "?", "?", 905],
+      ["Versatility", 197, "?", "?", "?", 209],
+      ["Mastery", 429, "?", "?", "?", 455],
     ]
   );
   const azureweaveSlippers = await createItem(
@@ -2208,11 +2326,14 @@ const makeTables = async () => {
     "Feet",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 285]],
     [
-      ["Stamina", "?", "?", "?", "?", 679],
-      ["Critical Strike", "?", "?", "?", "?", 199],
-      ["Mastery", "?", "?", "?", "?", 299],
+      ["Intellect", "", "", "", ""],
+      [260, "?", "?", 277, 285],
+    ],
+    [
+      ["Stamina", 594, "?", "?", 653, 679],
+      ["Critical Strike", 188, "?", "?", "?", 199],
+      ["Mastery", 282, "?", "?", "?", 299],
     ]
   );
   const blueDragonSoles = await createItem(
@@ -2226,20 +2347,23 @@ const makeTables = async () => {
     null,
     5,
     null,
-    "Every 2 seconds you spend moving increases your Intellect by ?-185, stacking up to 5 times. Casting a spell will consume all stacks of Intellect. (based on quality)",
+    "Every 2 seconds you spend moving increases your Intellect by 169-185 (based on quality), stacking up to 5 times. Casting a spell will consume all stacks of Intellect.",
     null,
     "Cloth",
     "Feet",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 285]],
     [
-      ["Stamina", "?", "?", "?", "?", 679],
-      ["Versatility", "?", "?", "?", "?", 231],
-      ["Mastery", "?", "?", "?", "?", 267],
+      ["Intellect", "", "", "", ""],
+      [260, "?", "?", 277, 285],
+    ],
+    [
+      ["Stamina", 594, "?", "?", 653, 679],
+      ["Versatility", 218, "?", "?", "?", 231],
+      ["Mastery", 251, "?", "?", "?", 267],
     ]
   );
-  //below item needs pvp ilvl
+
   const infuriousBindingOfGesticulation = await createItem(
     "Infurious Binding of Gesticulation",
     "inv_cloth_dragonpvp_d_01_belt",
@@ -2251,17 +2375,20 @@ const makeTables = async () => {
     null,
     5,
     null,
-    "Gladiator's Distinction reduces the duration of incoming crowd control effects by an additional 5%. Increases item level to ?-424 in Arenas and Battlegrounds. (based on quality)",
+    "Gladiator's Distinction reduces the duration of incoming crowd control effects by an additional 5%. Increases item level to 424 in Arenas and Battlegrounds.",
     null,
     "Cloth",
     "Waist",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 285]],
     [
-      ["Stamina", "?", "?", "?", "?", 679],
-      ["Versatility", "?", "?", "?", "?", 320],
-      ["Mastery", "?", "?", "?", "?", 178],
+      ["Intellect", "", "", "", ""],
+      [260, "?", "?", 277, 285],
+    ],
+    [
+      ["Stamina", 594, "?", "?", 653, 679],
+      ["Versatility", 302, "?", "?", "?", 320],
+      ["Mastery", 168, "?", "?", "?", 178],
     ]
   );
   const alliedWristguardsOfTimeDilation = await createItem(
@@ -2275,17 +2402,20 @@ const makeTables = async () => {
     null,
     5,
     null,
-    "Your spells and abilities have a chance to rally you and your 4 closest allies withing 30 yards to victory for 10 sec, increasing Versatility by ?-?. (based on quality)",
+    "Your spells and abilities have a chance to rally you and your 4 closest allies withing 30 yards to victory for 10 sec, increasing Versatility by 191-?. (based on quality)",
     null,
     "Cloth",
     "Wrist",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 214]],
     [
-      ["Stamina", "?", "?", "?", "?", 509],
-      ["Versatility", "?", "?", "?", "?", 192],
-      ["Mastery", "?", "?", "?", "?", 181],
+      ["Intellect", "", "", "", ""],
+      [195, 198, "?", "?", 214],
+    ],
+    [
+      ["Stamina", 446, 458, "?", "?", 509],
+      ["Versatility", 181, "?", "?", "?", 192],
+      ["Mastery", 171, "?", "?", "?", 181],
     ]
   );
   const chronoclothGloves = await createItem(
@@ -2305,11 +2435,14 @@ const makeTables = async () => {
     "Hands",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", "?", 285]],
     [
-      ["Stamina", "?", "?", "?", "?", 679],
-      ["Haste", "?", "?", "?", "?", 299],
-      ["Versatility", "?", "?", "?", "?", 199],
+      ["Intellect", "", "", "", ""],
+      [260, "?", "?", 277, 285],
+    ],
+    [
+      ["Stamina", 594, "?", "?", 653, 679],
+      ["Haste", 282, "?", "?", "?", 299],
+      ["Versatility", 188, "?", "?", "?", 199],
     ]
   );
   const chronoclothLeggings = await createItem(
@@ -2329,11 +2462,14 @@ const makeTables = async () => {
     "Legs",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", 370, 380]],
     [
-      ["Stamina", "?", "?", "?", 871, 905],
-      ["Critical Strike", "?", "?", "?", 210, 213],
-      ["Haste", "?", "?", "?", 443, 451],
+      ["Intellect", "", "", "", ""],
+      [346, "?", "?", 370, 380],
+    ],
+    [
+      ["Stamina", 793, "?", "?", 871, 905],
+      ["Critical Strike", 201, "?", "?", 210, 213],
+      ["Haste", 4255, "?", "?", 443, 451],
     ]
   );
   const chronoclothSash = await createItem(
@@ -2353,9 +2489,12 @@ const makeTables = async () => {
     "Waist",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", 277, 285]],
     [
-      ["Stamina", "?", "?", "?", 653, 679],
+      ["Intellect", "", "", "", ""],
+      [260, "?", "?", 277, 285],
+    ],
+    [
+      ["Stamina", 594, "?", "?", 653, 679],
       ["Haste", "?", "?", "?", 318, 324],
       ["Mastery", "?", "?", "?", 171, 174],
     ]
@@ -2371,17 +2510,20 @@ const makeTables = async () => {
     null,
     5,
     null,
-    "Damaging a new enemy grants you ?-183 Haste for 10 sec, up to 5 stacks. (based on quality)",
+    "Damaging a new enemy grants you 165-183 Haste (based on quality) for 10 sec, up to 5 stacks.",
     null,
     "Cloth",
     "Head",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", 370, 380]],
     [
-      ["Stamina", "?", "?", "?", 871, 905],
-      ["Haste", "?", "?", "?", 331, 337],
-      ["Versatility", "?", "?", "?", 322, 327],
+      ["Intellect", "", "", "", ""],
+      [346, "?", "?", 370, 380],
+    ],
+    [
+      ["Stamina", 793, "?", "?", 871, 905],
+      ["Haste", 317, "?", "?", 331, 337],
+      ["Versatility", 308, "?", "?", 322, 327],
     ]
   );
   //below item needs pvp ilvl
@@ -2396,17 +2538,20 @@ const makeTables = async () => {
     null,
     5,
     null,
-    "After recovering from a loss of control effect, you become empowered with possibility, increasing your Haste by ?-548 for 10 sec. This effect may only occur once every 30 sec. Increase item level to ?-424 in Arenas and Battlegrounds. (based on quality)",
+    "After recovering from a loss of control effect, you become empowered with possibility, increasing your Haste by 517-548 (based on quality) for 10 sec. This effect may only occur once every 30 sec. Increase item level to 424 in Arenas and Battlegrounds.",
     null,
     "Cloth",
     "Legs",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
-    [["Intellect", "", "", "", ""], ["?", "?", "?", 370, 380]],
     [
-      ["Stamina", "?", "?", "?", 871, 905],
-      ["Haste", "?", "?", "?", 196, 199],
-      ["Versatility", "?", "?", "?", 457, 465],
+      ["Intellect", "", "", "", ""],
+      [346, "?", "?", 370, 380],
+    ],
+    [
+      ["Stamina", 793, "?", "?", 871, 905],
+      ["Haste", 188, "?", "?", 196, 199],
+      ["Versatility", 438, "?", "?", 457, 465],
     ]
   );
   const dragonclothTailoringVestments = await createItem(
@@ -2426,10 +2571,13 @@ const makeTables = async () => {
     "Chest",
     "Chest (1)",
     [372, 378, 384, 391, 398],
-    [["Skill", "", "", "", ""], ["?", "?", "?", 10, 10]],
     [
-      ["Inspiration", "?", "?", "?", 67, 73],
-      ["Multicraft", "?", "?", "?", 44, 49],
+      ["Skill", "", "", "", ""],
+      [10, 10, 10, 10, 10],
+    ],
+    [
+      ["Inspiration", 53, "?", "?", 67, 73],
+      ["Multicraft", 35, "?", "?", 44, 49],
     ]
   );
   const mastersWilderclothAlchemistsRobe = await createItem(
@@ -2449,10 +2597,13 @@ const makeTables = async () => {
     "Chest",
     "Chest (1)",
     [346, 352, 358, 365, 372],
-    [["Skill", "", "", "", ""], ["?", "?", "?", 6, "?"]],
     [
-      ["Resourcefulness", "?", "?", "?", 32, "?"],
-      ["Crafting Speed", "?", "?", "?", 48, "?"],
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [
+      ["Resourcefulness", 25, "?", "?", 32, "?"],
+      ["Crafting Speed", 38, "?", "?", 48, "?"],
     ]
   );
   const mastersWilderclothChefsHat = await createItem(
@@ -2472,10 +2623,13 @@ const makeTables = async () => {
     "Head",
     "Head (1)",
     [346, 352, 358, 365, 372],
-    [["Skill", "", "", "", ""], ["?", "?", "?", 4, "?"]],
     [
-      ["Crafting Speed", "?", "?", "?", 48, "?"],
-      ["Multicraft", "?", "?", "?", 32, "?"],
+      ["Skill", "", "", "", ""],
+      [4,4,4,4,4],
+    ],
+    [
+      ["Crafting Speed", 38, "?", "?", 48, "?"],
+      ["Multicraft", 25, "?", "?", 32, "?"],
     ]
   );
   const mastersWilderclothEnchantersHat = await createItem(
@@ -2495,10 +2649,13 @@ const makeTables = async () => {
     "Head",
     "Head (1)",
     [346, 352, 358, 365, 372],
-    [["Skill", "", "", "", ""], ["?", "?", "?", 6, "?"]],
     [
-      ["Inspiration", "?", "?", "?", 56, "?"],
-      ["Resourcefulness", "?", "?", "?", 24, "?"],
+      ["Skill", "", "", "", ""],
+      [6,6,6,6,6],
+    ],
+    [
+      ["Inspiration", 45, "?", "?", 56, "?"],
+      ["Resourcefulness", 19, "?", "?", 24, "?"],
     ]
   );
   const mastersWilderclothFishingCap = await createItem(
@@ -2518,7 +2675,10 @@ const makeTables = async () => {
     "Head",
     null,
     [346, 352, 358, 365, 372],
-    [["Skill", "", "", "", ""], ["?", "?", "?", 6, "?"]]
+    [
+      ["Skill", "", "", "", ""],
+      [6,6,6,6,6],
+    ]
   );
   const mastersWilderclothGardeningHat = await createItem(
     "Master's Wildercloth Gardening Hat",
@@ -2537,10 +2697,13 @@ const makeTables = async () => {
     "Head",
     "Head (1)",
     [346, 352, 358, 365, 372],
-    [["Skill", "", "", "", ""], ["?", "?", "?", 6, "?"]],
     [
-      ["Deftness", "?", "?", "?", 40, "?"],
-      ["Perception", "?", "?", "?", 40, "?"],
+      ["Skill", "", "", "", ""],
+      [6,6,6,6,6],
+    ],
+    [
+      ["Deftness", 32, "?", "?", 40, "?"],
+      ["Perception", 32, "?", "?", 40, "?"],
     ]
   );
   const wilderclothEnchantersHat = await createItem(
@@ -2562,8 +2725,8 @@ const makeTables = async () => {
     [320, 326, 332, 339, 346],
     null,
     [
-      ["Inspiration", "?", "?", "?", "?", 45],
-      ["Resourcefulness", "?", "?", "?", "?", 19],
+      ["Inspiration", 32, "?", "?", "?", 45],
+      ["Resourcefulness", 14, "?", "?", "?", 19],
     ]
   );
   const wilderclothAlchemistsRobe = await createItem(
@@ -2585,8 +2748,8 @@ const makeTables = async () => {
     [320, 326, 332, 339, 346],
     null,
     [
-      ["Resourcefulness", "?", "?", "?", "?", 25],
-      ["Crafting Speed", "?", "?", "?", "?", 38],
+      ["Resourcefulness", 18, "?", "?", "?", 25],
+      ["Crafting Speed", 28, "?", "?", "?", 38],
     ]
   );
   const wilderclothFishingCap = await createItem(
@@ -2606,7 +2769,10 @@ const makeTables = async () => {
     "Head",
     null,
     [320, 326, 332, 339, 346],
-    [["Skill", "", "", "", ""], ["?", "?", "?", "?", 4]]
+    [
+      ["Skill", "", "", "", ""],
+      [4,4,4,4,4],
+    ]
   );
   const wilderclothChefsHat = await createItem(
     "Wildercloth Chef's Hat",
@@ -2627,8 +2793,8 @@ const makeTables = async () => {
     [320, 326, 332, 339, 346],
     null,
     [
-      ["Crafting Speed", "?", "?", "?", "?", 38],
-      ["Multicraft", "?", "?", "?", "?", 25],
+      ["Crafting Speed", 28, "?", "?", "?", 38],
+      ["Multicraft", 18, "?", "?", "?", 25],
     ]
   );
   const wilderclothGardeningHat = await createItem(
@@ -2650,8 +2816,8 @@ const makeTables = async () => {
     [320, 326, 332, 339, 346],
     null,
     [
-      ["Deftness", "?", "?", "?", "?", 32],
-      ["Perception", "?", "?", "?", "?", 32],
+      ["Deftness", 23, "?", "?", "?", 32],
+      ["Perception", 23, "?", "?", "?", 32],
     ]
   );
   const wilderclothTailorsCoat = await createItem(
@@ -2673,8 +2839,8 @@ const makeTables = async () => {
     [320, 326, 332, 339, 346],
     null,
     [
-      ["Inspiration", "?", "?", "?", "?", 38],
-      ["Multicraft", "?", "?", "?", "?", 25],
+      ["Inspiration", 28, "?", "?", "?", 38],
+      ["Multicraft", 18, "?", "?", "?", 25],
     ]
   );
   const frozenSpellthread = await createItem(
@@ -2689,7 +2855,7 @@ const makeTables = async () => {
     3,
     null,
     null,
-    "Apply Frozen Spellthread to your leggings, permanently increasing its Intellect by 99-142 and stamina by 74-106. (based on quality)"
+    "Apply Frozen Spellthread to your leggings, permanently increasing its Intellect by 99/121/142 (based on quality) and stamina by 74/90/106."
   );
   const temporalSpellthread = await createItem(
     "Temporal Spellthread",
@@ -2703,7 +2869,7 @@ const makeTables = async () => {
     3,
     null,
     null,
-    "Apply Temporal Spellthread to your leggings, permanently increasing its Intellect by 99-142 and mana by 3%-5%. (based on quality)"
+    "Apply Temporal Spellthread to your leggings, permanently increasing its Intellect by 99/121/142 (based on quality) and mana by 3%/4%/5%."
   );
   const vibrantSpellthread = await createItem(
     "Vibrant Spellthread",
@@ -2717,7 +2883,7 @@ const makeTables = async () => {
     3,
     null,
     null,
-    "Apply Vibrant Spellthread to your leggings, permanently increasing its Intellect by 59-85. (based on quality)"
+    "Apply Vibrant Spellthread to your leggings, permanently increasing its Intellect by 59/72/85. (based on quality)"
   );
   const azureweaveExpeditionPack = await createItem(
     "Azureweave Expedition Pack",
@@ -2760,28 +2926,42 @@ const makeTables = async () => {
     "inv_10_tailoring2_banner_red",
     "Use",
     1,
-    "Requires Dragon Isles Mining (1)",
+    null,
     null,
     "Rare",
     null,
     3,
     null,
     null,
-    "Place a banner that increases damage done to all Earth and Fire Elementals within 100 yards by 50%/75%/100%. Also grants 18/24/30 Deftness and Finesse to Miners. (based on quality level.) Lasts 10 min. Only usable in the Dragon Isles. (10 Min Cooldown)"
+    "Place a banner that increases damage done to all Earth and Fire Elementals within 100 yards by 50%/75%/100% (based on quality). Also grants 18/24/30 Deftness and Finesse to Miners. Lasts 10 min. Only usable in the Dragon Isles. (10 Min Cooldown)",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {Mining: 1}
   );
   const explorersBannerOfHerbology = await createItem(
     "Explorer's Banner of Herbology",
     "inv_10_tailoring2_banner_green",
     "Use",
     1,
-    "Requires Dragon Isles Herbalism (1)",
+    null,
     null,
     "Rare",
     null,
     3,
     null,
     null,
-    "Place a banner that increases damage done to all Air and Frost Elementals within 100 yards by 50%/75%/100%. Also grants 18/24/30 Deftness and Finesse to Miners. (based on quality level.) Lasts 10 min. Only usable in the Dragon Isles. (10 Min Cooldown)"
+    "Place a banner that increases damage done to all Air and Frost Elementals within 100 yards by 50%/75%/100% (based on quality). Also grants 18/24/30 Deftness and Finesse to Herbalists. Lasts 10 min. Only usable in the Dragon Isles. (10 Min Cooldown)",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {Herbalism: 1}
   );
   const duckStuffedDuckLovie = await createItem(
     "Duck-Stuffed Duck Lovie",
@@ -2869,318 +3049,1618 @@ const makeTables = async () => {
   );
 
   //engineering items
-  // const reinforcedMachineChassis = await createItem(
-  //   "Reinforced Machine Chassis",
-  //   1000
-  // );
-  // const arclightCapacitor = await createItem("Arclight Capacitor", 1000);
-  // const assortedSafetyFuses = await createItem("Assorted Safety Fuses", 1000);
-  // const everburningBlastingPowder = await createItem(
-  //   "Everburning Blasting Powder",
-  //   1000
-  // );
-  // const greasedUpGears = await createItem("Greased-Up Gears", 1000);
-  // const shockSpringCoil = await createItem("Shock-Spring Coil", 1000);
-  // const handfulOfSereviteBolts = await createItem(
-  //   "Handful of Serevite Bolts",
-  //   1000
-  // );
-  // const pieceOfScrap = await createItem("Piece of Scrap", 1000);
-  // const overchargedOverclocker = await createItem(
-  //   "Overcharged Overclocker",
-  //   1000
-  // );
-  // const haphazardlyTetheredWires = await createItem(
-  //   "Haphazardly Tethered Wires",
-  //   1000
-  // );
-  // const calibratedSafetySwitch = await createItem(
-  //   "Calibrated Safety Switch",
-  //   1000
-  // );
-  // const criticalFailurePreventionUnit = await createItem(
-  //   "Critical Failure Prevention Unit",
-  //   1000
-  // );
-  // const magazineOfHealingDarts = await createItem(
-  //   "Magazine of Healing Darts",
-  //   1000
-  // );
-  // const springLoadedCapacitorCasing = await createItem(
-  //   "Spring-Loaded Capacitor Casing",
-  //   1000
-  // );
-  // const tinkerAlarmOTurret = await createItem("Tinker: Alarm-O-Turret", 1000);
-  // const tinkerArclightVitalCorrectors = await createItem(
-  //   "Tinker: Arclight Vital Correctors",
-  //   1000
-  // );
-  // const tinkerPolarityAmplifier = await createItem(
-  //   "Tinker: Polarity Amplifier",
-  //   1000
-  // );
-  // const tinkerSupercollideOTron = await createItem(
-  //   "Tinker: Supercollide-O-Tron",
-  //   1000
-  // );
-  // const tinkerGroundedCircuitry = await createItem(
-  //   "Tinker: Grounded Circuitry",
-  //   1000
-  // );
-  // const tinkerBreathOfNeltharion = await createItem(
-  //   "Tinker: Breath of Neltharion",
-  //   1000
-  // );
-  // const tinkerPlaneDisplacer = await createItem(
-  //   "Tinker: Place Displacer",
-  //   1000
-  // );
-  // const battleReadyBinoculars = await createItem(
-  //   "Battle-Ready Binoculars",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const lightweightOcularLenses = await createItem(
-  //   "Lightweight Ocular Lenses",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const oscillatingWildernessOpticals = await createItem(
-  //   "Oscillating Wilderness Opticals",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const peripheralVisionProjectors = await createItem(
-  //   "Peripheral Vision Projectors",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const deadlineDeadeyes = await createItem("Deadline Deadeyes", 1, 306, 316);
-  // const milestoneMagnifiers = await createItem(
-  //   "Milestone Magnifiers",
-  //   1,
-  //   306,
-  //   316
-  // );
-  // const qualityAssuredOptics = await createItem(
-  //   "Quality-Assured Optics",
-  //   1,
-  //   306,
-  //   316
-  // );
-  // const sentrysStabilizedSpecs = await createItem(
-  //   "Sentry's Stabilized Specs",
-  //   1,
-  //   306,
-  //   316
-  // );
-  // const complicatedCuffs = await createItem("Complicated Cuffs", 1, 382, 392);
-  // const difficultWristProtectors = await createItem(
-  //   "Difficult Wrist Protectors",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const needlesslyComplexWristguards = await createItem(
-  //   "Needlessly Complex Wristguards",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const overengineeredSleeveExtenders = await createItem(
-  //   "Overengineered Sleeve Extenders",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const sophisticatedProblemSolver = await createItem(
-  //   "Sophisticated Problem Solver",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const pewTwo = await createItem("P.E.W. x2", 1, 333, 343);
-  // const meticulouslyTunedGear = await createItem(
-  //   "Meticulously-Tuned Gear",
-  //   1000
-  // );
-  // const oneSizeFitsAllGear = await createItem("One-Size-Fits-All Gear", 1000);
-  // const rapidlyTickingGear = await createItem("Rapidly Ticking Gear", 1000);
-  // const razorSharpGear = await createItem("Razor-Sharp Gear", 1000);
-  // const highIntensityThermalScanner = await createItem(
-  //   "High Intensity Thermal Scanner",
-  //   1000
-  // );
-  // const projectilePropulsionPinion = await createItem(
-  //   "Projectile Propulsion Pinion",
-  //   1000
-  // );
-  // const completelySafeRockets = await createItem(
-  //   "Completely Safe Rockets",
-  //   1000
-  // );
-  // const endlessStackOfNeedles = await createItem(
-  //   "Endless Stack of Needles",
-  //   1000
-  // );
-  // const gyroscopicKaleidoscope = await createItem(
-  //   "Gyroscopic Kaleidoscope",
-  //   1000
-  // );
-  // const blackFireflight = await createItem("Black Fireflight", 1000);
-  // const blueFireflight = await createItem("Blue Fireflight", 1000);
-  // const bundleOfFireworks = await createItem("Bundle of Fireworks", 1000);
-  // const greenFireflight = await createItem("Green Fireflight", 1000);
-  // const redFireflight = await createItem("Red Fireflight", 1000);
-  // const bronzeFireflight = await createItem("Bronze Fireflight", 1000);
-  // const suspiciouslySilentCrate = await createItem(
-  //   "Suspiciously Silent Crate",
-  //   1000
-  // );
-  // const suspiciouslyTickingCrate = await createItem(
-  //   "Suspiciously Ticking Crate",
-  //   1000
-  // );
-  // const iwinButtonMkTen = await createItem("I.W.I.N. Button Mk10", 1000);
-  // const ezThroGreaseGrenade = await createItem("EZ-Thro Grease Grenade", 1000);
-  // const ezThroCreatureCombustionCanister = await createItem(
-  //   "EZ-Thro Creature Combustion Canister",
-  //   1000
-  // );
-  // const ezThroGravitationalDisplacer = await createItem(
-  //   "EZ-Thro Gravitational Displacer",
-  //   1000
-  // );
-  // const ezThroPrimalDeconstructionCharge = await createItem(
-  //   "EZ-Thro Primal Deconstruction Charge",
-  //   1000
-  // );
-  // const stickyWarpGrenade = await createItem("Sticky Warp Grenade", 1000);
-  // const greaseGrenade = await createItem("Grease Grenade", 1000);
-  // const gravitationalDisplacer = await createItem(
-  //   "Gravitational Displacer",
-  //   1000
-  // );
-  // const primalDeconstructionCharge = await createItem(
-  //   "Primal Deconstruction Charge",
-  //   1000
-  // );
-  // const creatureCombustionCanister = await createItem(
-  //   "Creature Combustion Canister",
-  //   1000
-  // );
-  // const savior = await createItem("S.A.V.I.O.R.", 1000);
-  // const zapthrottleSoulInhaler = await createItem("Zapthrottle Soul Inhaler");
-  // const cartomancyCannon = await createItem("Cartomancy Cannon");
-  // const centralizedPrecipitationEmitter = await createItem(
-  //   "Centralized Precipitation Emitter"
-  // );
-  // const elementInfusedRocketHelmet = await createItem(
-  //   "Element-Infused Rocket Helmet"
-  // );
-  // const environmentalEmulator = await createItem("Environmental Emulator");
-  // const giggleGoggles = await createItem("Giggle Goggles");
-  // const help = await createItem("H.E.L.P.");
-  // const expeditionMultiToolbox = await createItem("Expedition Multi-Toolbox");
-  // const tinkerRemovalKit = await createItem("Tinker Removal Kit");
-  // const wyrmholeGenerator = await createItem("Wyrmhole Generator");
-  // const portableAlchemistsLabBench = await createItem(
-  //   "Portable Alchemist's Lab Bench"
-  // );
-  // const portableTinkersWorkbench = await createItem(
-  //   "Portable Tinker's Workbench"
-  // );
-  // const neuralSilencerMkThree = await createItem("Neural Silencer Mk3", 1000);
-  // const khazgoriteBrainwaveAmplifier = await createItem(
-  //   "Khaz'gorite Brainwave Amplifier",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const khazgoriteDelversHelmet = await createItem(
-  //   "Khaz'gorite Delver's Helmet",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const khazgoriteEncasedSamophlange = await createItem(
-  //   "Khaz'gorite Encased Samophlange",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const khazgoriteFisherfriend = await createItem(
-  //   "Khaz'gorite Fisherfriend",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const lapidarysKhazgoriteClamps = await createItem(
-  //   "Lapidary's Khaz'gorite Clamps",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const springLoadedKhazgoriteFabricCutters = await createItem(
-  //   "Spring-Loaded Khaz'gorite Fabric Cutters",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const bottomlessMireslushOreSatchel = await createItem(
-  //   "Bottomless Mireslush Ore Satchel",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const bottomlessStonecrustOreSatchel = await createItem(
-  //   "Bottomless Stonecrust Ore Satchel",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const draconiumBrainwaveAmplifier = await createItem(
-  //   "Draconium Brainwave Amplifier",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const draconiumDelversHelmet = await createItem(
-  //   "Draconium Delver's Helmet",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const draconiumEncasedSamophlange = await createItem(
-  //   "Draconium Encased Samophlange",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const draconiumFisherfriend = await createItem(
-  //   "Draconium Fisherfriend",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const lapidarysDraconiumClamps = await createItem(
-  //   "Lapidary's Draconium Clamps",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const springLoadedDraconiumFabricCutters = await createItem(
-  //   "Spring-Loaded Draconium Fabric Cutters",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const quackE = await createItem("Quack-E");
-  // const duckoy = await createItem("D.U.C.K.O.Y.", 1000);
+  const reinforcedMachineChassis = await createItem(
+    "Reinforced Machine Chassis",
+    "inv_10_engineering_manufacturedparts_mechanicalparts_color3",
+    null,
+    1000,
+    "A critical component for the most advanced Engineering devices. Can be bought and sold on the auction house.",
+    "Rarest Engi material. Requires a lot of stuff to craft.",
+    "Common",
+    "Crafting Reagent",
+    3
+  );
+  const arclightCapacitor = await createItem(
+    "Arclight Capacitor",
+    "inv_10_engineering_manufacturedparts_electricalparts_color1",
+    null,
+    1000,
+    "A critical component for the most advanced Engineering devices. Can be bought and sold on the auction house.",
+    "Rarer Engi material. Requires Greased-Up Gears & Shock-Spring Coils to craft.",
+    "Common",
+    "Crafting Reagent",
+    3
+  );
+  const assortedSafetyFuses = await createItem(
+    "Assorted Safety Fuses",
+    "inv_10_engineering_manufacturedparts_electricalparts_color4",
+    null,
+    1000,
+    "A critical component when creating Engineering bombs intended for people with careless hands. Can be bought and sold on the auction house.",
+    "Material used to craft EZ-Thro Bombs (bombs that can be used by non-engineers)",
+    "Common",
+    "Crafting Reagent",
+    3
+  );
+  const everburningBlastingPowder = await createItem(
+    "Everburning Blasting Powder",
+    "inv_10_enchanting_dust_color1",
+    null,
+    1000,
+    "A commonly used part primarily for explosive Engineering crafts. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent",
+    3
+  );
+  const greasedUpGears = await createItem(
+    "Greased-Up Gears",
+    "inv_10_engineering_manufacturedparts_gear_uprez",
+    null,
+    1000,
+    "A commonly used part for many complicated Engineering devices. Can be bought and sold on the auction house.",
+    "Common engineering material.",
+    "Common",
+    "Crafting Reagent",
+    3
+  );
+  const shockSpringCoil = await createItem(
+    "Shock-Spring Coil",
+    "inv_10_engineering_manufacturedparts_spring_uprez",
+    null,
+    1000,
+    "A commonly used part for a variety of Engineering crafts. Can be bought and sold on the auction house.",
+    "Common engineering material.",
+    "Common",
+    "Crafting Reagent",
+    3
+  );
+  const handfulOfSereviteBolts = await createItem(
+    "Handful of Serevite Bolts",
+    "inv_10_engineering_manufacturedparts_gizmo_fireironbolts_blue",
+    null,
+    1000,
+    "A commonly used part for a variety of Engineering crafts. Can be bought and sold on the auction house.",
+    "The most basic engineering material. Used to make just about everything else.",
+    "Common",
+    "Crafting Reagent",
+    3
+  );
+  const pieceOfScrap = await createItem(
+    "Piece of Scrap",
+    "inv_misc_wartornscrap_plate",
+    "Pickup",
+    1000,
+    "Specialized engineers can sometimes recover a Piece of Scrap when using bombs or tinkers. They can sift through piles of these in search of usable materials or other goodies. Unique (25)",
+    "Received when 'Rummaging Through Scrap' (learned through a specialization)",
+    "Common"
+  );
+  const overchargedOverclocker = await createItem(
+    "Overcharged Overclocker",
+    "inv_engineering_90_lightningbox",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Finishing Crafting Reagent",
+    3,
+    "Spare Parts",
+    "When crafting: Increases your Resourcefulness by 33/44/55 (based on quality) and Inspiration by 30/40/50."
+  );
+  const haphazardlyTetheredWires = await createItem(
+    "Haphazardly Tethered Wires",
+    "inv_10_engineering_manufacturedparts_spring_frost",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Finishing Crafting Reagent",
+    3,
+    "Spare Parts",
+    "When crafting: When crafting: You are 9/12/15% more likely (based on quality) to improve at Engineering, but Recipe Difficulty is increased by 18/24/30."
+  );
+  const calibratedSafetySwitch = await createItem(
+    "Calibrated Safety Switch",
+    "inv_eng_metalblingronear",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Safety Components",
+    "+20/15/10 Recipe Difficulty (based on quality). Provides the following property: Reduces the likelihood of this device's tinker malfunctioning by 15%."
+  );
+  const criticalFailurePreventionUnit = await createItem(
+    "Critical Failure Prevention Unit",
+    "inv_eng_superchargedengine",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Safety Components",
+    "+20/15/10 Recipe Difficulty (based on quality). Provides the following property: Tinkers slotted into this device can no longer catastrophically malfunction."
+  );
+  const magazineOfHealingDarts = await createItem(
+    "Magazine of Healing Darts",
+    "inv_gizmo_runichealthinjector",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Optional Crafting Reagent",
+    3,
+    "Embellishment",
+    "+35/30/25 Recipe Difficulty (based on quality). When you heal you sometimes fire a Healing Dart. Also add Unique-Equipped: Embellished (2)."
+  );
+  const springLoadedCapacitorCasing = await createItem(
+    "Spring-Loaded Capacitor Casing",
+    "inv_eng_superchargedengine",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Safety Components",
+    "+20/15/10 Recipe Difficulty (based on quality). The tinker slotted within this device will sometimes dislodge the battery instead of malfunctioning."
+  );
+  const tinkerAlarmOTurret = await createItem(
+    "Tinker: Alarm-O-Turret",
+    "inv_10_engineering2_tinkermodules_color1",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Tinker Module",
+    3,
+    "Tinker",
+    "Place a hidden Alarm-O-Turret on a nearby targeted location. If an enemy player enters its detection radius, it will alert you of their presence and attempt to defend the area for 30 sec or until destroyed."
+  );
+  const tinkerArclightVitalCorrectors = await createItem(
+    "Tinker: Arclight Vital Correctors",
+    "inv_10_engineering_device_gadget1_color2",
+    null,
+    200,
+    null,
+    "Battle Rez Tinker!",
+    "Rare",
+    "Tinker Module",
+    3,
+    "Tinker",
+    "Carelessly cross a few frayed wires within the vicinity of a fallen ally in a desperate attempt to jolt them back to life with 60% health and 20% mana. Castable in combat. What could possibly go wrong?Cannot be used by players higher than level 70."
+  );
+  const tinkerPolarityAmplifier = await createItem(
+    "Tinker: Polarity Amplifier",
+    "inv_10_engineering2_tinkermodules_color4",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Tinker Module",
+    3,
+    "Tinker",
+    "Grants a magnetic charge that changes periodically. Aim a magnet toward an enemy player. If your polarities are opposite, you both will be rooted for 6 sec. If they are identical, you both will be repelled away from each other. Your target must have also have a magnetic charge."
+  );
+  const tinkerSupercollideOTron = await createItem(
+    "Tinker: Supercollide-O-Tron",
+    "inv_10_engineering2_tinkermodules_color5",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Tinker Module",
+    3,
+    "Tinker",
+    "Lock on to a distant enemy target, up to 12 to 60 yds away. After 1.5 sec, if your path remains unobstructed, you will charge toward them at the speed of sound. Both you and your target will be stunned for 1.5 sec upon collision."
+  );
+  const tinkerGroundedCircuitry = await createItem(
+    "Tinker: Grounded Circuitry",
+    "inv_10_engineering2_tinkermodules_color2",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Tinker Module",
+    3,
+    "Tinker",
+    "Guarantees the next slotted Tinker use to succeed. The cooldown of this effect is reduced at higher qualities."
+  );
+  const tinkerBreathOfNeltharion = await createItem(
+    "Tinker: Breath of Neltharion",
+    "inv_10_engineering2_tinkermodules_color3",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Tinker Module",
+    3,
+    "Tinker",
+    "Reveal a flamethrower to deal 69,335 Fire damage in a cone in front of you for 6 sec."
+  );
+  const tinkerPlaneDisplacer = await createItem(
+    "Tinker: Plane Displacer",
+    "inv_10_engineering2_tinkermodules_color6",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Tinker Module",
+    3,
+    "Tinker",
+    "Grants the user invisibility for 12-18 sec."
+  );
+  const battleReadyBinoculars = await createItem(
+    "Battle-Ready Binoculars",
+    "inv_helm_armor_engineering_b_02_goblin",
+    "Pickup",
+    1,
+    null,
+    "IF YOU HAVE GEAR 0: Crafting this may give you a recipe for Bracers.",
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Head",
+    null,
+    [382, 384, 386, 389, 392],
+    [
+      ["Strength", "Intellect", "", "", ""],
+      [353, 353, "?", "?", 380],
+    ],
+    [
+      ["Stamina", 814, 814, "?", "?", 905],
+      ["Random Stat 1", 633, 633, "?", "?", 664],
+      ["Tinker Socket", null, null, null, null, null],
+    ],
+    {Engineering: 1}
+  );
+  const lightweightOcularLenses = await createItem(
+    "Lightweight Ocular Lenses",
+    "inv_helm_armor_engineering_b_02_goblin",
+    "Pickup",
+    1,
+    null,
+    "IF YOU HAVE GEAR 0: Crafting this may give you a recipe for Bracers.",
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Cloth",
+    "Head",
+    null,
+    [382, 384, 386, 389, 392],
+    [
+      ["Intellect", "", "", "", ""],
+      [353, 353, "?", "?", 380],
+    ],
+    [
+      ["Stamina", 814, 814, "?", "?", 905],
+      ["Random Stat 1", 633, 633, "?", "?", 664],
+      ["Tinker Socket", null, null, null, null, null],
+    ],
+    {Engineering: 1}
+  );
+  const oscillatingWildernessOpticals = await createItem(
+    "Oscillating Wilderness Opticals",
+    "inv_helm_armor_engineering_b_02_goblin",
+    "Pickup",
+    1,
+    null,
+    "IF YOU HAVE GEAR 0: Crafting this may give you a recipe for Bracers.",
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Head",
+    null,
+    [382, 384, 386, 389, 392],
+    [
+      ["Agility", "Intellect", "", "", ""],
+      [353, 353, "?", "?", 380],
+    ],
+    [
+      ["Stamina", 814, 814, "?", "?", 905],
+      ["Random Stat 1", 633, 633, "?", "?", 664],
+      ["Tinker Socket", null, null, null, null, null],
+    ],
+    {Engineering: 1}
+  );
+  const peripheralVisionProjectors = await createItem(
+    "Peripheral Vision Projectors",
+    "inv_helm_armor_engineering_b_02_goblin",
+    "Pickup",
+    1,
+    null,
+    "IF YOU HAVE GEAR 0: Crafting this may give you a recipe for Bracers.",
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Head",
+    null,
+    [382, 384, 386, 389, 392],
+    [
+      ["Agility", "Intellect", "", "", ""],
+      [353, 353, "?", "?", 380],
+    ],
+    [
+      ["Stamina", 814, 814, "?", "?", 905],
+      ["Random Stat 1", 633, 633, "?", "?", 664],
+      ["Tinker Socket", null, null, null, null, null],
+    ],
+    {Engineering: 1}
+  );
+  const deadlineDeadeyes = await createItem(
+    "Deadline Deadeyes",
+    "inv_helm_armor_engineering_b_02_gnome",
+    "Equip",
+    1,
+    null,
+    "IF YOU HAVE GEAR 0: Crafting this may give you a recipe for Bracers.",
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Head",
+    null,
+    [306, 308, 310, 313, 316],
+    [
+      ["Agility", "Intellect", "", "", ""],
+      [171, "?", "?", "?", 187],
+    ],
+    [
+      ["Stamina", 426, "?", "?", "?", 456],
+      ["Haste", 111, "?", "?", "?", 130],
+      ["Mastery", 86, "?", "?", "?", 100],
+      ["Tinker Socket", null, null, null, null, null],
+    ],
+    {Engineering: 1}
+  );
+  const milestoneMagnifiers = await createItem(
+    "Milestone Magnifiers",
+    "inv_helm_armor_engineering_b_02_gnome",
+    "Equip",
+    1,
+    null,
+    "IF YOU HAVE GEAR 0: Crafting this may give you a recipe for Bracers.",
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Head",
+    null,
+    [306, 308, 310, 313, 316],
+    [
+      ["Agility", "Intellect", "", "", ""],
+      [171, "?", "?", "?", 187],
+    ],
+    [
+      ["Stamina", 426, "?", "?", "?", 456],
+      ["Critical Strike", 111, "?", "?", "?", 130],
+      ["Versatility", 86, "?", "?", "?", 100],
+      ["Tinker Socket", null, null, null, null, null],
+    ],
+    {Engineering: 1}
+  );
+  const qualityAssuredOptics = await createItem(
+    "Quality-Assured Optics",
+    "inv_helm_armor_engineering_b_02_gnome",
+    "Equip",
+    1,
+    null,
+    "IF YOU HAVE GEAR 0: Crafting this may give you a recipe for Bracers.",
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Cloth",
+    "Head",
+    null,
+    [306, 308, 310, 313, 316],
+    [
+      ["Intellect", "", "", "", ""],
+      [171, "?", "?", "?", 187],
+    ],
+    [
+      ["Stamina", 426, "?", "?", "?", 456],
+      ["Haste", 102, "?", "?", "?", 120],
+      ["Mastery", 94, "?", "?", "?", 110],
+      ["Tinker Socket", null, null, null, null, null],
+    ],
+    {Engineering: 1}
+  );
+  const sentrysStabilizedSpecs = await createItem(
+    "Sentry's Stabilized Specs",
+    "inv_helm_armor_engineering_b_02_gnome",
+    "Equip",
+    1,
+    null,
+    "IF YOU HAVE GEAR 0: Crafting this may give you a recipe for Bracers.",
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Head",
+    null,
+    [306, 308, 310, 313, 316],
+    [
+      ["Intellect", "Strength", "", "", ""],
+      [171, "?", "?", "?", 187],
+    ],
+    [
+      ["Stamina", 426, "?", "?", "?", 456],
+      ["Critical Strike", 111, "?", "?", "?", 130],
+      ["Mastery", 86, "?", "?", "?", 100],
+      ["Tinker Socket", null, null, null, null, null],
+    ],
+    {Engineering: 1}
+  );
+  const complicatedCuffs = await createItem(
+    "Complicated Cuffs",
+    "inv_mail_dragonquest_b_01_bracer",
+    "Pickup",
+    1,
+    null,
+    "IF YOU HAVE GEAR 0: Crafting this may give you a recipe for Bracers.",
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Wrist",
+    null,
+    [382, 384, 386, 389, 392],
+    [
+      ["Agility", "Intellect", "", "", ""],
+      [195, 198, "?", "?", 214],
+    ],
+    [
+      ["Stamina", 446, 458, "?", "?", 509],
+      ["Random Stat 1", 356, 356, "?", "?", 373],
+      ["Tinker Socket", null, null, null, null, null],
+    ]
+  );
+  const difficultWristProtectors = await createItem(
+    "Difficult Wrist Protectors",
+    "inv_bracer_plate_dragonquest_b_01",
+    "Pickup",
+    1,
+    null,
+    "IF YOU HAVE GEAR 0: Crafting this may give you a recipe for Bracers.",
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Wrist",
+    null,
+    [382, 384, 386, 389, 392],
+    [
+      ["Intellect", "Strength", "", "", ""],
+      [195, 198, "?", "?", 214],
+    ],
+    [
+      ["Stamina", 446, 458, "?", "?", 509],
+      ["Random Stat 1", 356, 356, "?", "?", 373],
+      ["Tinker Socket", null, null, null, null, null],
+    ]
+  );
+  const needlesslyComplexWristguards = await createItem(
+    "Needlessly Complex Wristguards",
+    "inv_leather_dragonquest_b_01_bracer",
+    "Pickup",
+    1,
+    null,
+    "IF YOU HAVE GEAR 0: Crafting this may give you a recipe for Bracers.",
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Wrist",
+    null,
+    [382, 384, 386, 389, 392],
+    [
+      ["Agility", "Intellect", "", "", ""],
+      [195, 198, "?", "?", 214],
+    ],
+    [
+      ["Stamina", 446, 458, "?", "?", 509],
+      ["Random Stat 1", 356, 356, "?", "?", 373],
+      ["Tinker Socket", null, null, null, null, null],
+    ]
+  );
+  const overengineeredSleeveExtenders = await createItem(
+    "Overengineered Sleeve Extenders",
+    "inv_cloth_dragonquest_b_01_bracer",
+    "Pickup",
+    1,
+    null,
+    "IF YOU HAVE GEAR 0: Crafting this may give you a recipe for Bracers.",
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Wrist",
+    null,
+    [382, 384, 386, 389, 392],
+    [
+      ["Intellect", "", "", "", ""],
+      [195, 198, "?", "?", 214],
+    ],
+    [
+      ["Stamina", 446, 458, "?", "?", 509],
+      ["Random Stat 1", 356, 356, "?", "?", 373],
+      ["Tinker Socket", null, null, null, null, null],
+    ]
+  );
+  const sophisticatedProblemSolver = await createItem(
+    "Sophisticated Problem Solver",
+    "inv_firearm_2h_engineering_c_01_orange",
+    "Pickup",
+    1,
+    null,
+    "Crafting this may give you a recipe for Bracers.",
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Gun",
+    "Ranged",
+    null,
+    [382, 384, 386, 389, 392],
+    [
+      ["Agility", "", "", "", ""],
+      [353, 353, "?", "?", 380],
+    ],
+    [
+      ["Stamina", 814, 814, "?", "?", 905],
+      ["Random Stat 1", 317, 317, "?", "?", 332],
+      ["Random Stat 2", 317, 317, "?", "?", 332],
+    ]
+  );
+  const pewTwo = await createItem(
+    "P.E.W. x2",
+    "inv_firearm_2h_engineering_c_01_blue",
+    "Pickup",
+    1,
+    null,
+    "Crafting this may give you a recipe for Bracers.",
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Gun",
+    "Ranged",
+    null,
+    [333, 335, 337, 340, 343],
+    [
+      ["Agility", "", "", "", ""],
+      [223, 223, "?", "?", 241],
+    ],
+    [
+      ["Stamina", 486, 486, "?", "?", 498],
+      ["Random Stat 1", 195, 195, "?", "?", 239],
+      ["Random Stat 2", 195, 195, "?", "?", 239],
+    ]
+  );
+  const meticulouslyTunedGear = await createItem(
+    "Meticulously-Tuned Gear",
+    "inv_10_engineering_purchasedparts_color2",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Cogwheel",
+    "+35/25/15 Recipe Difficulty (based on quality.) Provides the following property: Allocate the secondary stats of Engineering crafted goggles or bracers to Mastery."
+  );
+  const oneSizeFitsAllGear = await createItem(
+    "One-Size-Fits-All Gear",
+    "inv_10_engineering_purchasedparts_color4",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Cogwheel",
+    "+35/25/15 Recipe Difficulty (based on quality.) Provides the following property: Allocate the secondary stats of Engineering crafted goggles or bracers to Versatility."
+  );
+  const rapidlyTickingGear = await createItem(
+    "Rapidly Ticking Gear",
+    "inv_10_engineering_purchasedparts_color3",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Cogwheel",
+    "+35/25/15 Recipe Difficulty (based on quality.) Provides the following property: Allocate the secondary stats of Engineering crafted goggles or bracers to Haste."
+  );
+  const razorSharpGear = await createItem(
+    "Razor-Sharp Gear",
+    "inv_10_engineering_purchasedparts_color5",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Cogwheel",
+    "+35/25/15 Recipe Difficulty (based on quality.) Provides the following property: Allocate the secondary stats of Engineering crafted goggles or bracers to Critical Strike."
+  );
+  const highIntensityThermalScanner = await createItem(
+    "High Intensity Thermal Scanner",
+    "inv_10_engineering_scope_color4",
+    null,
+    200,
+    null,
+    "Weapon enchantment for Bow/Crossbow/Gun.",
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a ranged weapon to sometimes increase a secondary stat by 1,220-1,559 (based on quality) based upon the type of creature you are attacking."
+  );
+  const projectilePropulsionPinion = await createItem(
+    "Projectile Propulsion Pinion",
+    "inv_10_engineering_scope_color3",
+    null,
+    200,
+    null,
+    "Weapon enchantment for Bow/Crossbow/Gun.",
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a ranged weapon to grant 255/382/545 (based on quality) split between your highest and lowest secondary stats after you stand still for 5 sec. (based on quality)"
+  );
+  const completelySafeRockets = await createItem(
+    "Completely Safe Rockets",
+    "inv_ammo_bullet_04",
+    null,
+    200,
+    null,
+    "Ammo - 60 minute consumable for Hunters. Kinda like a Phial/Flask. Unsure if it goes away on death.",
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Throw in a seemingly endless supply of tiny rockets into your quiver. Your auto-attacks have a chance to fire one of these rockets which explodes on impact to deal 2350/2866/3358 (based on quality) Fire damage in a small radius around the target. Lasts 60 min."
+  );
+  const endlessStackOfNeedles = await createItem(
+    "Endless Stack of Needles",
+    "inv_ammo_bullet_04",
+    null,
+    200,
+    null,
+    "Ammo - 60 minute consumable for Hunters. Kinda like a Phial/Flask. Unsure if it goes away on death.",
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Replace your traditional ammunition with sharp needles that cause your auto-attacks to also apply a bleed to the target which deals 564/687/806 (based on quality) Physical damage every 2 sec. Lasts 60 min."
+  );
+  const gyroscopicKaleidoscope = await createItem(
+    "Gyroscopic Kaleidoscope",
+    "inv_10_engineering_scope_color2",
+    null,
+    200,
+    null,
+    "Weapon enchantment for Bow/Crossbow/Gun.",
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchant a ranged weapon with a whimsical scope that grants you 290/304/371 (based on quality) of a random secondary stat for 30 sec every time you jump."
+  );
+  const blackFireflight = await createItem(
+    "Black Fireflight",
+    "inv_misc_missilelarge_purple",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Shoot a set of fireworks honoring the Black Dragonflight."
+  );
+  const blueFireflight = await createItem(
+    "Blue Fireflight",
+    "inv_misc_missilelarge_blue",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Shoot a set of fireworks honoring the Blue Dragonflight."
+  );
+  const bundleOfFireworks = await createItem(
+    "Bundle of Fireworks",
+    "inv_enchanting_wod_crystalbundle",
+    "Pickup",
+    1,
+    "Contains an assortment of fireworks across many eras and from many cultures.",
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Right Click to Open"
+  );
+  const greenFireflight = await createItem(
+    "Green Fireflight",
+    "inv_misc_missilelarge_green",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Shoot a set of fireworks honoring the Green Dragonflight."
+  );
+  const redFireflight = await createItem(
+    "Red Fireflight",
+    "inv_misc_missilelarge_red",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Shoot a set of fireworks honoring the Red Dragonflight."
+  );
+  const bronzeFireflight = await createItem(
+    "Bronze Fireflight",
+    "inv_misc_missilelarge_yellow",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Shoot a set of fireworks honoring the Bronze Dragonflight."
+  );
+  const suspiciouslySilentCrate = await createItem(
+    "Suspiciously Silent Crate",
+    "inv_10_engineering2_boxofbombs_friendly_color3",
+    "Pickup",
+    1,
+    "Contains an assortment of Ez-Thro Bombs.",
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Right Click to Open"
+  );
+  const suspiciouslyTickingCrate = await createItem(
+    "Suspiciously Ticking Crate",
+    "inv_10_engineering2_boxofbombs_dangerous_color1",
+    "Pickup",
+    1,
+    "Contains an assortment of dangerous bombs.",
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Right Click to Open"
+  );
+  const iwinButtonMkTen = await createItem(
+    "I.W.I.N. Button Mk10",
+    "inv_10_engineering_device_gadget1_color1",
+    "Pickup",
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Press the button to call in an air strike at the designated location, dealing 152,608/177,878/207,295 (based on quality) Fire damage to all enemies in the strike zone. Only usable outdoors.",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {Engineering: 1}
+  );
+  const ezThroGreaseGrenade = await createItem(
+    "EZ-Thro Grease Grenade",
+    "inv_10_engineering_explosives_1_color3",
+    null,
+    200,
+    "So EZ that even non-Engineers can use it!",
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Launch a concealed grenade toward the target location, dealing 8645/10170/11696 (based on quality) Nature damage and coating the ground in a sticky substance for 6 sec that slows enemy units within by 75%. (5 Min Cooldown)"
+  );
+  const ezThroCreatureCombustionCanister = await createItem(
+    "EZ-Thro Creature Combustion Canister",
+    "inv_10_engineering_explosives_1_color1",
+    null,
+    200,
+    "So EZ that even non-Engineers can use it!",
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Throw the canister, exploding the nearest meaty corpse into chunks of meat. Only usable outdoors. (5 Min Cooldown)"
+  );
+  const ezThroGravitationalDisplacer = await createItem(
+    "EZ-Thro Gravitational Displacer",
+    "inv_10_engineering_device_gadget2_color3",
+    null,
+    200,
+    "So EZ that even non-Engineers can use it!",
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Throw the displacer and activate it after 2 sec, pulling all enemies within 10/15/20 yards (based on quality) to its location. Only usable outdoors. (5 Min Cooldown)"
+  );
+  const ezThroPrimalDeconstructionCharge = await createItem(
+    "EZ-Thro Primal Deconstruction Charge",
+    "inv_10_engineering_explosives_2_color1",
+    null,
+    200,
+    "So EZ that even non-Engineers can use it!",
+    "I'm not sure what 'moderate siege damage' entails.",
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Inflicts 15337/17876/20833 Fire damage (based on quality) to enemies in a 8 yard radius. This explosion is powerful enough to cause moderate siege damage. (5 Min Cooldown)"
+  );
+  const stickyWarpGrenade = await createItem(
+    "Sticky Warp Grenade",
+    "inv_10_engineering_explosives_1_color1",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Throw at a location, attaching itself to the surface or a nearby enemy. Detonates after 3 sec, swapping your position with itself and any attached enemy. Item quality affects the distance this can be thrown. Only usable outdoors. (5 Min Cooldown)",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {Engineering: 1}
+  );
+  const greaseGrenade = await createItem(
+    "Grease Grenade",
+    "inv_10_engineering_explosives_1_color3",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Launch a concealed grenade toward the target location, dealing 8645/10170/11696 (based on quality) Nature damage and coating the ground in a sticky substance for 6 sec that slows enemy units within by 75%. (5 Min Cooldown)",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {Engineering: 1}
+  );
+  const gravitationalDisplacer = await createItem(
+    "Gravitational Displacer",
+    "inv_10_engineering_device_gadget2_color3",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Throw the displacer and activate it after 2 sec, pulling all enemies within 10/15/20 yards (based on quality) to its location. Only usable outdoors. (5 Min Cooldown)",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {Engineering: 1}
+  );
+  const primalDeconstructionCharge = await createItem(
+    "Primal Deconstruction Charge",
+    "inv_10_engineering_explosives_2_color1",
+    null,
+    200,
+    null,
+    "I'm not sure what 'moderate siege damage' entails.",
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Inflicts 15337/17876/20833 Fire damage (based on quality) to enemies in a 8 yard radius. This explosion is powerful enough to cause moderate siege damage. (5 Min Cooldown)",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {Engineering: 1}
+  );
+  const creatureCombustionCanister = await createItem(
+    "Creature Combustion Canister",
+    "inv_10_engineering_explosives_1_color1",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Throw the canister, exploding the nearest meaty corpse into chunks of meat. Only usable outdoors. (5 Min Cooldown)",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {Engineering: 1}
+  );
+  const savior = await createItem(
+    "S.A.V.I.O.R.",
+    "inv_10_engineering_device_gadget1_color3",
+    "Pickup",
+    200,
+    null,
+    "Wipe protection bot.",
+    "Epic",
+    null,
+    3,
+    null,
+    null,
+    "Place a friendly mechanical construct on the ground nearby which will offer moral support as your companions fall around you. It will resurrect all party or raid members within a reasonable distance after combat has ended. Cast time is reduced by quality. Does not work on players whose spirits have been released, are above level 70, or have angered the robot. (5 Min Cooldown)",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {Engineering: 1}
+  );
+  const zapthrottleSoulInhaler = await createItem(
+    "Zapthrottle Soul Inhaler",
+    "inv_10_engineering_device_flamethrower_air",
+    "Use",
+    1,
+    "Empty Soul Cages not included.",
+    "Device used to get Elemental Souls. Requires Empty Soul Cages (from Jewelcrafters) as 'ammo'.",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Begin draining the essence of a particularly powerful elemental. If your target dies while being drained, you will capture its soul. The device's engine will need to cool for 15 min after a successful capture. Only one player can attempt to drain an elemental's soul at a time. (30 Sec Cooldown)"
+  );
+  const cartomancyCannon = await createItem(
+    "Cartomancy Cannon",
+    "inv_weapon_rifle_19",
+    "Use",
+    1,
+    null,
+    "Requires a Fated Fortune Card (made by inscriptionists) to use.",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Load your Cartomancy Cannon with a Fated Fortune Card and fire it toward a friendly player. Wish them luck! (30 Sec Cooldown)"
+  );
+  const centralizedPrecipitationEmitter = await createItem(
+    "Centralized Precipitation Emitter",
+    "inv_10_engineering_device_gadget3_color1",
+    "Use",
+    1,
+    null,
+    null,
+    "Rare",
+    "Toy",
+    1,
+    null,
+    null,
+    "Adds this toy to your toy box. Place down a Centralized Precipitation Emitter for up to 2 hrs that allows you to experience the fury of nature, by choice! A cloaking device attached to this machine ensures that only members of your party or raid can see the machine and its effects. Can only be used outside. (2 Hrs Cooldown)"
+  );
+  const elementInfusedRocketHelmet = await createItem(
+    "Element-Infused Rocket Helmet",
+    "ability_mount_rocketmount",
+    "Use",
+    1,
+    null,
+    null,
+    "Rare",
+    "Toy",
+    1,
+    null,
+    null,
+    "Adds this toy to your toy box. Guaranteed to propel yourself to a safe height above your surroundings! (1 Day Cooldown)"
+  );
+  const environmentalEmulator = await createItem(
+    "Environmental Emulator",
+    "inv_10_engineering_device_gadget2_color1",
+    "Use",
+    1,
+    null,
+    "Can somehow acquire environments to choose from. Wowhead shows - Icecrown, Felstorm, Twisting Nether, Peaceful Day, Calm Cyclone, Burning Skies. More info later.",
+    "Rare",
+    "Toy",
+    1,
+    null,
+    null,
+    "Adds this toy to your toy box. Place down an Environmental Emulator for up to 2 hrs that allows you to view the world from a different perspective. A cloaking device attached to this machine ensures that only members of your party or raid can see the machine and its effects. Can only be used outside. (2 Hrs Cooldown)"
+  );
+  const giggleGoggles = await createItem(
+    "Giggle Goggles",
+    "inv_gizmo_newgoggles",
+    "Use",
+    1,
+    null,
+    null,
+    "Rare",
+    "Toy",
+    1,
+    null,
+    null,
+    "Adds this toy to your toy box. Perceive the world as though it were ruled by gnolls. (1 Hour Cooldown)"
+  );
+  const help = await createItem(
+    "H.E.L.P.",
+    "inv_10_engineering2_pvpflaregun_color1",
+    "Pickup",
+    1,
+    null,
+    "Battleground signal flare??",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Fires a signal flare to alert nearby allies of incoming danger. Can only be used in battlegrounds. Signal flares cannot be fired in a given area more than once every 3 min. (2 Min Cooldown)"
+  );
+  const tinkerRemovalKit = await createItem(
+    "Tinker Removal Kit",
+    "inv_misc_enggizmos_37",
+    "Use",
+    1,
+    "It's just a screwdriver... Good luck!",
+    null,
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Recklessly, but nonetheless effectively, remove a Tinker module from its socket for later use."
+  );
+  // const expeditionMultiToolbox = await createItem("Expedition Multi-Toolbox"); /* this might have been removed */
+  const wyrmholeGenerator = await createItem(
+    "Wyrmhole Generator",
+    "inv_10_engineering_device_gadget3_color3",
+    "Use",
+    1,
+    null,
+    "While this has a 2 Hr CD (up from 15 min in SL) & teleports you to a random location now, you can improve it w/ Specializations - Mechanical Mind 20 halves the CD, & Novelties 30 allows you to find 'Signal Transmitters' across the isles, allowing you to choose where to teleport.",
+    "Rare",
+    "Toy",
+    1,
+    null,
+    null,
+    "Adds this toy to your toy box. Open a wormhole that allows the user to quickly travel to a random location in the Dragon Isles. Engineers that specialize into triangulation can learn to warp to specific locations. (2 Hrs Cooldown)",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {Engineering: 1}
+  );
+  const portableAlchemistsLabBench = await createItem(
+    "Portable Alchemist's Lab Bench",
+    "inv_misc_5potionbag_special",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Place down a Portable Alchemist's Lab Bench to enable nearby alchemists to practice their trade for 5 min. It probably will not explode. (5 Min Cooldown)"
+  );
+  const portableTinkersWorkbench = await createItem(
+    "Portable Tinker's Workbench",
+    "inv_engineering_sonicenvironmentenhancer",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Place down a Portable Tinker's Workbench to enable nearby engineers to practice their trade for 5 min. It probably will not explode. (5 Min Cooldown)"
+  );
+  const neuralSilencerMkThree = await createItem(
+    "Neural Silencer Mk3",
+    "inv_10_engineering_manufacturedparts_mechanicalparts_color1",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Makes you immune to some annoyances. Persists through death. Lasts 12 hrs."
+  );
+  const khazgoriteBrainwaveAmplifier = await createItem(
+    "Khaz'gorite Brainwave Amplifier",
+    "inv_helm_armor_engineering_b_01_orange",
+    "Pickup",
+    1,
+    "WARNING: Thinking too hard may cause mindblowing effects.",
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Engineering Accessory",
+    "Head",
+    "Head (1)",
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [["Inspiration", "?", "?", "?", 48, "?"]]
+  );
+  const khazgoriteDelversHelmet = await createItem(
+    "Khaz'gorite Delver's Helmet",
+    "inv_helm_armor_mining_a_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mining Accessory",
+    "Head",
+    "Head (1)",
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [
+      ["Deftness", "?", "?", "?", 40, 44],
+      ["Perception", "?", "?", "?", 40, 44],
+    ]
+  );
+  const khazgoriteEncasedSamophlange = await createItem(
+    "Khaz'gorite Encased Samophlange",
+    "inv_misc_1h_engineeringmultitool_b_01_orange",
+    "Pickup",
+    1,
+    "A needlessly complicated omnitool coveted by any Engineer worth their bolts",
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    "Recklessly, but nonetheless effectively, remove a Tinker module from its socket for later use.",
+    "Engineering Tool",
+    null,
+    null,
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [10, 10, 10, 10, 10],
+    ],
+    [["Random Stat 1", "?", "?", "?", 101, 110]]
+  );
+  const khazgoriteFisherfriend = await createItem(
+    "Khaz'gorite Fisherfriend",
+    "inv_misc_2h_fishingpole_b_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Fishing Tool",
+    null,
+    null,
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [10, 10, 10, 10, 10],
+    ],
+    [["Perception", "?", "?", "?", 101, 110]]
+  );
+  const lapidarysKhazgoriteClamps = await createItem(
+    "Lapidary's Khaz'gorite Clamps",
+    "inv_misc_1h_jewelerschisel_a_01",
+    "Pickup",
+    1,
+    "Provides all the necessary tools for jewelcrafting in one convenient package.",
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Jewelcrafting Tool",
+    null,
+    null,
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [10, 10, 10, 10, 10],
+    ],
+    [["Random Stat 1", "?", "?", "?", 101, 110]]
+  );
+  const springLoadedKhazgoriteFabricCutters = await createItem(
+    "Spring-Loaded Khaz'gorite Fabric Cutters",
+    "inv_sword_1h_tailoring_b_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Tailoring Tool",
+    null,
+    null,
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [10, 10, 10, 10, 10],
+    ],
+    [["Random Stat 1", "?", "?", "?", 101, 110]]
+  );
+  const bottomlessMireslushOreSatchel = await createItem(
+    "Bottomless Mireslush Ore Satchel",
+    "inv_cape_special_mining_c_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mining Accessory",
+    "Back",
+    "Back (1)",
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [["Finesse", "?", "?", "?", 81, 88]]
+  );
+  const bottomlessStonecrustOreSatchel = await createItem(
+    "Bottomless Stonecrust Ore Satchel",
+    "inv_cape_special_mining_c_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mining Accessory",
+    "Back",
+    "Back (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [["Finesse", "?", "?", "?", "?", 64]]
+  );
+  const draconiumBrainwaveAmplifier = await createItem(
+    "Draconium Brainwave Amplifier",
+    "inv_helm_armor_engineering_b_01_orange",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Engineering Accessory",
+    "Head",
+    "Head (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [["Inspiration", "?", "?", "?", "?", 38]]
+  );
+  const draconiumDelversHelmet = await createItem(
+    "Draconium Delver's Helmet",
+    "inv_helm_armor_mining_a_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mining Accessory",
+    "Head",
+    "Head (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [
+      ["Deftness", "?", "?", "?", "?", 32],
+      ["Perception", "", "", "", "", 32],
+    ]
+  );
+  const draconiumEncasedSamophlange = await createItem(
+    "Draconium Encased Samophlange",
+    "inv_misc_1h_engineeringmultitool_b_01_orange",
+    "Equip",
+    1,
+    "A needlessly complicated omnitool coveted by any Engineer worth their bolts",
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    "Recklessly, but nonetheless effectively, remove a Tinker module from its socket for later use.",
+    "Engineering Tool",
+    null,
+    null,
+    [320, 326, 332, 339, 346],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [["Random Stat 1", "?", "?", "?", "?", 79]]
+  );
+  const draconiumFisherfriend = await createItem(
+    "Draconium Fisherfriend",
+    "inv_misc_2h_fishingpole_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Fishing Tool",
+    null,
+    null,
+    [320, 326, 332, 339, 346],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [["Perception", "", "", "", "", 79]]
+  );
+  const lapidarysDraconiumClamps = await createItem(
+    "Lapidary's Draconium Clamps",
+    "inv_misc_1h_jewelerschisel_a_01",
+    "Equip",
+    1,
+    "Provides all the necessary tools for jewelcrafting in one convenient package.",
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Jewelcrafting Tool",
+    null,
+    null,
+    [320, 326, 332, 339, 346],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [["Random Stat 1", "", "", "", "", 79]]
+  );
+  const springLoadedDraconiumFabricCutters = await createItem(
+    "Spring-Loaded Draconium Fabric Cutters",
+    "inv_sword_1h_tailoring_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Tailoring Tool",
+    null,
+    null,
+    [320, 326, 332, 339, 346],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [["Random Stat 1", "", "", "", "", 79]]
+  );
+  const quackE = await createItem(
+    "Quack-E",
+    "inv_duckbaby_mech",
+    "Pickup",
+    1,
+    null,
+    "Battle pet - This duck is SO cute ;_;",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Teaches you how to summon and dismiss this companion."
+  );
+  const duckoy = await createItem(
+    "D.U.C.K.O.Y.",
+    "inv_duckbaby_mech",
+    "Pickup",
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Activate a robotic duckling that wanders around, annoying your enemies before self-destructing for 20449/23835/27777 (based on quality) Fire damage split between all nearby enemies. Damage is increased for each enemy struck, up to 5 enemies. (5 Min Cooldown)",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    {Engineering: 1}
+  );
 
   // //enchanting items
   const chromaticDust = await createItem(
@@ -3191,26 +4671,28 @@ const makeTables = async () => {
     "Gathered by players with the Enchanting skill by disenchanting items. Can be bought and sold on the auction house.",
     null,
     "Common",
-    "Crafting Reagent",
+    "Crafting Reagent"
   );
-  const vibrantShard = await createItem("Vibrant Shard",
-  "inv_10_enchanting_shard_color4",
-  null,
-  1000,
-  "Gathered by players with the Enchanting skill by disenchanting items. Can be bought and sold on the auction house.",
-  null,
-  "Rare",
-  "Crafting Reagent",
-);
-  const resonantCrystal = await createItem("Resonant Crystal",
-  "inv_10_enchanting_crystal_color2",
-  null,
-  1000,
-  "Gathered by players with the Enchanting skill by disenchanting items. Can be bought and sold on the auction house.",
-  null,
-  "Epic",
-  "Crafting Reagent",
-);
+  const vibrantShard = await createItem(
+    "Vibrant Shard",
+    "inv_10_enchanting_shard_color4",
+    null,
+    1000,
+    "Gathered by players with the Enchanting skill by disenchanting items. Can be bought and sold on the auction house.",
+    null,
+    "Rare",
+    "Crafting Reagent"
+  );
+  const resonantCrystal = await createItem(
+    "Resonant Crystal",
+    "inv_10_enchanting_crystal_color2",
+    null,
+    1000,
+    "Gathered by players with the Enchanting skill by disenchanting items. Can be bought and sold on the auction house.",
+    null,
+    "Epic",
+    "Crafting Reagent"
+  );
   // const gracefulAvoidance = await createItem("Graceful Avoidance");
   // const homeboundSpeed = await createItem("Homebound Speed");
   // const regenerativeLeech = await createItem("Regenerative Leech");
@@ -3321,15 +4803,37 @@ const makeTables = async () => {
   //   1000
   // );
   // const bottledPutrescence = await createItem("Bottled Putrescence", 1000);
-  // const potionOfGusts = await createItem("Potion of Gusts", 1000);
+  const potionOfGusts = await createItem("Potion of Gusts", 
+  "inv_10_alchemy_bottle_shape1_green",
+  null,
+  200,
+  null,
+  null,
+  "Common",
+  null,
+  3,
+  null,
+  null,
+  "Drink to be propelled forward a short distance, momentarily weightless. (5 Min Cooldown)"
+);
   // const potionOfShockingDisclosure = await createItem(
   //   "Potion of Shocking Disclosure",
   //   1000
   // );
-  // const potionOfTheHushedZephyr = await createItem(
-  //   "Potion of the Hushed Zephyr",
-  //   1000
-  // );
+  const potionOfTheHushedZephyr = await createItem(
+    "Potion of the Hushed Zephyr",
+    "inv_10_alchemy_bottle_shape1_white",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Drink to gain invisibility for 12/15/18 seconds (based on quality). (5 Min Cooldown)"
+  );
   // const aeratedManaPotion = await createItem("Aerated Mana Potion", 1000);
   // const potionOfChilledClarity = await createItem(
   //   "Potion of Chilled Clarity",
@@ -3348,10 +4852,20 @@ const makeTables = async () => {
   //   "Potion of Frozen Fatality",
   //   1000
   // );
-  // const refreshingHealingPotion = await createItem(
-  //   "Refreshing Healing Potion",
-  //   1000
-  // );
+  const refreshingHealingPotion = await createItem(
+    "Refreshing Healing Potion",
+    "inv_10_alchemy_bottle_shape4_red",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Restores 68650/80950/93250 health (based on quality). (5 Min Cooldown)"
+  );
   // const potionCauldronOfUltimatePower = await createItem(
   //   "Potion Cauldron of Ultimate Power",
   //   1000
@@ -3815,42 +5329,153 @@ const makeTables = async () => {
   // );
 
   // //jewelcrafting items
-  const silkenGemdust = await createItem("Silken Gemdust",
-  "inv_enchanting_wod_dust4",
+  const silkenGemdust = await createItem(
+    "Silken Gemdust",
+    "inv_enchanting_wod_dust4",
+    null,
+    1000,
+    "Acquired by Jewelcrafters by crushing gems from the Dragon Isles. Can be bought and sold on the auction house.",
+    "Crushing gems is like prospecting, but instead of ore, you destroy 5 gems.",
+    "Uncommon",
+    "Crafting Reagent",
+    3
+  );
+  const queensRuby = await createItem("Queen's Ruby",
+  "inv_10_jewelcrafting_gem1leveling_uncut_red",
   null,
   1000,
-  "Acquired by Jewelcrafters by crushing gems from the Dragon Isles. Can be bought and sold on the auction house.",
-  "Crushing gems is like prospecting, but instead of ore, you destroy 5 gems.",
+  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+  null,
   "Uncommon",
   "Crafting Reagent",
-  3,
-);
-  // const queensRuby = await createItem("Queen's Ruby", 1000);
-  // const mysticSapphire = await createItem("Mystic Sapphire", 1000);
-  // const vibrantEmerald = await createItem("Vibrant Emerald", 1000);
-  // const sunderedOnyx = await createItem("Sundered Onyx", 1000);
-  // const eternityAmber = await createItem("Eternity Amber", 1000);
-  // const alexstraszite = await createItem("Alexstraszite", 1000);
-  // const malygite = await createItem("Malygite", 1000);
-  // const ysemerald = await createItem("Ysemerald", 1000);
-  // const neltharite = await createItem("Neltharite", 1000);
-  // const nozdorite = await createItem("Nozdorite", 1000);
-  // const illimitedDiamond = await createItem("Illimited Diamond", 1000);
-  const elementalHarmony = await createItem("Elemental Harmony",
-  "inv_10_elementalcombinedfoozles_primordial",
+  3
+  );
+  const mysticSapphire = await createItem("Mystic Sapphire", 
+  "inv_10_jewelcrafting_gem1leveling_uncut_blue",
   null,
   1000,
-  "A harmonious union between the gems of the Dragon Isles with Awakened Elements, crafted by jewelcrafters with the assistance of alchemists. Can be bought and sold on the auction house.",
+  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+  null,
+  "Uncommon",
+  "Crafting Reagent",
+  3
+  );
+  const vibrantEmerald = await createItem("Vibrant Emerald", 
+  "inv_10_jewelcrafting_gem1leveling_uncut_green",
+  null,
+  1000,
+  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+  null,
+  "Uncommon",
+  "Crafting Reagent",
+  3
+  );
+  const sunderedOnyx = await createItem("Sundered Onyx",
+  "inv_10_jewelcrafting_gem1leveling_uncut_black",
+  null,
+  1000,
+  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+  null,
+  "Uncommon",
+  "Crafting Reagent",
+  3
+  );
+  const eternityAmber = await createItem("Eternity Amber",
+  "inv_10_jewelcrafting_gem1leveling_uncut_bronze",
+  null,
+  1000,
+  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+  null,
+  "Uncommon",
+  "Crafting Reagent",
+  3
+  );
+  const alexstraszite = await createItem("Alexstraszite",
+  "inv_10_jewelcrafting_gem2standard_uncut_red",
+  null,
+  1000,
+  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
   null,
   "Rare",
   "Crafting Reagent",
-  3,
-);
+  3
+  );
+  const malygite = await createItem("Malygite",
+  "inv_10_jewelcrafting_gem2standard_uncut_blue",
+  null,
+  1000,
+  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+  null,
+  "Rare",
+  "Crafting Reagent",
+  3
+  );
+  const ysemerald = await createItem("Ysemerald",
+  "inv_10_jewelcrafting_gem2standard_uncut_green",
+  null,
+  1000,
+  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+  null,
+  "Rare",
+  "Crafting Reagent",
+  3
+  );
+  const neltharite = await createItem("Neltharite",
+  "inv_10_jewelcrafting_gem2standard_uncut_black",
+  null,
+  1000,
+  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+  null,
+  "Rare",
+  "Crafting Reagent",
+  3
+  );
+  const nozdorite = await createItem("Nozdorite",
+  "inv_10_jewelcrafting_gem2standard_uncut_bronze",
+  null,
+  1000,
+  "Acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+  null,
+  "Rare",
+  "Crafting Reagent",
+  3
+  );
+  // const illimitedDiamond = await createItem("Illimited Diamond", 1000);
+  const elementalHarmony = await createItem(
+    "Elemental Harmony",
+    "inv_10_elementalcombinedfoozles_primordial",
+    null,
+    1000,
+    "A harmonious union between the gems of the Dragon Isles with Awakened Elements, crafted by jewelcrafters with the assistance of alchemists. Can be bought and sold on the auction house.",
+    null,
+    "Rare",
+    "Crafting Reagent",
+    3
+  );
   // const blottingSand = await createItem("Blotting Sand", 1000);
   // const pounce = await createItem("Pounce", 1000);
   // const emptySoulCage = await createItem("Empty Soul Cage", 1000);
-  // const draconicVial = await createItem("Draconic Vial", 1000);
-  // const framelessLens = await createItem("Frameless Lens", 1000);
+  const draconicVial = await createItem("Draconic Vial",
+  "inv_10_alchemy_bottle_shape1_empty",
+  null,
+  1000,
+  "Purchased from tradeskill vendors. Jewelcrafters can also craft this item at equal or higher qualities. Can be bought and sold on the auction house.",
+  null,
+  "Common",
+  "Crafting Reagent",
+  3
+  );
+  const framelessLens = await createItem(
+    "Frameless Lens",
+    "inv_10_jewelcrafting2_glasslens_color1",
+    null,
+    1000,
+    "A basic reagent that Jewelcrafters make. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent",
+    3,
+    );
   // const glossyStone = await createItem("Glossy Stone", 1000);
   // const shimmeringClasp = await createItem("Shimmering Clasp", 1000);
   // const energizedVibrantEmerald = await createItem(
@@ -4046,8 +5671,27 @@ const makeTables = async () => {
   // );
 
   // //blacksmithing items
-  // const obsidianSearedAlloy = await createItem("Obsidian Seared Alloy", 1000);
-  // const frostfireAlloy = await createItem("Frostfire Alloy", 1000);
+  const obsidianSearedAlloy = await createItem(
+    "Obsidian Seared Alloy",
+    "inv_10_blacksmithing_craftedbar_blackdragonsearedalloy",
+    null,
+    1000,
+    "Smelted by players with the Blacksmithing skill.",
+    null,
+    "Epic",
+    "Crafting Reagent",
+    3,
+    );
+  const frostfireAlloy = await createItem("Frostfire Alloy",
+  "inv_10_blacksmithing_craftedbar_frostfirealloy",
+  null,
+  1000,
+  "Smelted by players with the Blacksmithing skill.",
+  null,
+  "Rare",
+  "Crafting Reagent",
+  3,
+  );
   // const infuriousAlloy = await createItem("Infurious Alloy", 1000);
   // const primalMoltenAlloy = await createItem("Primal Molten Alloy", 1000);
   // const armorSpikes = await createItem("Armor Spikes", 1000);
@@ -4841,11 +6485,39 @@ const makeTables = async () => {
   //   "Finished Prototype Regal Barding"
   // );
   // const earthshineScales = await createItem("Earthshine Scales", 1000);
-  // const frostbiteScales = await createItem("Frostbite Scales", 1000);
+  const frostbiteScales = await createItem("Frostbite Scales",
+  "inv_10_skinning_dragonscales_blue",
+  null,
+  1000,
+  "Crafted by players with the Leatherworking skill. Can be bought and sold on the auction house.",
+  null,
+  "Rare",
+  "Crafting Reagent",
+  3,
+  );
   // const infuriousHide = await createItem("Infurious Hide", 1000);
   // const infuriousScales = await createItem("Infurious Scales", 1000);
-  // const mireslushHide = await createItem("Mireslush Hide", 1000);
-  // const stonecrustHide = await createItem("Stonecrust Hide", 1000);
+  const mireslushHide = await createItem("Mireslush Hide",
+  "inv_10_skinning_leather_rarehide_color2",
+  null,
+  1000,
+  "Crafted by players with the Leatherworking skill. Can be bought and sold on the auction house.",
+  null,
+  "Rare",
+  "Crafting Reagent",
+  3,
+  );
+
+  const stonecrustHide = await createItem("Stonecrust Hide",
+  "inv_10_skinning_leather_rarehide_color3",
+  null,
+  1000,
+  "Crafted by players with the Leatherworking skill. Can be bought and sold on the auction house.",
+  null,
+  "Rare",
+  "Crafting Reagent",
+  3,
+  );
   // const fangAdornments = await createItem("Fang Adornments", 1000);
   // const toxifiedArmorPatch = await createItem("Toxified Armor Patch", 1000);
   // const fierceArmorKit = await createItem("Fierce Armor Kit", 1000);
@@ -9776,2228 +11448,2228 @@ const makeTables = async () => {
   //   "Enchanter's Lectern"
   // );
 
-  // //engineering recipes - 91 total
-  // const arclightCapacitorRecipe = await createRecipe(
-  //   "Arclight Capacitor",
-  //   arclightCapacitor,
-  //   1,
-  //   engineering,
-  //   [
-  //     [awakenedOrder, 1],
-  //     [shockSpringCoil, 2],
-  //     [greasedUpGears, 1],
-  //     [khazgoriteOre, 2],
-  //   ],
-  //   20,
-  //   "Parts",
-  //   2,
-  //   350,
-  //   null,
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { PiecesParts: 15 }],
-  //     ["Spare Parts", { PiecesParts: 0 }],
-  //   ]
-  // );
-  // const reinforcedMachineChassisRecipe = await createRecipe(
-  //   "Reinforced Machine Chassis",
-  //   reinforcedMachineChassis,
-  //   1,
-  //   engineering,
-  //   [
-  //     [awakenedEarth, 1],
-  //     [handfulOfSereviteBolts, 4],
-  //     [shockSpringCoil, 1],
-  //     [greasedUpGears, 2],
-  //   ],
-  //   20,
-  //   "Parts",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { PiecesParts: 15 }],
-  //     ["Spare Parts", { PiecesParts: 0 }],
-  //   ]
-  // );
-  // const assortedSafetyFusesRecipe = await createRecipe(
-  //   "Assorted Safety Fuses",
-  //   assortedSafetyFuses,
-  //   "2-3",
-  //   engineering,
-  //   [
-  //     [wildercloth, 3],
-  //     [handfulOfSereviteBolts, 3],
-  //     [shockSpringCoil, 1],
-  //     [greasedUpGears, 1],
-  //   ],
-  //   null,
-  //   "Parts",
-  //   1,
-  //   250,
-  //   null,
-  //   { EZThro: 0 },
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { PiecesParts: 15 }],
-  //     ["Spare Parts", { PiecesParts: 0 }],
-  //   ]
-  // );
-  // const everburningBlastingPowderRecipe = await createRecipe(
-  //   "Everburning Blasting Powder",
-  //   everburningBlastingPowder,
-  //   "1-2",
-  //   engineering,
-  //   [
-  //     [rousingFire, 2],
-  //     [rousingEarth, 1],
-  //     [draconiumOre, 1],
-  //   ],
-  //   15,
-  //   "Parts",
-  //   1,
-  //   200,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { PiecesParts: 15 }],
-  //     ["Spare Parts", { PiecesParts: 0 }],
-  //   ]
-  // );
-  // const greasedUpGearsRecipe = await createRecipe(
-  //   "Greased-Up Gears",
-  //   greasedUpGears,
-  //   "1-2",
-  //   engineering,
-  //   [
-  //     [rousingFire, 3],
-  //     [handfulOfSereviteBolts, 2],
-  //     [draconiumOre, 4],
-  //   ],
-  //   10,
-  //   "Parts",
-  //   1,
-  //   250,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { PiecesParts: 15 }],
-  //     ["Spare Parts", { PiecesParts: 0 }],
-  //   ]
-  // );
-  // const shockSpringCoilRecipe = await createRecipe(
-  //   "Shock-Spring Coil",
-  //   shockSpringCoil,
-  //   "1-2",
-  //   engineering,
-  //   [
-  //     [rousingEarth, 2],
-  //     [handfulOfSereviteBolts, 6],
-  //   ],
-  //   5,
-  //   "Parts",
-  //   1,
-  //   150,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { PiecesParts: 15 }],
-  //     ["Spare Parts", { PiecesParts: 0 }],
-  //   ]
-  // );
-  // const handfulOfSereviteBoltsRecipe = await createRecipe(
-  //   "Handful of Serevite Bolts",
-  //   handfulOfSereviteBolts,
-  //   "2-3",
-  //   engineering,
-  //   [[sereviteOre, 4]],
-  //   1,
-  //   "Parts",
-  //   1,
-  //   50,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Learned by default.",
-  //   [
-  //     ["Lesser Illustrious Insight", { PiecesParts: 15 }],
-  //     ["Spare Parts", { PiecesParts: 0 }],
-  //   ]
-  // );
-  // // const rummageThroughScrap = await(createRecipe("Rummage Through Scrap", null, 1, engineering, [[pieceOfScrap, 5]], null, "Parts", 0, null, null, {Scrapper: 0}, null, null, "Need more info"));
-  // const overchargedOverclockerRecipe = await createRecipe(
-  //   "Overcharged Overclocker",
-  //   overchargedOverclocker,
-  //   2,
-  //   engineering,
-  //   [
-  //     [rousingFire, 5],
-  //     [handfulOfSereviteBolts, 2],
-  //     [shockSpringCoil, 3],
-  //   ],
-  //   40,
-  //   "Finishing Reagents",
-  //   1,
-  //   425,
-  //   null,
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const illustriousInsightRecipeEngineering = await createRecipe(
-  //   "Illustrious Insight",
-  //   illustriousInsight,
-  //   1,
-  //   engineering,
-  //   [[artisansMettle, 50]],
-  //   null,
-  //   "Finishing Reagents",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Various Specializations",
-  //   "Tinker's Workbench"
-  // );
-  // const haphazardlyTetheredWiresRecipe = await createRecipe(
-  //   "Haphazardly Tethered Wires",
-  //   haphazardlyTetheredWires,
-  //   2,
-  //   engineering,
-  //   [
-  //     [rousingEarth, 4],
-  //     [handfulOfSereviteBolts, 3],
-  //   ],
-  //   25,
-  //   "Finishing Reagents",
-  //   1,
-  //   250,
-  //   null,
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const calibratedSafetySwitchRecipe = await createRecipe(
-  //   "Calibrated Safety Switch",
-  //   calibratedSafetySwitch,
-  //   1,
-  //   engineering,
-  //   [
-  //     [arclightCapacitor, 1],
-  //     [shockSpringCoil, 2],
-  //     [greasedUpGears, 1],
-  //     [reinforcedMachineChassis, 1],
-  //   ],
-  //   null,
-  //   "Optional Reagents",
-  //   1,
-  //   425,
-  //   null,
-  //   { GearsForGear: 20 },
-  //   "Tinker Malfunction",
-  //   "Tinker's Workbench",
-  //   "Chance to get from a tinker malfunction while having Gears For Gear 20.",
-  //   [
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const criticalFailurePreventionUnitRecipe = await createRecipe(
-  //   "Critical Failure Prevention Unit",
-  //   criticalFailurePreventionUnit,
-  //   1,
-  //   engineering,
-  //   [
-  //     [arclightCapacitor, 1],
-  //     [primalDeconstructionCharge, 2],
-  //     [shockSpringCoil, 3],
-  //     [reinforcedMachineChassis, 1],
-  //   ],
-  //   null,
-  //   "Optional Reagents",
-  //   1,
-  //   425,
-  //   null,
-  //   { GearsForGear: 20 },
-  //   "Tinker Malfunction",
-  //   "Tinker's Workbench",
-  //   "Chance to get from a tinker malfunction while having Gears For Gear 20.",
-  //   [
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const magazineOfHealingDartsRecipe = await createRecipe(
-  //   "Magazine of Healing Darts",
-  //   magazineOfHealingDarts,
-  //   1,
-  //   engineering,
-  //   [
-  //     [arclightCapacitor, 1],
-  //     [refreshingHealingPotion, 10],
-  //     [everburningBlastingPowder, 3],
-  //     [reinforcedMachineChassis, 1],
-  //   ],
-  //   null,
-  //   "Optional Reagents",
-  //   1,
-  //   425,
-  //   null,
-  //   { GearsForGear: 10 },
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const springLoadedCapacitorCasingRecipe = await createRecipe(
-  //   "Spring-Loaded Capacitor Casing",
-  //   springLoadedCapacitorCasing,
-  //   1,
-  //   engineering,
-  //   [
-  //     [arclightCapacitor, 1],
-  //     [shockSpringCoil, 2],
-  //     [handfulOfSereviteBolts, 10],
-  //     [reinforcedMachineChassis, 1],
-  //   ],
-  //   null,
-  //   "Optional Reagents",
-  //   1,
-  //   425,
-  //   null,
-  //   { GearsForGear: 20 },
-  //   "Tinker Malfunction",
-  //   "Tinker's Workbench",
-  //   "Chance to get from a tinker malfunction while having Gears For Gear 20.",
-  //   [
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const tinkerAlarmOTurretRecipe = await createRecipe(
-  //   null,
-  //   tinkerAlarmOTurret,
-  //   1,
-  //   engineering,
-  //   [
-  //     [awakenedIre, 2],
-  //     [reinforcedMachineChassis, 1],
-  //     [arclightCapacitor, 1],
-  //     [greasedUpGears, 3],
-  //     [shockSpringCoil, 3],
-  //   ],
-  //   null,
-  //   "Tinkers",
-  //   1,
-  //   425,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Tinker's Workbench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
-  //     ["Spare Parts", { MechanicalMind: 15 }],
-  //   ]
-  // );
-  // const tinkerArclightVitalCorrectorsRecipe = await createRecipe(
-  //   null,
-  //   tinkerArclightVitalCorrectors,
-  //   1,
-  //   engineering,
-  //   [
-  //     [awakenedOrder, 2],
-  //     [reinforcedMachineChassis, 1],
-  //     [arclightCapacitor, 2],
-  //     [greasedUpGears, 4],
-  //     [shockSpringCoil, 3],
-  //   ],
-  //   null,
-  //   "Tinkers",
-  //   1,
-  //   425,
-  //   null,
-  //   { Inventions: 20 },
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
-  //     ["Spare Parts", { MechanicalMind: 15 }],
-  //   ]
-  // );
-  // const tinkerPolarityAmplifierRecipe = await createRecipe(
-  //   null,
-  //   tinkerPolarityAmplifier,
-  //   1,
-  //   engineering,
-  //   [
-  //     [awakenedIre, 1],
-  //     [reinforcedMachineChassis, 1],
-  //     [greasedUpGears, 3],
-  //     [arclightCapacitor, 1],
-  //     [handfulOfSereviteBolts, 8],
-  //   ],
-  //   null,
-  //   "Tinkers",
-  //   1,
-  //   425,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Tinker's Workbench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
-  //     ["Spare Parts", { MechanicalMind: 15 }],
-  //   ]
-  // );
-  // const tinkerSupercollideOTronRecipe = await createRecipe(
-  //   null,
-  //   tinkerSupercollideOTron,
-  //   1,
-  //   engineering,
-  //   [
-  //     [awakenedFire, 5],
-  //     [awakenedOrder, 3],
-  //     [shockSpringCoil, 3],
-  //     [greasedUpGears, 10],
-  //     [reinforcedMachineChassis, 1],
-  //     [arclightCapacitor, 3],
-  //   ],
-  //   null,
-  //   "Tinkers",
-  //   1,
-  //   425,
-  //   null,
-  //   { Inventions: 40 },
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
-  //     ["Spare Parts", { MechanicalMind: 15 }],
-  //   ]
-  // );
-  // const tinkerGroundedCircuitryRecipe = await createRecipe(
-  //   null,
-  //   tinkerGroundedCircuitry,
-  //   1,
-  //   engineering,
-  //   [
-  //     [reinforcedMachineChassis, 1],
-  //     [handfulOfSereviteBolts, 4],
-  //     [arclightCapacitor, 2],
-  //     [greasedUpGears, 2],
-  //   ],
-  //   null,
-  //   "Tinkers",
-  //   1,
-  //   425,
-  //   { ValdrakkenAccord: 11 },
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
-  //     ["Spare Parts", { MechanicalMind: 15 }],
-  //   ]
-  // );
-  // const tinkerBreathOfNeltharionRecipe = await createRecipe(
-  //   null,
-  //   tinkerBreathOfNeltharion,
-  //   1,
-  //   engineering,
-  //   [
-  //     [awakenedFire, 3],
-  //     [reinforcedMachineChassis, 1],
-  //     [everburningBlastingPowder, 8],
-  //     [handfulOfSereviteBolts, 5],
-  //     [greasedUpGears, 4],
-  //   ],
-  //   null,
-  //   "Tinkers",
-  //   1,
-  //   425,
-  //   null,
-  //   null,
-  //   "Dungeon Drop",
-  //   "Tinker's Workbench",
-  //   "Drops from 'Crumpled Schematic' in Neltharus.",
-  //   [
-  //     ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
-  //     ["Spare Parts", { MechanicalMind: 15 }],
-  //   ]
-  // );
-  // const tinkerPlaneDisplacerRecipe = await createRecipe(
-  //   null,
-  //   tinkerPlaneDisplacer,
-  //   1,
-  //   engineering,
-  //   [
-  //     [shockSpringCoil, 1],
-  //     [reinforcedMachineChassis, 1],
-  //     [potionOfTheHushedZephyr, 1],
-  //   ],
-  //   25,
-  //   "Tinkers",
-  //   1,
-  //   425,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
-  //     ["Spare Parts", { MechanicalMind: 15 }],
-  //   ]
-  // );
-  // const battleReadyBinocularsRecipe = await createRecipe(
-  //   null,
-  //   battleReadyBinoculars,
-  //   1,
-  //   engineering,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [awakenedOrder, 2],
-  //     [framelessLens, 2],
-  //     [obsidianSearedAlloy, 2],
-  //     [arclightCapacitor, 2],
-  //     [reinforcedMachineChassis, 1],
-  //   ],
-  //   50,
-  //   "Goggles",
-  //   1,
-  //   320,
-  //   null,
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Gear: 10 }],
-  //     ["Cogwheel", {}],
-  //     ["Safety Components", { GearsForGear: 20 }],
-  //     ["Illustrious Insight", { Gear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const lightweightOcularLensesRecipe = await createRecipe(
-  //   null,
-  //   lightweightOcularLenses,
-  //   1,
-  //   engineering,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [awakenedOrder, 2],
-  //     [framelessLens, 2],
-  //     [vibrantWilderclothBolt, 2],
-  //     [arclightCapacitor, 2],
-  //     [reinforcedMachineChassis, 1],
-  //   ],
-  //   50,
-  //   "Goggles",
-  //   1,
-  //   320,
-  //   null,
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Gear: 10 }],
-  //     ["Cogwheel", {}],
-  //     ["Safety Components", { GearsForGear: 20 }],
-  //     ["Illustrious Insight", { Gear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const oscillatingWildernessOpticalsRecipe = await createRecipe(
-  //   null,
-  //   oscillatingWildernessOpticals,
-  //   1,
-  //   engineering,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [awakenedOrder, 2],
-  //     [framelessLens, 2],
-  //     [frostbiteScales, 4],
-  //     [arclightCapacitor, 2],
-  //     [reinforcedMachineChassis, 1],
-  //   ],
-  //   50,
-  //   "Goggles",
-  //   1,
-  //   320,
-  //   null,
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Gear: 10 }],
-  //     ["Cogwheel", {}],
-  //     ["Safety Components", { GearsForGear: 20 }],
-  //     ["Illustrious Insight", { Gear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const peripheralVisionProjectorsRecipe = await createRecipe(
-  //   null,
-  //   peripheralVisionProjectors,
-  //   1,
-  //   engineering,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [awakenedOrder, 2],
-  //     [framelessLens, 2],
-  //     [stonecrustHide, 4],
-  //     [arclightCapacitor, 2],
-  //     [reinforcedMachineChassis, 1],
-  //   ],
-  //   50,
-  //   "Goggles",
-  //   1,
-  //   320,
-  //   null,
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Gear: 10 }],
-  //     ["Cogwheel", {}],
-  //     ["Safety Components", { GearsForGear: 20 }],
-  //     ["Illustrious Insight", { Gear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const deadlineDeadeyesRecipe = await createRecipe(
-  //   null,
-  //   deadlineDeadeyes,
-  //   1,
-  //   engineering,
-  //   [
-  //     [smudgedLens, 2],
-  //     [shockSpringCoil, 2],
-  //     [handfulOfSereviteBolts, 2],
-  //     [greasedUpGears, 1],
-  //   ],
-  //   15,
-  //   "Goggles",
-  //   2,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Lesser Illustrious Insight", { Gear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const milestoneMagnifiersRecipe = await createRecipe(
-  //   null,
-  //   milestoneMagnifiers,
-  //   1,
-  //   engineering,
-  //   [
-  //     [smudgedLens, 2],
-  //     [shockSpringCoil, 2],
-  //     [handfulOfSereviteBolts, 2],
-  //     [greasedUpGears, 1],
-  //   ],
-  //   15,
-  //   "Goggles",
-  //   2,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Lesser Illustrious Insight", { Gear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const qualityAssuredOpticsRecipe = await createRecipe(
-  //   null,
-  //   qualityAssuredOptics,
-  //   1,
-  //   engineering,
-  //   [
-  //     [smudgedLens, 2],
-  //     [shockSpringCoil, 2],
-  //     [handfulOfSereviteBolts, 2],
-  //     [greasedUpGears, 1],
-  //   ],
-  //   15,
-  //   "Goggles",
-  //   2,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Lesser Illustrious Insight", { Gear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const sentrysStabilizedSpecsRecipe = await createRecipe(
-  //   null,
-  //   sentrysStabilizedSpecs,
-  //   1,
-  //   engineering,
-  //   [
-  //     [smudgedLens, 2],
-  //     [shockSpringCoil, 2],
-  //     [handfulOfSereviteBolts, 2],
-  //     [greasedUpGears, 1],
-  //   ],
-  //   15,
-  //   "Goggles",
-  //   2,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Lesser Illustrious Insight", { Gear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const complicatedCuffsRecipe = await createRecipe(
-  //   null,
-  //   complicatedCuffs,
-  //   1,
-  //   engineering,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 30],
-  //     [lustrousScaledHide, 5],
-  //     [reinforcedMachineChassis, 1],
-  //     [greasedUpGears, 3],
-  //     [arclightCapacitor, 3],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   320,
-  //   null,
-  //   { Gear: 0 },
-  //   "Crafting Goggles/Guns/Bracers",
-  //   "Tinker's Workbench",
-  //   "Random chance to learn when crafting other gear pieces while having Gear 0.",
-  //   [
-  //     ["Primal Infusion", { Gear: 10 }],
-  //     ["Cogwheel", { GearsForGear: 30 }],
-  //     ["Safety Components", { GearsForGear: 20 }],
-  //     ["Illustrious Insight", { Gear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const difficultWristProtectorsRecipe = await createRecipe(
-  //   null,
-  //   difficultWristProtectors,
-  //   1,
-  //   engineering,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 30],
-  //     [obsidianSearedAlloy, 2],
-  //     [reinforcedMachineChassis, 1],
-  //     [greasedUpGears, 3],
-  //     [arclightCapacitor, 3],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   320,
-  //   null,
-  //   { Gear: 0 },
-  //   "Crafting Goggles/Guns/Bracers",
-  //   "Tinker's Workbench",
-  //   "Random chance to learn when crafting other gear pieces while having Gear 0.",
-  //   [
-  //     ["Primal Infusion", { Gear: 10 }],
-  //     ["Cogwheel", { GearsForGear: 30 }],
-  //     ["Safety Components", { GearsForGear: 20 }],
-  //     ["Illustrious Insight", { Gear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const needlesslyComplexWristguardsRecipe = await createRecipe(
-  //   null,
-  //   needlesslyComplexWristguards,
-  //   1,
-  //   engineering,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 30],
-  //     [denseHide, 5],
-  //     [reinforcedMachineChassis, 1],
-  //     [greasedUpGears, 3],
-  //     [arclightCapacitor, 3],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   320,
-  //   null,
-  //   { Gear: 0 },
-  //   "Crafting Goggles/Guns/Bracers",
-  //   "Tinker's Workbench",
-  //   "Random chance to learn when crafting other gear pieces while having Gear 0.",
-  //   [
-  //     ["Primal Infusion", { Gear: 10 }],
-  //     ["Cogwheel", { GearsForGear: 30 }],
-  //     ["Safety Components", { GearsForGear: 20 }],
-  //     ["Illustrious Insight", { Gear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const overengineeredSleeveExtendersRecipe = await createRecipe(
-  //   null,
-  //   overengineeredSleeveExtenders,
-  //   1,
-  //   engineering,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 30],
-  //     [vibrantWilderclothBolt, 4],
-  //     [reinforcedMachineChassis, 1],
-  //     [greasedUpGears, 3],
-  //     [arclightCapacitor, 3],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   320,
-  //   null,
-  //   { Gear: 0 },
-  //   "Crafting Goggles/Guns/Bracers",
-  //   "Tinker's Workbench",
-  //   "Random chance to learn when crafting other gear pieces while having Gear 0.",
-  //   [
-  //     ["Primal Infusion", { Gear: 10 }],
-  //     ["Cogwheel", { GearsForGear: 30 }],
-  //     ["Safety Components", { GearsForGear: 20 }],
-  //     ["Illustrious Insight", { Gear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const sophisticatedProblemSolverRecipe = await createRecipe(
-  //   null,
-  //   sophisticatedProblemSolver,
-  //   1,
-  //   engineering,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 160],
-  //     [obsidianSearedAlloy, 4],
-  //     [reinforcedMachineChassis, 1],
-  //     [everburningBlastingPowder, 8],
-  //     [arclightCapacitor, 2],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   1,
-  //   320,
-  //   null,
-  //   null,
-  //   "Raid Drop",
-  //   "Tinker's Workbench",
-  //   "Dropped from bosses in Vault of the Incarnates.",
-  //   [
-  //     ["Primal Infusion", { Gear: 10 }],
-  //     ["Missive", { Gear: 20 }],
-  //     ["Embellishment", { Gear: 35 }],
-  //     ["Illustrious Insight", { Gear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const pewTwoRecipe = await createRecipe(
-  //   null,
-  //   pewTwo,
-  //   1,
-  //   engineering,
-  //   [
-  //     [rousingFire, 1],
-  //     [handfulOfSereviteBolts, 5],
-  //     [everburningBlastingPowder, 5],
-  //     [sereviteOre, 5],
-  //   ],
-  //   45,
-  //   "Weapons",
-  //   3,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { Gear: 20 }],
-  //     ["Lesser Illustrious Insight", { Gear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const meticulouslyTunedGearRecipe = await createRecipe(
-  //   null,
-  //   meticulouslyTunedGear,
-  //   1,
-  //   engineering,
-  //   [
-  //     [handfulOfSereviteBolts, 4],
-  //     [greasedUpGears, 1],
-  //     [sunderedOnyx, 1],
-  //   ],
-  //   null,
-  //   "Cogwheels",
-  //   1,
-  //   425,
-  //   null,
-  //   { GearsForGear: 0 },
-  //   "Crafting Greased-Up Gears",
-  //   "Tinker's Workbench",
-  //   "Random chance when crafting Greased-Up Gears while having Gears for Gear 0.",
-  //   [
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const oneSizeFitsAllGearRecipe = await createRecipe(
-  //   null,
-  //   oneSizeFitsAllGear,
-  //   1,
-  //   engineering,
-  //   [
-  //     [handfulOfSereviteBolts, 4],
-  //     [greasedUpGears, 1],
-  //     [mysticSapphire, 1],
-  //   ],
-  //   null,
-  //   "Cogwheels",
-  //   1,
-  //   425,
-  //   null,
-  //   { GearsForGear: 0 },
-  //   "Crafting Greased-Up Gears",
-  //   "Tinker's Workbench",
-  //   "Random chance when crafting Greased-Up Gears while having Gears for Gear 0.",
-  //   [
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const rapidlyTickingGearRecipe = await createRecipe(
-  //   null,
-  //   rapidlyTickingGear,
-  //   1,
-  //   engineering,
-  //   [
-  //     [handfulOfSereviteBolts, 4],
-  //     [greasedUpGears, 1],
-  //     [vibrantEmerald, 1],
-  //   ],
-  //   null,
-  //   "Cogwheels",
-  //   1,
-  //   425,
-  //   null,
-  //   { GearsForGear: 0 },
-  //   "Crafting Greased-Up Gears",
-  //   "Tinker's Workbench",
-  //   "Random chance when crafting Greased-Up Gears while having Gears for Gear 0.",
-  //   [
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const razorSharpGearRecipe = await createRecipe(
-  //   null,
-  //   meticulouslyTunedGear,
-  //   1,
-  //   engineering,
-  //   [
-  //     [handfulOfSereviteBolts, 4],
-  //     [greasedUpGears, 1],
-  //     [queensRuby, 1],
-  //   ],
-  //   null,
-  //   "Cogwheels",
-  //   1,
-  //   425,
-  //   null,
-  //   { GearsForGear: 0 },
-  //   "Crafting Greased-Up Gears",
-  //   "Tinker's Workbench",
-  //   "Random chance when crafting Greased-Up Gears while having Gears for Gear 0.",
-  //   [
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const highIntensityThermalScannerRecipe = await createRecipe(
-  //   null,
-  //   highIntensityThermalScanner,
-  //   1,
-  //   engineering,
-  //   [
-  //     [framelessLens, 1],
-  //     [greasedUpGears, 3],
-  //     [arclightCapacitor, 2],
-  //     [reinforcedMachineChassis, 1],
-  //   ],
-  //   null,
-  //   "Scopes & Ammo",
-  //   1,
-  //   425,
-  //   null,
-  //   { Utility: 20 },
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Utility: 30 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const projectilePropulsionPinionRecipe = await createRecipe(
-  //   null,
-  //   projectilePropulsionPinion,
-  //   1,
-  //   engineering,
-  //   [
-  //     [framelessLens, 1],
-  //     [greasedUpGears, 3],
-  //     [arclightCapacitor, 2],
-  //     [reinforcedMachineChassis, 1],
-  //   ],
-  //   null,
-  //   "Scopes & Ammo",
-  //   1,
-  //   425,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Tinker's Workbench",
-  //   "Drops from Djaradin Cache on the Waking SHores.",
-  //   [
-  //     ["Lesser Illustrious Insight", { Utility: 30 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const completelySafeRocketsRecipe = await createRecipe(
-  //   null,
-  //   completelySafeRockets,
-  //   2,
-  //   engineering,
-  //   [
-  //     [handfulOfSereviteBolts, 2],
-  //     [everburningBlastingPowder, 4],
-  //   ],
-  //   null,
-  //   "Scopes & Ammo",
-  //   1,
-  //   425,
-  //   null,
-  //   { Utility: 0 },
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Utility: 30 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const endlessStackOfNeedlesRecipe = await createRecipe(
-  //   null,
-  //   endlessStackOfNeedles,
-  //   2,
-  //   engineering,
-  //   [
-  //     [handfulOfSereviteBolts, 2],
-  //     [shockSpringCoil, 1],
-  //     [greasedUpGears, 1],
-  //   ],
-  //   null,
-  //   "Scopes & Ammo",
-  //   1,
-  //   425,
-  //   null,
-  //   { Utility: 10 },
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Utility: 30 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const gyroscopicKaleidoscopeRecipe = await createRecipe(
-  //   null,
-  //   gyroscopicKaleidoscope,
-  //   1,
-  //   engineering,
-  //   [
-  //     [framelessLens, 1],
-  //     [handfulOfSereviteBolts, 2],
-  //     [greasedUpGears, 6],
-  //     [arclightCapacitor, 2],
-  //   ],
-  //   30,
-  //   "Scopes & Ammo",
-  //   1,
-  //   425,
-  //   null,
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Utility: 30 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const blackFireflightRecipe = await createRecipe(
-  //   null,
-  //   blackFireflight,
-  //   "2-3",
-  //   engineering,
-  //   [
-  //     [wildercloth, 1],
-  //     [everburningBlastingPowder, 2],
-  //   ],
-  //   null,
-  //   "Fireworks",
-  //   1,
-  //   null,
-  //   { ArtisansConsortium: "Valued" },
-  //   null,
-  //   null,
-  //   "Tinker's Workbench"
-  // );
-  // const blueFireflightRecipe = await createRecipe(
-  //   null,
-  //   blueFireflight,
-  //   "2-3",
-  //   engineering,
-  //   [
-  //     [wildercloth, 1],
-  //     [everburningBlastingPowder, 2],
-  //   ],
-  //   null,
-  //   "Fireworks",
-  //   1,
-  //   null,
-  //   { ArtisansConsortium: "Respected" },
-  //   null,
-  //   null,
-  //   "Tinker's Workbench"
-  // );
-  // const bundleOfFireworksRecipe = await createRecipe(
-  //   null,
-  //   blackFireflight,
-  //   1,
-  //   engineering,
-  //   [
-  //     [rousingFire, 3],
-  //     [everburningBlastingPowder, 2],
-  //     [stonecrustHide, 1],
-  //   ],
-  //   null,
-  //   "Fireworks",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Tinker's Workbench",
-  //   "Drops from Draconic Recipe in a Bottle."
-  // );
-  // const greenFireflightRecipe = await createRecipe(
-  //   null,
-  //   greenFireflight,
-  //   "2-3",
-  //   engineering,
-  //   [
-  //     [everburningBlastingPowder, 2],
-  //     [adamantScales, 1],
-  //   ],
-  //   null,
-  //   "Fireworks",
-  //   1,
-  //   null,
-  //   { ArtisansConsortium: "Esteemed" },
-  //   null,
-  //   null,
-  //   "Tinker's Workbench"
-  // );
-  // const redFireflightRecipe = await createRecipe(
-  //   null,
-  //   redFireflight,
-  //   "2-3",
-  //   engineering,
-  //   [
-  //     [resilientLeather, 1],
-  //     [everburningBlastingPowder, 2],
-  //   ],
-  //   null,
-  //   "Fireworks",
-  //   1,
-  //   null,
-  //   { ArtisansConsortium: "Preferred" },
-  //   null,
-  //   null,
-  //   "Tinker's Workbench"
-  // );
-  // const bronzeFireflightRecipe = await createRecipe(
-  //   null,
-  //   blueFireflight,
-  //   "2-3",
-  //   engineering,
-  //   [
-  //     [everburningBlastingPowder, 2],
-  //     [eternityAmber, 1],
-  //   ],
-  //   15,
-  //   "Fireworks",
-  //   1
-  // );
-  // const suspiciouslySilentCrateRecipe = await createRecipe(
-  //   null,
-  //   suspiciouslySilentCrate,
-  //   1,
-  //   engineering,
-  //   [
-  //     [awakenedFire, 1],
-  //     [everburningBlastingPowder, 10],
-  //     [shockSpringCoil, 1],
-  //     [handfulOfSereviteBolts, 3],
-  //     [assortedSafetyFuses, 2],
-  //   ],
-  //   null,
-  //   "Explosives",
-  //   1,
-  //   450,
-  //   null,
-  //   { EZThro: 30 },
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { EZThro: 15 }],
-  //     ["Spare Parts", { Creation: 30 }],
-  //   ]
-  // );
-  // const suspiciouslyTickingCrateRecipe = await createRecipe(
-  //   null,
-  //   suspiciouslyTickingCrate,
-  //   1,
-  //   engineering,
-  //   [
-  //     [awakenedFire, 1],
-  //     [everburningBlastingPowder, 10],
-  //     [shockSpringCoil, 1],
-  //     [handfulOfSereviteBolts, 3],
-  //   ],
-  //   null,
-  //   "Explosives",
-  //   1,
-  //   450,
-  //   null,
-  //   { ShortFuse: 30 },
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { ShortFuse: 15 }],
-  //     ["Spare Parts", { Creation: 30 }],
-  //   ]
-  // );
-  // const iwinButtonMkTenRecipe = await createRecipe(
-  //   null,
-  //   iwinButtonMkTen,
-  //   "1-2",
-  //   engineering,
-  //   [
-  //     [handfulOfSereviteBolts, 1],
-  //     [arclightCapacitor, 1],
-  //     [shockSpringCoil, 1],
-  //     [primalDeconstructionCharge, 1],
-  //   ],
-  //   null,
-  //   "Explosives",
-  //   1,
-  //   300,
-  //   null,
-  //   { Explosives: 40 },
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { ShortFuse: 15 }],
-  //     ["Spare Parts", { Creation: 30 }],
-  //   ]
-  // );
-  // const ezThroCreatureCombustionCanisterRecipe = await createRecipe(
-  //   null,
-  //   ezThroCreatureCombustionCanister,
-  //   "2-3",
-  //   engineering,
-  //   [
-  //     [everburningBlastingPowder, 6],
-  //     [shockSpringCoil, 1],
-  //     [handfulOfSereviteBolts, 4],
-  //     [assortedSafetyFuses, 1],
-  //   ],
-  //   null,
-  //   "Explosives",
-  //   1,
-  //   250,
-  //   null,
-  //   { EZThro: 0 },
-  //   "Crafting Explosives",
-  //   "Tinker's Workbench",
-  //   "Can be learned when crafting Creature Combustion Canister while having EZ-Thro 0.",
-  //   [
-  //     ["Lesser Illustrious Insight", { EZThro: 15 }],
-  //     ["Spare Parts", { Creation: 30 }],
-  //   ]
-  // );
-  // const ezThroGravitationalDisplacerRecipe = await createRecipe(
-  //   null,
-  //   ezThroGravitationalDisplacer,
-  //   "2-3",
-  //   engineering,
-  //   [
-  //     [rousingDecay, 1],
-  //     [everburningBlastingPowder, 4],
-  //     [shockSpringCoil, 1],
-  //     [handfulOfSereviteBolts, 2],
-  //     [potionOfGusts, 1],
-  //     [assortedSafetyFuses, 1],
-  //   ],
-  //   null,
-  //   "Explosives",
-  //   1,
-  //   350,
-  //   null,
-  //   { EZThro: 0 },
-  //   "Crafting Explosives",
-  //   "Tinker's Workbench",
-  //   "Can be learned when crafting Gravitational Displacer while having EZ-Thro 0.",
-  //   [
-  //     ["Lesser Illustrious Insight", { EZThro: 15 }],
-  //     ["Spare Parts", { Creation: 30 }],
-  //   ]
-  // );
-  // const ezThroGreaseGrenadeRecipe = await createRecipe(
-  //   null,
-  //   ezThroGreaseGrenade,
-  //   "2-3",
-  //   engineering,
-  //   [
-  //     [rousingDecay, 1],
-  //     [everburningBlastingPowder, 6],
-  //     [handfulOfSereviteBolts, 4],
-  //     [assortedSafetyFuses, 1],
-  //   ],
-  //   null,
-  //   "Explosives",
-  //   1,
-  //   300,
-  //   null,
-  //   { EZThro: 0 },
-  //   "Crafting Explosives",
-  //   "Tinker's Workbench",
-  //   "Can be learned when crafting Grease Grenade while having EZ-Thro 0.",
-  //   [
-  //     ["Lesser Illustrious Insight", { EZThro: 15 }],
-  //     ["Spare Parts", { Creation: 30 }],
-  //   ]
-  // );
-  // const ezThroPrimalDeconstructionChargeRecipe = await createRecipe(
-  //   null,
-  //   ezThroPrimalDeconstructionCharge,
-  //   "2-3",
-  //   engineering,
-  //   [
-  //     [rousingFire, 1],
-  //     [everburningBlastingPowder, 4],
-  //     [shockSpringCoil, 1],
-  //     [handfulOfSereviteBolts, 4],
-  //     [assortedSafetyFuses, 1],
-  //   ],
-  //   null,
-  //   "Explosives",
-  //   1,
-  //   250,
-  //   null,
-  //   { EZThro: 0 },
-  //   "Crafting Explosives",
-  //   "Tinker's Workbench",
-  //   "Can be learned when crafting Primal Deconstruction Charge while having EZ-Thro 0.",
-  //   [
-  //     ["Lesser Illustrious Insight", { EZThro: 15 }],
-  //     ["Spare Parts", { Creation: 30 }],
-  //   ]
-  // );
-  // const gravitationalDisplacerRecipe = await createRecipe(
-  //   null,
-  //   gravitationalDisplacer,
-  //   "2-3",
-  //   engineering,
-  //   [
-  //     [everburningBlastingPowder, 4],
-  //     [shockSpringCoil, 1],
-  //     [handfulOfSereviteBolts, 2],
-  //     [potionOfGusts, 1],
-  //   ],
-  //   null,
-  //   "Explosives",
-  //   1,
-  //   350,
-  //   { DragonscaleExpedition: 9 },
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { ShortFuse: 15 }],
-  //     ["Spare Parts", { Creation: 30 }],
-  //   ]
-  // );
-  // const greaseGrenadeRecipe = await createRecipe(
-  //   null,
-  //   greaseGrenade,
-  //   "2-3",
-  //   engineering,
-  //   [
-  //     [rousingDecay, 1],
-  //     [everburningBlastingPowder, 6],
-  //     [handfulOfSereviteBolts, 4],
-  //   ],
-  //   null,
-  //   "Explosives",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Tinker's Workbench",
-  //   "Drops from Draconic Recipe in a Bottle.",
-  //   [
-  //     ["Lesser Illustrious Insight", { ShortFuse: 15 }],
-  //     ["Spare Parts", { Creation: 30 }],
-  //   ]
-  // );
-  // const stickyWarpGrenadeRecipe = await createRecipe(
-  //   null,
-  //   stickyWarpGrenade,
-  //   "2-3",
-  //   engineering,
-  //   [
-  //     [rousingDecay, 1],
-  //     [everburningBlastingPowder, 3],
-  //     [shockSpringCoil, 2],
-  //     [handfulOfSereviteBolts, 6],
-  //   ],
-  //   null,
-  //   "Explosives",
-  //   1,
-  //   450,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Tinker's Workbench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Lesser Illustrious Insight", { ShortFuse: 15 }],
-  //     ["Spare Parts", { Creation: 30 }],
-  //   ]
-  // );
-  // const primalDeconstructionChargeRecipe = await createRecipe(
-  //   null,
-  //   primalDeconstructionCharge,
-  //   "2-3",
-  //   engineering,
-  //   [
-  //     [awakenedFire, 1],
-  //     [everburningBlastingPowder, 4],
-  //     [shockSpringCoil, 1],
-  //     [handfulOfSereviteBolts, 4],
-  //   ],
-  //   null,
-  //   "Explosives",
-  //   1,
-  //   250,
-  //   { DragonscaleExpedition: 9 },
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { ShortFuse: 15 }],
-  //     ["Spare Parts", { Creation: 30 }],
-  //   ]
-  // );
-  // const creatureCombustionCanisterRecipe = await createRecipe(
-  //   null,
-  //   creatureCombustionCanister,
-  //   "2-3",
-  //   engineering,
-  //   [
-  //     [everburningBlastingPowder, 6],
-  //     [shockSpringCoil, 1],
-  //     [handfulOfSereviteBolts, 4],
-  //   ],
-  //   25,
-  //   "Explosives",
-  //   1,
-  //   250,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { ShortFuse: 15 }],
-  //     ["Spare Parts", { Creation: 30 }],
-  //   ]
-  // );
-  // const zapthrottleSoulInhalerRecipe = await createRecipe(
-  //   null,
-  //   zapthrottleSoulInhaler,
-  //   1,
-  //   engineering,
-  //   [
-  //     [everburningBlastingPowder, 3],
-  //     [arclightCapacitor, 1],
-  //     [reinforcedMachineChassis, 1],
-  //     [handfulOfSereviteBolts, 6],
-  //     [shockSpringCoil, 2],
-  //     [greasedUpGears, 3],
-  //   ],
-  //   null,
-  //   "Devices",
-  //   1,
-  //   null,
-  //   null,
-  //   { Scrapper: 20 },
-  //   null,
-  //   "Tinker's Workbench"
-  // );
-  // const saviorRecipe = await createRecipe(
-  //   null,
-  //   savior,
-  //   2,
-  //   engineering,
-  //   [
-  //     [awakenedOrder, 1],
-  //     [handfulOfSereviteBolts, 20],
-  //     [arclightCapacitor, 1],
-  //     [shockSpringCoil, 3],
-  //     [greasedUpGears, 2],
-  //   ],
-  //   null,
-  //   "Devices",
-  //   1,
-  //   350,
-  //   null,
-  //   { MechanicalMind: 40 },
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
-  //     ["Spare Parts", { MechanicalMind: 15 }],
-  //   ]
-  // );
-  // const cartomancyCannonRecipe = await createRecipe(
-  //   null,
-  //   cartomancyCannon,
-  //   1,
-  //   engineering,
-  //   [
-  //     [handfulOfSereviteBolts, 20],
-  //     [shockSpringCoil, 6],
-  //     [everburningBlastingPowder, 12],
-  //     [reinforcedMachineChassis, 1],
-  //     [arclightCapacitor, 2],
-  //     [greasedUpGears, 4],
-  //   ],
-  //   null,
-  //   "Devices",
-  //   1,
-  //   null,
-  //   null,
-  //   { Novelties: 10 },
-  //   null,
-  //   "Tinker's Workbench"
-  // );
-  // const centralizedPrecipitationEmitterRecipe = await createRecipe(
-  //   null,
-  //   centralizedPrecipitationEmitter,
-  //   1,
-  //   engineering,
-  //   [
-  //     [frostySoul, 3],
-  //     [airySoul, 3],
-  //     [handfulOfSereviteBolts, 20],
-  //     [shockSpringCoil, 3],
-  //     [reinforcedMachineChassis, 1],
-  //     [arclightCapacitor, 4],
-  //     [elementalHarmony, 1],
-  //   ],
-  //   null,
-  //   "Devices",
-  //   1,
-  //   null,
-  //   null,
-  //   { Novelties: 5 },
-  //   null,
-  //   "Tinker's Workbench"
-  // );
-  // const elementInfusedRocketHelmetRecipe = await createRecipe(
-  //   null,
-  //   elementInfusedRocketHelmet,
-  //   1,
-  //   engineering,
-  //   [
-  //     [awakenedFire, 10],
-  //     [awakenedAir, 5],
-  //     [gravitationalDisplacer, 15],
-  //     [everburningBlastingPowder, 20],
-  //     [reinforcedMachineChassis, 1],
-  //     [arclightCapacitor, 2],
-  //     [handfulOfSereviteBolts, 5],
-  //   ],
-  //   null,
-  //   "Devices",
-  //   1,
-  //   null,
-  //   null,
-  //   { Novelties: 15 },
-  //   null,
-  //   "Tinker's Workbench"
-  // );
-  // const environmentalEmulatorRecipe = await createRecipe(
-  //   null,
-  //   environmentalEmulator,
-  //   1,
-  //   engineering,
-  //   [
-  //     [fierySoul, 3],
-  //     [earthenSoul, 3],
-  //     [handfulOfSereviteBolts, 20],
-  //     [shockSpringCoil, 3],
-  //     [reinforcedMachineChassis, 1],
-  //     [arclightCapacitor, 4],
-  //     [elementalHarmony, 1],
-  //   ],
-  //   null,
-  //   "Devices",
-  //   1,
-  //   null,
-  //   null,
-  //   { Novelties: 25 },
-  //   null,
-  //   "Tinker's Workbench"
-  // );
-  // const giggleGogglesRecipe = await createRecipe(
-  //   null,
-  //   giggleGoggles,
-  //   1,
-  //   engineering,
-  //   [
-  //     [framelessLens, 2],
-  //     [shockSpringCoil, 3],
-  //     [reinforcedMachineChassis, 1],
-  //     [arclightCapacitor, 2],
-  //     [handfulOfSereviteBolts, 6],
-  //     [neltharite, 2],
-  //   ],
-  //   null,
-  //   "Devices",
-  //   1,
-  //   null,
-  //   null,
-  //   { Novelties: 20 },
-  //   null,
-  //   "Tinker's Workbench"
-  // );
-  // const helpRecipe = await createRecipe(
-  //   null,
-  //   help,
-  //   1,
-  //   engineering,
-  //   [
-  //     [awakenedIre, 3],
-  //     [markOfHonor, 15],
-  //     [reinforcedMachineChassis, 1],
-  //     [everburningBlastingPowder, 4],
-  //     [handfulOfSereviteBolts, 6],
-  //   ],
-  //   null,
-  //   "Devices",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Tinker's Workbench",
-  //   "Received from Arena, BGs, or WM?"
-  // );
-  // const tinkerRemovalKitRecipe = await createRecipe(
-  //   null,
-  //   tinkerRemovalKit,
-  //   1,
-  //   engineering,
-  //   [
-  //     [handfulOfSereviteBolts, 3],
-  //     [shockSpringCoil, 2],
-  //     [draconiumOre, 2],
-  //   ],
-  //   40,
-  //   "Devices",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Tinker's Workbench"
-  // );
-  // const wyrmholeGeneratorRecipe = await createRecipe(
-  //   null,
-  //   wyrmholeGenerator,
-  //   1,
-  //   engineering,
-  //   [
-  //     [awakenedOrder, 3],
-  //     [handfulOfSereviteBolts, 2],
-  //     [shockSpringCoil, 1],
-  //     [greasedUpGears, 2],
-  //     [reinforcedMachineChassis, 1],
-  //     [arclightCapacitor, 3],
-  //   ],
-  //   null,
-  //   "Devices",
-  //   1,
-  //   null,
-  //   null,
-  //   { MechanicalMind: 0 },
-  //   null,
-  //   "Tinker's Workbench"
-  // );
-  // const portableAlchemistsLabBenchRecipe = await createRecipe(
-  //   null,
-  //   portableAlchemistsLabBench,
-  //   1,
-  //   engineering,
-  //   [
-  //     [rousingAir, 1],
-  //     [rousingFrost, 1],
-  //     [greasedUpGears, 1],
-  //     [handfulOfSereviteBolts, 3],
-  //     [omniumDraconis, 3],
-  //     [draconicVial, 5],
-  //   ],
-  //   null,
-  //   "Devices",
-  //   1,
-  //   null,
-  //   { ArtisansConsortium: "Respected" },
-  //   null,
-  //   null,
-  //   "Tinker's Workbench"
-  // );
-  // const portableTinkersWorkbenchRecipe = await createRecipe(
-  //   null,
-  //   portableTinkersWorkbench,
-  //   1,
-  //   engineering,
-  //   [
-  //     [handfulOfSereviteBolts, 2],
-  //     [framelessLens, 1],
-  //     [greasedUpGears, 1],
-  //     [shockSpringCoil, 1],
-  //   ],
-  //   null,
-  //   "Devices",
-  //   1,
-  //   null,
-  //   { ArtisansConsortium: "Respected" },
-  //   null,
-  //   null,
-  //   "Tinker's Workbench"
-  // );
-  // const neuralSilencerMkThreeRecipe = await createRecipe(
-  //   null,
-  //   neuralSilencerMkThree,
-  //   "2-3",
-  //   engineering,
-  //   [
-  //     [wildercloth, 1],
-  //     [handfulOfSereviteBolts, 4],
-  //     [shockSpringCoil, 2],
-  //     [greasedUpGears, 1],
-  //   ],
-  //   15,
-  //   "Devices",
-  //   1
-  // );
-  // const khazgoriteBrainwaveAmplifierRecipe = await createRecipe(
-  //   null,
-  //   khazgoriteBrainwaveAmplifier,
-  //   1,
-  //   engineering,
-  //   [
-  //     [artisansMettle, 225],
-  //     [framelessLens, 2],
-  //     [khazgoriteOre, 10],
-  //     [shockSpringCoil, 2],
-  //     [greasedUpGears, 3],
-  //     [arclightCapacitor, 4],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   425,
-  //   { ArtisansConsortium: "Valued" },
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const khazgoriteDelversHelmetRecipe = await createRecipe(
-  //   null,
-  //   khazgoriteDelversHelmet,
-  //   1,
-  //   engineering,
-  //   [
-  //     [artisansMettle, 225],
-  //     [framelessLens, 1],
-  //     [obsidianSearedAlloy, 4],
-  //     [arclightCapacitor, 2],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   425,
-  //   { ValdrakkenAccord: 19 },
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const khazgoriteEncasedSamophlangeRecipe = await createRecipe(
-  //   null,
-  //   khazgoriteEncasedSamophlange,
-  //   1,
-  //   engineering,
-  //   [
-  //     [artisansMettle, 300],
-  //     [khazgoriteOre, 10],
-  //     [shockSpringCoil, 2],
-  //     [greasedUpGears, 3],
-  //     [arclightCapacitor, 5],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   400,
-  //   { ArtisansConsortium: "Valued" },
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const khazgoriteFisherfriendRecipe = await createRecipe(
-  //   null,
-  //   khazgoriteFisherfriend,
-  //   1,
-  //   engineering,
-  //   [
-  //     [khazgoriteOre, 10],
-  //     [greasedUpGears, 4],
-  //     [arclightCapacitor, 2],
-  //     [reinforcedMachineChassis, 1],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   425,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Tinker's Workbench",
-  //   "Drops from the 'Immaculate Sac of Swog Treasures' from 'The Great Swog'???",
-  //   [
-  //     ["Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const lapidarysKhazgoriteClampsRecipe = await createRecipe(
-  //   null,
-  //   lapidarysKhazgoriteClamps,
-  //   1,
-  //   engineering,
-  //   [
-  //     [artisansMettle, 300],
-  //     [khazgoriteOre, 10],
-  //     [shockSpringCoil, 2],
-  //     [greasedUpGears, 5],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   400,
-  //   { ValdrakkenAccord: 19 },
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const springLoadedKhazgoriteFabricCuttersRecipe = await createRecipe(
-  //   null,
-  //   springLoadedKhazgoriteFabricCutters,
-  //   1,
-  //   engineering,
-  //   [
-  //     [artisansMettle, 300],
-  //     [obsidianSearedAlloy, 4],
-  //     [arclightCapacitor, 2],
-  //     [shockSpringCoil, 2],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   400,
-  //   { DragonscaleExpedition: 15 },
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const bottomlessMireslushOreSatchelRecipe = await createRecipe(
-  //   null,
-  //   bottomlessMireslushOreSatchel,
-  //   1,
-  //   engineering,
-  //   [
-  //     [artisansMettle, 225],
-  //     [mireslushHide, 6],
-  //     [frostfireAlloy, 5],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   425,
-  //   { DragonscaleExpedition: 15 },
-  //   null,
-  //   null,
-  //   "Tinker's Workbench",
-  //   null,
-  //   [
-  //     ["Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const bottomlessStonecrustOreSatchelRecipe = await createRecipe(
-  //   null,
-  //   bottomlessStonecrustOreSatchel,
-  //   1,
-  //   engineering,
-  //   [
-  //     [stonecrustHide, 1],
-  //     [handfulOfSereviteBolts, 2],
-  //   ],
-  //   20,
-  //   "Profession Equipment",
-  //   2,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const draconiumBrainwaveAmplifierRecipe = await createRecipe(
-  //   null,
-  //   draconiumBrainwaveAmplifier,
-  //   1,
-  //   engineering,
-  //   [
-  //     [framelessLens, 1],
-  //     [handfulOfSereviteBolts, 2],
-  //     [shockSpringCoil, 2],
-  //     [draconiumOre, 2],
-  //   ],
-  //   25,
-  //   "Profession Equipment",
-  //   2,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const draconiumDelversHelmetRecipe = await createRecipe(
-  //   null,
-  //   draconiumDelversHelmet,
-  //   1,
-  //   engineering,
-  //   [
-  //     [smudgedLens, 1],
-  //     [handfulOfSereviteBolts, 2],
-  //     [draconiumOre, 2],
-  //   ],
-  //   20,
-  //   "Profession Equipment",
-  //   2,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const draconiumEncasedSamophlangeRecipe = await createRecipe(
-  //   null,
-  //   draconiumEncasedSamophlange,
-  //   1,
-  //   engineering,
-  //   [
-  //     [handfulOfSereviteBolts, 2],
-  //     [shockSpringCoil, 2],
-  //     [greasedUpGears, 1],
-  //     [draconiumOre, 2],
-  //   ],
-  //   20,
-  //   "Profession Equipment",
-  //   2,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const draconiumFisherfriendRecipe = await createRecipe(
-  //   null,
-  //   draconiumFisherfriend,
-  //   1,
-  //   engineering,
-  //   [
-  //     [handfulOfSereviteBolts, 2],
-  //     [greasedUpGears, 1],
-  //     [shockSpringCoil, 2],
-  //     [draconiumOre, 3],
-  //   ],
-  //   35,
-  //   "Profession Equipment",
-  //   2,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const lapidarysDraconiumClampsRecipe = await createRecipe(
-  //   null,
-  //   lapidarysDraconiumClamps,
-  //   1,
-  //   engineering,
-  //   [
-  //     [handfulOfSereviteBolts, 2],
-  //     [greasedUpGears, 1],
-  //     [draconiumOre, 3],
-  //   ],
-  //   20,
-  //   "Profession Equipment",
-  //   2,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const springLoadedDraconiumFabricCuttersRecipe = await createRecipe(
-  //   null,
-  //   springLoadedDraconiumFabricCutters,
-  //   1,
-  //   engineering,
-  //   [
-  //     [handfulOfSereviteBolts, 3],
-  //     [shockSpringCoil, 3],
-  //     [draconiumOre, 4],
-  //   ],
-  //   25,
-  //   "Profession Equipment",
-  //   2,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Lesser Illustrious Insight", { GearsForGear: 15 }],
-  //     ["Spare Parts", { FunctionOverForm: 10 }],
-  //   ]
-  // );
-  // const quackERecipe = await createRecipe(
-  //   null,
-  //   quackE,
-  //   1,
-  //   engineering,
-  //   [
-  //     [contouredFowlfeather, 60],
-  //     [quackEQuackModulator, 1],
-  //     [reinforcedMachineChassis, 1],
-  //     [malygite, 2],
-  //     [greasedUpGears, 2],
-  //     [shockSpringCoil, 1],
-  //     [handfulOfSereviteBolts, 4],
-  //   ],
-  //   null,
-  //   "Robotics",
-  //   1,
-  //   null,
-  //   { DragonscaleExpedition: 21 },
-  //   null,
-  //   null,
-  //   "Tinker's Workbench"
-  // );
-  // const duckoyRecipe = await createRecipe(
-  //   null,
-  //   duckoy,
-  //   1,
-  //   engineering,
-  //   [
-  //     [contouredFowlfeather, 6],
-  //     [resilientLeather, 1],
-  //     [handfulOfSereviteBolts, 1],
-  //     [everburningBlastingPowder, 2],
-  //   ],
-  //   null,
-  //   "Robotics",
-  //   1,
-  //   350,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Tinker's Workbench",
-  //   "Drops from Draconic Message in a Bottle.",
-  //   [
-  //     ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
-  //     ["Spare Parts", { MechanicalMind: 15 }],
-  //   ]
-  // );
+  //engineering recipes - 91 total
+  const arclightCapacitorRecipe = await createRecipe(
+    "Arclight Capacitor",
+    arclightCapacitor,
+    1,
+    engineering,
+    [
+      [awakenedOrder, 1],
+      [shockSpringCoil, 2],
+      [greasedUpGears, 1],
+      [khazgoriteOre, 2],
+    ],
+    20,
+    "Parts",
+    2,
+    350,
+    null,
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { PiecesParts: 15 }],
+      ["Spare Parts", { PiecesParts: 0 }],
+    ]
+  );
+  const reinforcedMachineChassisRecipe = await createRecipe(
+    "Reinforced Machine Chassis",
+    reinforcedMachineChassis,
+    1,
+    engineering,
+    [
+      [awakenedEarth, 1],
+      [handfulOfSereviteBolts, 4],
+      [shockSpringCoil, 1],
+      [greasedUpGears, 2],
+    ],
+    20,
+    "Parts",
+    1,
+    300,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { PiecesParts: 15 }],
+      ["Spare Parts", { PiecesParts: 0 }],
+    ]
+  );
+  const assortedSafetyFusesRecipe = await createRecipe(
+    "Assorted Safety Fuses",
+    assortedSafetyFuses,
+    "2-3",
+    engineering,
+    [
+      [wildercloth, 3],
+      [handfulOfSereviteBolts, 3],
+      [shockSpringCoil, 1],
+      [greasedUpGears, 1],
+    ],
+    null,
+    "Parts",
+    1,
+    250,
+    null,
+    { EZThro: 0 },
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { PiecesParts: 15 }],
+      ["Spare Parts", { PiecesParts: 0 }],
+    ]
+  );
+  const everburningBlastingPowderRecipe = await createRecipe(
+    "Everburning Blasting Powder",
+    everburningBlastingPowder,
+    "1-2",
+    engineering,
+    [
+      [rousingFire, 2],
+      [rousingEarth, 1],
+      [draconiumOre, 1],
+    ],
+    15,
+    "Parts",
+    1,
+    200,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { PiecesParts: 15 }],
+      ["Spare Parts", { PiecesParts: 0 }],
+    ]
+  );
+  const greasedUpGearsRecipe = await createRecipe(
+    "Greased-Up Gears",
+    greasedUpGears,
+    "1-2",
+    engineering,
+    [
+      [rousingFire, 3],
+      [handfulOfSereviteBolts, 2],
+      [draconiumOre, 4],
+    ],
+    10,
+    "Parts",
+    1,
+    250,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { PiecesParts: 15 }],
+      ["Spare Parts", { PiecesParts: 0 }],
+    ]
+  );
+  const shockSpringCoilRecipe = await createRecipe(
+    "Shock-Spring Coil",
+    shockSpringCoil,
+    "1-2",
+    engineering,
+    [
+      [rousingEarth, 2],
+      [handfulOfSereviteBolts, 6],
+    ],
+    5,
+    "Parts",
+    1,
+    150,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { PiecesParts: 15 }],
+      ["Spare Parts", { PiecesParts: 0 }],
+    ]
+  );
+  const handfulOfSereviteBoltsRecipe = await createRecipe(
+    "Handful of Serevite Bolts",
+    handfulOfSereviteBolts,
+    "2-3",
+    engineering,
+    [[sereviteOre, 4]],
+    1,
+    "Parts",
+    1,
+    50,
+    null,
+    null,
+    null,
+    null,
+    "Learned by default.",
+    [
+      ["Lesser Illustrious Insight", { PiecesParts: 15 }],
+      ["Spare Parts", { PiecesParts: 0 }],
+    ]
+  );
+  // const rummageThroughScrap = await(createRecipe("Rummage Through Scrap", null, 1, engineering, [[pieceOfScrap, 5]], null, "Parts", 0, null, null, {Scrapper: 0}, null, null, "Need more info"));
+  const overchargedOverclockerRecipe = await createRecipe(
+    "Overcharged Overclocker",
+    overchargedOverclocker,
+    2,
+    engineering,
+    [
+      [rousingFire, 5],
+      [handfulOfSereviteBolts, 2],
+      [shockSpringCoil, 3],
+    ],
+    40,
+    "Finishing Reagents",
+    1,
+    425,
+    null,
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const illustriousInsightRecipeEngineering = await createRecipe(
+    "Illustrious Insight",
+    illustriousInsight,
+    1,
+    engineering,
+    [[artisansMettle, 50]],
+    null,
+    "Finishing Reagents",
+    1,
+    null,
+    null,
+    null,
+    "Various Specializations",
+    "Tinker's Workbench"
+  );
+  const haphazardlyTetheredWiresRecipe = await createRecipe(
+    "Haphazardly Tethered Wires",
+    haphazardlyTetheredWires,
+    2,
+    engineering,
+    [
+      [rousingEarth, 4],
+      [handfulOfSereviteBolts, 3],
+    ],
+    25,
+    "Finishing Reagents",
+    1,
+    250,
+    null,
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const calibratedSafetySwitchRecipe = await createRecipe(
+    "Calibrated Safety Switch",
+    calibratedSafetySwitch,
+    1,
+    engineering,
+    [
+      [arclightCapacitor, 1],
+      [shockSpringCoil, 2],
+      [greasedUpGears, 1],
+      [reinforcedMachineChassis, 1],
+    ],
+    null,
+    "Optional Reagents",
+    1,
+    425,
+    null,
+    { GearsForGear: 20 },
+    "Tinker Malfunction",
+    "Tinker's Workbench",
+    "Chance to get from a tinker malfunction while having Gears For Gear 20.",
+    [
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const criticalFailurePreventionUnitRecipe = await createRecipe(
+    "Critical Failure Prevention Unit",
+    criticalFailurePreventionUnit,
+    1,
+    engineering,
+    [
+      [arclightCapacitor, 1],
+      [primalDeconstructionCharge, 2],
+      [shockSpringCoil, 3],
+      [reinforcedMachineChassis, 1],
+    ],
+    null,
+    "Optional Reagents",
+    1,
+    425,
+    null,
+    { GearsForGear: 20 },
+    "Tinker Malfunction",
+    "Tinker's Workbench",
+    "Chance to get from a tinker malfunction while having Gears For Gear 20.",
+    [
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const magazineOfHealingDartsRecipe = await createRecipe(
+    "Magazine of Healing Darts",
+    magazineOfHealingDarts,
+    1,
+    engineering,
+    [
+      [arclightCapacitor, 1],
+      [refreshingHealingPotion, 10],
+      [everburningBlastingPowder, 3],
+      [reinforcedMachineChassis, 1],
+    ],
+    null,
+    "Optional Reagents",
+    1,
+    425,
+    null,
+    { GearsForGear: 10 },
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const springLoadedCapacitorCasingRecipe = await createRecipe(
+    "Spring-Loaded Capacitor Casing",
+    springLoadedCapacitorCasing,
+    1,
+    engineering,
+    [
+      [arclightCapacitor, 1],
+      [shockSpringCoil, 2],
+      [handfulOfSereviteBolts, 10],
+      [reinforcedMachineChassis, 1],
+    ],
+    null,
+    "Optional Reagents",
+    1,
+    425,
+    null,
+    { GearsForGear: 20 },
+    "Tinker Malfunction",
+    "Tinker's Workbench",
+    "Chance to get from a tinker malfunction while having Gears For Gear 20.",
+    [
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const tinkerAlarmOTurretRecipe = await createRecipe(
+    null,
+    tinkerAlarmOTurret,
+    1,
+    engineering,
+    [
+      [awakenedIre, 2],
+      [reinforcedMachineChassis, 1],
+      [arclightCapacitor, 1],
+      [greasedUpGears, 3],
+      [shockSpringCoil, 3],
+    ],
+    null,
+    "Tinkers",
+    1,
+    425,
+    null,
+    null,
+    "PvP Victory",
+    "Tinker's Workbench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
+      ["Spare Parts", { MechanicalMind: 15 }],
+    ]
+  );
+  const tinkerArclightVitalCorrectorsRecipe = await createRecipe(
+    null,
+    tinkerArclightVitalCorrectors,
+    1,
+    engineering,
+    [
+      [awakenedOrder, 2],
+      [reinforcedMachineChassis, 1],
+      [arclightCapacitor, 2],
+      [greasedUpGears, 4],
+      [shockSpringCoil, 3],
+    ],
+    null,
+    "Tinkers",
+    1,
+    425,
+    null,
+    { Inventions: 20 },
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
+      ["Spare Parts", { MechanicalMind: 15 }],
+    ]
+  );
+  const tinkerPolarityAmplifierRecipe = await createRecipe(
+    null,
+    tinkerPolarityAmplifier,
+    1,
+    engineering,
+    [
+      [awakenedIre, 1],
+      [reinforcedMachineChassis, 1],
+      [greasedUpGears, 3],
+      [arclightCapacitor, 1],
+      [handfulOfSereviteBolts, 8],
+    ],
+    null,
+    "Tinkers",
+    1,
+    425,
+    null,
+    null,
+    "PvP Victory",
+    "Tinker's Workbench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
+      ["Spare Parts", { MechanicalMind: 15 }],
+    ]
+  );
+  const tinkerSupercollideOTronRecipe = await createRecipe(
+    null,
+    tinkerSupercollideOTron,
+    1,
+    engineering,
+    [
+      [awakenedFire, 5],
+      [awakenedOrder, 3],
+      [shockSpringCoil, 3],
+      [greasedUpGears, 10],
+      [reinforcedMachineChassis, 1],
+      [arclightCapacitor, 3],
+    ],
+    null,
+    "Tinkers",
+    1,
+    425,
+    null,
+    { Inventions: 40 },
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
+      ["Spare Parts", { MechanicalMind: 15 }],
+    ]
+  );
+  const tinkerGroundedCircuitryRecipe = await createRecipe(
+    null,
+    tinkerGroundedCircuitry,
+    1,
+    engineering,
+    [
+      [reinforcedMachineChassis, 1],
+      [handfulOfSereviteBolts, 4],
+      [arclightCapacitor, 2],
+      [greasedUpGears, 2],
+    ],
+    null,
+    "Tinkers",
+    1,
+    425,
+    { ValdrakkenAccord: 11 },
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
+      ["Spare Parts", { MechanicalMind: 15 }],
+    ]
+  );
+  const tinkerBreathOfNeltharionRecipe = await createRecipe(
+    null,
+    tinkerBreathOfNeltharion,
+    1,
+    engineering,
+    [
+      [awakenedFire, 3],
+      [reinforcedMachineChassis, 1],
+      [everburningBlastingPowder, 8],
+      [handfulOfSereviteBolts, 5],
+      [greasedUpGears, 4],
+    ],
+    null,
+    "Tinkers",
+    1,
+    425,
+    null,
+    null,
+    "Dungeon Drop",
+    "Tinker's Workbench",
+    "Drops from 'Crumpled Schematic' in Neltharus.",
+    [
+      ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
+      ["Spare Parts", { MechanicalMind: 15 }],
+    ]
+  );
+  const tinkerPlaneDisplacerRecipe = await createRecipe(
+    null,
+    tinkerPlaneDisplacer,
+    1,
+    engineering,
+    [
+      [shockSpringCoil, 1],
+      [reinforcedMachineChassis, 1],
+      [potionOfTheHushedZephyr, 1],
+    ],
+    25,
+    "Tinkers",
+    1,
+    425,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
+      ["Spare Parts", { MechanicalMind: 15 }],
+    ]
+  );
+  const battleReadyBinocularsRecipe = await createRecipe(
+    null,
+    battleReadyBinoculars,
+    1,
+    engineering,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [awakenedOrder, 2],
+      [framelessLens, 2],
+      [obsidianSearedAlloy, 2],
+      [arclightCapacitor, 2],
+      [reinforcedMachineChassis, 1],
+    ],
+    50,
+    "Goggles",
+    1,
+    320,
+    null,
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Primal Infusion", { Gear: 10 }],
+      ["Cogwheel", {}],
+      ["Safety Components", { GearsForGear: 20 }],
+      ["Illustrious Insight", { Gear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const lightweightOcularLensesRecipe = await createRecipe(
+    null,
+    lightweightOcularLenses,
+    1,
+    engineering,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [awakenedOrder, 2],
+      [framelessLens, 2],
+      [vibrantWilderclothBolt, 2],
+      [arclightCapacitor, 2],
+      [reinforcedMachineChassis, 1],
+    ],
+    50,
+    "Goggles",
+    1,
+    320,
+    null,
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Primal Infusion", { Gear: 10 }],
+      ["Cogwheel", {}],
+      ["Safety Components", { GearsForGear: 20 }],
+      ["Illustrious Insight", { Gear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const oscillatingWildernessOpticalsRecipe = await createRecipe(
+    null,
+    oscillatingWildernessOpticals,
+    1,
+    engineering,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [awakenedOrder, 2],
+      [framelessLens, 2],
+      [frostbiteScales, 4],
+      [arclightCapacitor, 2],
+      [reinforcedMachineChassis, 1],
+    ],
+    50,
+    "Goggles",
+    1,
+    320,
+    null,
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Primal Infusion", { Gear: 10 }],
+      ["Cogwheel", {}],
+      ["Safety Components", { GearsForGear: 20 }],
+      ["Illustrious Insight", { Gear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const peripheralVisionProjectorsRecipe = await createRecipe(
+    null,
+    peripheralVisionProjectors,
+    1,
+    engineering,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [awakenedOrder, 2],
+      [framelessLens, 2],
+      [stonecrustHide, 4],
+      [arclightCapacitor, 2],
+      [reinforcedMachineChassis, 1],
+    ],
+    50,
+    "Goggles",
+    1,
+    320,
+    null,
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Primal Infusion", { Gear: 10 }],
+      ["Cogwheel", {}],
+      ["Safety Components", { GearsForGear: 20 }],
+      ["Illustrious Insight", { Gear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const deadlineDeadeyesRecipe = await createRecipe(
+    null,
+    deadlineDeadeyes,
+    1,
+    engineering,
+    [
+      [smudgedLens, 2],
+      [shockSpringCoil, 2],
+      [handfulOfSereviteBolts, 2],
+      [greasedUpGears, 1],
+    ],
+    15,
+    "Goggles",
+    2,
+    40,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Lesser Illustrious Insight", { Gear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const milestoneMagnifiersRecipe = await createRecipe(
+    null,
+    milestoneMagnifiers,
+    1,
+    engineering,
+    [
+      [smudgedLens, 2],
+      [shockSpringCoil, 2],
+      [handfulOfSereviteBolts, 2],
+      [greasedUpGears, 1],
+    ],
+    15,
+    "Goggles",
+    2,
+    40,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Lesser Illustrious Insight", { Gear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const qualityAssuredOpticsRecipe = await createRecipe(
+    null,
+    qualityAssuredOptics,
+    1,
+    engineering,
+    [
+      [smudgedLens, 2],
+      [shockSpringCoil, 2],
+      [handfulOfSereviteBolts, 2],
+      [greasedUpGears, 1],
+    ],
+    15,
+    "Goggles",
+    2,
+    40,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Lesser Illustrious Insight", { Gear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const sentrysStabilizedSpecsRecipe = await createRecipe(
+    null,
+    sentrysStabilizedSpecs,
+    1,
+    engineering,
+    [
+      [smudgedLens, 2],
+      [shockSpringCoil, 2],
+      [handfulOfSereviteBolts, 2],
+      [greasedUpGears, 1],
+    ],
+    15,
+    "Goggles",
+    2,
+    40,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Lesser Illustrious Insight", { Gear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const complicatedCuffsRecipe = await createRecipe(
+    null,
+    complicatedCuffs,
+    1,
+    engineering,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 30],
+      [lustrousScaledHide, 5],
+      [reinforcedMachineChassis, 1],
+      [greasedUpGears, 3],
+      [arclightCapacitor, 3],
+    ],
+    null,
+    "Armor",
+    1,
+    320,
+    null,
+    { Gear: 0 },
+    "Crafting Goggles/Guns/Bracers",
+    "Tinker's Workbench",
+    "Random chance to learn when crafting other gear pieces while having Gear 0.",
+    [
+      ["Primal Infusion", { Gear: 10 }],
+      ["Cogwheel", { GearsForGear: 30 }],
+      ["Safety Components", { GearsForGear: 20 }],
+      ["Illustrious Insight", { Gear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const difficultWristProtectorsRecipe = await createRecipe(
+    null,
+    difficultWristProtectors,
+    1,
+    engineering,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 30],
+      [obsidianSearedAlloy, 2],
+      [reinforcedMachineChassis, 1],
+      [greasedUpGears, 3],
+      [arclightCapacitor, 3],
+    ],
+    null,
+    "Armor",
+    1,
+    320,
+    null,
+    { Gear: 0 },
+    "Crafting Goggles/Guns/Bracers",
+    "Tinker's Workbench",
+    "Random chance to learn when crafting other gear pieces while having Gear 0.",
+    [
+      ["Primal Infusion", { Gear: 10 }],
+      ["Cogwheel", { GearsForGear: 30 }],
+      ["Safety Components", { GearsForGear: 20 }],
+      ["Illustrious Insight", { Gear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const needlesslyComplexWristguardsRecipe = await createRecipe(
+    null,
+    needlesslyComplexWristguards,
+    1,
+    engineering,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 30],
+      [denseHide, 5],
+      [reinforcedMachineChassis, 1],
+      [greasedUpGears, 3],
+      [arclightCapacitor, 3],
+    ],
+    null,
+    "Armor",
+    1,
+    320,
+    null,
+    { Gear: 0 },
+    "Crafting Goggles/Guns/Bracers",
+    "Tinker's Workbench",
+    "Random chance to learn when crafting other gear pieces while having Gear 0.",
+    [
+      ["Primal Infusion", { Gear: 10 }],
+      ["Cogwheel", { GearsForGear: 30 }],
+      ["Safety Components", { GearsForGear: 20 }],
+      ["Illustrious Insight", { Gear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const overengineeredSleeveExtendersRecipe = await createRecipe(
+    null,
+    overengineeredSleeveExtenders,
+    1,
+    engineering,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 30],
+      [vibrantWilderclothBolt, 4],
+      [reinforcedMachineChassis, 1],
+      [greasedUpGears, 3],
+      [arclightCapacitor, 3],
+    ],
+    null,
+    "Armor",
+    1,
+    320,
+    null,
+    { Gear: 0 },
+    "Crafting Goggles/Guns/Bracers",
+    "Tinker's Workbench",
+    "Random chance to learn when crafting other gear pieces while having Gear 0.",
+    [
+      ["Primal Infusion", { Gear: 10 }],
+      ["Cogwheel", { GearsForGear: 30 }],
+      ["Safety Components", { GearsForGear: 20 }],
+      ["Illustrious Insight", { Gear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const sophisticatedProblemSolverRecipe = await createRecipe(
+    null,
+    sophisticatedProblemSolver,
+    1,
+    engineering,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 160],
+      [obsidianSearedAlloy, 4],
+      [reinforcedMachineChassis, 1],
+      [everburningBlastingPowder, 8],
+      [arclightCapacitor, 2],
+    ],
+    null,
+    "Weapons",
+    1,
+    320,
+    null,
+    null,
+    "Raid Drop",
+    "Tinker's Workbench",
+    "Dropped from bosses in Vault of the Incarnates.",
+    [
+      ["Primal Infusion", { Gear: 10 }],
+      ["Missive", { Gear: 20 }],
+      ["Embellishment", { Gear: 35 }],
+      ["Illustrious Insight", { Gear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const pewTwoRecipe = await createRecipe(
+    null,
+    pewTwo,
+    1,
+    engineering,
+    [
+      [rousingFire, 1],
+      [handfulOfSereviteBolts, 5],
+      [everburningBlastingPowder, 5],
+      [sereviteOre, 5],
+    ],
+    45,
+    "Weapons",
+    3,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { Gear: 20 }],
+      ["Lesser Illustrious Insight", { Gear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const meticulouslyTunedGearRecipe = await createRecipe(
+    null,
+    meticulouslyTunedGear,
+    1,
+    engineering,
+    [
+      [handfulOfSereviteBolts, 4],
+      [greasedUpGears, 1],
+      [sunderedOnyx, 1],
+    ],
+    null,
+    "Cogwheels",
+    1,
+    425,
+    null,
+    { GearsForGear: 0 },
+    "Crafting Greased-Up Gears",
+    "Tinker's Workbench",
+    "Random chance when crafting Greased-Up Gears while having Gears for Gear 0.",
+    [
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const oneSizeFitsAllGearRecipe = await createRecipe(
+    null,
+    oneSizeFitsAllGear,
+    1,
+    engineering,
+    [
+      [handfulOfSereviteBolts, 4],
+      [greasedUpGears, 1],
+      [mysticSapphire, 1],
+    ],
+    null,
+    "Cogwheels",
+    1,
+    425,
+    null,
+    { GearsForGear: 0 },
+    "Crafting Greased-Up Gears",
+    "Tinker's Workbench",
+    "Random chance when crafting Greased-Up Gears while having Gears for Gear 0.",
+    [
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const rapidlyTickingGearRecipe = await createRecipe(
+    null,
+    rapidlyTickingGear,
+    1,
+    engineering,
+    [
+      [handfulOfSereviteBolts, 4],
+      [greasedUpGears, 1],
+      [vibrantEmerald, 1],
+    ],
+    null,
+    "Cogwheels",
+    1,
+    425,
+    null,
+    { GearsForGear: 0 },
+    "Crafting Greased-Up Gears",
+    "Tinker's Workbench",
+    "Random chance when crafting Greased-Up Gears while having Gears for Gear 0.",
+    [
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const razorSharpGearRecipe = await createRecipe(
+    null,
+    meticulouslyTunedGear,
+    1,
+    engineering,
+    [
+      [handfulOfSereviteBolts, 4],
+      [greasedUpGears, 1],
+      [queensRuby, 1],
+    ],
+    null,
+    "Cogwheels",
+    1,
+    425,
+    null,
+    { GearsForGear: 0 },
+    "Crafting Greased-Up Gears",
+    "Tinker's Workbench",
+    "Random chance when crafting Greased-Up Gears while having Gears for Gear 0.",
+    [
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const highIntensityThermalScannerRecipe = await createRecipe(
+    null,
+    highIntensityThermalScanner,
+    1,
+    engineering,
+    [
+      [framelessLens, 1],
+      [greasedUpGears, 3],
+      [arclightCapacitor, 2],
+      [reinforcedMachineChassis, 1],
+    ],
+    null,
+    "Scopes & Ammo",
+    1,
+    425,
+    null,
+    { Utility: 20 },
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Utility: 30 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const projectilePropulsionPinionRecipe = await createRecipe(
+    null,
+    projectilePropulsionPinion,
+    1,
+    engineering,
+    [
+      [framelessLens, 1],
+      [greasedUpGears, 3],
+      [arclightCapacitor, 2],
+      [reinforcedMachineChassis, 1],
+    ],
+    null,
+    "Scopes & Ammo",
+    1,
+    425,
+    null,
+    null,
+    "World Drop",
+    "Tinker's Workbench",
+    "Drops from Djaradin Cache on the Waking SHores.",
+    [
+      ["Lesser Illustrious Insight", { Utility: 30 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const completelySafeRocketsRecipe = await createRecipe(
+    null,
+    completelySafeRockets,
+    2,
+    engineering,
+    [
+      [handfulOfSereviteBolts, 2],
+      [everburningBlastingPowder, 4],
+    ],
+    null,
+    "Scopes & Ammo",
+    1,
+    425,
+    null,
+    { Utility: 0 },
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Utility: 30 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const endlessStackOfNeedlesRecipe = await createRecipe(
+    null,
+    endlessStackOfNeedles,
+    2,
+    engineering,
+    [
+      [handfulOfSereviteBolts, 2],
+      [shockSpringCoil, 1],
+      [greasedUpGears, 1],
+    ],
+    null,
+    "Scopes & Ammo",
+    1,
+    425,
+    null,
+    { Utility: 10 },
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Utility: 30 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const gyroscopicKaleidoscopeRecipe = await createRecipe(
+    null,
+    gyroscopicKaleidoscope,
+    1,
+    engineering,
+    [
+      [framelessLens, 1],
+      [handfulOfSereviteBolts, 2],
+      [greasedUpGears, 6],
+      [arclightCapacitor, 2],
+    ],
+    30,
+    "Scopes & Ammo",
+    1,
+    425,
+    null,
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Utility: 30 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const blackFireflightRecipe = await createRecipe(
+    null,
+    blackFireflight,
+    "2-3",
+    engineering,
+    [
+      [wildercloth, 1],
+      [everburningBlastingPowder, 2],
+    ],
+    null,
+    "Fireworks",
+    1,
+    null,
+    { ArtisansConsortium: "Valued" },
+    null,
+    null,
+    "Tinker's Workbench"
+  );
+  const blueFireflightRecipe = await createRecipe(
+    null,
+    blueFireflight,
+    "2-3",
+    engineering,
+    [
+      [wildercloth, 1],
+      [everburningBlastingPowder, 2],
+    ],
+    null,
+    "Fireworks",
+    1,
+    null,
+    { ArtisansConsortium: "Respected" },
+    null,
+    null,
+    "Tinker's Workbench"
+  );
+  const bundleOfFireworksRecipe = await createRecipe(
+    null,
+    blackFireflight,
+    1,
+    engineering,
+    [
+      [rousingFire, 3],
+      [everburningBlastingPowder, 2],
+      [stonecrustHide, 1],
+    ],
+    null,
+    "Fireworks",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Tinker's Workbench",
+    "Drops from Draconic Recipe in a Bottle."
+  );
+  const greenFireflightRecipe = await createRecipe(
+    null,
+    greenFireflight,
+    "2-3",
+    engineering,
+    [
+      [everburningBlastingPowder, 2],
+      [adamantScales, 1],
+    ],
+    null,
+    "Fireworks",
+    1,
+    null,
+    { ArtisansConsortium: "Esteemed" },
+    null,
+    null,
+    "Tinker's Workbench"
+  );
+  const redFireflightRecipe = await createRecipe(
+    null,
+    redFireflight,
+    "2-3",
+    engineering,
+    [
+      [resilientLeather, 1],
+      [everburningBlastingPowder, 2],
+    ],
+    null,
+    "Fireworks",
+    1,
+    null,
+    { ArtisansConsortium: "Preferred" },
+    null,
+    null,
+    "Tinker's Workbench"
+  );
+  const bronzeFireflightRecipe = await createRecipe(
+    null,
+    blueFireflight,
+    "2-3",
+    engineering,
+    [
+      [everburningBlastingPowder, 2],
+      [eternityAmber, 1],
+    ],
+    15,
+    "Fireworks",
+    1
+  );
+  const suspiciouslySilentCrateRecipe = await createRecipe(
+    null,
+    suspiciouslySilentCrate,
+    1,
+    engineering,
+    [
+      [awakenedFire, 1],
+      [everburningBlastingPowder, 10],
+      [shockSpringCoil, 1],
+      [handfulOfSereviteBolts, 3],
+      [assortedSafetyFuses, 2],
+    ],
+    null,
+    "Explosives",
+    1,
+    450,
+    null,
+    { EZThro: 30 },
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { EZThro: 15 }],
+      ["Spare Parts", { Creation: 30 }],
+    ]
+  );
+  const suspiciouslyTickingCrateRecipe = await createRecipe(
+    null,
+    suspiciouslyTickingCrate,
+    1,
+    engineering,
+    [
+      [awakenedFire, 1],
+      [everburningBlastingPowder, 10],
+      [shockSpringCoil, 1],
+      [handfulOfSereviteBolts, 3],
+    ],
+    null,
+    "Explosives",
+    1,
+    450,
+    null,
+    { ShortFuse: 30 },
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { ShortFuse: 15 }],
+      ["Spare Parts", { Creation: 30 }],
+    ]
+  );
+  const iwinButtonMkTenRecipe = await createRecipe(
+    null,
+    iwinButtonMkTen,
+    "1-2",
+    engineering,
+    [
+      [handfulOfSereviteBolts, 1],
+      [arclightCapacitor, 1],
+      [shockSpringCoil, 1],
+      [primalDeconstructionCharge, 1],
+    ],
+    null,
+    "Explosives",
+    1,
+    300,
+    null,
+    { Explosives: 40 },
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { ShortFuse: 15 }],
+      ["Spare Parts", { Creation: 30 }],
+    ]
+  );
+  const ezThroCreatureCombustionCanisterRecipe = await createRecipe(
+    null,
+    ezThroCreatureCombustionCanister,
+    "2-3",
+    engineering,
+    [
+      [everburningBlastingPowder, 6],
+      [shockSpringCoil, 1],
+      [handfulOfSereviteBolts, 4],
+      [assortedSafetyFuses, 1],
+    ],
+    null,
+    "Explosives",
+    1,
+    250,
+    null,
+    { EZThro: 0 },
+    "Crafting Explosives",
+    "Tinker's Workbench",
+    "Can be learned when crafting Creature Combustion Canister while having EZ-Thro 0.",
+    [
+      ["Lesser Illustrious Insight", { EZThro: 15 }],
+      ["Spare Parts", { Creation: 30 }],
+    ]
+  );
+  const ezThroGravitationalDisplacerRecipe = await createRecipe(
+    null,
+    ezThroGravitationalDisplacer,
+    "2-3",
+    engineering,
+    [
+      [rousingDecay, 1],
+      [everburningBlastingPowder, 4],
+      [shockSpringCoil, 1],
+      [handfulOfSereviteBolts, 2],
+      [potionOfGusts, 1],
+      [assortedSafetyFuses, 1],
+    ],
+    null,
+    "Explosives",
+    1,
+    350,
+    null,
+    { EZThro: 0 },
+    "Crafting Explosives",
+    "Tinker's Workbench",
+    "Can be learned when crafting Gravitational Displacer while having EZ-Thro 0.",
+    [
+      ["Lesser Illustrious Insight", { EZThro: 15 }],
+      ["Spare Parts", { Creation: 30 }],
+    ]
+  );
+  const ezThroGreaseGrenadeRecipe = await createRecipe(
+    null,
+    ezThroGreaseGrenade,
+    "2-3",
+    engineering,
+    [
+      [rousingDecay, 1],
+      [everburningBlastingPowder, 6],
+      [handfulOfSereviteBolts, 4],
+      [assortedSafetyFuses, 1],
+    ],
+    null,
+    "Explosives",
+    1,
+    300,
+    null,
+    { EZThro: 0 },
+    "Crafting Explosives",
+    "Tinker's Workbench",
+    "Can be learned when crafting Grease Grenade while having EZ-Thro 0.",
+    [
+      ["Lesser Illustrious Insight", { EZThro: 15 }],
+      ["Spare Parts", { Creation: 30 }],
+    ]
+  );
+  const ezThroPrimalDeconstructionChargeRecipe = await createRecipe(
+    null,
+    ezThroPrimalDeconstructionCharge,
+    "2-3",
+    engineering,
+    [
+      [rousingFire, 1],
+      [everburningBlastingPowder, 4],
+      [shockSpringCoil, 1],
+      [handfulOfSereviteBolts, 4],
+      [assortedSafetyFuses, 1],
+    ],
+    null,
+    "Explosives",
+    1,
+    250,
+    null,
+    { EZThro: 0 },
+    "Crafting Explosives",
+    "Tinker's Workbench",
+    "Can be learned when crafting Primal Deconstruction Charge while having EZ-Thro 0.",
+    [
+      ["Lesser Illustrious Insight", { EZThro: 15 }],
+      ["Spare Parts", { Creation: 30 }],
+    ]
+  );
+  const gravitationalDisplacerRecipe = await createRecipe(
+    null,
+    gravitationalDisplacer,
+    "2-3",
+    engineering,
+    [
+      [everburningBlastingPowder, 4],
+      [shockSpringCoil, 1],
+      [handfulOfSereviteBolts, 2],
+      [potionOfGusts, 1],
+    ],
+    null,
+    "Explosives",
+    1,
+    350,
+    { DragonscaleExpedition: 9 },
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { ShortFuse: 15 }],
+      ["Spare Parts", { Creation: 30 }],
+    ]
+  );
+  const greaseGrenadeRecipe = await createRecipe(
+    null,
+    greaseGrenade,
+    "2-3",
+    engineering,
+    [
+      [rousingDecay, 1],
+      [everburningBlastingPowder, 6],
+      [handfulOfSereviteBolts, 4],
+    ],
+    null,
+    "Explosives",
+    1,
+    300,
+    null,
+    null,
+    "World Drop",
+    "Tinker's Workbench",
+    "Drops from Draconic Recipe in a Bottle.",
+    [
+      ["Lesser Illustrious Insight", { ShortFuse: 15 }],
+      ["Spare Parts", { Creation: 30 }],
+    ]
+  );
+  const stickyWarpGrenadeRecipe = await createRecipe(
+    null,
+    stickyWarpGrenade,
+    "2-3",
+    engineering,
+    [
+      [rousingDecay, 1],
+      [everburningBlastingPowder, 3],
+      [shockSpringCoil, 2],
+      [handfulOfSereviteBolts, 6],
+    ],
+    null,
+    "Explosives",
+    1,
+    450,
+    null,
+    null,
+    "PvP Victory",
+    "Tinker's Workbench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Lesser Illustrious Insight", { ShortFuse: 15 }],
+      ["Spare Parts", { Creation: 30 }],
+    ]
+  );
+  const primalDeconstructionChargeRecipe = await createRecipe(
+    null,
+    primalDeconstructionCharge,
+    "2-3",
+    engineering,
+    [
+      [awakenedFire, 1],
+      [everburningBlastingPowder, 4],
+      [shockSpringCoil, 1],
+      [handfulOfSereviteBolts, 4],
+    ],
+    null,
+    "Explosives",
+    1,
+    250,
+    { DragonscaleExpedition: 9 },
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { ShortFuse: 15 }],
+      ["Spare Parts", { Creation: 30 }],
+    ]
+  );
+  const creatureCombustionCanisterRecipe = await createRecipe(
+    null,
+    creatureCombustionCanister,
+    "2-3",
+    engineering,
+    [
+      [everburningBlastingPowder, 6],
+      [shockSpringCoil, 1],
+      [handfulOfSereviteBolts, 4],
+    ],
+    25,
+    "Explosives",
+    1,
+    250,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { ShortFuse: 15 }],
+      ["Spare Parts", { Creation: 30 }],
+    ]
+  );
+  const zapthrottleSoulInhalerRecipe = await createRecipe(
+    null,
+    zapthrottleSoulInhaler,
+    1,
+    engineering,
+    [
+      [everburningBlastingPowder, 3],
+      [arclightCapacitor, 1],
+      [reinforcedMachineChassis, 1],
+      [handfulOfSereviteBolts, 6],
+      [shockSpringCoil, 2],
+      [greasedUpGears, 3],
+    ],
+    null,
+    "Devices",
+    1,
+    null,
+    null,
+    { Scrapper: 20 },
+    null,
+    "Tinker's Workbench"
+  );
+  const saviorRecipe = await createRecipe(
+    null,
+    savior,
+    2,
+    engineering,
+    [
+      [awakenedOrder, 1],
+      [handfulOfSereviteBolts, 20],
+      [arclightCapacitor, 1],
+      [shockSpringCoil, 3],
+      [greasedUpGears, 2],
+    ],
+    null,
+    "Devices",
+    1,
+    350,
+    null,
+    { MechanicalMind: 40 },
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
+      ["Spare Parts", { MechanicalMind: 15 }],
+    ]
+  );
+  const cartomancyCannonRecipe = await createRecipe(
+    null,
+    cartomancyCannon,
+    1,
+    engineering,
+    [
+      [handfulOfSereviteBolts, 20],
+      [shockSpringCoil, 6],
+      [everburningBlastingPowder, 12],
+      [reinforcedMachineChassis, 1],
+      [arclightCapacitor, 2],
+      [greasedUpGears, 4],
+    ],
+    null,
+    "Devices",
+    1,
+    null,
+    null,
+    { Novelties: 10 },
+    null,
+    "Tinker's Workbench"
+  );
+  const centralizedPrecipitationEmitterRecipe = await createRecipe(
+    null,
+    centralizedPrecipitationEmitter,
+    1,
+    engineering,
+    [
+      [frostySoul, 3],
+      [airySoul, 3],
+      [handfulOfSereviteBolts, 20],
+      [shockSpringCoil, 3],
+      [reinforcedMachineChassis, 1],
+      [arclightCapacitor, 4],
+      [elementalHarmony, 1],
+    ],
+    null,
+    "Devices",
+    1,
+    null,
+    null,
+    { Novelties: 5 },
+    null,
+    "Tinker's Workbench"
+  );
+  const elementInfusedRocketHelmetRecipe = await createRecipe(
+    null,
+    elementInfusedRocketHelmet,
+    1,
+    engineering,
+    [
+      [awakenedFire, 10],
+      [awakenedAir, 5],
+      [gravitationalDisplacer, 15],
+      [everburningBlastingPowder, 20],
+      [reinforcedMachineChassis, 1],
+      [arclightCapacitor, 2],
+      [handfulOfSereviteBolts, 5],
+    ],
+    null,
+    "Devices",
+    1,
+    null,
+    null,
+    { Novelties: 15 },
+    null,
+    "Tinker's Workbench"
+  );
+  const environmentalEmulatorRecipe = await createRecipe(
+    null,
+    environmentalEmulator,
+    1,
+    engineering,
+    [
+      [fierySoul, 3],
+      [earthenSoul, 3],
+      [handfulOfSereviteBolts, 20],
+      [shockSpringCoil, 3],
+      [reinforcedMachineChassis, 1],
+      [arclightCapacitor, 4],
+      [elementalHarmony, 1],
+    ],
+    null,
+    "Devices",
+    1,
+    null,
+    null,
+    { Novelties: 25 },
+    null,
+    "Tinker's Workbench"
+  );
+  const giggleGogglesRecipe = await createRecipe(
+    null,
+    giggleGoggles,
+    1,
+    engineering,
+    [
+      [framelessLens, 2],
+      [shockSpringCoil, 3],
+      [reinforcedMachineChassis, 1],
+      [arclightCapacitor, 2],
+      [handfulOfSereviteBolts, 6],
+      [neltharite, 2],
+    ],
+    null,
+    "Devices",
+    1,
+    null,
+    null,
+    { Novelties: 20 },
+    null,
+    "Tinker's Workbench"
+  );
+  const helpRecipe = await createRecipe(
+    null,
+    help,
+    1,
+    engineering,
+    [
+      [awakenedIre, 3],
+      [markOfHonor, 15],
+      [reinforcedMachineChassis, 1],
+      [everburningBlastingPowder, 4],
+      [handfulOfSereviteBolts, 6],
+    ],
+    null,
+    "Devices",
+    1,
+    null,
+    null,
+    null,
+    "PvP Victory",
+    "Tinker's Workbench",
+    "Received from Arena, BGs, or WM?"
+  );
+  const tinkerRemovalKitRecipe = await createRecipe(
+    null,
+    tinkerRemovalKit,
+    1,
+    engineering,
+    [
+      [handfulOfSereviteBolts, 3],
+      [shockSpringCoil, 2],
+      [draconiumOre, 2],
+    ],
+    40,
+    "Devices",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Tinker's Workbench"
+  );
+  const wyrmholeGeneratorRecipe = await createRecipe(
+    null,
+    wyrmholeGenerator,
+    1,
+    engineering,
+    [
+      [awakenedOrder, 3],
+      [handfulOfSereviteBolts, 2],
+      [shockSpringCoil, 1],
+      [greasedUpGears, 2],
+      [reinforcedMachineChassis, 1],
+      [arclightCapacitor, 3],
+    ],
+    null,
+    "Devices",
+    1,
+    null,
+    null,
+    { MechanicalMind: 0 },
+    null,
+    "Tinker's Workbench"
+  );
+  const portableAlchemistsLabBenchRecipe = await createRecipe(
+    null,
+    portableAlchemistsLabBench,
+    1,
+    engineering,
+    [
+      [rousingAir, 1],
+      [rousingFrost, 1],
+      [greasedUpGears, 1],
+      [handfulOfSereviteBolts, 3],
+      [omniumDraconis, 3],
+      [draconicVial, 5],
+    ],
+    null,
+    "Devices",
+    1,
+    null,
+    { ArtisansConsortium: "Respected" },
+    null,
+    null,
+    "Tinker's Workbench"
+  );
+  const portableTinkersWorkbenchRecipe = await createRecipe(
+    null,
+    portableTinkersWorkbench,
+    1,
+    engineering,
+    [
+      [handfulOfSereviteBolts, 2],
+      [framelessLens, 1],
+      [greasedUpGears, 1],
+      [shockSpringCoil, 1],
+    ],
+    null,
+    "Devices",
+    1,
+    null,
+    { ArtisansConsortium: "Respected" },
+    null,
+    null,
+    "Tinker's Workbench"
+  );
+  const neuralSilencerMkThreeRecipe = await createRecipe(
+    null,
+    neuralSilencerMkThree,
+    "2-3",
+    engineering,
+    [
+      [wildercloth, 1],
+      [handfulOfSereviteBolts, 4],
+      [shockSpringCoil, 2],
+      [greasedUpGears, 1],
+    ],
+    15,
+    "Devices",
+    1
+  );
+  const khazgoriteBrainwaveAmplifierRecipe = await createRecipe(
+    null,
+    khazgoriteBrainwaveAmplifier,
+    1,
+    engineering,
+    [
+      [artisansMettle, 225],
+      [framelessLens, 2],
+      [khazgoriteOre, 10],
+      [shockSpringCoil, 2],
+      [greasedUpGears, 3],
+      [arclightCapacitor, 4],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    425,
+    { ArtisansConsortium: "Valued" },
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const khazgoriteDelversHelmetRecipe = await createRecipe(
+    null,
+    khazgoriteDelversHelmet,
+    1,
+    engineering,
+    [
+      [artisansMettle, 225],
+      [framelessLens, 1],
+      [obsidianSearedAlloy, 4],
+      [arclightCapacitor, 2],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    425,
+    { ValdrakkenAccord: 19 },
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const khazgoriteEncasedSamophlangeRecipe = await createRecipe(
+    null,
+    khazgoriteEncasedSamophlange,
+    1,
+    engineering,
+    [
+      [artisansMettle, 300],
+      [khazgoriteOre, 10],
+      [shockSpringCoil, 2],
+      [greasedUpGears, 3],
+      [arclightCapacitor, 5],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    400,
+    { ArtisansConsortium: "Valued" },
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Missive", {}],
+      ["Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const khazgoriteFisherfriendRecipe = await createRecipe(
+    null,
+    khazgoriteFisherfriend,
+    1,
+    engineering,
+    [
+      [khazgoriteOre, 10],
+      [greasedUpGears, 4],
+      [arclightCapacitor, 2],
+      [reinforcedMachineChassis, 1],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    425,
+    null,
+    null,
+    "World Drop",
+    "Tinker's Workbench",
+    "Drops from the 'Immaculate Sac of Swog Treasures' from 'The Great Swog'???",
+    [
+      ["Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const lapidarysKhazgoriteClampsRecipe = await createRecipe(
+    null,
+    lapidarysKhazgoriteClamps,
+    1,
+    engineering,
+    [
+      [artisansMettle, 300],
+      [khazgoriteOre, 10],
+      [shockSpringCoil, 2],
+      [greasedUpGears, 5],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    400,
+    { ValdrakkenAccord: 19 },
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Missive", {}],
+      ["Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const springLoadedKhazgoriteFabricCuttersRecipe = await createRecipe(
+    null,
+    springLoadedKhazgoriteFabricCutters,
+    1,
+    engineering,
+    [
+      [artisansMettle, 300],
+      [obsidianSearedAlloy, 4],
+      [arclightCapacitor, 2],
+      [shockSpringCoil, 2],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    400,
+    { DragonscaleExpedition: 15 },
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Missive", {}],
+      ["Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const bottomlessMireslushOreSatchelRecipe = await createRecipe(
+    null,
+    bottomlessMireslushOreSatchel,
+    1,
+    engineering,
+    [
+      [artisansMettle, 225],
+      [mireslushHide, 6],
+      [frostfireAlloy, 5],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    425,
+    { DragonscaleExpedition: 15 },
+    null,
+    null,
+    "Tinker's Workbench",
+    null,
+    [
+      ["Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const bottomlessStonecrustOreSatchelRecipe = await createRecipe(
+    null,
+    bottomlessStonecrustOreSatchel,
+    1,
+    engineering,
+    [
+      [stonecrustHide, 1],
+      [handfulOfSereviteBolts, 2],
+    ],
+    20,
+    "Profession Equipment",
+    2,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const draconiumBrainwaveAmplifierRecipe = await createRecipe(
+    null,
+    draconiumBrainwaveAmplifier,
+    1,
+    engineering,
+    [
+      [framelessLens, 1],
+      [handfulOfSereviteBolts, 2],
+      [shockSpringCoil, 2],
+      [draconiumOre, 2],
+    ],
+    25,
+    "Profession Equipment",
+    2,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const draconiumDelversHelmetRecipe = await createRecipe(
+    null,
+    draconiumDelversHelmet,
+    1,
+    engineering,
+    [
+      [smudgedLens, 1],
+      [handfulOfSereviteBolts, 2],
+      [draconiumOre, 2],
+    ],
+    20,
+    "Profession Equipment",
+    2,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const draconiumEncasedSamophlangeRecipe = await createRecipe(
+    null,
+    draconiumEncasedSamophlange,
+    1,
+    engineering,
+    [
+      [handfulOfSereviteBolts, 2],
+      [shockSpringCoil, 2],
+      [greasedUpGears, 1],
+      [draconiumOre, 2],
+    ],
+    20,
+    "Profession Equipment",
+    2,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Missive", {}],
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const draconiumFisherfriendRecipe = await createRecipe(
+    null,
+    draconiumFisherfriend,
+    1,
+    engineering,
+    [
+      [handfulOfSereviteBolts, 2],
+      [greasedUpGears, 1],
+      [shockSpringCoil, 2],
+      [draconiumOre, 3],
+    ],
+    35,
+    "Profession Equipment",
+    2,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const lapidarysDraconiumClampsRecipe = await createRecipe(
+    null,
+    lapidarysDraconiumClamps,
+    1,
+    engineering,
+    [
+      [handfulOfSereviteBolts, 2],
+      [greasedUpGears, 1],
+      [draconiumOre, 3],
+    ],
+    20,
+    "Profession Equipment",
+    2,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Missive", {}],
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const springLoadedDraconiumFabricCuttersRecipe = await createRecipe(
+    null,
+    springLoadedDraconiumFabricCutters,
+    1,
+    engineering,
+    [
+      [handfulOfSereviteBolts, 3],
+      [shockSpringCoil, 3],
+      [draconiumOre, 4],
+    ],
+    25,
+    "Profession Equipment",
+    2,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Missive", {}],
+      ["Lesser Illustrious Insight", { GearsForGear: 15 }],
+      ["Spare Parts", { FunctionOverForm: 10 }],
+    ]
+  );
+  const quackERecipe = await createRecipe(
+    null,
+    quackE,
+    1,
+    engineering,
+    [
+      [contouredFowlfeather, 60],
+      [quackEQuackModulator, 1],
+      [reinforcedMachineChassis, 1],
+      [malygite, 2],
+      [greasedUpGears, 2],
+      [shockSpringCoil, 1],
+      [handfulOfSereviteBolts, 4],
+    ],
+    null,
+    "Robotics",
+    1,
+    null,
+    { DragonscaleExpedition: 21 },
+    null,
+    null,
+    "Tinker's Workbench"
+  );
+  const duckoyRecipe = await createRecipe(
+    null,
+    duckoy,
+    1,
+    engineering,
+    [
+      [contouredFowlfeather, 6],
+      [resilientLeather, 1],
+      [handfulOfSereviteBolts, 1],
+      [everburningBlastingPowder, 2],
+    ],
+    null,
+    "Robotics",
+    1,
+    350,
+    null,
+    null,
+    "World Drop",
+    "Tinker's Workbench",
+    "Drops from Draconic Message in a Bottle.",
+    [
+      ["Lesser Illustrious Insight", { MechanicalMind: 30 }],
+      ["Spare Parts", { MechanicalMind: 15 }],
+    ]
+  );
 
   // //inscription recipes - 100 total
   // // const dragonIslesMilling = await(createRecipe("Dragon Isles Milling", shimmeringPigment, 5, inscription, [[hochenblume, 5]], 1, "Inscription Essentials", 1, 250));

@@ -43,6 +43,7 @@ const Item = sequelize.define(
     },
     effect: { type: DataTypes.TEXT },
     onUse: { type: DataTypes.TEXT },
+    requiresProfession: { type: DataTypes.JSONB }
     //has many Materials, Recipe(s)
   },
   {
@@ -238,7 +239,7 @@ app.get(
             include: [
               {
                 model: Item,
-                attributes: ["name", "icon"],
+                attributes: ["id", "name", "icon"],
               },
             ],
           },
@@ -277,7 +278,7 @@ app.get(
             include: [
               {
                 model: Item,
-                attributes: ["name", "icon"],
+                attributes: ["id", "name", "icon"],
               },
             ],
           },
@@ -321,7 +322,7 @@ app.get(
             include: [
               {
                 model: Item,
-                attributes: ["name", "icon"],
+                attributes: ["id", "name", "icon"],
               },
             ],
           },
@@ -369,7 +370,7 @@ app.get(
             include: [
               {
                 model: Item,
-                attributes: ["name", "icon"],
+                attributes: ["id", "name", "icon"],
               },
             ],
           },
@@ -452,9 +453,30 @@ app.get("/items/:itemId", async (req, res) => {
         include: [
           {
             model: Material,
+            attributes: ["id", "quantity"],
             include: [
               {
                 model: Recipe,
+                attributes: ["id", "name"],
+                include: [
+                  {
+                    model: Item,
+                    attributes: ["id", "icon"],
+                  },
+                  {
+                    model: Profession,
+                    attributes: ["id", "name"],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            model: Recipe,
+            attributes: ["id", "name"],
+            include: [
+              {
+                model: Profession,
                 attributes: ["id", "name"],
               },
             ],
