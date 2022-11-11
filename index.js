@@ -7,8 +7,6 @@ const sequelize = new Sequelize(
 );
 const app = express();
 const port = process.env.PORT || 3001;
-// const internalURL
-// const externalURL
 
 //SETTING UP APP
 app.use(cors());
@@ -43,7 +41,7 @@ const Item = sequelize.define(
     },
     effect: { type: DataTypes.TEXT },
     onUse: { type: DataTypes.TEXT },
-    requiresProfession: { type: DataTypes.JSONB }
+    requiresProfession: { type: DataTypes.JSONB },
     //has many Materials, Recipe(s)
   },
   {
@@ -67,6 +65,7 @@ const Recipe = sequelize.define(
   "recipe",
   {
     name: { type: DataTypes.STRING, allowNull: false },
+    icon: { type: DataTypes.STRING },
     numberCrafted: { type: DataTypes.STRING, defaultValue: "1" },
     requiredProfessionLevel: { type: DataTypes.INTEGER },
     category: { type: DataTypes.STRING },
@@ -232,21 +231,26 @@ app.get(
           ["requiredProfessionLevel", "ASC"],
           ["name", "ASC"],
         ],
-        attributes: ["id", "requiredProfessionLevel", "name", "category"],
+        attributes: [
+          "id",
+          "requiredProfessionLevel",
+          "name",
+          "category",
+          "icon",
+        ],
         include: [
           {
             model: Material,
             include: [
               {
                 model: Item,
-                attributes: ["id", "name", "icon"],
+                attributes: ["id", "name", "icon", "quality"],
               },
             ],
           },
-          FinishingReagent,
           {
             model: Item,
-            attributes: ["icon"],
+            attributes: ["quality"],
           },
         ],
       })
@@ -271,21 +275,20 @@ app.get(
           ["requiredRenownLevel", "ASC"],
           ["name", "ASC"],
         ],
-        attributes: ["id", "requiredRenownLevel", "name", "category"],
+        attributes: ["id", "requiredRenownLevel", "name", "category", "icon"],
         include: [
           {
             model: Material,
             include: [
               {
                 model: Item,
-                attributes: ["id", "name", "icon"],
+                attributes: ["id", "name", "icon", "quality"],
               },
             ],
           },
-          FinishingReagent,
           {
             model: Item,
-            attributes: ["icon"],
+            attributes: ["quality"],
           },
         ],
       })
@@ -315,21 +318,26 @@ app.get(
           ["requiredSpecializationLevel", "ASC"],
           ["name", "ASC"],
         ],
-        attributes: ["id", "requiredSpecializationLevel", "name", "category"],
+        attributes: [
+          "id",
+          "requiredSpecializationLevel",
+          "name",
+          "category",
+          "icon",
+        ],
         include: [
           {
             model: Material,
             include: [
               {
                 model: Item,
-                attributes: ["id", "name", "icon"],
+                attributes: ["id", "name", "icon", "quality"],
               },
             ],
           },
-          FinishingReagent,
           {
             model: Item,
-            attributes: ["icon"],
+            attributes: ["quality"],
           },
         ],
       })
@@ -363,6 +371,7 @@ app.get(
           "requiredSpecializationLevel",
           "name",
           "category",
+          "icon",
         ],
         include: [
           {
@@ -370,14 +379,13 @@ app.get(
             include: [
               {
                 model: Item,
-                attributes: ["id", "name", "icon"],
+                attributes: ["id", "name", "icon", "quality"],
               },
             ],
           },
-          FinishingReagent,
           {
             model: Item,
-            attributes: ["icon"],
+            attributes: ["quality"],
           },
         ],
       })
@@ -421,13 +429,13 @@ app.get("/recipes/:recipeId", async (req, res) => {
           include: [
             {
               model: Item,
-              attributes: ["id", "name", "icon"],
+              attributes: ["id", "name", "icon", "quality"],
             },
           ],
         },
         {
           model: Item,
-          attributes: ["id", "name", "icon"],
+          attributes: ["id", "name", "icon", "quality"],
         },
         FinishingReagent,
       ],
@@ -461,7 +469,7 @@ app.get("/items/:itemId", async (req, res) => {
                 include: [
                   {
                     model: Item,
-                    attributes: ["id", "icon"],
+                    attributes: ["id", "icon", "quality"],
                   },
                   {
                     model: Profession,

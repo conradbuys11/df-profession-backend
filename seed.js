@@ -72,6 +72,7 @@ const Recipe = sequelize.define(
   "recipe",
   {
     name: { type: DataTypes.STRING, allowNull: false },
+    icon: {type: DataTypes.STRING},
     numberCrafted: { type: DataTypes.STRING, defaultValue: "1" },
     requiredProfessionLevel: { type: DataTypes.INTEGER },
     category: { type: DataTypes.STRING },
@@ -299,7 +300,8 @@ async function createRecipe(
   specialAcquisitionMethod,
   requiredLocation,
   notes,
-  finishingReagents
+  finishingReagents,
+  icon
 ) {
   let recipe = Recipe.build({
     itemId: itemMade.id,
@@ -307,9 +309,9 @@ async function createRecipe(
   });
 
   if (isNotNullAndUndefined(name)) {
-    recipe.name = name;
+    recipe.name = "Recipe: " + name;
   } else {
-    recipe.name = itemMade.name;
+    recipe.name = "Recipe: " + itemMade.name;
   } //item already has the name, right? easy
   if (isNotNullAndUndefined(numberCrafted)) {
     recipe.numberCrafted = numberCrafted.toString();
@@ -340,6 +342,12 @@ async function createRecipe(
   }
   if (isNotNullAndUndefined(notes)) {
     recipe.notes = notes;
+  }
+  if(isNotNullAndUndefined(icon)){
+    recipe.icon = icon;
+  }
+  else if(itemMade.icon){
+    recipe.icon = itemMade.icon;
   }
   await recipe.save();
   // console.log(`${recipe.name}'s ID: ${recipe.id}`);
@@ -412,9 +420,10 @@ async function createFinishingReagent(
 // MAKING TABLES
 // TIME TO SYNC
 const makeTables = async () => {
-  await sequelize.sync({ force: true });
-  console.log("Database synced successfully.");
-
+  await(sequelize.drop());
+  console.log("Tables dropped successfully.");
+  await(sequelize.sync());
+  console.log("Tables synced successfully.");
   //
   // SEEDING PROFESSIONS
   //
@@ -2673,7 +2682,7 @@ const makeTables = async () => {
     null,
     null,
     null,
-    null,
+    "Fishing Accessory",
     "Head",
     null,
     [346, 352, 358, 365, 372],
@@ -2767,7 +2776,7 @@ const makeTables = async () => {
     null,
     null,
     null,
-    null,
+    "Fishing Accessory",
     "Head",
     null,
     [320, 326, 332, 339, 346],
@@ -4330,7 +4339,7 @@ const makeTables = async () => {
       ["Skill", "", "", "", ""],
       [6, 6, 6, 6, 6],
     ],
-    [["Inspiration", "?", "?", "?", 48, "?"]]
+    [["Inspiration", 38, 41, "?", 48, 48]]
   );
   const khazgoriteDelversHelmet = await createItem(
     "Khaz'gorite Delver's Helmet",
@@ -4354,8 +4363,8 @@ const makeTables = async () => {
       [6, 6, 6, 6, 6],
     ],
     [
-      ["Deftness", "?", "?", "?", 40, 44],
-      ["Perception", "?", "?", "?", 40, 44],
+      ["Deftness", 32, 34, "?", 40, 44],
+      ["Perception", 32, 34, "?", 40, 44],
     ]
   );
   const khazgoriteEncasedSamophlange = await createItem(
@@ -4379,7 +4388,7 @@ const makeTables = async () => {
       ["Skill", "", "", "", ""],
       [10, 10, 10, 10, 10],
     ],
-    [["Random Stat 1", "?", "?", "?", 101, 110]]
+    [["Random Stat 1", 79, 86, "?", 101, 110]]
   );
   const khazgoriteFisherfriend = await createItem(
     "Khaz'gorite Fisherfriend",
@@ -4402,7 +4411,7 @@ const makeTables = async () => {
       ["Skill", "", "", "", ""],
       [10, 10, 10, 10, 10],
     ],
-    [["Perception", "?", "?", "?", 101, 110]]
+    [["Perception", 79, 86, "?", 101, 110]]
   );
   const lapidarysKhazgoriteClamps = await createItem(
     "Lapidary's Khaz'gorite Clamps",
@@ -4425,7 +4434,7 @@ const makeTables = async () => {
       ["Skill", "", "", "", ""],
       [10, 10, 10, 10, 10],
     ],
-    [["Random Stat 1", "?", "?", "?", 101, 110]]
+    [["Random Stat 1", 79, 86, "?", 101, 110]]
   );
   const springLoadedKhazgoriteFabricCutters = await createItem(
     "Spring-Loaded Khaz'gorite Fabric Cutters",
@@ -4448,7 +4457,7 @@ const makeTables = async () => {
       ["Skill", "", "", "", ""],
       [10, 10, 10, 10, 10],
     ],
-    [["Random Stat 1", "?", "?", "?", 101, 110]]
+    [["Random Stat 1", 79, 86, "?", 101, 110]]
   );
   const bottomlessMireslushOreSatchel = await createItem(
     "Bottomless Mireslush Ore Satchel",
@@ -4471,7 +4480,7 @@ const makeTables = async () => {
       ["Skill", "", "", "", ""],
       [6, 6, 6, 6, 6],
     ],
-    [["Finesse", "?", "?", "?", 81, 88]]
+    [["Finesse", 64, 69, "?", 81, 88]]
   );
   const bottomlessStonecrustOreSatchel = await createItem(
     "Bottomless Stonecrust Ore Satchel",
@@ -4491,7 +4500,7 @@ const makeTables = async () => {
     "Back (1)",
     [320, 326, 332, 339, 346],
     null,
-    [["Finesse", "?", "?", "?", "?", 64]]
+    [["Finesse", 46, "?", "?", "?", 64]]
   );
   const draconiumBrainwaveAmplifier = await createItem(
     "Draconium Brainwave Amplifier",
@@ -4511,7 +4520,7 @@ const makeTables = async () => {
     "Head (1)",
     [320, 326, 332, 339, 346],
     null,
-    [["Inspiration", "?", "?", "?", "?", 38]]
+    [["Inspiration", 28, 30, "?", "?", 38]]
   );
   const draconiumDelversHelmet = await createItem(
     "Draconium Delver's Helmet",
@@ -4532,8 +4541,8 @@ const makeTables = async () => {
     [320, 326, 332, 339, 346],
     null,
     [
-      ["Deftness", "?", "?", "?", "?", 32],
-      ["Perception", "", "", "", "", 32],
+      ["Deftness", 23, 25, "?", "?", 32],
+      ["Perception", 23, 25, "?", "?", 32],
     ]
   );
   const draconiumEncasedSamophlange = await createItem(
@@ -4557,7 +4566,7 @@ const makeTables = async () => {
       ["Skill", "", "", "", ""],
       [6, 6, 6, 6, 6],
     ],
-    [["Random Stat 1", "?", "?", "?", "?", 79]]
+    [["Random Stat 1", 58, 62, "?", "?", 79]]
   );
   const draconiumFisherfriend = await createItem(
     "Draconium Fisherfriend",
@@ -4580,7 +4589,7 @@ const makeTables = async () => {
       ["Skill", "", "", "", ""],
       [6, 6, 6, 6, 6],
     ],
-    [["Perception", "", "", "", "", 79]]
+    [["Perception", 58, 62, "?", "?", 79]]
   );
   const lapidarysDraconiumClamps = await createItem(
     "Lapidary's Draconium Clamps",
@@ -4603,7 +4612,7 @@ const makeTables = async () => {
       ["Skill", "", "", "", ""],
       [6, 6, 6, 6, 6],
     ],
-    [["Random Stat 1", "", "", "", "", 79]]
+    [["Random Stat 1", 58, 62, "?", "?", 79]]
   );
   const springLoadedDraconiumFabricCutters = await createItem(
     "Spring-Loaded Draconium Fabric Cutters",
@@ -4626,7 +4635,7 @@ const makeTables = async () => {
       ["Skill", "", "", "", ""],
       [6, 6, 6, 6, 6],
     ],
-    [["Random Stat 1", "", "", "", "", 79]]
+    [["Random Stat 1", 58, 62, "?", "?", 79]]
   );
   const quackE = await createItem(
     "Quack-E",
