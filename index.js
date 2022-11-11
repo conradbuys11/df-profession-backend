@@ -186,14 +186,14 @@ app.get("/items", async (req, res) => {
 });
 
 app.get("/professions/by_name/:professionName", async (req, res) => {
-  let profession = (
-    await Profession.findOne({
-      where: {
-        name: req.params.professionName,
-      },
-    })
-  ).toJSON();
-  res.send(profession);
+  let profession = await Profession.findOne({
+    where: {
+      name: req.params.professionName,
+    },
+  });
+  profession
+    ? res.send(profession.toJSON())
+    : res.status(404).send("Profession not found.");
 });
 
 app.get("/recipes/by_profession/:professionId", async (req, res) => {
@@ -218,44 +218,48 @@ app.get(
     //then, eagerly fetch the Item asssociated with each Material (though we're only getting name & icon)
     //next, fetch the Finishing Reagents associated
     //finally, we're going to be fetching the item icon associated with this recipe
+    if (req.params.professionId) {
+      let recipes = (
+        await Recipe.findAll({
+          where: {
+            professionId: req.params.professionId,
+            requiredProfessionLevel: {
+              [Op.not]: null,
+            },
+          },
+          order: [
+            ["requiredProfessionLevel", "ASC"],
+            ["name", "ASC"],
+          ],
+          attributes: [
+            "id",
+            "requiredProfessionLevel",
+            "name",
+            "category",
+            "icon",
+          ],
+          include: [
+            {
+              model: Material,
+              include: [
+                {
+                  model: Item,
+                  attributes: ["id", "name", "icon", "quality"],
+                },
+              ],
+            },
+            {
+              model: Item,
+              attributes: ["quality"],
+            },
+          ],
+        })
+      ).map((recipe) => recipe.toJSON());
 
-    let recipes = (
-      await Recipe.findAll({
-        where: {
-          professionId: req.params.professionId,
-          requiredProfessionLevel: {
-            [Op.not]: null,
-          },
-        },
-        order: [
-          ["requiredProfessionLevel", "ASC"],
-          ["name", "ASC"],
-        ],
-        attributes: [
-          "id",
-          "requiredProfessionLevel",
-          "name",
-          "category",
-          "icon",
-        ],
-        include: [
-          {
-            model: Material,
-            include: [
-              {
-                model: Item,
-                attributes: ["id", "name", "icon", "quality"],
-              },
-            ],
-          },
-          {
-            model: Item,
-            attributes: ["quality"],
-          },
-        ],
-      })
-    ).map((recipe) => recipe.toJSON());
-    res.send(recipes);
+      res.send(recipes);
+    } else {
+      res.status(404).send("No profession provided.");
+    }
   }
 );
 
@@ -263,37 +267,41 @@ app.get(
   "/recipes/by_profession/:professionId/only_renown_recipes",
   async (req, res) => {
     //same as above, but only renown recipes now!
-    let recipes = (
-      await Recipe.findAll({
-        where: {
-          professionId: req.params.professionId,
-          requiredRenownLevel: {
-            [Op.not]: null,
+    if (req.params.professionId) {
+      let recipes = (
+        await Recipe.findAll({
+          where: {
+            professionId: req.params.professionId,
+            requiredRenownLevel: {
+              [Op.not]: null,
+            },
           },
-        },
-        order: [
-          ["requiredRenownLevel", "ASC"],
-          ["name", "ASC"],
-        ],
-        attributes: ["id", "requiredRenownLevel", "name", "category", "icon"],
-        include: [
-          {
-            model: Material,
-            include: [
-              {
-                model: Item,
-                attributes: ["id", "name", "icon", "quality"],
-              },
-            ],
-          },
-          {
-            model: Item,
-            attributes: ["quality"],
-          },
-        ],
-      })
-    ).map((recipe) => recipe.toJSON());
-    res.send(recipes);
+          order: [
+            ["requiredRenownLevel", "ASC"],
+            ["name", "ASC"],
+          ],
+          attributes: ["id", "requiredRenownLevel", "name", "category", "icon"],
+          include: [
+            {
+              model: Material,
+              include: [
+                {
+                  model: Item,
+                  attributes: ["id", "name", "icon", "quality"],
+                },
+              ],
+            },
+            {
+              model: Item,
+              attributes: ["quality"],
+            },
+          ],
+        })
+      ).map((recipe) => recipe.toJSON());
+      res.send(recipes);
+    } else {
+      res.status(404).send("No profession provided.");
+    }
   }
 );
 
@@ -303,46 +311,50 @@ app.get(
     //same as above, but only specialization recipes now!
     //to keep in mind: some recipes have a specialization level requirement, but are actually "other" recipes
     //so we need to check that both specialization is not null, and other is null!
-    let recipes = (
-      await Recipe.findAll({
-        where: {
-          professionId: req.params.professionId,
-          requiredSpecializationLevel: {
-            [Op.not]: null,
+    if (req.params.professionId) {
+      let recipes = (
+        await Recipe.findAll({
+          where: {
+            professionId: req.params.professionId,
+            requiredSpecializationLevel: {
+              [Op.not]: null,
+            },
+            specialAcquisitionMethod: {
+              [Op.is]: null,
+            },
           },
-          specialAcquisitionMethod: {
-            [Op.is]: null,
-          },
-        },
-        order: [
-          ["requiredSpecializationLevel", "ASC"],
-          ["name", "ASC"],
-        ],
-        attributes: [
-          "id",
-          "requiredSpecializationLevel",
-          "name",
-          "category",
-          "icon",
-        ],
-        include: [
-          {
-            model: Material,
-            include: [
-              {
-                model: Item,
-                attributes: ["id", "name", "icon", "quality"],
-              },
-            ],
-          },
-          {
-            model: Item,
-            attributes: ["quality"],
-          },
-        ],
-      })
-    ).map((recipe) => recipe.toJSON());
-    res.send(recipes);
+          order: [
+            ["requiredSpecializationLevel", "ASC"],
+            ["name", "ASC"],
+          ],
+          attributes: [
+            "id",
+            "requiredSpecializationLevel",
+            "name",
+            "category",
+            "icon",
+          ],
+          include: [
+            {
+              model: Material,
+              include: [
+                {
+                  model: Item,
+                  attributes: ["id", "name", "icon", "quality"],
+                },
+              ],
+            },
+            {
+              model: Item,
+              attributes: ["quality"],
+            },
+          ],
+        })
+      ).map((recipe) => recipe.toJSON());
+      res.send(recipes);
+    } else {
+      res.status(404).send("No profession provided.");
+    }
   }
 );
 
@@ -353,44 +365,48 @@ app.get(
     //some of these recipes have both required specialization level && special acquisition method
     //tbh, front end is gonna take care of that sorting. we're good to just do a normal search
     //we do include requiredSpecializationLevel in our attributes, though
-    let recipes = (
-      await Recipe.findAll({
-        where: {
-          professionId: req.params.professionId,
-          specialAcquisitionMethod: {
-            [Op.not]: null,
+    if (req.params.professionId) {
+      let recipes = (
+        await Recipe.findAll({
+          where: {
+            professionId: req.params.professionId,
+            specialAcquisitionMethod: {
+              [Op.not]: null,
+            },
           },
-        },
-        order: [
-          ["specialAcquisitionMethod", "ASC"],
-          ["name", "ASC"],
-        ],
-        attributes: [
-          "id",
-          "specialAcquisitionMethod",
-          "requiredSpecializationLevel",
-          "name",
-          "category",
-          "icon",
-        ],
-        include: [
-          {
-            model: Material,
-            include: [
-              {
-                model: Item,
-                attributes: ["id", "name", "icon", "quality"],
-              },
-            ],
-          },
-          {
-            model: Item,
-            attributes: ["quality"],
-          },
-        ],
-      })
-    ).map((recipe) => recipe.toJSON());
-    res.send(recipes);
+          order: [
+            ["specialAcquisitionMethod", "ASC"],
+            ["name", "ASC"],
+          ],
+          attributes: [
+            "id",
+            "specialAcquisitionMethod",
+            "requiredSpecializationLevel",
+            "name",
+            "category",
+            "icon",
+          ],
+          include: [
+            {
+              model: Material,
+              include: [
+                {
+                  model: Item,
+                  attributes: ["id", "name", "icon", "quality"],
+                },
+              ],
+            },
+            {
+              model: Item,
+              attributes: ["quality"],
+            },
+          ],
+        })
+      ).map((recipe) => recipe.toJSON());
+      res.send(recipes);
+    } else {
+      res.status(404).send("No profession provided.");
+    }
   }
 );
 
@@ -417,31 +433,31 @@ app.get("/recipes/by_profession_name/:professionName", async (req, res) => {
 
 app.get("/recipes/:recipeId", async (req, res) => {
   //getting singular recipe, then mapping to json
-  let recipe = (
-    await Recipe.findByPk(req.params.recipeId, {
-      include: [
-        {
-          model: Profession,
-          attributes: ["name"],
-        },
-        {
-          model: Material,
-          include: [
-            {
-              model: Item,
-              attributes: ["id", "name", "icon", "quality"],
-            },
-          ],
-        },
-        {
-          model: Item,
-          attributes: ["id", "name", "icon", "quality"],
-        },
-        FinishingReagent,
-      ],
-    })
-  ).toJSON();
-  res.send(recipe);
+  let recipe = await Recipe.findByPk(req.params.recipeId, {
+    include: [
+      {
+        model: Profession,
+        attributes: ["name"],
+      },
+      {
+        model: Material,
+        include: [
+          {
+            model: Item,
+            attributes: ["id", "name", "icon", "quality"],
+          },
+        ],
+      },
+      {
+        model: Item,
+        attributes: ["id", "name", "icon", "quality"],
+      },
+      FinishingReagent,
+    ],
+  });
+  recipe
+    ? res.send(recipe.toJSON())
+    : res.status(404).send("Recipe not found.");
 });
 
 // app.get("/materials/by_recipe/:recipeId", async (req, res) => {
@@ -455,34 +471,20 @@ app.get("/recipes/:recipeId", async (req, res) => {
 
 app.get("/items/:itemId", async (req, res) => {
   //find by primary key, convert to json - :itemId gets inserted into req.params object
-  try {
-    let item = (
-      await Item.findByPk(req.params.itemId, {
+  let item = await Item.findByPk(req.params.itemId, {
+    include: [
+      {
+        model: Material,
+        attributes: ["id", "quantity"],
         include: [
-          {
-            model: Material,
-            attributes: ["id", "quantity"],
-            include: [
-              {
-                model: Recipe,
-                attributes: ["id", "name"],
-                include: [
-                  {
-                    model: Item,
-                    attributes: ["id", "icon", "quality"],
-                  },
-                  {
-                    model: Profession,
-                    attributes: ["id", "name"],
-                  },
-                ],
-              },
-            ],
-          },
           {
             model: Recipe,
             attributes: ["id", "name"],
             include: [
+              {
+                model: Item,
+                attributes: ["id", "icon", "quality"],
+              },
               {
                 model: Profession,
                 attributes: ["id", "name"],
@@ -490,12 +492,20 @@ app.get("/items/:itemId", async (req, res) => {
             ],
           },
         ],
-      })
-    ).toJSON();
-    res.send(item);
-  } catch (error) {
-    res.send(error);
-  }
+      },
+      {
+        model: Recipe,
+        attributes: ["id", "name"],
+        include: [
+          {
+            model: Profession,
+            attributes: ["id", "name"],
+          },
+        ],
+      },
+    ],
+  });
+  item ? res.send(item.toJSON()) : res.status(404).send("Item not found.");
 });
 
 // app.get("items/names/:name", async (req, res) => {
