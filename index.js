@@ -179,6 +179,72 @@ app.get("/", (req, res) => {
   res.send("<h1>PLACEHOLDER</h1>");
 });
 
+app.get("/getAllInfo", async (req, res) => {
+  //this is gonna be our master, "get all stuff" api call
+  //basically, we're gonna call this once when we load the page for the first time,
+  //then we don't have to make any other api calls.
+  //the logic for sorting/finding/etc. can all be handled in the front end. way easier than spamming api calls.
+
+  let items =
+    //might want to remove the includes: it's extremely extraneous, since we'll have the id in the included thing anyway
+    //ie, don't need item.materials, since we can just look for all materials where item.id = item.id
+    (
+      await Item.findAll({
+        include: [
+          {
+            model: Material,
+            attributes: ["id"],
+          },
+          {
+            model: Recipe,
+            attributes: ["id"],
+          },
+        ],
+      })
+    ).map((item) => item.toJSON());
+
+  let recipes = (
+    await Recipe.findAll({
+      include: [
+        {
+          model: Material,
+          attributes: ["id"],
+        },
+        {
+          model: FinishingReagent,
+          attributes: ["id"],
+        },
+      ],
+    })
+  ).map((recipe) => recipe.toJSON());
+
+  let professions = (
+    await Profession.findAll({
+      include: [
+        {
+          model: Recipe,
+          attributes: ["id"],
+        },
+      ],
+    })
+  ).map((profession) => profession.toJSON());
+
+  let materials = (await Material.findAll()).map((material) =>
+    material.toJSON()
+  );
+  let finishingReagents = (await FinishingReagent.findAll()).map((fReagent) =>
+    fReagent.toJSON()
+  );
+
+  res.send({
+    items: items,
+    recipes: recipes,
+    professions: professions,
+    materials: materials,
+    finishingReagents: finishingReagents,
+  });
+});
+
 app.get("/items", async (req, res) => {
   //getting all items, then mapping them to json
   let items = (await Item.findAll()).map((item) => item.toJSON());

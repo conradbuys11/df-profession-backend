@@ -72,7 +72,7 @@ const Recipe = sequelize.define(
   "recipe",
   {
     name: { type: DataTypes.STRING, allowNull: false },
-    icon: {type: DataTypes.STRING},
+    icon: { type: DataTypes.STRING },
     numberCrafted: { type: DataTypes.STRING, defaultValue: "1" },
     requiredProfessionLevel: { type: DataTypes.INTEGER },
     category: { type: DataTypes.STRING },
@@ -343,10 +343,9 @@ async function createRecipe(
   if (isNotNullAndUndefined(notes)) {
     recipe.notes = notes;
   }
-  if(isNotNullAndUndefined(icon)){
+  if (isNotNullAndUndefined(icon)) {
     recipe.icon = icon;
-  }
-  else if(itemMade.icon){
+  } else if (itemMade.icon) {
     recipe.icon = itemMade.icon;
   }
   await recipe.save();
@@ -417,12 +416,218 @@ async function createFinishingReagent(
   return finishingReagent;
 }
 
+const primaryStatArrayEpic = (sizeOfItem) => {
+  // this function is for 382-392 pieces
+  // small (back & wrist), large (head, chest, legs), or medium (everything else)
+  // also, 1h for a one handed weapon (str or agi), 1h-int for one handed int weapon, 2h-int for two handed int weapon
+  switch (sizeOfItem.toLowerCase()) {
+    case "small":
+      return [195, 198, "?", 208, 214];
+    case "medium":
+      return [260, 265, "?", 277, 285];
+    case "large":
+      return [346, 353, "?", 370, 380];
+    case "1h":
+      return [173, 176, "?", 185, 190];
+    case "1h-int":
+      return [845, "?", "?", "?", 1107];
+    case "2h-int":
+      return [1690, "?", "?", "?", 2214];
+    default:
+      return ["?", "?", "?", "?", "?"];
+  }
+};
+
+const secondaryStatArrayEpic = (nameOfStat, sizeOfItem) => {
+  // this function is for 382-392 pieces
+  // if it's stamina, we do something different
+  // small (back & wrist), large (head, chest, legs), or medium (everything else)
+  // also, 1h for a one handed weapon!
+  if (nameOfStat.toLowerCase() === "stamina") {
+    switch (sizeOfItem) {
+      case "small":
+        return ["Stamina", 446, 458, "?", 490, 509];
+      case "medium":
+        return ["Stamina", 594, 610, "?", 653, 679];
+      case "large":
+        return ["Stamina", 793, 814, "?", 871, 905];
+      case "1h":
+        return ["Stamina", 396, 407, "?", 436, 453];
+      default:
+        return ["Stamina", "?", "?", "?", "?", "?"];
+    }
+  } else {
+    switch (sizeOfItem) {
+      case "small":
+        return [nameOfStat, 176, 178, "?", "?", 187];
+      case "medium":
+        return [nameOfStat, 235, 238, "?", "?", 249];
+      case "large":
+        return [nameOfStat, 313, 317, "?", "?", 332];
+      case "1h":
+        return [nameOfStat, 156, 158, "?", "?", 166];
+      default:
+        return [nameOfStat, "?", "?", "?", "?", "?"];
+    }
+  }
+};
+
+const primaryStatArrayRare = (sizeOfItem) => {
+  // this function is for 333-343 pieces
+  // small (back & wrist), large (head, chest, legs), or medium (everything else)
+  // also, 1h for a one handed weapon (str or agi), 1h-int for one handed int weapon, 2h-int for two handed int weapon
+  switch (sizeOfItem.toLowerCase()) {
+    case "small":
+      return [123, 126, "?", "?", 135];
+    case "medium":
+      return [165, 168, "?", "?", 181];
+    case "large":
+      return [219, 223, "?", "?", 241];
+    case "1h":
+      return [110, 112, "?", "?", 120];
+    case "1h-int":
+      return [651, "?", "?", "?", 701];
+    case "2h-int":
+      return [1302, "?", "?", "?", 1402];
+    default:
+      return ["?", "?", "?", "?", "?"];
+  }
+};
+
+const secondaryStatArrayRare = (nameOfStat, sizeOfItem) => {
+  // this function is for 333-343 pieces
+  // if it's stamina, we do something different
+  // small (back & wrist), large (head, chest, legs), or medium (everything else)
+  // also, 1h for a one handed weapon!
+  if (nameOfStat.toLowerCase() === "stamina") {
+    switch (sizeOfItem) {
+      case "small":
+        return ["Stamina", 271, 273, "?", "?", 280];
+      case "medium":
+        return ["Stamina", 362, 364, "?", "?", 374];
+      case "large":
+        return ["Stamina", 483, 486, "?", "?", 498];
+      case "1h":
+        return ["Stamina", 241, 243, "?", "?", 249];
+      default:
+        return ["Stamina", "?", "?", "?", "?", "?"];
+    }
+  } else {
+    switch (sizeOfItem) {
+      case "small":
+        return [nameOfStat, 104, 110, "?", "?", 134];
+      case "medium":
+        return [nameOfStat, 138, 146, "?", "?", 179];
+      case "large":
+        return [nameOfStat, 184, 195, "?", "?", 239];
+      case "1h":
+        return [nameOfStat, 92, 97, "?", "?", 119];
+      default:
+        return [nameOfStat, "?", "?", "?", "?", "?"];
+    }
+  }
+};
+
+const primaryStatArrayBaby = (sizeOfItem) => {
+  // this function is for 306-316 pieces
+  // small (back & wrist), large (head, chest, legs), or medium (everything else)
+  switch (sizeOfItem.toLowerCase()) {
+    case "small":
+      return [96, 98, "?", "?", 105];
+    case "medium":
+      return [128, 130, "?", "?", 140];
+    case "large":
+      return [171, 174, "?", "?", 187];
+    default:
+      return ["?", "?", "?", "?", "?"];
+  }
+};
+
+const secondaryStatArrayBaby = (nameOfStat, sizeOfItem) => {
+  // this function is for 306-316 pieces
+  // if it's stamina, we do something different
+  // small (back & wrist), large (head, chest, legs), or medium (everything else)
+  if (nameOfStat.toLowerCase() === "stamina") {
+    switch (sizeOfItem) {
+      case "small":
+        return ["Stamina", 240, 245, "?", "?", 257];
+      case "medium":
+        return ["Stamina", 319, 327, "?", "?", 342];
+      case "large":
+        return ["Stamina", 426, 435, "?", "?", 456];
+      default:
+        return ["Stamina", "?", "?", "?", "?", "?"];
+    }
+  } else {
+    switch (sizeOfItem) {
+      case "small":
+        return [nameOfStat, 55, 56, "?", "?", 65];
+      case "medium":
+        return [nameOfStat, 74, 74, "?", "?", 86];
+      case "large":
+        return [nameOfStat, 98, 99, "?", "?", 115];
+      default:
+        return [nameOfStat, "?", "?", "?", "?", "?"];
+    }
+  }
+};
+
+const statArrayProfToolAccessory = (
+  nameOfStat,
+  typeOfToolOrAccessory,
+  quality
+) => {
+  //hoo boy we're basically recreating all of the above methods but in ONE
+  //for profession tools & accessories
+  //this method is a clusterfuck and desperately needs to be split up
+  let arr = [];
+  if (typeOfToolOrAccessory.match(/(Tool$)/g)) {
+    /* (Tool$) is the entire word Tool, then end of string */
+    if (nameOfStat.toLowerCase() === "skill") {
+      arr = [["Skill", "", "", "", ""]];
+      quality.toLowerCase() === "large"
+        ? arr.push([10, 10, 10, 10, 10])
+        : quality.toLowerCase() === "medium"
+        ? arr.push([6, 6, 6, 6, 6])
+        : arr.push([4, 4, 4, 4, 4]);
+      console.log(arr);
+      return arr;
+    } else {
+      arr = [nameOfStat];
+      quality.toLowerCase() === "large"
+        ? arr.push(79, 86, "?", 101, 110)
+        : quality.toLowerCase() === "medium"
+        ? arr.push(58, 62, 67, 101, 110)
+        : arr.push(31, "?", "?", "?", 43);
+      return arr;
+    }
+  } else if (typeOfToolOrAccessory.match(/(Toolkit)/g)) {
+    if (nameOfStat.toLowerCase() === "skill") {
+      arr = [
+        ["Skill", "", "", "", ""],
+        [6, 6, 6, 6, 6],
+      ];
+      return arr;
+    } else {
+      arr = [nameOfStat];
+      quality.toLowerCase() === "large"
+        ? arr.push(32, 34, "?", 40, 44)
+        : quality.toLowerCase() === "medium"
+        ? arr.push(23, 25, "?", "?", 32)
+        : arr.push("?", "?", "?", "?", "?");
+      return arr;
+    }
+  }
+  return arr;
+  //can do more later, but chests & heads are inconsistent with their secondary stats
+};
+
 // MAKING TABLES
 // TIME TO SYNC
 const makeTables = async () => {
-  await(sequelize.drop());
+  await sequelize.drop();
   console.log("Tables dropped successfully.");
-  await(sequelize.sync());
+  await sequelize.sync();
   console.log("Tables synced successfully.");
   //
   // SEEDING PROFESSIONS
@@ -1316,11 +1521,57 @@ const makeTables = async () => {
     "Common",
     "Crafting Reagent"
   );
-  // const glowingTitanOrb = await createItem("Glowing Titan Orb", 200);
-  // const aquaticMaw = await createItem("Aquatic Maw", 1000);
-  // const largeSturdyFemur = await createItem("Large Sturdy Femur", 1000);
-  // const primalBearSpine = await createItem("Primal Bear Spine", 1000);
-  // const mastodonTusk = await createItem("Mastodon Tusk", 1000);
+  const glowingTitanOrb = await createItem(
+    "Glowing Titan Orb",
+    "item_enchantedpearl",
+    null,
+    1000,
+    "A mysterious orb thrumming with energy found in possession of a titan watcher on the Dragon Isles.",
+    "Literally no idea where to get this.",
+    "Common",
+    "Crafting Reagent",
+    1
+  );
+  const aquaticMaw = await createItem(
+    "Aquatic Maw",
+    "trade_archaeology_shark-jaws",
+    null,
+    1000,
+    "A massive, toothy jaw obtained from large fish native to the Dragon Isles.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const largeSturdyFemur = await createItem(
+    "Large Sturdy Femur",
+    "inv_leatherworking_90_bone",
+    null,
+    1000,
+    "A hefty thigh bone retrieved from the bruffalon native to the Dragon Isles.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const primalBearSpine = await createItem(
+    "Primal Bear Spine",
+    "inv_skeletonspinepet_green",
+    null,
+    1000,
+    "A hulking spine from the bears of the Dragon Isles.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const mastodonTusk = await createItem(
+    "Mastodon Tusk",
+    "achievement_reputation_tuskarr",
+    null,
+    1000,
+    "A durable tusk taken from the mammoths of the Dragon Isles.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
   const iridescentPlume = await createItem(
     "Iridescent Plume",
     "inv_icon_feather05d",
@@ -1401,14 +1652,11 @@ const makeTables = async () => {
     "Wrist",
     null,
     [306, 308, 310, 313, 316],
+    [["Intellect", "", "", "", ""], primaryStatArrayBaby("small")],
     [
-      ["Intellect", "", "", "", ""],
-      [96, "?", "?", "?", 105],
-    ],
-    [
-      ["Stamina", 240, "?", "?", "?", 257],
-      ["Random Stat 1", 55, "?", "?", "?", 65],
-      ["Random Stat 2", 55, "?", "?", "?", 65],
+      secondaryStatArrayBaby("stamina", "small"),
+      secondaryStatArrayBaby("Random Stat 1", "small"),
+      secondaryStatArrayBaby("Random Stat 2", "small"),
     ]
   );
   const surveyorsClothTreads = await createItem(
@@ -1428,14 +1676,11 @@ const makeTables = async () => {
     "Feet",
     null,
     [306, 308, 310, 313, 316],
+    [["Intellect", "", "", "", ""], primaryStatArrayBaby("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [128, "?", "?", "?", 140],
-    ],
-    [
-      ["Stamina", 319, "?", "?", "?", 342],
-      ["Random Stat 1", 74, "?", "?", "?", 86],
-      ["Random Stat 2", 74, "?", "?", "?", 86],
+      secondaryStatArrayBaby("stamina", "medium"),
+      secondaryStatArrayBaby("Random Stat 1", "medium"),
+      secondaryStatArrayBaby("Random Stat 2", "medium"),
     ]
   );
   const surveyorsClothRobe = await createItem(
@@ -1455,14 +1700,11 @@ const makeTables = async () => {
     "Chest",
     null,
     [306, 308, 310, 313, 316],
+    [["Intellect", "", "", "", ""], primaryStatArrayBaby("large")],
     [
-      ["Intellect", "", "", "", ""],
-      [171, "?", "?", "?", 187],
-    ],
-    [
-      ["Stamina", 426, "?", "?", "?", 456],
-      ["Random Stat 1", 98, "?", "?", "?", 115],
-      ["Random Stat 2", 98, "?", "?", "?", 115],
+      secondaryStatArrayBaby("stamina", "large"),
+      secondaryStatArrayBaby("Random Stat 1", "large"),
+      secondaryStatArrayBaby("Random Stat 2", "large"),
     ]
   );
   const wilderclothBolt = await createItem(
@@ -1493,14 +1735,11 @@ const makeTables = async () => {
     "Waist",
     null,
     [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [165, "?", "?", "?", 181],
-    ],
-    [
-      ["Stamina", 362, "?", "?", "?", 374],
-      ["Random Stat 1", 138, "?", "?", "?", 179],
-      ["Random Stat 2", 138, "?", "?", "?", 179],
+      secondaryStatArrayRare("stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
     ]
   );
   const surveyorsSeasonedGloves = await createItem(
@@ -1520,14 +1759,11 @@ const makeTables = async () => {
     "Hands",
     null,
     [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [165, "?", "?", "?", 181],
-    ],
-    [
-      ["Stamina", 362, "?", "?", "?", 374],
-      ["Random Stat 1", 138, "?", "?", "?", 179],
-      ["Random Stat 2", 138, "?", "?", "?", 179],
+      secondaryStatArrayRare("stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
     ]
   );
   const surveyorsSeasonedHood = await createItem(
@@ -1547,14 +1783,11 @@ const makeTables = async () => {
     "Head",
     null,
     [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("large")],
     [
-      ["Intellect", "", "", "", ""],
-      [219, "?", "?", "?", 241],
-    ],
-    [
-      ["Stamina", 483, "?", "?", "?", 498],
-      ["Random Stat 1", 184, "?", "?", "?", 239],
-      ["Random Stat 2", 184, "?", "?", "?", 239],
+      secondaryStatArrayRare("stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
     ]
   );
   const surveyorsSeasonedPants = await createItem(
@@ -1574,14 +1807,11 @@ const makeTables = async () => {
     "Legs",
     null,
     [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("large")],
     [
-      ["Intellect", "", "", "", ""],
-      [219, "?", "?", "?", 241],
-    ],
-    [
-      ["Stamina", 483, "?", "?", "?", 498],
-      ["Random Stat 1", 184, "?", "?", "?", 239],
-      ["Random Stat 2", 184, "?", "?", "?", 239],
+      secondaryStatArrayRare("stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
     ]
   );
   const surveyorsSeasonedShoulders = await createItem(
@@ -1601,14 +1831,11 @@ const makeTables = async () => {
     "Chest",
     null,
     [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [165, "?", "?", "?", 181],
-    ],
-    [
-      ["Stamina", 362, "?", "?", "?", 374],
-      ["Random Stat 1", 138, "?", "?", "?", 179],
-      ["Random Stat 2", 138, "?", "?", "?", 179],
+      secondaryStatArrayRare("stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
     ]
   );
   const surveyorsTailoredCloak = await createItem(
@@ -1630,12 +1857,12 @@ const makeTables = async () => {
     [306, 308, 310, 313, 316],
     [
       ["Agility", "Intellect", "Strength", "", ""],
-      [96, "?", "?", "?", 105],
+      primaryStatArrayBaby("small"),
     ],
     [
-      ["Stamina", 240, "?", "?", "?", 257],
-      ["Random Stat 1", 55, "?", "?", "?", 65],
-      ["Random Stat 2", 55, "?", "?", "?", 65],
+      secondaryStatArrayBaby("stamina", "small"),
+      secondaryStatArrayBaby("Random Stat 1", "small"),
+      secondaryStatArrayBaby("Random Stat 2", "small"),
     ]
   );
   const vibrantWilderclothBolt = await createItem(
@@ -1768,14 +1995,11 @@ const makeTables = async () => {
     "Waist",
     null,
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [260, "?", "?", "?", 285],
-    ],
-    [
-      ["Stamina", 594, "?", "?", "?", 679],
-      ["Random Stat 1", 235, "?", "?", "?", 249],
-      ["Random Stat 2", 235, "?", "?", "?", 249],
+      secondaryStatArrayEpic("stamina", "medium"),
+      secondaryStatArrayEpic("Random Stat 1", "medium"),
+      secondaryStatArrayEpic("Random Stat 2", "medium"),
     ]
   );
   const vibrantWilderclothHandwraps = await createItem(
@@ -1795,14 +2019,11 @@ const makeTables = async () => {
     "Hands",
     null,
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [260, "?", "?", "?", 285],
-    ],
-    [
-      ["Stamina", 594, "?", "?", "?", 679],
-      ["Random Stat 1", 235, "?", "?", "?", 249],
-      ["Random Stat 2", 235, "?", "?", "?", 249],
+      secondaryStatArrayEpic("stamina", "medium"),
+      secondaryStatArrayEpic("Random Stat 1", "medium"),
+      secondaryStatArrayEpic("Random Stat 2", "medium"),
     ]
   );
   const vibrantWilderclothHeadcover = await createItem(
@@ -1822,14 +2043,11 @@ const makeTables = async () => {
     "Head",
     null,
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("large")],
     [
-      ["Intellect", "", "", "", ""],
-      [346, "?", "?", "?", 380],
-    ],
-    [
-      ["Stamina", 793, "?", "?", "?", 905],
-      ["Random Stat 1", 313, "?", "?", "?", 332],
-      ["Random Stat 2", 313, "?", "?", "?", 332],
+      secondaryStatArrayEpic("stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
     ]
   );
   const vibrantWilderclothShawl = await createItem(
@@ -1851,12 +2069,12 @@ const makeTables = async () => {
     [382, 384, 386, 389, 392],
     [
       ["Agility", "Intellect", "Strength", "", ""],
-      [195, 198, "?", "?", 214],
+      primaryStatArrayEpic("small"),
     ],
     [
-      ["Stamina", 446, 458, "?", "?", 509],
-      ["Random Stat 1", 176, "?", "?", "?", 187],
-      ["Random Stat 2", 176, "?", "?", "?", 187],
+      secondaryStatArrayEpic("stamina", "small"),
+      secondaryStatArrayEpic("Random Stat 1", "small"),
+      secondaryStatArrayEpic("Random Stat 2", "small"),
     ]
   );
   const vibrantWilderclothShoulderspikes = await createItem(
@@ -1876,14 +2094,11 @@ const makeTables = async () => {
     "Shoulder",
     null,
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [260, "?", "?", "?", 285],
-    ],
-    [
-      ["Stamina", 594, "?", "?", "?", 679],
-      ["Random Stat 1", 235, "?", "?", "?", 249],
-      ["Random Stat 2", 235, "?", "?", "?", 249],
+      secondaryStatArrayEpic("stamina", "medium"),
+      secondaryStatArrayEpic("Random Stat 1", "medium"),
+      secondaryStatArrayEpic("Random Stat 2", "medium"),
     ]
   );
   const vibrantWilderclothSlacks = await createItem(
@@ -1903,14 +2118,11 @@ const makeTables = async () => {
     "Legs",
     null,
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("large")],
     [
-      ["Intellect", "", "", "", ""],
-      [346, "?", "?", "?", 380],
-    ],
-    [
-      ["Stamina", 793, "?", "?", "?", 905],
-      ["Random Stat 1", 313, "?", "?", "?", 332],
-      ["Random Stat 2", 313, "?", "?", "?", 332],
+      secondaryStatArrayEpic("stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
     ]
   );
   const vibrantWilderclothSlippers = await createItem(
@@ -1930,14 +2142,11 @@ const makeTables = async () => {
     "Feet",
     null,
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [260, "?", "?", "?", 285],
-    ],
-    [
-      ["Stamina", 594, "?", "?", "?", 679],
-      ["Random Stat 1", 235, "?", "?", "?", 249],
-      ["Random Stat 2", 235, "?", "?", "?", 249],
+      secondaryStatArrayEpic("stamina", "medium"),
+      secondaryStatArrayEpic("Random Stat 1", "medium"),
+      secondaryStatArrayEpic("Random Stat 2", "medium"),
     ]
   );
   const vibrantWilderclothVestments = await createItem(
@@ -1957,14 +2166,11 @@ const makeTables = async () => {
     "Chest",
     null,
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("large")],
     [
-      ["Intellect", "", "", "", ""],
-      [346, "?", "?", "?", 380],
-    ],
-    [
-      ["Stamina", 793, "?", "?", "?", 905],
-      ["Random Stat 1", 313, "?", "?", "?", 332],
-      ["Random Stat 2", 313, "?", "?", "?", 332],
+      secondaryStatArrayEpic("stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
     ]
   );
   const vibrantWilderclothWristwraps = await createItem(
@@ -1984,14 +2190,11 @@ const makeTables = async () => {
     "Wrist",
     null,
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("small")],
     [
-      ["Intellect", "", "", "", ""],
-      [195, 198, "?", "?", 214],
-    ],
-    [
-      ["Stamina", 446, 458, "?", "?", 509],
-      ["Random Stat 1", 176, "?", "?", "?", 187],
-      ["Random Stat 2", 176, "?", "?", "?", 187],
+      secondaryStatArrayEpic("stamina", "small"),
+      secondaryStatArrayEpic("Random Stat 1", "small"),
+      secondaryStatArrayEpic("Random Stat 2", "small"),
     ]
   );
 
@@ -2012,14 +2215,11 @@ const makeTables = async () => {
     "Wrist",
     null,
     [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("small")],
     [
-      ["Intellect", "", "", "", ""],
-      [123, "?", "?", "?", 135],
-    ],
-    [
-      ["Stamina", 271, "?", "?", "?", 280],
-      ["Random Stat 1", 104, "?", "?", "?", 134],
-      ["Random Stat 2", 104, "?", "?", "?", 134],
+      secondaryStatArrayRare("stamina", "small"),
+      secondaryStatArrayRare("Random Stat 1", "small"),
+      secondaryStatArrayRare("Random Stat 2", "small"),
     ]
   );
   const crimsonCombatantsWilderclothCloak = await createItem(
@@ -2041,12 +2241,12 @@ const makeTables = async () => {
     [333, 335, 337, 340, 343],
     [
       ["Agility", "Intellect", "Strength", "", ""],
-      [123, "?", "?", "?", 135],
+      primaryStatArrayRare("small"),
     ],
     [
-      ["Stamina", 271, "?", "?", "?", 280],
-      ["Random Stat 1", 104, "?", "?", "?", 134],
-      ["Random Stat 2", 104, "?", "?", "?", 134],
+      secondaryStatArrayRare("stamina", "small"),
+      secondaryStatArrayRare("Random Stat 1", "small"),
+      secondaryStatArrayRare("Random Stat 2", "small"),
     ]
   );
   const crimsonCombatantsWilderclothGloves = await createItem(
@@ -2066,14 +2266,11 @@ const makeTables = async () => {
     "Hands",
     null,
     [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [165, "?", "?", "?", 181],
-    ],
-    [
-      ["Stamina", 362, "?", "?", "?", 374],
-      ["Random Stat 1", 138, "?", "?", "?", 179],
-      ["Random Stat 2", 138, "?", "?", "?", 179],
+      secondaryStatArrayRare("stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
     ]
   );
   const crimsonCombatantsWilderclothHood = await createItem(
@@ -2093,14 +2290,11 @@ const makeTables = async () => {
     "Head",
     null,
     [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("large")],
     [
-      ["Intellect", "", "", "", ""],
-      [219, "?", "?", "?", 241],
-    ],
-    [
-      ["Stamina", 483, "?", "?", "?", 498],
-      ["Random Stat 1", 184, "?", "?", "?", 239],
-      ["Random Stat 2", 184, "?", "?", "?", 239],
+      secondaryStatArrayRare("stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
     ]
   );
   const crimsonCombatantsWilderclothLeggings = await createItem(
@@ -2120,14 +2314,11 @@ const makeTables = async () => {
     "Legs",
     null,
     [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("large")],
     [
-      ["Intellect", "", "", "", ""],
-      [219, "?", "?", "?", 241],
-    ],
-    [
-      ["Stamina", 483, "?", "?", "?", 498],
-      ["Random Stat 1", 184, "?", "?", "?", 239],
-      ["Random Stat 2", 184, "?", "?", "?", 239],
+      secondaryStatArrayRare("stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
     ]
   );
   const crimsonCombatantsWilderclothSash = await createItem(
@@ -2147,14 +2338,11 @@ const makeTables = async () => {
     "Waist",
     null,
     [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [165, "?", "?", "?", 181],
-    ],
-    [
-      ["Stamina", 362, "?", "?", "?", 374],
-      ["Random Stat 1", 138, "?", "?", "?", 179],
-      ["Random Stat 2", 138, "?", "?", "?", 179],
+      secondaryStatArrayRare("stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
     ]
   );
   const crimsonCombatantsWilderclothShoulderpads = await createItem(
@@ -2174,14 +2362,11 @@ const makeTables = async () => {
     "Shoulder",
     null,
     [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [165, "?", "?", "?", 181],
-    ],
-    [
-      ["Stamina", 362, "?", "?", "?", 374],
-      ["Random Stat 1", 138, "?", "?", "?", 179],
-      ["Random Stat 2", 138, "?", "?", "?", 179],
+      secondaryStatArrayRare("stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
     ]
   );
   const crimsonCombatantsWilderclothTreads = await createItem(
@@ -2201,14 +2386,11 @@ const makeTables = async () => {
     "Feet",
     null,
     [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [165, "?", "?", "?", 181],
-    ],
-    [
-      ["Stamina", 362, "?", "?", "?", 374],
-      ["Random Stat 1", 138, "?", "?", "?", 179],
-      ["Random Stat 2", 138, "?", "?", "?", 179],
+      secondaryStatArrayRare("stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
     ]
   );
   const crimsonCombatantsWilderclothTunic = await createItem(
@@ -2228,14 +2410,11 @@ const makeTables = async () => {
     "Chest",
     null,
     [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("large")],
     [
-      ["Intellect", "", "", "", ""],
-      [219, "?", "?", "?", 241],
-    ],
-    [
-      ["Stamina", 483, "?", "?", "?", 498],
-      ["Random Stat 1", 184, "?", "?", "?", 239],
-      ["Random Stat 2", 184, "?", "?", "?", 239],
+      secondaryStatArrayRare("stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
     ]
   );
 
@@ -2256,12 +2435,9 @@ const makeTables = async () => {
     "Shoulder",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [260, "?", "?", 277, 285],
-    ],
-    [
-      ["Stamina", 594, "?", "?", 653, 679],
+      secondaryStatArrayEpic("stamina", "medium"),
       ["Critical Strike", 194, "?", "?", "?", 206],
       ["Mastery", 275, "?", "?", "?", 292],
     ]
@@ -2283,12 +2459,9 @@ const makeTables = async () => {
     "Shoulder",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [260, "?", "?", 277, 285],
-    ],
-    [
-      ["Stamina", 594, "?", "?", 653, 679],
+      secondaryStatArrayEpic("stamina", "medium"),
       ["Haste", 174, "?", "?", "?", 185],
       ["Mastery", 295, "?", "?", "?", 313],
     ]
@@ -2310,12 +2483,9 @@ const makeTables = async () => {
     "Chest",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("large")],
     [
-      ["Intellect", "", "", "", ""],
-      [346, "?", "?", "?", 380],
-    ],
-    [
-      ["Stamina", 793, "?", "?", "?", 905],
+      secondaryStatArrayEpic("stamina", "large"),
       ["Versatility", 197, "?", "?", "?", 209],
       ["Mastery", 429, "?", "?", "?", 455],
     ]
@@ -2337,12 +2507,9 @@ const makeTables = async () => {
     "Feet",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [260, "?", "?", 277, 285],
-    ],
-    [
-      ["Stamina", 594, "?", "?", 653, 679],
+      secondaryStatArrayEpic("stamina", "medium"),
       ["Critical Strike", 188, "?", "?", "?", 199],
       ["Mastery", 282, "?", "?", "?", 299],
     ]
@@ -2364,12 +2531,9 @@ const makeTables = async () => {
     "Feet",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [260, "?", "?", 277, 285],
-    ],
-    [
-      ["Stamina", 594, "?", "?", 653, 679],
+      secondaryStatArrayEpic("stamina", "medium"),
       ["Versatility", 218, "?", "?", "?", 231],
       ["Mastery", 251, "?", "?", "?", 267],
     ]
@@ -2392,12 +2556,9 @@ const makeTables = async () => {
     "Waist",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [260, "?", "?", 277, 285],
-    ],
-    [
-      ["Stamina", 594, "?", "?", 653, 679],
+      secondaryStatArrayEpic("stamina", "medium"),
       ["Versatility", 302, "?", "?", "?", 320],
       ["Mastery", 168, "?", "?", "?", 178],
     ]
@@ -2413,18 +2574,15 @@ const makeTables = async () => {
     null,
     5,
     null,
-    "Your spells and abilities have a chance to rally you and your 4 closest allies withing 30 yards to victory for 10 sec, increasing Versatility by 191-?. (based on quality)",
+    "Your spells and abilities have a chance to rally you and your 4 closest allies withing 30 yards to victory for 10 sec, increasing Versatility by 191/?/?/205/211. (based on quality)",
     null,
     "Cloth",
     "Wrist",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("small")],
     [
-      ["Intellect", "", "", "", ""],
-      [195, 198, "?", "?", 214],
-    ],
-    [
-      ["Stamina", 446, 458, "?", "?", 509],
+      secondaryStatArrayEpic("stamina", "small"),
       ["Versatility", 181, "?", "?", "?", 192],
       ["Mastery", 171, "?", "?", "?", 181],
     ]
@@ -2446,12 +2604,9 @@ const makeTables = async () => {
     "Hands",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [260, "?", "?", 277, 285],
-    ],
-    [
-      ["Stamina", 594, "?", "?", 653, 679],
+      secondaryStatArrayEpic("stamina", "medium"),
       ["Haste", 282, "?", "?", "?", 299],
       ["Versatility", 188, "?", "?", "?", 199],
     ]
@@ -2473,12 +2628,9 @@ const makeTables = async () => {
     "Legs",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("large")],
     [
-      ["Intellect", "", "", "", ""],
-      [346, "?", "?", 370, 380],
-    ],
-    [
-      ["Stamina", 793, "?", "?", 871, 905],
+      secondaryStatArrayEpic("stamina", "large"),
       ["Critical Strike", 201, "?", "?", 210, 213],
       ["Haste", 4255, "?", "?", 443, 451],
     ]
@@ -2500,12 +2652,9 @@ const makeTables = async () => {
     "Waist",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [260, "?", "?", 277, 285],
-    ],
-    [
-      ["Stamina", 594, "?", "?", 653, 679],
+      secondaryStatArrayEpic("stamina", "medium"),
       ["Haste", "?", "?", "?", 318, 324],
       ["Mastery", "?", "?", "?", 171, 174],
     ]
@@ -2527,17 +2676,14 @@ const makeTables = async () => {
     "Head",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("large")],
     [
-      ["Intellect", "", "", "", ""],
-      [346, "?", "?", 370, 380],
-    ],
-    [
-      ["Stamina", 793, "?", "?", 871, 905],
+      secondaryStatArrayEpic("stamina", "large"),
       ["Haste", 317, "?", "?", 331, 337],
       ["Versatility", 308, "?", "?", 322, 327],
     ]
   );
-  //below item needs pvp ilvl
+
   const infuriousLegwrapsOfPossibility = await createItem(
     "Infurious Legwraps of Possibility",
     "inv_cloth_dragonpvp_d_01_pant",
@@ -2555,12 +2701,9 @@ const makeTables = async () => {
     "Legs",
     "Embellished (2)",
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("medium")],
     [
-      ["Intellect", "", "", "", ""],
-      [346, "?", "?", 370, 380],
-    ],
-    [
-      ["Stamina", 793, "?", "?", 871, 905],
+      secondaryStatArrayEpic("stamina", "medium"),
       ["Haste", 188, "?", "?", 196, 199],
       ["Versatility", 438, "?", "?", 457, 465],
     ]
@@ -2713,8 +2856,8 @@ const makeTables = async () => {
       [6, 6, 6, 6, 6],
     ],
     [
-      ["Deftness", 32, "?", "?", 40, "?"],
-      ["Perception", 32, "?", "?", 40, "?"],
+      ["Deftness", 32, 34, "?", 40, 44],
+      ["Perception", 32, 34, "?", 40, 44],
     ]
   );
   const wilderclothEnchantersHat = await createItem(
@@ -2827,8 +2970,8 @@ const makeTables = async () => {
     [320, 326, 332, 339, 346],
     null,
     [
-      ["Deftness", 23, "?", "?", "?", 32],
-      ["Perception", 23, "?", "?", "?", 32],
+      ["Deftness", 23, 25, "?", "?", 32],
+      ["Perception", 23, 25, "?", "?", 32],
     ]
   );
   const wilderclothTailorsCoat = await createItem(
@@ -3332,13 +3475,10 @@ const makeTables = async () => {
     "Head",
     null,
     [382, 384, 386, 389, 392],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
     [
-      ["Strength", "Intellect", "", "", ""],
-      [353, 353, "?", "?", 380],
-    ],
-    [
-      ["Stamina", 814, 814, "?", "?", 905],
-      ["Random Stat 1", 633, 633, "?", "?", 664],
+      secondaryStatArrayEpic("stamina", "large"),
+      ["Random Stat 1", 616, 633, "?", "?", 664],
       ["Tinker Socket", null, null, null, null, null],
     ],
     { Engineering: 1 }
@@ -3360,13 +3500,10 @@ const makeTables = async () => {
     "Head",
     null,
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("large")],
     [
-      ["Intellect", "", "", "", ""],
-      [353, 353, "?", "?", 380],
-    ],
-    [
-      ["Stamina", 814, 814, "?", "?", 905],
-      ["Random Stat 1", 633, 633, "?", "?", 664],
+      secondaryStatArrayEpic("stamina", "large"),
+      ["Random Stat 1", 616, 633, "?", "?", 664],
       ["Tinker Socket", null, null, null, null, null],
     ],
     { Engineering: 1 }
@@ -3388,13 +3525,10 @@ const makeTables = async () => {
     "Head",
     null,
     [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
     [
-      ["Agility", "Intellect", "", "", ""],
-      [353, 353, "?", "?", 380],
-    ],
-    [
-      ["Stamina", 814, 814, "?", "?", 905],
-      ["Random Stat 1", 633, 633, "?", "?", 664],
+      secondaryStatArrayEpic("stamina", "large"),
+      ["Random Stat 1", 616, 633, "?", "?", 664],
       ["Tinker Socket", null, null, null, null, null],
     ],
     { Engineering: 1 }
@@ -3416,13 +3550,10 @@ const makeTables = async () => {
     "Head",
     null,
     [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
     [
-      ["Agility", "Intellect", "", "", ""],
-      [353, 353, "?", "?", 380],
-    ],
-    [
-      ["Stamina", 814, 814, "?", "?", 905],
-      ["Random Stat 1", 633, 633, "?", "?", 664],
+      secondaryStatArrayEpic("stamina", "large"),
+      ["Random Stat 1", 616, 633, "?", "?", 664],
       ["Tinker Socket", null, null, null, null, null],
     ],
     { Engineering: 1 }
@@ -3444,12 +3575,9 @@ const makeTables = async () => {
     "Head",
     null,
     [306, 308, 310, 313, 316],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayBaby("large")],
     [
-      ["Agility", "Intellect", "", "", ""],
-      [171, "?", "?", "?", 187],
-    ],
-    [
-      ["Stamina", 426, "?", "?", "?", 456],
+      secondaryStatArrayBaby("stamina", "large"),
       ["Haste", 111, "?", "?", "?", 130],
       ["Mastery", 86, "?", "?", "?", 100],
       ["Tinker Socket", null, null, null, null, null],
@@ -3473,12 +3601,9 @@ const makeTables = async () => {
     "Head",
     null,
     [306, 308, 310, 313, 316],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayBaby("large")],
     [
-      ["Agility", "Intellect", "", "", ""],
-      [171, "?", "?", "?", 187],
-    ],
-    [
-      ["Stamina", 426, "?", "?", "?", 456],
+      secondaryStatArrayBaby("stamina", "large"),
       ["Critical Strike", 111, "?", "?", "?", 130],
       ["Versatility", 86, "?", "?", "?", 100],
       ["Tinker Socket", null, null, null, null, null],
@@ -3502,12 +3627,9 @@ const makeTables = async () => {
     "Head",
     null,
     [306, 308, 310, 313, 316],
+    [["Intellect", "", "", "", ""], primaryStatArrayBaby("large")],
     [
-      ["Intellect", "", "", "", ""],
-      [171, "?", "?", "?", 187],
-    ],
-    [
-      ["Stamina", 426, "?", "?", "?", 456],
+      secondaryStatArrayBaby("stamina", "large"),
       ["Haste", 102, "?", "?", "?", 120],
       ["Mastery", 94, "?", "?", "?", 110],
       ["Tinker Socket", null, null, null, null, null],
@@ -3531,12 +3653,9 @@ const makeTables = async () => {
     "Head",
     null,
     [306, 308, 310, 313, 316],
+    [["Intellect", "Strength", "", "", ""], primaryStatArrayBaby("large")],
     [
-      ["Intellect", "Strength", "", "", ""],
-      [171, "?", "?", "?", 187],
-    ],
-    [
-      ["Stamina", 426, "?", "?", "?", 456],
+      secondaryStatArrayBaby("stamina", "large"),
       ["Critical Strike", 111, "?", "?", "?", 130],
       ["Mastery", 86, "?", "?", "?", 100],
       ["Tinker Socket", null, null, null, null, null],
@@ -3560,13 +3679,10 @@ const makeTables = async () => {
     "Wrist",
     null,
     [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("small")],
     [
-      ["Agility", "Intellect", "", "", ""],
-      [195, 198, "?", "?", 214],
-    ],
-    [
-      ["Stamina", 446, 458, "?", "?", 509],
-      ["Random Stat 1", 356, 356, "?", "?", 373],
+      secondaryStatArrayEpic("stamina", "small"),
+      ["Random Stat 1", 352, 356, "?", "?", 373],
       ["Tinker Socket", null, null, null, null, null],
     ]
   );
@@ -3587,13 +3703,10 @@ const makeTables = async () => {
     "Wrist",
     null,
     [382, 384, 386, 389, 392],
+    [["Intellect", "Strength", "", "", ""], primaryStatArrayEpic("small")],
     [
-      ["Intellect", "Strength", "", "", ""],
-      [195, 198, "?", "?", 214],
-    ],
-    [
-      ["Stamina", 446, 458, "?", "?", 509],
-      ["Random Stat 1", 356, 356, "?", "?", 373],
+      secondaryStatArrayEpic("stamina", "small"),
+      ["Random Stat 1", 352, 356, "?", "?", 373],
       ["Tinker Socket", null, null, null, null, null],
     ]
   );
@@ -3614,13 +3727,10 @@ const makeTables = async () => {
     "Wrist",
     null,
     [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("small")],
     [
-      ["Agility", "Intellect", "", "", ""],
-      [195, 198, "?", "?", 214],
-    ],
-    [
-      ["Stamina", 446, 458, "?", "?", 509],
-      ["Random Stat 1", 356, 356, "?", "?", 373],
+      secondaryStatArrayEpic("stamina", "small"),
+      ["Random Stat 1", 352, 356, "?", "?", 373],
       ["Tinker Socket", null, null, null, null, null],
     ]
   );
@@ -3641,13 +3751,10 @@ const makeTables = async () => {
     "Wrist",
     null,
     [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("small")],
     [
-      ["Intellect", "", "", "", ""],
-      [195, 198, "?", "?", 214],
-    ],
-    [
-      ["Stamina", 446, 458, "?", "?", 509],
-      ["Random Stat 1", 356, 356, "?", "?", 373],
+      secondaryStatArrayEpic("stamina", "small"),
+      ["Random Stat 1", 352, 356, "?", "?", 373],
       ["Tinker Socket", null, null, null, null, null],
     ]
   );
@@ -3668,14 +3775,11 @@ const makeTables = async () => {
     "Ranged",
     null,
     [382, 384, 386, 389, 392],
+    [["Agility", "", "", "", ""], primaryStatArrayEpic("large")],
     [
-      ["Agility", "", "", "", ""],
-      [353, 353, "?", "?", 380],
-    ],
-    [
-      ["Stamina", 814, 814, "?", "?", 905],
-      ["Random Stat 1", 317, 317, "?", "?", 332],
-      ["Random Stat 2", 317, 317, "?", "?", 332],
+      secondaryStatArrayEpic("stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
     ]
   );
   const pewTwo = await createItem(
@@ -3695,14 +3799,11 @@ const makeTables = async () => {
     "Ranged",
     null,
     [333, 335, 337, 340, 343],
+    [["Agility", "", "", "", ""], primaryStatArrayRare("large")],
     [
-      ["Agility", "", "", "", ""],
-      [223, 223, "?", "?", 241],
-    ],
-    [
-      ["Stamina", 486, 486, "?", "?", 498],
-      ["Random Stat 1", 195, 195, "?", "?", 239],
-      ["Random Stat 2", 195, 195, "?", "?", 239],
+      secondaryStatArrayRare("stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
     ]
   );
   const meticulouslyTunedGear = await createItem(
@@ -4384,11 +4485,8 @@ const makeTables = async () => {
     null,
     null,
     [346, 352, 358, 365, 372],
-    [
-      ["Skill", "", "", "", ""],
-      [10, 10, 10, 10, 10],
-    ],
-    [["Random Stat 1", 79, 86, "?", 101, 110]]
+    statArrayProfToolAccessory("Skill", "Tool", "large"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "large")]
   );
   const khazgoriteFisherfriend = await createItem(
     "Khaz'gorite Fisherfriend",
@@ -4407,11 +4505,8 @@ const makeTables = async () => {
     null,
     null,
     [346, 352, 358, 365, 372],
-    [
-      ["Skill", "", "", "", ""],
-      [10, 10, 10, 10, 10],
-    ],
-    [["Perception", 79, 86, "?", 101, 110]]
+    statArrayProfToolAccessory("Skill", "Tool", "large"),
+    [statArrayProfToolAccessory("Perception", "Tool", "large")]
   );
   const lapidarysKhazgoriteClamps = await createItem(
     "Lapidary's Khaz'gorite Clamps",
@@ -4430,11 +4525,8 @@ const makeTables = async () => {
     null,
     null,
     [346, 352, 358, 365, 372],
-    [
-      ["Skill", "", "", "", ""],
-      [10, 10, 10, 10, 10],
-    ],
-    [["Random Stat 1", 79, 86, "?", 101, 110]]
+    statArrayProfToolAccessory("Skill", "Tool", "large"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "large")]
   );
   const springLoadedKhazgoriteFabricCutters = await createItem(
     "Spring-Loaded Khaz'gorite Fabric Cutters",
@@ -4453,11 +4545,8 @@ const makeTables = async () => {
     null,
     null,
     [346, 352, 358, 365, 372],
-    [
-      ["Skill", "", "", "", ""],
-      [10, 10, 10, 10, 10],
-    ],
-    [["Random Stat 1", 79, 86, "?", 101, 110]]
+    statArrayProfToolAccessory("Skill", "Tool", "large"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "large")]
   );
   const bottomlessMireslushOreSatchel = await createItem(
     "Bottomless Mireslush Ore Satchel",
@@ -4562,11 +4651,8 @@ const makeTables = async () => {
     null,
     null,
     [320, 326, 332, 339, 346],
-    [
-      ["Skill", "", "", "", ""],
-      [6, 6, 6, 6, 6],
-    ],
-    [["Random Stat 1", 58, 62, "?", "?", 79]]
+    statArrayProfToolAccessory("Skill", "Tool", "medium"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "medium")]
   );
   const draconiumFisherfriend = await createItem(
     "Draconium Fisherfriend",
@@ -4585,11 +4671,8 @@ const makeTables = async () => {
     null,
     null,
     [320, 326, 332, 339, 346],
-    [
-      ["Skill", "", "", "", ""],
-      [6, 6, 6, 6, 6],
-    ],
-    [["Perception", 58, 62, "?", "?", 79]]
+    statArrayProfToolAccessory("Skill", "Tool", "medium"),
+    [statArrayProfToolAccessory("Perception", "Tool", "medium")]
   );
   const lapidarysDraconiumClamps = await createItem(
     "Lapidary's Draconium Clamps",
@@ -4608,11 +4691,8 @@ const makeTables = async () => {
     null,
     null,
     [320, 326, 332, 339, 346],
-    [
-      ["Skill", "", "", "", ""],
-      [6, 6, 6, 6, 6],
-    ],
-    [["Random Stat 1", 58, 62, "?", "?", 79]]
+    statArrayProfToolAccessory("Skill", "Tool", "medium"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "medium")]
   );
   const springLoadedDraconiumFabricCutters = await createItem(
     "Spring-Loaded Draconium Fabric Cutters",
@@ -4631,11 +4711,8 @@ const makeTables = async () => {
     null,
     null,
     [320, 326, 332, 339, 346],
-    [
-      ["Skill", "", "", "", ""],
-      [6, 6, 6, 6, 6],
-    ],
-    [["Random Stat 1", 58, 62, "?", "?", 79]]
+    statArrayProfToolAccessory("Skill", "Tool", "medium"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "medium")]
   );
   const quackE = await createItem(
     "Quack-E",
@@ -4704,116 +4781,1065 @@ const makeTables = async () => {
     "Epic",
     "Crafting Reagent"
   );
-  // const gracefulAvoidance = await createItem("Graceful Avoidance");
-  // const homeboundSpeed = await createItem("Homebound Speed");
-  // const regenerativeLeech = await createItem("Regenerative Leech");
-  // const writOfAvoidanceCloak = await createItem("Writ of Avoidance (Cloak)");
-  // const writOfLeechCloak = await createItem("Writ of Leech (Cloak)");
-  // const writOfSpeedCloak = await createItem("Writ of Speed (Cloak)");
-  // const acceleratedAgility = await createItem("Accelerated Agility");
-  // const reserveOfIntellect = await createItem("Reserve of Intellect");
-  // const sustainedStrength = await createItem("Sustained Strength");
-  // const wakingStats = await createItem("Waking Stats");
-  // const devotionOfAvoidance = await createItem("Devotion of Avoidance");
-  // const devotionOfLeech = await createItem("Devotion of Leech");
-  // const devotionOfSpeed = await createItem("Devotion of Speed");
-  // const writOfAvoidanceBracer = await createItem("Writ of Avoidance (Bracer)");
-  // const writOfLeechBracer = await createItem("Writ of Leech (Bracer)");
-  // const writOfSpeedBracer = await createItem("Writ of Speed (Bracer)");
-  // const plainsrunnersBreeze = await createItem("Plainsrunner's Breeze");
-  // const ridersReassurance = await createItem("Rider's Reassurance");
-  // const watchersLoam = await createItem("Watcher's Loam");
-  // const devotionOfCriticalStrike = await createItem(
-  //   "Devotion of Critical Strike"
-  // );
-  // const devotionOfHaste = await createItem("Devotion of Haste");
-  // const devotionOfMastery = await createItem("Devotion of Mastery");
-  // const devotionOfVersatility = await createItem("Devotion of Versatility");
-  // const writOfCriticalStrike = await createItem("Writ of Critical Strike");
-  // const writOfHaste = await createItem("Writ of Haste");
-  // const writOfMastery = await createItem("Writ of Mastery");
-  // const writOfVersatility = await createItem("Writ of Versatility");
-  // const burningDevotion = await createItem("Burning Devotion");
-  // const earthenDevotion = await createItem("Earthen Devotion");
-  // const frozenDevotion = await createItem("Frozen Devotion");
-  // const sophicDevotion = await createItem("Sophic Devotion");
-  // const waftingDevotion = await createItem("Wafting Devotion");
-  // const burningWrit = await createItem("Burning Writ");
-  // const earthenWrit = await createItem("Earthen Writ");
-  // const frozenWrit = await createItem("Frozen Writ");
-  // const sophicWrit = await createItem("Sophic Writ");
-  // const waftingWrit = await createItem("Wafting Writ");
-  // const draconicDeftness = await createItem("Draconic Deftness");
-  // const draconicFinesse = await createItem("Draconic Finesse");
-  // const draconicInspiration = await createItem("Draconic Inspiration");
-  // const draconicPerception = await createItem("Draconic Perception");
-  // const draconicResourcefulness = await createItem("Draconic Resourcefulness");
-  // const torchOfPrimalAwakening = await createItem(
-  //   "Torch of Primal Awakening",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const runedKhazgoriteRod = await createItem(
-  //   "Runed Khaz'gorite Rod",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const runedDraconiumRod = await createItem(
-  //   "Runed Draconium Rod",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const enchantedWrithebarkWand = await createItem(
-  //   "Enchanted Writhebark Wand",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const runedSereviteRod = await createItem("Runed Serevite Rod", 1, 270, 285);
-  // const illusionPrimalAir = await createItem("Illusion: Primal Air");
-  // const illusionPrimalEarth = await createItem("Illusion: Primal Earth");
-  // const illusionPrimalFire = await createItem("Illusion: Primal Fire");
-  // const illusionPrimalFrost = await createItem("Illusion: Primal Frost");
-  // const illusionPrimalMastery = await createItem("Illusion: Primal Mastery");
-  // const primalInvocationExtract = await createItem("Primal Invocation Extract");
-  // const khadgarsDisenchantingRod = await createItem(
-  //   "Khadgar's Disenchanting Rod"
-  // );
-  // const illusoryAdornmentOrder = await createItem("Illusory Adornment: Order");
-  // const illusoryAdornmentAir = await createItem("Illusory Adornment: Air");
-  // const illusoryAdornmentEarth = await createItem("Illusory Adornment: Earth");
-  // const illusoryAdornmentFire = await createItem("Illusory Adornment: Fire");
-  // const illusoryAdornmentFrost = await createItem("Illusory Adornment: Frost");
-  // const scepterOfSpectacleOrder = await createItem(
-  //   "Scepter of Spectacle: Order"
-  // );
-  // const scepterOfSpectacleAir = await createItem("Scepter of Spectacle: Air");
-  // const scepterOfSpectacleFrost = await createItem(
-  //   "Scepter of Spectacle: Frost"
-  // );
-  // const scepterOfSpectacleEarth = await createItem(
-  //   "Scepter of Spectacle: Earth"
-  // );
-  // const scepterOfSpectacleFire = await createItem("Scepter of Spectacle: Fire");
-  // const sophicAmalgamation = await createItem("Sophic Amalgamation");
+  const gracefulAvoidance = await createItem(
+    "Enchant Cloak - Graceful Avoidance",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a cloak to increase your Avoidance by 200/267/334 (based on quality) and reduce fall damage by 10%/15%/20% (based on quality.)"
+  );
+  const homeboundSpeed = await createItem(
+    "Enchant Cloak - Homebound Speed",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a cloak to increase your Speed by 200/267/334 (based on quality) and reduce the cooldown of your Hearthstone by 3/4/5 minutes (based on quality) while in the Dragon Isles."
+  );
+  const regenerativeLeech = await createItem(
+    "Enchant Cloak - Regenerative Leech",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a cloak to increase your Leech by 200/267/334 (based on quality) and heal for ?/10006/11674 (based on quality) every 5 sec while out of combat."
+  );
+  const writOfAvoidanceCloak = await createItem(
+    "Enchant Cloak - Writ of Avoidance",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a cloak to increase your Avoidance by 200/267/334 (based on quality.)"
+  );
+  const writOfLeechCloak = await createItem(
+    "Enchant Cloak - Writ of Leech",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a cloak to increase your Leech by 200/267/334 (based on quality.)"
+  );
+  const writOfSpeedCloak = await createItem(
+    "Enchant Cloak - Writ of Speed",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a cloak to increase your Speed by 200/267/334 (based on quality.)"
+  );
+  const acceleratedAgility = await createItem(
+    "Enchant Chest - Accelerated Agility",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a chestpiece to increase your Agility by 205/251/296 (based on quality) and Speed by 534/600/667 (based on quality.)"
+  );
+  const reserveOfIntellect = await createItem(
+    "Enchant Chest - Reserve of Intellect",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a chestpiece to increase your Intellect by 205/251/296 (based on quality) and mana pool by 3%/4%/5% (based on quality.)"
+  );
+  const sustainedStrength = await createItem(
+    "Enchant Chest - Sustained Strength",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a chestpiece to increase your Strength by 205/251/296 (based on quality) and Stamina by 248/302/335 (based on quality.)"
+  );
+  const wakingStats = await createItem(
+    "Enchant Chest - Waking Stats",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a chestpiece to increase your primary stats by 280/339/400 (based on quality.)"
+  );
+  const devotionOfAvoidance = await createItem(
+    "Enchant Bracer - Devotion of Avoidance",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants bracers to increase your Avoidance by 400/467/534 (based on quality.)"
+  );
+  const devotionOfLeech = await createItem(
+    "Enchant Bracer - Devotion of Leech",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants bracers to increase your Leech by 400/467/534 (based on quality.)"
+  );
+  const devotionOfSpeed = await createItem(
+    "Enchant Bracer - Devotion of Speed",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants bracers to increase your Speed by 400/467/534 (based on quality.)"
+  );
+  const writOfAvoidanceBracer = await createItem(
+    "Enchant Bracer - Writ of Avoidance",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants bracers to increase your Avoidance by 200/267/334 (based on quality.)"
+  );
+  const writOfLeechBracer = await createItem(
+    "Enchant Bracer - Writ of Leech",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants bracers to increase your Leech by 200/267/334 (based on quality.)"
+  );
+  const writOfSpeedBracer = await createItem(
+    "Enchant Bracer - Writ of Speed",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants bracers to increase your Speed by 200/267/334 (based on quality.)"
+  );
+  const plainsrunnersBreeze = await createItem(
+    "Enchant Boots - Plainsrunner's Breeze",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants boots to increase your Speed by 534/600/667 (based on quality.)"
+  );
+  const ridersReassurance = await createItem(
+    "Enchant Boots - Rider's Reassurance",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants boots to increase your mounted speed by 6%/8%/10% (based on quality.)"
+  );
+  const watchersLoam = await createItem(
+    "Enchant Boots - Watcher's Loam",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants boots to increase your Stamina by 374/454/534 (based on quality.)"
+  );
+  const devotionOfCriticalStrike = await createItem(
+    "Enchant Ring - Devotion of Critical Strike",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a ring to increase your Critical Strike by 171/195/219 (based on quality.)"
+  );
+  const devotionOfHaste = await createItem(
+    "Enchant Ring - Devotion of Haste",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a ring to increase your Haste by 171/195/219 (based on quality.)"
+  );
+  const devotionOfMastery = await createItem(
+    "Enchant Ring - Devotion of Mastery",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a ring to increase your Mastery by 171/195/219 (based on quality.)"
+  );
+  const devotionOfVersatility = await createItem(
+    "Enchant Ring - Devotion of Versatility",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a ring to increase your Versatility by 171/195/219 (based on quality.)"
+  );
+  const writOfCriticalStrike = await createItem(
+    "Enchant Ring - Writ of Critical Strike",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a ring to increase your Critical Strike by 93/120/147 (based on quality.)"
+  );
+  const writOfHaste = await createItem(
+    "Enchant Ring - Writ of Haste",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a ring to increase your Haste by 93/120/147 (based on quality.)"
+  );
+  const writOfMastery = await createItem(
+    "Enchant Ring - Writ of Mastery",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a ring to increase your Mastery by 93/120/147 (based on quality.)"
+  );
+  const writOfVersatility = await createItem(
+    "Enchant Ring - Writ of Versatility",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a ring to increase your Versatility by 93/120/147 (based on quality.)"
+  );
+  const burningDevotion = await createItem(
+    "Enchant Weapon - Burning Devotion",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Epic",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a weapon to sometimes ignite, causing your next heal to additionally cauterize an ally's wounds, healing for 16926/18535/20150 (based on quality.)"
+  );
+  const earthenDevotion = await createItem(
+    "Enchant Weapon - Earthen Devotion",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Epic",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a weapon to sometimes ground yourself, increasing your Armor by 1904/2084/2266 (based on quality) for 15 sec."
+  );
+  const frozenDevotion = await createItem(
+    "Enchant Weapon - Frozen Devotion",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Epic",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a weapon to sometimes radiate ice, dealing 9403/10298/11194 Frost damage (based on quality) split between enemies in front of you. Damagee is increased for each enemy struck, up to 5 enemies."
+  );
+  const sophicDevotion = await createItem(
+    "Enchant Weapon - Sophic Devotion",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Epic",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a weapon to sometimes harness Order, increasing your primary stat by 783/857/932 (based on quality) for 15 sec."
+  );
+  const waftingDevotion = await createItem(
+    "Enchant Weapon - Wafting Devotion",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Epic",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a weapon to sometimes sway the winds, increasing your Haste by 1465/1603/1743 (based on quality) and Speed by 466/511/555 (based on quality) for 15 sec."
+  );
+  const burningWrit = await createItem(
+    "Enchant Weapon - Burning Writ",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a weapon to sometimes incite flames, increasing your Critical Strike by 1185/1290/1394 (based on quality) for 15 sec."
+  );
+  const earthenWrit = await createItem(
+    "Enchant Weapon - Earthen Writ",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a weapon to sometimes rumble the earth, increasing your Mastery by 1185/1290/1394 (based on quality) for 15 sec."
+  );
+  const frozenWrit = await createItem(
+    "Enchant Weapon - Frozen Writ",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a weapon to sometimes chill your veins, increasing your Versatility by 1185/1290/1394 (based on quality) for 15 sec."
+  );
+  const sophicWrit = await createItem(
+    "Enchant Weapon - Sophic Writ",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a weapon to sometimes beckon Order, increasing your primary stat by 634/689/746 (based on quality) for 15 sec."
+  );
+  const waftingWrit = await createItem(
+    "Enchant Weapon - Wafting Writ",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a weapon to sometimes draw a breeze, increasing your Haste by 1185/1290/1394 (based on quality) for 15 sec."
+  );
+  const draconicDeftness = await createItem(
+    "Enchant Tool - Draconic Deftness",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a gathering tool to increase your Deftness by 64/85/107 (based on quality.)"
+  );
+  const draconicFinesse = await createItem(
+    "Enchant Tool - Draconic Finesse",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a gathering tool to increase your Finesse by 64/85/107 (based on quality.)"
+  );
+  const draconicInspiration = await createItem(
+    "Enchant Tool - Draconic Inspiration",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a crafting tool to increase your Inspiration by 64/85/107 (based on quality.)"
+  );
+  const draconicPerception = await createItem(
+    "Enchant Tool - Draconic Perception",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a gathering or fishing tool to increase your Perception by 64/85/107 (based on quality.)"
+  );
+  const draconicResourcefulness = await createItem(
+    "Enchant Tool - Draconic Resourcefulness",
+    "ui_profession_enchanting",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Permanently enchants a crafting or cooking tool to increase your Resourcefulness by 72/96/120 (based on quality.)"
+  );
+  const torchOfPrimalAwakening = await createItem(
+    "Torch of Primal Awakening",
+    "inv_wand_1h_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Wand",
+    "Ranged",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("1h-int")],
+    [
+      secondaryStatArrayEpic("stamina", "1h"),
+      secondaryStatArrayEpic("Random Stat 1", "1h"),
+      secondaryStatArrayEpic("Random Stat 2", "1h"),
+    ]
+  );
+  const runedKhazgoriteRod = await createItem(
+    "Runed Khaz'gorite Rod",
+    "inv_misc_1h_enchantingrod_b_01",
+    "Pickup",
+    1,
+    "Serves as a runed enchanting rod.",
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    null,
+    "Enchanting Tool",
+    null,
+    [346, 352, 358, 365, 372],
+    statArrayProfToolAccessory("Skill", "Tool", "large"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "large")]
+  );
+  const runedDraconiumRod = await createItem(
+    "Runed Draconium Rod",
+    "inv_misc_1h_enchantingrod_b_01",
+    "Equip",
+    1,
+    "Serves as a runed enchanting rod.",
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    null,
+    "Enchanting Tool",
+    null,
+    [320, 326, 332, 339, 342],
+    statArrayProfToolAccessory("Skill", "Tool", "medium"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "medium")]
+  );
+  const enchantedWrithebarkWand = await createItem(
+    "Enchanted Writhebark Wand",
+    "inv_wand_1h_kultirasquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Wand",
+    "Ranged",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("1h-int")],
+    [
+      secondaryStatArrayRare("stamina", "1h"),
+      secondaryStatArrayRare("Random Stat 1", "1h"),
+      secondaryStatArrayRare("Random Stat 2", "1h"),
+    ]
+  );
+  const runedSereviteRod = await createItem(
+    "Runed Serevite Rod",
+    "inv_misc_enchantedpyriumrod",
+    "Equip",
+    1,
+    "Serves as a runed enchanting rod.",
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    null,
+    "Enchanting Tool",
+    null,
+    [270, 276, 282, 289, 296],
+    statArrayProfToolAccessory("Skill", "Tool", "small"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "small")]
+  );
+  const illusionPrimalAir = await createItem(
+    "Illusion: Primal Air",
+    "inv_inscription_weaponscroll03",
+    null,
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Collect the weapon enchantment appearance of Primal Air."
+  );
+  const illusionPrimalEarth = await createItem(
+    "Illusion: Primal Earth",
+    "inv_inscription_weaponscroll03",
+    null,
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Collect the weapon enchantment appearance of Primal Earth."
+  );
+  const illusionPrimalFire = await createItem(
+    "Illusion: Primal Fire",
+    "inv_inscription_weaponscroll03",
+    null,
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Collect the weapon enchantment appearance of Primal Fire."
+  );
+  const illusionPrimalFrost = await createItem(
+    "Illusion: Primal Frost",
+    "inv_inscription_weaponscroll03",
+    null,
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Collect the weapon enchantment appearance of Primal Frost."
+  );
+  const illusionPrimalMastery = await createItem(
+    "Illusion: Primal Mastery",
+    "inv_inscription_weaponscroll03",
+    null,
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    1,
+    null,
+    null,
+    "Collect the weapon enchantment appearance of Primal Mastery."
+  );
+  const primalInvocationExtract = await createItem(
+    "Primal Invocation Extract",
+    "inv_10_enchanting2_elementalswirl_color1",
+    null,
+    1,
+    null,
+    "Received from 'Primal Extraction - Glimmers of Insight' - guessing this is a proc after getting Primal Extraction (specialization) 30?",
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Perform an elemental invocation, transforming into the elemental summoned for 10/15/20 min (based on quality). (1 Hr Cooldown)"
+  );
+  const khadgarsDisenchantingRod = await createItem(
+    "Khadgar's Disenchanting Rod",
+    "inv_enchanting_70_toy_leyshocker",
+    null,
+    1,
+    "I'm trying something new!",
+    "I really want to try this out lmao",
+    "Rare",
+    "Toy",
+    1,
+    null,
+    null,
+    "Adds this toy to your Toy Box. Disenchant a player. (5 Min Cooldown)"
+  );
+  const illusoryAdornmentOrder = await createItem(
+    "Illusory Adornment: Order",
+    "inv_10_enchanting_enchantingoils_color2",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Temporarily imbues shoulders with an illusion of Order for 1200/2400/3600 (based on quality... but what do these numbers mean??)"
+  );
+  const illusoryAdornmentAir = await createItem(
+    "Illusory Adornment: Air",
+    "inv_10_enchanting_enchantingoils_color4",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Temporarily imbues shoulders with a windswept illusion for 1200/2400/3600 (based on quality... but what do these numbers mean??)"
+  );
+  const illusoryAdornmentEarth = await createItem(
+    "Illusory Adornment: Earth",
+    "inv_10_enchanting_enchantingoils_color5",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Temporarily imbues shoulders with an earthen illusion for 1200/2400/3600 (based on quality... but what do these numbers mean??)"
+  );
+  const illusoryAdornmentFire = await createItem(
+    "Illusory Adornment: Fire",
+    "inv_10_enchanting_enchantingoils_color1",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Temporarily imbues shoulders with a fiery illusion for 1200/2400/3600 (based on quality... but what do these numbers mean??)"
+  );
+  const illusoryAdornmentFrost = await createItem(
+    "Illusory Adornment: Frost",
+    "inv_10_enchanting_enchantingoils_color4",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Temporarily imbues shoulders with a frosted illusion for 1200/2400/3600 (based on quality... but what do these numbers mean??)"
+  );
+  const scepterOfSpectacleOrder = await createItem(
+    "Scepter of Spectacle: Order",
+    "inv_wand_32",
+    null,
+    1,
+    "50 Charges",
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Wave the scepter, projecting an illusory orb of Order in front of you.",
+    null,
+    "Main Hand",
+    null,
+    [5, 5, 5, 5, 5]
+  );
+  const scepterOfSpectacleAir = await createItem(
+    "Scepter of Spectacle: Air",
+    "inv_wand_04",
+    null,
+    1,
+    "50 Charges",
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Wave the scepter, projecting an illusory orb of air in front of you.",
+    null,
+    "Main Hand",
+    null,
+    [5, 5, 5, 5, 5]
+  );
+  const scepterOfSpectacleFrost = await createItem(
+    "Scepter of Spectacle: Frost",
+    "inv_wand_05",
+    null,
+    1,
+    "50 Charges",
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Wave the scepter, projecting an illusory orb of frost in front of you.",
+    null,
+    "Main Hand",
+    null,
+    [5, 5, 5, 5, 5]
+  );
+  const scepterOfSpectacleEarth = await createItem(
+    "Scepter of Spectacle: Earth",
+    "inv_wand_1h_warfrontshorde_c_01",
+    null,
+    1,
+    "50 Charges",
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Wave the scepter, projecting an illusory orb of earth in front of you.",
+    null,
+    "Main Hand",
+    null,
+    [5, 5, 5, 5, 5]
+  );
+  const scepterOfSpectacleFire = await createItem(
+    "Scepter of Spectacle: Fire",
+    "inv_wand_06",
+    null,
+    1,
+    "50 Charges",
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Wave the scepter, projecting an illusory orb of fire in front of you.",
+    null,
+    "Main Hand",
+    null,
+    [5, 5, 5, 5, 5]
+  );
+  const sophicAmalgamation = await createItem(
+    "Sophic Amalgamation",
+    "inv_10_elementalcombinedfoozles_titan",
+    null,
+    1,
+    null,
+    null,
+    "Rare",
+    "Pet",
+    1,
+    null,
+    null,
+    "Teaches you how to summon this companion."
+  );
+
+  const elementalShatterAir = await createItem(
+    "Elemental Shatter: Air",
+    "inv_10_elementalcombinedfoozles_air",
+    "Pickup",
+    1,
+    "The shattered essence envelops you, increasing your Haste by 281 for 10 min.",
+    "I'm assuming this is not actually an item, but instead a buff from Elemental Shatter w/ Awakened Air."
+  );
+
+  const elementalShatterEarth = await createItem(
+    "Elemental Shatter: Earth",
+    "inv_10_elementalcombinedfoozles_earth",
+    "Pickup",
+    1,
+    "The shattered essence envelops you, increasing your Mastery by 281 for 10 min.",
+    "I'm assuming this is not actually an item, but instead a buff from Elemental Shatter w/ Awakened Earth."
+  );
+
+  const elementalShatterFire = await createItem(
+    "Elemental Shatter: Fire",
+    "inv_10_elementalcombinedfoozles_fire",
+    "Pickup",
+    1,
+    "The shattered essence envelops you, increasing your Critical Strike by 281 for 10 min.",
+    "I'm assuming this is not actually an item, but instead a buff from Elemental Shatter w/ Awakened Fire."
+  );
+
+  const elementalShatterFrost = await createItem(
+    "Elemental Shatter: Frost",
+    "inv_10_elementalcombinedfoozles_frost",
+    "Pickup",
+    1,
+    "The shattered essence envelops you, increasing your Versatility by 281 for 10 min.",
+    "I'm assuming this is not actually an item, but instead a buff from Elemental Shatter w/ Awakened Frost."
+  );
+
+  const elementalShatterOrder = await createItem(
+    "Elemental Shatter: Order",
+    "inv_10_elementalcombinedfoozles_titan",
+    "Pickup",
+    1,
+    "The shattered essence envelops you, increasing your primary stat by 211 for 10 min.",
+    "I'm assuming this is not actually an item, but instead a buff from Elemental Shatter w/ Awakened Order."
+  );
+
+  //guess this doesn't exist anymore?
   // const crystalMagicalLockpick = await createItem(
   //   "Crystal Magical Lockpick",
   //   1000
   // );
 
   // //alchemy items
-  // const dragonsAlchemicalSolution = await createItem(
-  //   "Dragon's Alchemical Solution",
-  //   1000
-  // );
-  // const residualNeuralChannelingAgent = await createItem(
-  //   "Residual Neural Channeling Agent",
-  //   1000
-  // );
-  // const bottledPutrescence = await createItem("Bottled Putrescence", 1000);
+  const dragonsAlchemicalSolution = await createItem(
+    "Dragon's Alchemical Solution",
+    "inv_10_alchemy2_quenchingfluid_color1",
+    "Pickup",
+    1000,
+    "Acquired as a byproduct from reclaiming excess concoctions.",
+    "Item used in Potion/Phial Experimentation - how you're going to get a bulk of your Potion & Phial recipes.",
+    "Rare",
+    "Crafting Reagent"
+  );
+  const residualNeuralChannelingAgent = await createItem(
+    "Residual Neural Channeling Agent",
+    "inv_10_alchemy_bottle_shape1_yellow",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "While dead, assault your enemy's consciousness with what remains of your own, dealing 82405/96050/111,935 Nature damage (based on quality) over 18 sec to your target. Should you be revived, the remaining damage will be dealt instantly. Releasing your spirit will return your consciousness to you and cancel the effect. Shares a cooldown with combat potions. (5 Min Cooldown)"
+  );
+  const bottledPutrescence = await createItem(
+    "Bottled Putrescence",
+    "inv_10_alchemy_bottle_shape1_black",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Throw to spread rot and decay, dealing 70199/81822/95354 Nature damage (based on quality) to enemies over 10 sec. Shares a cooldown with combat potions. (5 Min Cooldown)"
+  );
   const potionOfGusts = await createItem(
     "Potion of Gusts",
     "inv_10_alchemy_bottle_shape1_green",
@@ -4828,10 +5854,20 @@ const makeTables = async () => {
     null,
     "Drink to be propelled forward a short distance, momentarily weightless. (5 Min Cooldown)"
   );
-  // const potionOfShockingDisclosure = await createItem(
-  //   "Potion of Shocking Disclosure",
-  //   1000
-  // );
+  const potionOfShockingDisclosure = await createItem(
+    "Potion of Shocking Disclosure",
+    "inv_10_alchemy_bottle_shape1_violet",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Envelops you in a field of static for 30 sec, discharging every 5 sec to deal 6685/7793/9081 damage (based on quality) and reveal nearby enemies. Enemies struck by this effect are unable to enter stealth or invisibility for 6 sec. (5 Min Cooldown)"
+  );
   const potionOfTheHushedZephyr = await createItem(
     "Potion of the Hushed Zephyr",
     "inv_10_alchemy_bottle_shape1_white",
@@ -4846,24 +5882,90 @@ const makeTables = async () => {
     null,
     "Drink to gain invisibility for 12/15/18 seconds (based on quality). (5 Min Cooldown)"
   );
-  // const aeratedManaPotion = await createItem("Aerated Mana Potion", 1000);
-  // const potionOfChilledClarity = await createItem(
-  //   "Potion of Chilled Clarity",
-  //   1000
-  // );
-  // const delicateSuspensionOfSpores = await createItem(
-  //   "Delicate Suspension of Spores",
-  //   1000
-  // );
-  // const potionOfFrozenFocus = await createItem("Potion of Frozen Focus", 1000);
-  // const potionOfWitheringVitality = await createItem(
-  //   "Potion of Withering Vitality",
-  //   1000
-  // );
-  // const potionOfFrozenFatality = await createItem(
-  //   "Potion of Frozen Fatality",
-  //   1000
-  // );
+  const aeratedManaPotion = await createItem(
+    "Aerated Mana Potion",
+    "inv_10_alchemy_bottle_shape1_blue",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Restores 20869/24000/27600 mana. (5 Min Cooldown)"
+  );
+  const potionOfChilledClarity = await createItem(
+    "Potion of Chilled Clarity",
+    "inv_10_alchemy_bottle_shape4_green",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    "Toxic",
+    3,
+    null,
+    null,
+    "Reduces the mana cost of all spells by 100% but also increases cast time by 40% for 15/12/9 seconds (based on quality). (5 Min Cooldown)"
+  );
+  const delicateSuspensionOfSpores = await createItem(
+    "Delicate Suspension of Spores",
+    "inv_10_alchemy_bottle_shape4_yellow",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Use upon a fallen ally within 10 yds to spread restorative spores nearby for 12 sec. These spores cling to allies and heal them for 27486/31609/36351 (based on quality) over 6 sec. Usable on yourself while dead. Shares a cooldown with combat potions. (5 Min Cooldown)"
+  );
+  const potionOfFrozenFocus = await createItem(
+    "Potion of Frozen Focus",
+    "inv_10_alchemy_bottle_shape4_blue",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Drink to chill your body but elevate your focus, allowing you to restore 36521/42000/48300 mana (based on quality) over 10 sec, but you are defenseless until your focus is broken. (5 Min Cooldown)"
+  );
+  const potionOfWitheringVitality = await createItem(
+    "Potion of Withering Vitality",
+    "inv_10_alchemy_bottle_shape4_orange",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    "Toxic",
+    3,
+    null,
+    null,
+    "Consume this vile concoction to instantly heal yourself for 137,347/160,090/186,565 (based on quality), but suffer that same amount as Plague damage over 15 sec. (5 Min Cooldown)"
+  );
+  const potionOfFrozenFatality = await createItem(
+    "Potion of Frozen Fatality",
+    "inv_10_alchemy_bottle_shape4_black",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Drink to collapse to the ground, frozen in a state of near-death for 5/15/30 min (based on quality), tricking enemies into ignoring you. Cannot be used while in combat. (2 Min Cooldown)"
+  );
   const refreshingHealingPotion = await createItem(
     "Refreshing Healing Potion",
     "inv_10_alchemy_bottle_shape4_red",
@@ -4878,115 +5980,454 @@ const makeTables = async () => {
     null,
     "Restores 68650/80950/93250 health (based on quality). (5 Min Cooldown)"
   );
-  // const potionCauldronOfUltimatePower = await createItem(
-  //   "Potion Cauldron of Ultimate Power",
-  //   1000
-  // );
-  // const potionCauldronOfPower = await createItem(
-  //   "Potion Cauldron of Power",
-  //   1000
-  // );
-  // const cauldronOfThePooka = await createItem("Cauldron of the Pooka", 1000);
-  // const elementalPotionOfUltimatePower = await createItem(
-  //   "Elemental Potion of Ultimate Power",
-  //   1000
-  // );
-  // const elementalPotionOfPower = await createItem(
-  //   "Elemental Potion of Power",
-  //   1000
-  // );
-  // const phialOfElementalChaos = await createItem(
-  //   "Phial of Elemental Chaos",
-  //   1000
-  // );
-  // const phialOfChargedIsolation = await createItem(
-  //   "Phial of Charged Isolation",
-  //   1000
-  // );
-  // const phialOfStaticEmpowerment = await createItem(
-  //   "Phial of Static Empowerment",
-  //   1000
-  // );
-  // const phialOfStillAir = await createItem("Phial of Still Air", 1000);
-  // const phialOfTheEyeInTheStorm = await createItem(
-  //   "Phial of the Eye in the Storm",
-  //   1000
-  // );
-  // const aeratedPhialOfDeftness = await createItem(
-  //   "Aerated Phial of Deftness",
-  //   1000
-  // );
-  // const chargedPhialOfAlacrity = await createItem(
-  //   "Charged Phial of Alacrity",
-  //   1000
-  // );
-  // const aeratedPhialOfQuickHands = await createItem(
-  //   "Aerated Phial of Quick Hands",
-  //   1000
-  // );
-  // const phialOfIcyPreservation = await createItem(
-  //   "Phial of Icy Preservation",
-  //   1000
-  // );
-  // const icedPhialOfCorruptingRage = await createItem(
-  //   "Iced Phial of Corrupting Rage",
-  //   1000
-  // );
-  // const phialOfGlacialFury = await createItem("Phial of Glacial Fury", 1000);
-  // const steamingPhialOfFinesse = await createItem(
-  //   "Steaming Phial of Finesse",
-  //   1000
-  // );
-  // const crystallinePhialOfPerception = await createItem(
-  //   "Crystalline Phial of Perception",
-  //   1000
-  // );
-  // const phialOfTepidVersatility = await createItem(
-  //   "Phial of Tepid Versatility",
-  //   1000
-  // );
-  // //next 2 aren't really items
+  const potionCauldronOfUltimatePower = await createItem(
+    "Potion Cauldron of Ultimate Power",
+    "inv_misc_cauldron_shadow",
+    "Account",
+    200,
+    null,
+    "The strongest cauldron available. Requires everyone to pitch in Primal Chaos.",
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Creates a cauldron that raid members can use to exchange 5 Primal Chaos for 5 Fleeting Elemental Potions of Ultimate Power. When consumed, their primary stat is increased by 669/770/886 (based on quality) for 30 sec. The cauldron lasts for 20 min. (3 Min Cooldown)"
+  );
+  const potionCauldronOfPower = await createItem(
+    "Potion Cauldron of Power",
+    "inv_misc_cauldron_frost",
+    "Account",
+    200,
+    null,
+    "The less strong cauldron available. But you don't need to give up your own materials!",
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Creates a cauldron that raid members can use to acquire Fleeting Elemental Potions of Power. When consumed, their primary stat is increased by 502/577/664 (based on quality) for 30 sec. Cauldron has 120 uses and each provides 5 potions. The cauldron lasts for 20 min. (3 Min Cooldown)"
+  );
+  const cauldronOfThePooka = await createItem(
+    "Cauldron of the Pooka",
+    "archaeology_5_0_pandarenteaset",
+    "Account",
+    200,
+    null,
+    "The meme cauldron.",
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Set out a Cauldron of the Pooka for 3 min. Allies can take a sample of the suspiciously fuzzy liquid as a refreshing drink to restore 60/70/80% mana (based on quality) over 25 sec. Each sip has a chance to transform them into a cute and cuddly creature! (3 Min Cooldown)"
+  );
+  const elementalPotionOfUltimatePower = await createItem(
+    "Elemental Potion of Ultimate Power",
+    "trade_alchemy_dpotion_b20",
+    "Pickup",
+    200,
+    null,
+    "Strongest pure-stat potion available.",
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Drink to increase your primary stat by 669/770/886 (based on quality) for 30 sec. (5 Min Cooldown)"
+  );
+  const elementalPotionOfPower = await createItem(
+    "Elemental Potion of Power",
+    "trade_alchemy_dpotion_b10",
+    null,
+    200,
+    null,
+    "The less strong pure-stat potion. But it's not BoP!",
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Drink to increase your primary stat by 502/577/664 (based on quality) for 30 sec. (5 Min Cooldown)"
+  );
+  const phialOfElementalChaos = await createItem(
+    "Phial of Elemental Chaos",
+    "inv_10_alchemy_bottle_shape2_orange",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Infuse yourself with the power of the elements, granting you a random elemental boon that changes every 60 sec. Each boon increases a secondary stat by 552/602/652 (based on quality) and grants a bonus effect. Lasts 30 min and through death. Consuming an identical phial will add another 30 min. (1 Sec Cooldown)"
+  );
+  const phialOfChargedIsolation = await createItem(
+    "Phial of Charged Isolation",
+    "inv_10_alchemy_bottle_shape3_white",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Your Primary Stat is increased by 452/520/598 (based on quality) while at least 10 yds from allies. You will retain 75% of this stat for 2.5 sec after being near an ally. Lasts 30 min and through death. Consuming an identical phial will add another 30 min. (1 Sec Cooldown)"
+  );
+  const phialOfStaticEmpowerment = await createItem(
+    "Phial of Static Empowerment",
+    "inv_10_alchemy_bottle_shape3_violet",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Remaining stationary will increase your Primary Stat up to 471/541/623 (based on quality) over 5 sec. Movement consumes the effect, granting up to 629/686/743 Speed (based on quality) for 5 sec. Lasts 30 min and through death. Consuming an identical phial will add another 30 min. (1 Sec Cooldown)"
+  );
+  const phialOfStillAir = await createItem(
+    "Phial of Still Air",
+    "inv_10_alchemy_bottle_shape3_green",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "After performing actions other than healing for 5 seconds, your next heal triggers a Surging Breeze on the target which heals them for 10450/12181/14195 (based on quality). Lasts 30 min and through death. Consuming an identical phial will add another 30 min. (1 Sec Cooldown)"
+  );
+  const phialOfTheEyeInTheStorm = await createItem(
+    "Phial of the Eye in the Storm",
+    "inv_10_alchemy_bottle_shape3_blue",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Your Primary Stat is increased by 113/130/150 (based on quality) for each enemy that has recently struck you, stacking up to 5 times. Lasts 30 min and through death. Consuming an identical phial will add another 30 min. (1 Sec Cooldown)"
+  );
+  const aeratedPhialOfDeftness = await createItem(
+    "Aerated Phial of Deftness",
+    "inv_10_alchemy_bottle_shape3_orange",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Increases your Deftness by 30/40/50 (based on quality). Lasts 30 min and through death. Consuming an identical phial will add another 30 min. (1 Sec Cooldown)"
+  );
+  const chargedPhialOfAlacrity = await createItem(
+    "Charged Phial of Alacrity",
+    "inv_10_alchemy_bottle_shape3_yellow",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Increases your Speed by 629/686/743 (based on quality). Lasts 30 min and through death. Consuming an identical phial will add another 30 min. (1 Sec Cooldown)"
+  );
+  const aeratedPhialOfQuickHands = await createItem(
+    "Aerated Phial of Quick Hands",
+    "inv_10_alchemy_bottle_shape3_red",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Increases the speed you craft Dragon Isles recipes by 18%/24%/30% (based on quality). Lasts 30 min and through death. Consuming an identical phial will add another 30 min. (1 Sec Cooldown)"
+  );
+  const phialOfIcyPreservation = await createItem(
+    "Phial of Icy Preservation",
+    "inv_10_alchemy_bottle_shape2_blue",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    "Toxic",
+    3,
+    null,
+    null,
+    "Damage taken is decreased by 4%/5%/6% (based on quality) while over 50% health, but increased by 4%/5%/6% (based on quality) while under 50% health. Lasts 30 min and through death. Consuming an identical phial will add another 30 min. (1 Sec Cooldown)"
+  );
+  const icedPhialOfCorruptingRage = await createItem(
+    "Iced Phial of Corrupting Rage",
+    "inv_10_alchemy_bottle_shape2_red",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    "Toxic",
+    3,
+    null,
+    null,
+    "Gain Corrupting Rage which grants 947/1032/1118 Critical Strike rating (based on quality). After suffering 100% of your health in damage, you are afflicted with Overwhelming Rage instead which causes you to take 25% of your health as Nature damage over 15 sec, after which the cycle begins anew. Lasts 30 min and through death. Consuming an identical phial will add another 30 min. (1 Sec Cooldown)"
+  );
+  const phialOfGlacialFury = await createItem(
+    "Phial of Glacial Fury",
+    "inv_10_alchemy_bottle_shape2_blue",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Whenever you first attack a target, gain a stack of Glacial Fury for 15 sec, up to 5 stacks. Dealing damage has a chance to unleash a blast of 4727/5509/6420 Frost damage (based on quality) upon the target which is split among nearby enemies. This effect is increased by 15% per stack. Lasts 30 min and through death. Consuming an identical phial will add another 30 min. (1 Sec Cooldown)"
+  );
+  const steamingPhialOfFinesse = await createItem(
+    "Steaming Phial of Finesse",
+    "inv_10_alchemy_bottle_shape2_violet",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Increases your Finesse by 30/40/50 (based on quality). Lasts 30 min and through death. Consuming an identical phial will add another 30 min. (1 Sec Cooldown)"
+  );
+  const crystallinePhialOfPerception = await createItem(
+    "Crystalline Phial of Perception",
+    "inv_10_alchemy_bottle_shape2_yellow",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Increases your Perception by 30/40/50 (based on quality). Lasts 30 min and through death. Consuming an identical phial will add another 30 min. (1 Sec Cooldown)"
+  );
+  const phialOfTepidVersatility = await createItem(
+    "Phial of Tepid Versatility",
+    "inv_10_alchemy_bottle_shape2_black",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Increases your Versatility by 631/688/745 (based on quality). Lasts 30 min and through death. Consuming an identical phial will add another 30 min. (1 Sec Cooldown)"
+  );
+  //next 2 aren't really items
   // const transmuteDecayToElements = await createItem(
   //   "Transmute: Decay to Elements"
   // );
   // const transmuteOrderToElements = await createItem(
   //   "Transmute: Order to Elements"
   // );
-  // //back to actual items
-  // const potionAbsorptionInhibitor = await createItem(
-  //   "Potion Absorption Inhibitor",
-  //   1000
-  // );
-  // const writhefireOil = await createItem("Writhefire Oil", 1000);
-  // const broodSalt = await createItem("Brood Salt", 1000);
-  // const stableFluidicDraconium = await createItem(
-  //   "Stable Fluidic Draconium",
-  //   1000
-  // );
-  // const agitatingPotionAugmentation = await createItem(
-  //   "Agitating Potion Augmentation",
-  //   1000
-  // );
-  // const reactivePhialEmbellishment = await createItem(
-  //   "Reactive Phial Embellishment",
-  //   1000
-  // );
-  // const sagaciousIncense = await createItem("Sagacious Incense", 1000);
-  // const exultantIncense = await createItem("Exultant Incense", 1000);
-  // const fervidIncense = await createItem("Fervid Incense", 1000);
-  // const somniferousIncense = await createItem("Somniferous Incense", 1000);
-  // const alacritousAlchemistStone = await createItem(
-  //   "Alacritous Alchemist Stone",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const sustainingAlchemistStone = await createItem(
-  //   "Sustaining Alchemist Stone",
-  //   1,
-  //   382,
-  //   392
-  // );
+  //back to actual items
+  const potionAbsorptionInhibitor = await createItem(
+    "Potion Absorption Inhibitor",
+    "inv_misc_food_legion_gooamber_drop",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Optional Crafting Reagent",
+    3,
+    "Embellishment",
+    "+35/30/25 Recipe Difficulty (based on quality). Provides the following property: Increase the duration of Dragon Isles potions by 50% and add Unique-Equipped: Embellished (2)."
+  );
+  const writhefireOil = await createItem(
+    "Writhefire Oil",
+    "inv_10_alchemy_engineersgrease_color4",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Finishing Crafting Reagent",
+    3,
+    "Chain Oil",
+    "When crafting: You are 9%/12%/15% (based on difficulty) more likely to improve at your profession, but Recipe Difficulty is increased by 18/24/30 (based on quality.)"
+  );
+  const broodSalt = await createItem(
+    "Brood Salt",
+    "inv_10_alchemy_curingagent_color4",
+    null,
+    200,
+    null,
+    "Is both a Curing Agent & Alchemical Catalyst??",
+    "Uncommon",
+    "Finishing Crafting Reagent",
+    3,
+    "Curing Agent",
+    "When crafting: Increases Inspiration by 30/40/50 (based on quality) and Crafting Speed by 12/16/20% (based on quality.)"
+  );
+  const stableFluidicDraconium = await createItem(
+    "Stable Fluidic Draconium",
+    "inv_10_alchemy_curingagent_color2",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Finishing Crafting Reagent",
+    3,
+    "Chain Oil",
+    "When crafting: Increases bonus Skill from Inspiration by 15%/20%/25% (based on quality)."
+  );
+  const agitatingPotionAugmentation = await createItem(
+    "Agitating Potion Augmentation",
+    "inv_10_alchemy2_catalyst_color1",
+    null,
+    200,
+    null,
+    "Only usable on Potions.",
+    "Uncommon",
+    "Finishing Crafting Reagent",
+    3,
+    "Alchemical Catalyst",
+    "When crafting: Increases Inspiration by 30/36/45 (based on quality) and Multicraft by 27/36/45 (based on quality.)"
+  );
+  const reactivePhialEmbellishment = await createItem(
+    "Reactive Phial Embellishment",
+    "inv_10_alchemy2_expensivepurchasablereagent_color3",
+    null,
+    200,
+    null,
+    "Only usable on Phials.",
+    "Uncommon",
+    "Finishing Crafting Reagent",
+    3,
+    "Alchemical Catalyst",
+    "When crafting: Increases Inspiration by 30/36/45 (based on quality) and Multicraft by 27/36/45 (based on quality.)"
+  );
+  const sagaciousIncense = await createItem(
+    "Sagacious Incense",
+    "inv_10_alchemy_incenseholder_color4",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Place down a pleasant incense that soothes the mind of everyone nearby, granting 20 Inspiration for 10/20/30 minutes (based on quality). (30 Sec Cooldown)"
+  );
+  const exultantIncense = await createItem(
+    "Exultant Incense",
+    "inv_10_alchemy_incenseholder_color1",
+    null,
+    200,
+    null,
+    "A Quality 3 one of these is used in a quest chain to get the Divine Kiss of Ohn'ahra mount.",
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Light a celebratory incense sure to invigorate everyone's mood. The incense will burn for 1/3/8 min (based on quality). (1/3/8 Min Cooldown)"
+  );
+  const fervidIncense = await createItem(
+    "Fervid Incense",
+    "inv_10_alchemy_incenseholder_color3",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Light an agitating incense sure to incite intense emotions. The incense will burn for 1/3/8 min (based on quality). (1/3/8 Min Cooldown)"
+  );
+  const somniferousIncense = await createItem(
+    "Somniferous Incense",
+    "inv_10_alchemy_incenseholder_color2",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Light a soothing incense intended to induce a peaceful slumber. The incense will burn for 1/3/8 min (based on quality). (1/3/8 Min Cooldown)"
+  );
+  const alacritousAlchemistStone = await createItem(
+    "Alacritous Alchemist Stone",
+    "inv_10_alchemy_alchemystone_color1",
+    "Pickup",
+    1,
+    "Can be used for transmutations in place of a Philosopher's Stone.",
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Your spells and abilities have a chance to increase your Primary Stat by 573/?/?/824/957 (based on quality) for 10 sec and reduce the cooldown of your combat potions by 10 sec.",
+    null,
+    null,
+    "Trinket",
+    "Alchemist Stone (1)",
+    [382, 384, 386, 389, 392],
+    null,
+    [["Haste", 360, "?", 458, 466, 510]]
+  );
+  const sustainingAlchemistStone = await createItem(
+    "Sustaining Alchemist Stone",
+    "inv_10_alchemy_alchemystone_color1",
+    "Pickup",
+    1,
+    "Can be used for transmutations in place of a Philosopher's Stone.",
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Your spells and abilities have a chance to increase your Primary Stat by 687/?/960/988/? (based on quality) for 10 sec and extend the duration of your active phial by 60 sec.",
+    null,
+    null,
+    "Trinket",
+    "Alchemist Stone (1)",
+    [382, 384, 386, 389, 392],
+    null,
+    [["Versatility", 360, "?", 458, 466, 510]]
+  );
 
   // //inscription items
   // // const dragonIslesMilling = await(createItem("Dragon Isles Milling")); //not a real item
@@ -4999,7 +6440,17 @@ const makeTables = async () => {
   // const blazingInk = await createItem("Blazing Ink", 1000);
   // const flourishingInk = await createItem("Flourishing Ink", 1000);
   // const sereneInk = await createItem("Serene Ink", 1000);
-  // const runedWrithebark = await createItem("Runed Writhebark", 1000);
+  const runedWrithebark = await createItem(
+    "Runed Writhebark",
+    "inv_10_inscription_runedwrithebark_color1",
+    null,
+    1000,
+    "A sturdy piece of Writhebark fastened with a frosted rune. Crafted by players with the Inscription skill. Can be bought and sold on the auction house.",
+    null,
+    "Rare",
+    "Crafting Reagent",
+    3
+  );
   // const chilledRune = await createItem("Chilled Rune", 1000);
   // const draconicMissiveOfTheAurora = await createItem(
   //   "Draconic Missive of the Aurora",
@@ -5499,7 +6950,17 @@ const makeTables = async () => {
     "Crafting Reagent",
     3
   );
-  // const glossyStone = await createItem("Glossy Stone", 1000);
+  const glossyStone = await createItem(
+    "Glossy Stone",
+    "inv_stone_sharpeningstone_05",
+    null,
+    1000,
+    "A basic reagent that Jewelcrafters make. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent",
+    3
+  );
   // const shimmeringClasp = await createItem("Shimmering Clasp", 1000);
   // const energizedVibrantEmerald = await createItem(
   //   "Energized Vibrant Emerald",
@@ -5716,400 +7177,1856 @@ const makeTables = async () => {
     "Crafting Reagent",
     3
   );
-  // const infuriousAlloy = await createItem("Infurious Alloy", 1000);
-  // const primalMoltenAlloy = await createItem("Primal Molten Alloy", 1000);
-  // const armorSpikes = await createItem("Armor Spikes", 1000);
-  // const alliedChestplateOfGenerosity = await createItem(
-  //   "Allied Chestplate of Generosity",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const alliedWristguardOfCompanionship = await createItem(
-  //   "Allied Wristguard of Companionship",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const frostfireLegguardsOfPreparation = await createItem(
-  //   "Frostfire Legguards of Preparation",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // //next two items need pvp ilvl
-  // const infuriousHelmOfVengeance = await createItem(
-  //   "Infurious Helm of Vengeance",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const infuriousWarbootsOfImpunity = await createItem(
-  //   "Infurious Warboots of Impunity",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const primalMoltenBreastplate = await createItem(
-  //   "Primal Molten Breastplate",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const primalMoltenGauntlets = await createItem(
-  //   "Primal Molten Gauntlets",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const primalMoltenGreatbelt = await createItem(
-  //   "Primal Molten Greatbelt",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const primalMoltenHelm = await createItem("Primal Molten Helm", 1, 382, 392);
-  // const primalMoltenLegplates = await createItem(
-  //   "Primal Molten Legplates",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const primalMoltenPauldrons = await createItem(
-  //   "Primal Molten Pauldrons",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const primalMoltenSabatons = await createItem(
-  //   "Primal Molten Sabatons",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const primalMoltenVambraces = await createItem(
-  //   "Primal Molten Vambraces",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const unstableFrostfireBelt = await createItem(
-  //   "Unstable Frostfire Belt",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const explorersExpertHelm = await createItem(
-  //   "Explorer's Expert Helm",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const explorersExpertSpaulders = await createItem(
-  //   "Explorer's Expert Spaulders",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const explorersExpertGauntlets = await createItem(
-  //   "Explorer's Expert Gauntlets",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const explorersExpertGreaves = await createItem(
-  //   "Explorer's Expert Greaves",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const explorersExpertClasp = await createItem(
-  //   "Explorer's Expert Clasp",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const explorersPlateChestguard = await createItem(
-  //   "Explorer's Plate Chestguard",
-  //   1,
-  //   306,
-  //   316
-  // );
-  // const explorersPlateBoots = await createItem(
-  //   "Explorer's Plate Boots",
-  //   1,
-  //   306,
-  //   316
-  // );
-  // const explorersPlateBracers = await createItem(
-  //   "Explorer's Plate Bracers",
-  //   1,
-  //   306,
-  //   316
-  // );
-  // //all of the next bunch need pvp ilvls
-  // const crimsonCombatantsDraconiumArmguards = await createItem(
-  //   "Crimson Combatant's Draconium Armguards",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsDraconiumBreastplate = await createItem(
-  //   "Crimson Combatant's Draconium Breastplate",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsDraconiumGauntlets = await createItem(
-  //   "Crimson Combatant's Draconium Gauntlets",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsDraconiumGreaves = await createItem(
-  //   "Crimson Combatant's Draconium Greaves",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsDraconiumHelm = await createItem(
-  //   "Crimson Combatant's Draconium Helm",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsDraconiumPauldrons = await createItem(
-  //   "Crimson Combatant's Draconium Pauldrons",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsDraconiumSabatons = await createItem(
-  //   "Crimson Combatant's Draconium Sabatons",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsDraconiumWaistguard = await createItem(
-  //   "Crimson Combatant's Draconium Waistguard",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // //end of pvp block
-  // const primalMoltenDefender = await createItem(
-  //   "Primal Molten Defender",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const shieldOfTheHearth = await createItem(
-  //   "Shield of the Hearth",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const draconiumDefender = await createItem("Draconium Defender", 1, 333, 343);
-  // const obsidianSearedClaymore = await createItem(
-  //   "Obsidian Seared Claymore",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const obsidianSearedCrusher = await createItem(
-  //   "Obsidian Seared Crusher",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const obsidianSearedFacesmasher = await createItem(
-  //   "Obsidian Seared Facesmasher",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const obsidianSearedHalberd = await createItem(
-  //   "Obsidian Seared Halberd",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const obsidianSearedHexsword = await createItem(
-  //   "Obsidian Seared Hexsword",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const obsidianSearedInvoker = await createItem(
-  //   "Obsidian Seared Invoker",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const obsidianSearedRuneaxe = await createItem(
-  //   "Obsidian Seared Runeaxe",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const obsidianSearedSlicer = await createItem(
-  //   "Obsidian Seared Slicer",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const primalMoltenGreataxe = await createItem(
-  //   "Primal Molten Greataxe",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const primalMoltenLongsword = await createItem(
-  //   "Primal Molten Longsword",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const primalMoltenMace = await createItem("Primal Molten Mace", 1, 382, 392);
-  // const primalMoltenShortblade = await createItem(
-  //   "Primal Molten Shortblade",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const primalMoltenSpellblade = await createItem(
-  //   "Primal Molten Spellblade",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const primalMoltenWarglaive = await createItem(
-  //   "Primal Molten Warglaive",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const draconiumGreatMace = await createItem(
-  //   "Draconium Great Mace",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const draconiumStiletto = await createItem("Draconium Stiletto", 1, 333, 343);
-  // const draconiumGreatAxe = await createItem(
-  //   "Draconium Great Axe",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const draconiumKnuckles = await createItem("Draconium Knuckles", 1, 333, 343);
-  // const draconiumSword = await createItem("Draconium Sword", 1, 333, 343);
-  // const draconiumAxe = await createItem("Draconium Axe", 1, 333, 343);
-  // const draconiumDirk = await createItem("Draconium Dirk", 1, 333, 343);
-  // const blackDragonTouchedHammer = await createItem(
-  //   "Black Dragon Touched Hammer",
-  //   1,
-  //   382,
-  //   397
-  // );
-  // const khazgoriteBlacksmithsHammer = await createItem(
-  //   "Khaz'gorite Blacksmith's Hammer",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const khazgoriteBlacksmithsToolbox = await createItem(
-  //   "Khaz'gorite Blacksmith's Toolbox",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const khazgoriteLeatherworkersKnife = await createItem(
-  //   "Khaz'gorite Leatherworker's Knife",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const khazgoriteLeatherworkersToolset = await createItem(
-  //   "Khaz'gorite Leatherworker's Toolset",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const khazgoriteNeedleSet = await createItem(
-  //   "Khaz'gorite Needle Set",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const khazgoritePickaxe = await createItem(
-  //   "Khaz'gorite Pickaxe",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const khazgoriteSickle = await createItem("Khaz'gorite Sickle", 1, 356, 371);
-  // const khazgoriteSkinningKnife = await createItem(
-  //   "Khaz'gorite Skinning Knife",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const draconiumNeedleSet = await createItem(
-  //   "Draconium Needle Set",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const draconiumLeatherworkersKnife = await createItem(
-  //   "Draconium Leatherworker's Knife",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const draconiumLeatherworkersToolset = await createItem(
-  //   "Draconium Leatherworker's Toolset",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const draconiumBlacksmithsToolbox = await createItem(
-  //   "Draconium Blacksmith's Toolbox",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const draconiumBlacksmithsHammer = await createItem(
-  //   "Draconium Blacksmith's Hammer",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const draconiumSkinningKnife = await createItem(
-  //   "Draconium Skinning Knife",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const draconiumSickle = await createItem("Draconium Sickle", 1, 317, 332);
-  // const draconiumPickaxe = await createItem("Draconium Pickaxe", 1, 317, 332);
-  // const mastersHammer = await createItem("Master's Hammer");
-  // const sturdyExpeditionShovel = await createItem(
-  //   "Sturdy Expedition Shovel",
-  //   1000
-  // );
-  // const sereviteRepairHammer = await createItem("Serevite Repair Hammer", 1000);
-  // const sereviteSkeletonKey = await createItem("Serevite Skeleton Key", 1000);
-  // const primalRazorstone = await createItem("Primal Razorstone", 1000);
-  // const primalWhetstone = await createItem("Primal Whetstone", 1000);
-  // const primalWeightstone = await createItem("Primal Weightstone", 1000);
-  // const alvinTheAnvil = await createItem("Alvin the Anvil");
-  // const prototypeExplorersBardingFramework = await createItem(
-  //   "Prototype Explorer's Barding Framework"
-  // );
-  // const prototypeRegalBardingFramework = await createItem(
-  //   "Prototype Regal Barding Framework"
-  // );
+  const infuriousAlloy = await createItem(
+    "Infurious Alloy",
+    "inv_10_blacksmithing_craftedbar_bloodyalloy",
+    null,
+    1000,
+    "Smelted by players with the Blacksmithing skill.",
+    null,
+    "Rare",
+    "Crafting Reagent",
+    3
+  );
+  const primalMoltenAlloy = await createItem(
+    "Primal Molten Alloy",
+    "inv_10_blacksmithing_craftedbar_primalmoltenalloy",
+    null,
+    1000,
+    "Smelted by players with the Blacksmithing skill.",
+    null,
+    "Rare",
+    "Crafting Reagent",
+    3
+  );
+  const armorSpikes = await createItem(
+    "Armor Spikes",
+    "inv_10_blacksmithing_craftedoptional_armorspikes_color01",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Optional Crafting Reagent",
+    3,
+    "Embellishment",
+    "+35/30/25 Recipe Difficulty (based on quality). Provides the following property: Adorn your armor with thick spikes and add Unique-Equipped: Embellished (2)."
+  );
+  const alliedChestplateOfGenerosity = await createItem(
+    "Allied Chestplate of Generosity",
+    "inv_chest_plate_raidwarriorprimalist_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Your spells and abilities have a chance to rally you and your 4 closest allies withing 30 yards to victory for 10 sec, increasing Versatility by 191/195/?/205/211. (based on quality)",
+    null,
+    "Plate",
+    "Chest",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("stamina", "large"),
+      ["Versatility", 224, 226, "?", 233, 237],
+      ["Mastery", 402, 407, "?", 419, 427],
+    ]
+  );
+  const alliedWristguardOfCompanionship = await createItem(
+    "Allied Wristguard of Companionship",
+    "inv_bracer_plate_raidwarriorprimalist_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Grants 46/47/?/48/49 Versatility (based on quality) for every ally in a 30 yard radius, stacking up to 4 times.",
+    null,
+    "Plate",
+    "Wrist",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayEpic("small")],
+    [
+      secondaryStatArrayEpic("stamina", "small"),
+      ["Critical Strike", 146, 148, 150, 152, 155],
+      ["Haste", 206, 209, 212, 215, 219],
+    ]
+  );
+  const frostfireLegguardsOfPreparation = await createItem(
+    "Frostfire Legguards of Preparation",
+    "inv_plate_dragondungeon_c_01_pant",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Damaging a new enemy grants you 165/168/?/177/? Haste (based on quality) for 10 sec, up to 5 stacks.",
+    null,
+    "Plate",
+    "Legs",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("stamina", "large"),
+      ["Haste", 277, 281, "?", 289, "?"],
+      ["Mastery", 349, 353, "?", 364, "?"],
+    ]
+  );
+  const infuriousHelmOfVengeance = await createItem(
+    "Infurious Helm of Vengeance",
+    "inv_helm_plate_challengewarrior_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Enemies who damage you will sometimes take 7223/7264/?/7663/8043 Physical damage (based on quality) over 6 sec. Increases item level to 424 in Arenas and Battlegrounds.",
+    null,
+    "Plate",
+    "Head",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("stamina", "large"),
+      ["Critical Strike", 241, 244, "?", 252, 256],
+      ["Versatility", 384, 389, "?", 401, 408],
+    ]
+  );
+  const infuriousWarbootsOfImpunity = await createItem(
+    "Infurious Warboots of Impunity",
+    "inv_armor_revendrethcosmetic_d_02_boots",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Gladiator's Distinction reduces the duration of incoming crowd control effects by an additional 5%. Increases item level to 424 in Arenas and Battlegrounds.",
+    null,
+    "Plate",
+    "Feet",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("stamina", "medium"),
+      ["Versatility", 335, 339, "?", 350, 356],
+      ["Mastery", 134, 136, "?", 140, 142],
+    ]
+  );
+  const primalMoltenBreastplate = await createItem(
+    "Primal Molten Breastplate",
+    "inv_chest_plate_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Chest",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Ramdom Stat 2", "large"),
+    ]
+  );
+  const primalMoltenGauntlets = await createItem(
+    "Primal Molten Gauntlets",
+    "inv_glove_plate_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Hands",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("stamina", "medium"),
+      secondaryStatArrayEpic("Random Stat 1", "medium"),
+      secondaryStatArrayEpic("Ramdom Stat 2", "medium"),
+    ]
+  );
+  const primalMoltenGreatbelt = await createItem(
+    "Primal Molten Greatbelt",
+    "inv_belt_plate_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Waist",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("stamina", "medium"),
+      secondaryStatArrayEpic("Random Stat 1", "medium"),
+      secondaryStatArrayEpic("Ramdom Stat 2", "medium"),
+    ]
+  );
+  const primalMoltenHelm = await createItem(
+    "Primal Molten Helm",
+    "inv_helm_plate_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Head",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Ramdom Stat 2", "large"),
+    ]
+  );
+  const primalMoltenLegplates = await createItem(
+    "Primal Molten Legplates",
+    "inv_pant_plate_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Legs",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Ramdom Stat 2", "large"),
+    ]
+  );
+  const primalMoltenPauldrons = await createItem(
+    "Primal Molten Pauldrons",
+    "inv_shoulder_plate_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Shoulder",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("stamina", "medium"),
+      secondaryStatArrayEpic("Random Stat 1", "medium"),
+      secondaryStatArrayEpic("Ramdom Stat 2", "medium"),
+    ]
+  );
+  const primalMoltenSabatons = await createItem(
+    "Primal Molten Sabatons",
+    "inv_boot_plate_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Feet",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("stamina", "medium"),
+      secondaryStatArrayEpic("Random Stat 1", "medium"),
+      secondaryStatArrayEpic("Ramdom Stat 2", "medium"),
+    ]
+  );
+  const primalMoltenVambraces = await createItem(
+    "Primal Molten Vambraces",
+    "inv_bracer_plate_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Wrist",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayEpic("small")],
+    [
+      secondaryStatArrayEpic("stamina", "small"),
+      secondaryStatArrayEpic("Random Stat 1", "small"),
+      secondaryStatArrayEpic("Ramdom Stat 2", "small"),
+    ]
+  );
+  const unstableFrostfireBelt = await createItem(
+    "Unstable Frostfire Belt",
+    "inv_belt_plate_challengedeathknight_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Your spells and abilities have a chance to inflict a Lingering Frostspark, dealing 5693/5810/?/7384/? Frostfire damage (based on quality) over 10 sec. Enemies that die while under this effect will explode, leaving a cold sleet for 8 sec that slows enemies by 50%.",
+    null,
+    "Plate",
+    "Waist",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("stamina", "medium"),
+      ["Critical Strike", 335, 339, "?", 350, "?"],
+      ["Mastery", 134, 136, "?", 140, "?"],
+    ]
+  );
+  const explorersExpertHelm = await createItem(
+    "Explorer's Expert Helm",
+    "inv_helm_plate_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Helm",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Ramdom Stat 2", "large"),
+    ]
+  );
+  const explorersExpertSpaulders = await createItem(
+    "Explorer's Expert Spaulders",
+    "inv_shoulder_plate_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Shoulders",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Ramdom Stat 2", "medium"),
+    ]
+  );
+  const explorersExpertGauntlets = await createItem(
+    "Explorer's Expert Gauntlets",
+    "inv_glove_plate_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Hands",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Ramdom Stat 2", "medium"),
+    ]
+  );
+  const explorersExpertGreaves = await createItem(
+    "Explorer's Expert Greaves",
+    "inv_pant_plate_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Legs",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Ramdom Stat 2", "medium"),
+    ]
+  );
+  const explorersExpertClasp = await createItem(
+    "Explorer's Expert Clasp",
+    "inv_belt_plate_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Waist",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Ramdom Stat 2", "medium"),
+    ]
+  );
+  const explorersPlateChestguard = await createItem(
+    "Explorer's Plate Chestguard",
+    "inv_chest_plate_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Chest",
+    null,
+    [306, 308, 310, 313, 316],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayBaby("large")],
+    [
+      secondaryStatArrayBaby("stamina", "large"),
+      secondaryStatArrayBaby("Random Stat 1", "large"),
+      secondaryStatArrayBaby("Ramdom Stat 2", "large"),
+    ]
+  );
+  const explorersPlateBoots = await createItem(
+    "Explorer's Plate Boots",
+    "inv_boot_plate_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Feet",
+    null,
+    [306, 308, 310, 313, 316],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayBaby("medium")],
+    [
+      secondaryStatArrayBaby("stamina", "medium"),
+      secondaryStatArrayBaby("Random Stat 1", "medium"),
+      secondaryStatArrayBaby("Ramdom Stat 2", "medium"),
+    ]
+  );
+  const explorersPlateBracers = await createItem(
+    "Explorer's Plate Bracers",
+    "inv_bracer_plate_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Plate",
+    "Wrist",
+    null,
+    [306, 308, 310, 313, 316],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayBaby("small")],
+    [
+      secondaryStatArrayBaby("stamina", "small"),
+      secondaryStatArrayBaby("Random Stat 1", "small"),
+      secondaryStatArrayBaby("Ramdom Stat 2", "small"),
+    ]
+  );
+  const crimsonCombatantsDraconiumArmguards = await createItem(
+    "Crimson Combatant's Draconium Armguards",
+    "inv_bracer_plate_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Plate",
+    "Wrist",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayRare("small")],
+    [
+      secondaryStatArrayRare("stamina", "small"),
+      secondaryStatArrayRare("Random Stat 1", "small"),
+      secondaryStatArrayRare("Ramdom Stat 2", "small"),
+    ]
+  );
+  const crimsonCombatantsDraconiumBreastplate = await createItem(
+    "Crimson Combatant's Draconium Breastplate",
+    "inv_chest_plate_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Plate",
+    "Chest",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Ramdom Stat 2", "large"),
+    ]
+  );
+  const crimsonCombatantsDraconiumGauntlets = await createItem(
+    "Crimson Combatant's Draconium Gauntlets",
+    "inv_glove_plate_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Plate",
+    "Hands",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Ramdom Stat 2", "medium"),
+    ]
+  );
+  const crimsonCombatantsDraconiumGreaves = await createItem(
+    "Crimson Combatant's Draconium Greaves",
+    "inv_pant_plate_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Plate",
+    "Legs",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Ramdom Stat 2", "large"),
+    ]
+  );
+  const crimsonCombatantsDraconiumHelm = await createItem(
+    "Crimson Combatant's Draconium Helm",
+    "inv_helm_plate_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Plate",
+    "Head",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Ramdom Stat 2", "large"),
+    ]
+  );
+  const crimsonCombatantsDraconiumPauldrons = await createItem(
+    "Crimson Combatant's Draconium Pauldrons",
+    "inv_shoulder_plate_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Plate",
+    "Shoulder",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Ramdom Stat 2", "medium"),
+    ]
+  );
+  const crimsonCombatantsDraconiumSabatons = await createItem(
+    "Crimson Combatant's Draconium Sabatons",
+    "inv_boot_plate_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Plate",
+    "Feet",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Ramdom Stat 2", "medium"),
+    ]
+  );
+  const crimsonCombatantsDraconiumWaistguard = await createItem(
+    "Crimson Combatant's Draconium Waistguard",
+    "inv_belt_plate_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Plate",
+    "Waist",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Strength", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Ramdom Stat 2", "medium"),
+    ]
+  );
+
+  const primalMoltenDefender = await createItem(
+    "Primal Molten Defender",
+    "inv_shield_1h_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Shield",
+    "Off Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [
+      ["Strength", "Intellect", "", "", ""],
+      ["173/531", "176/541", "?", "185/567", "190/583"],
+    ],
+    [
+      ["Stamina", 396, 407, "?", 436, 453],
+      ["Random Stat 1", 156, 158, "?", "?", 166],
+      ["Random Stat 2", 156, 158, "?", "?", 166],
+    ]
+  );
+  const shieldOfTheHearth = await createItem(
+    "Shield of the Hearth",
+    "creatureportrait_blackrockv2_shieldgong",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Taking damage has a chance to grant ?/?/?/326/332 Versatility (based on quality) for 15 sec.",
+    null,
+    "Shield",
+    "Off Hand",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [
+      ["Strength", "Intellect", "", "", ""],
+      ["173/531", "176/541", "?", "185/567", "190/583"],
+    ],
+    [
+      ["Stamina", 396, 407, "?", 436, 453],
+      ["Critical Strike", 174, 176, "?", 182, 185],
+      ["Mastery", 139, 140, "?", 144, 147],
+    ]
+  );
+  const draconiumDefender = await createItem(
+    "Draconium Defender",
+    "inv_shield_1h_dragonquest_b_02",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Shield",
+    "Off Hand",
+    null,
+    [333, 335, 337, 340, 343],
+    [
+      ["Strength", "Intellect", "", "", ""],
+      ["110/336", "112/343", "?", "?", "120/369"],
+    ],
+    [
+      ["Stamina", 241, 243, "?", "?", 249],
+      ["Random Stat 1", 92, 97, "?", "?", 119],
+      ["Random Stat 2", 92, 97, "?", "?", 119],
+    ]
+  );
+  const obsidianSearedClaymore = await createItem(
+    "Obsidian Seared Claymore",
+    "inv_sword_2h_dragonpvp_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Sword",
+    "Two-Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Strength", "", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
+    ]
+  );
+  const obsidianSearedCrusher = await createItem(
+    "Obsidian Seared Crusher",
+    "inv_mace_2h_primalistraid_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mace",
+    "Two-Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Strength", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
+    ]
+  );
+  const obsidianSearedFacesmasher = await createItem(
+    "Obsidian Seared Facesmasher",
+    "inv_hand_1h_dragondungeon_c_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Fist Weapon",
+    "One-Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Strength", "", "", ""], primaryStatArrayEpic("1h")],
+    [
+      secondaryStatArrayEpic("stamina", "1h"),
+      secondaryStatArrayEpic("Random Stat 1", "1h"),
+      secondaryStatArrayEpic("Random Stat 2", "1h"),
+    ]
+  );
+  const obsidianSearedHalberd = await createItem(
+    "Obsidian Seared Halberd",
+    "inv_polearm_2h_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Polearm",
+    "Two-Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Strength", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
+    ]
+  );
+  const obsidianSearedHexsword = await createItem(
+    "Obsidian Seared Hexsword",
+    "inv_sword_1h_dragondungeon_c_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Sword",
+    "One-Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("1h-int")],
+    [
+      secondaryStatArrayEpic("stamina", "1h"),
+      secondaryStatArrayEpic("Random Stat 1", "1h"),
+      secondaryStatArrayEpic("Random Stat 2", "1h"),
+    ]
+  );
+  const obsidianSearedInvoker = await createItem(
+    "Obsidian Seared Invoker",
+    "inv_mace_2h_dragondungeon_c_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mace",
+    "One-Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("1h-int")],
+    [
+      secondaryStatArrayEpic("stamina", "1h"),
+      secondaryStatArrayEpic("Random Stat 1", "1h"),
+      secondaryStatArrayEpic("Random Stat 2", "1h"),
+    ]
+  );
+  const obsidianSearedRuneaxe = await createItem(
+    "Obsidian Seared Runeaxe",
+    "inv_axe_1h_dragondungeon_c_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Axe",
+    "One-Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("1h-int")],
+    [
+      secondaryStatArrayEpic("stamina", "1h"),
+      secondaryStatArrayEpic("Random Stat 1", "1h"),
+      secondaryStatArrayEpic("Random Stat 2", "1h"),
+    ]
+  );
+  const obsidianSearedSlicer = await createItem(
+    "Obsidian Seared Slicer",
+    "inv_axe_1h_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Axe",
+    "One-Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Strength", "", "", ""], primaryStatArrayEpic("1h")],
+    [
+      secondaryStatArrayEpic("stamina", "1h"),
+      secondaryStatArrayEpic("Random Stat 1", "1h"),
+      secondaryStatArrayEpic("Random Stat 2", "1h"),
+    ]
+  );
+  const primalMoltenGreataxe = await createItem(
+    "Primal Molten Greataxe",
+    "inv_axe_2h_drakonoid_c_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Axe",
+    "Two-Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Strength", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
+    ]
+  );
+  const primalMoltenLongsword = await createItem(
+    "Primal Molten Longsword",
+    "inv_sword_1h_dragondungeon_c_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Sword",
+    "One-Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Strength", "", "", ""], primaryStatArrayEpic("1h")],
+    [
+      secondaryStatArrayEpic("stamina", "1h"),
+      secondaryStatArrayEpic("Random Stat 1", "1h"),
+      secondaryStatArrayEpic("Random Stat 2", "1h"),
+    ]
+  );
+  const primalMoltenMace = await createItem(
+    "Primal Molten Mace",
+    "inv_mace_1h_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mace",
+    "One-Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Strength", "", "", ""], primaryStatArrayEpic("1h")],
+    [
+      secondaryStatArrayEpic("stamina", "1h"),
+      secondaryStatArrayEpic("Random Stat 1", "1h"),
+      secondaryStatArrayEpic("Random Stat 2", "1h"),
+    ]
+  );
+  const primalMoltenShortblade = await createItem(
+    "Primal Molten Shortblade",
+    "inv_knife_1h_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Dagger",
+    "One-Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "", "", "", ""], primaryStatArrayEpic("1h")],
+    [
+      secondaryStatArrayEpic("stamina", "1h"),
+      secondaryStatArrayEpic("Random Stat 1", "1h"),
+      secondaryStatArrayEpic("Random Stat 2", "1h"),
+    ]
+  );
+  const primalMoltenSpellblade = await createItem(
+    "Primal Molten Spellblade",
+    "inv_knife_1h_primalistraid_d_02",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Dagger",
+    "One-Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("1h-int")],
+    [
+      secondaryStatArrayEpic("stamina", "1h"),
+      secondaryStatArrayEpic("Random Stat 1", "1h"),
+      secondaryStatArrayEpic("Random Stat 2", "1h"),
+    ]
+  );
+  const primalMoltenWarglaive = await createItem(
+    "Primal Molten Warglaive",
+    "inv_glaive_1h_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Warglaives",
+    "One-Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Strength", "", "", ""], primaryStatArrayEpic("1h")],
+    [
+      secondaryStatArrayEpic("stamina", "1h"),
+      secondaryStatArrayEpic("Random Stat 1", "1h"),
+      secondaryStatArrayEpic("Random Stat 2", "1h"),
+    ]
+  );
+  const draconiumGreatMace = await createItem(
+    "Draconium Great Mace",
+    "inv_mace_2h_dragondungeon_c_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mace",
+    "Two-Hand",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("2h-int")],
+    [
+      secondaryStatArrayRare("stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
+    ]
+  );
+  const draconiumStiletto = await createItem(
+    "Draconium Stiletto",
+    "inv_knife_1h_dragonquest_b_02",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Dagger",
+    "One-Hand",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("1h-int")],
+    [
+      secondaryStatArrayRare("stamina", "1h"),
+      secondaryStatArrayRare("Random Stat 1", "1h"),
+      secondaryStatArrayRare("Random Stat 2", "1h"),
+    ]
+  );
+  const draconiumGreatAxe = await createItem(
+    "Draconium Great Axe",
+    "inv_axe_2h_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Axe",
+    "Two-Hand",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Strength", "", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
+    ]
+  );
+  const draconiumKnuckles = await createItem(
+    "Draconium Knuckles",
+    "inv_hand_1h_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Fist Weapon",
+    "One-Hand",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Strength", "", "", ""], primaryStatArrayRare("1h")],
+    [
+      secondaryStatArrayRare("stamina", "1h"),
+      secondaryStatArrayRare("Random Stat 1", "1h"),
+      secondaryStatArrayRare("Random Stat 2", "1h"),
+    ]
+  );
+  const draconiumSword = await createItem(
+    "Draconium Sword",
+    "inv_sword_1h_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Sword",
+    "One-Hand",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Strength", "", "", ""], primaryStatArrayRare("1h")],
+    [
+      secondaryStatArrayRare("stamina", "1h"),
+      secondaryStatArrayRare("Random Stat 1", "1h"),
+      secondaryStatArrayRare("Random Stat 2", "1h"),
+    ]
+  );
+  const draconiumAxe = await createItem(
+    "Draconium Axe",
+    "inv_axe_1h_dragonquest_b_02",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Axe",
+    "One-Hand",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("1h-int")],
+    [
+      secondaryStatArrayRare("stamina", "1h"),
+      secondaryStatArrayRare("Random Stat 1", "1h"),
+      secondaryStatArrayRare("Random Stat 2", "1h"),
+    ]
+  );
+  const draconiumDirk = await createItem(
+    "Draconium Dirk",
+    "inv_knife_1h_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Dagger",
+    "One-Hand",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "", "", "", ""], primaryStatArrayRare("1h")],
+    [
+      secondaryStatArrayRare("stamina", "1h"),
+      secondaryStatArrayRare("Random Stat 1", "1h"),
+      secondaryStatArrayRare("Random Stat 2", "1h"),
+    ]
+  );
+  const blackDragonTouchedHammer = await createItem(
+    "Black Dragon Touched Hammer",
+    "inv_mace_1h_blacksmithing_b_01_black",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "During crafting, increases the Skill provided when inspired by 15%.",
+    null,
+    "Blacksmithing Tool",
+    null,
+    null,
+    [372, 378, 384, 391, 398],
+    statArrayProfToolAccessory("Skill", "Tool", "large"),
+    [["Random Stat 1", 110, 118, "?", 139, 152]]
+  );
+  const khazgoriteBlacksmithsHammer = await createItem(
+    "Khaz'gorite Blacksmith's Hammer",
+    "inv_mace_1h_blacksmithing_b_01_silver",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Blacksmithing Tool",
+    null,
+    null,
+    [346, 352, 356, 365, 372],
+    statArrayProfToolAccessory("Skill", "Tool", "large"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "large")]
+  );
+  const khazgoriteBlacksmithsToolbox = await createItem(
+    "Khaz'gorite Blacksmith's Toolbox",
+    "inv_blacksmithing_toolbox_02",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Blacksmithing Accessory",
+    "Toolkit",
+    "Toolkit (1)",
+    [346, 352, 356, 365, 372],
+    statArrayProfToolAccessory("Skill", "Toolkit", "large"),
+    [
+      statArrayProfToolAccessory("Resourcefulness", "Toolkit", "large"),
+      statArrayProfToolAccessory("Crafting Speed", "Toolkit", "large"),
+    ]
+  );
+  const khazgoriteLeatherworkersKnife = await createItem(
+    "Khaz'gorite Leatherworker's Knife",
+    "inv_knife_1h_leatherworking_b_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leatherworking Tool",
+    null,
+    null,
+    [346, 352, 356, 365, 372],
+    statArrayProfToolAccessory("Skill", "Tool", "large"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "large")]
+  );
+  const khazgoriteLeatherworkersToolset = await createItem(
+    "Khaz'gorite Leatherworker's Toolset",
+    "inv_misc_food_lunchbox",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leatherworking Accessory",
+    "Toolkit",
+    "Toolkit (1)",
+    [346, 352, 356, 365, 372],
+    statArrayProfToolAccessory("Skill", "Toolkit", "large"),
+    [
+      statArrayProfToolAccessory("Resourcefulness", "Toolkit", "large"),
+      statArrayProfToolAccessory("Crafting Speed", "Toolkit", "large"),
+    ]
+  );
+  const khazgoriteNeedleSet = await createItem(
+    "Khaz'gorite Needle Set",
+    "inv_professions_tailoringneedleset_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Tailoring Accessory",
+    "Toolkit",
+    "Toolkit (1)",
+    [346, 352, 356, 365, 372],
+    statArrayProfToolAccessory("Skill", "Toolkit", "large"),
+    [
+      statArrayProfToolAccessory("Resourcefulness", "Toolkit", "large"),
+      statArrayProfToolAccessory("Crafting Speed", "Toolkit", "large"),
+    ]
+  );
+  const khazgoritePickaxe = await createItem(
+    "Khaz'gorite Pickaxe",
+    "inv_axe_1h_miningpick_a_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mining Tool",
+    null,
+    null,
+    [346, 352, 356, 365, 372],
+    statArrayProfToolAccessory("Skill", "Tool", "large"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "large")]
+  );
+  const khazgoriteSickle = await createItem(
+    "Khaz'gorite Sickle",
+    "inv_axe_1h_herbalism_b_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Herbalism Tool",
+    null,
+    null,
+    [346, 352, 356, 365, 372],
+    statArrayProfToolAccessory("Skill", "Tool", "large"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "large")]
+  );
+  const khazgoriteSkinningKnife = await createItem(
+    "Khaz'gorite Skinning Knife",
+    "inv_knife_1h_skinning_a_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Skinning Tool",
+    null,
+    null,
+    [346, 352, 356, 365, 372],
+    statArrayProfToolAccessory("Skill", "Tool", "large"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "large")]
+  );
+  const draconiumNeedleSet = await createItem(
+    "Draconium Needle Set",
+    "inv_professions_tailoringneedleset_02",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Tailoring Accessory",
+    "Toolkit",
+    "Toolkit (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [
+      statArrayProfToolAccessory("Resourcefulness", "Toolkit", "medium"),
+      statArrayProfToolAccessory("Crafting Speed", "Toolkit", "medium"),
+    ]
+  );
+  const draconiumLeatherworkersKnife = await createItem(
+    "Draconium Leatherworker's Knife",
+    "inv_knife_1h_leatherworking_b_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leatherworking Tool",
+    null,
+    null,
+    [320, 326, 332, 339, 346],
+    statArrayProfToolAccessory("Skill", "Tool", "medium"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "medium")]
+  );
+  const draconiumLeatherworkersToolset = await createItem(
+    "Draconium Leatherworker's Toolset",
+    "inv_misc_food_lunchbox_red",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leatherworking Accessory",
+    "Toolkit",
+    "Toolkit (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [
+      statArrayProfToolAccessory("Resourcefulness", "Toolkit", "medium"),
+      statArrayProfToolAccessory("Crafting Speed", "Toolkit", "medium"),
+    ]
+  );
+  const draconiumBlacksmithsToolbox = await createItem(
+    "Draconium Blacksmith's Toolbox",
+    "inv_blacksmithing_toolbox_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Blacksmithing Accessory",
+    "Toolkit",
+    "Toolkit (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [
+      statArrayProfToolAccessory("Resourcefulness", "Toolkit", "medium"),
+      statArrayProfToolAccessory("Crafting Speed", "Toolkit", "medium"),
+    ]
+  );
+  const draconiumBlacksmithsHammer = await createItem(
+    "Draconium Blacksmith's Hammer",
+    "trade_archaeology_ogre2handedhammer",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Blacksmithing Tool",
+    null,
+    null,
+    [320, 326, 332, 339, 346],
+    statArrayProfToolAccessory("Skill", "Tool", "medium"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "medium")]
+  );
+  const draconiumSkinningKnife = await createItem(
+    "Draconium Skinning Knife",
+    "inv_knife_1h_skinning_a_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Skinning Tool",
+    null,
+    null,
+    [320, 326, 332, 339, 346],
+    statArrayProfToolAccessory("Skill", "Tool", "medium"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "medium")]
+  );
+  const draconiumSickle = await createItem(
+    "Draconium Sickle",
+    "inv_axe_1h_herbalism_b_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Herbalism Tool",
+    null,
+    null,
+    [320, 326, 332, 339, 346],
+    statArrayProfToolAccessory("Skill", "Tool", "medium"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "medium")]
+  );
+  const draconiumPickaxe = await createItem(
+    "Draconium Pickaxe",
+    "inv_axe_1h_miningpick_a_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mining Tool",
+    null,
+    null,
+    [320, 326, 332, 339, 346],
+    statArrayProfToolAccessory("Skill", "Tool", "medium"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "medium")]
+  );
+  const mastersHammer = await createItem(
+    "Master's Hammer",
+    "inv_10_blacksmithing_consumable_repairhammer_color2",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Repair a weapon or piece of plate armor you have specialized in repairing.",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    { Blacksmithing: 25 }
+  );
+  const sturdyExpeditionShovel = await createItem(
+    "Sturdy Expedition Shovel",
+    "inv_misc_2h_farmshovel_a_01",
+    null,
+    1,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    "20 Charges",
+    "Dig for treasure at Disturbed Dirt Piles."
+  );
+  const sereviteRepairHammer = await createItem(
+    "Serevite Repair Hammer",
+    "inv_10_blacksmithing_consumable_repairhammer_color1",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Fully repair a weapon or piece of plate armor (consumed on use).",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    { Blacksmithing: 25 }
+  );
+  const sereviteSkeletonKey = await createItem(
+    "Serevite Skeleton Key",
+    "inv_10_blacksmithing_consumable_key_color2",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Allows opening of locks that require up to 70 lockpicking skill.  The lockpick is consumed in the process.",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    { Blacksmithing: 1 }
+  );
+  const primalRazorstone = await createItem(
+    "Primal Razorstone",
+    "inv_10_blacksmithing_consumable_sharpeningstone_color1",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Sharpen your Mining, Herbalism, or Skinning Tool, increasing Finesse by 40/53/? (based on quality) for 2 hours."
+  );
+  const primalWhetstone = await createItem(
+    "Primal Whetstone",
+    "inv_10_blacksmithing_consumable_sharpeningstone_color2",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Sharpen your bladed weapon, increasing Attack Power by 253/307/360 (based on quality) for 1 hour."
+  );
+  const primalWeightstone = await createItem(
+    "Primal Weightstone",
+    "inv_10_blacksmithing_consumable_weightstone_color2",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Balances your blunt weapon, increasing Attack Power by 253/307/360 (based on quality) for 2 hours."
+  );
+  const alvinTheAnvil = await createItem(
+    "Alvin the Anvil",
+    "inv_blacksmith_anvil",
+    "Pickup",
+    1,
+    null,
+    "Might be able to be used as a portable anvil? Unsure.",
+    "Rare",
+    "Pet",
+    1,
+    null,
+    null,
+    "Teaches you how to summon this companion."
+  );
+  const prototypeExplorersBardingFramework = await createItem(
+    "Prototype Explorer's Barding Framework",
+    "inv_gizmo_bronzeframework_01",
+    null,
+    1,
+    "Crafted by players with the Blacksmithing skill. Can be acquired through Crafting Orders.",
+    null,
+    "Rare"
+  );
+  const prototypeRegalBardingFramework = await createItem(
+    "Prototype Regal Barding Framework",
+    "inv_gizmo_adamantiteframe",
+    null,
+    1,
+    "Crafted by players with the Blacksmithing skill. Can be acquired through Crafting Orders.",
+    null,
+    "Rare"
+  );
 
   // //leatherworking items
   // const lifeBoundBelt = await createItem("Life-Bound Belt", 1, 382, 392);
@@ -6657,4823 +9574,4904 @@ const makeTables = async () => {
   //basicPhialExperimentation
   //basicPotionExperimentation
   //reclaimConcoctions
-  // const primalConvergentRecipe = await createRecipe(
-  //   "Primal Convergent",
-  //   primalConvergent,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedEarth, 1],
-  //     [awakenedFire, 1],
-  //     [awakenedAir, 1],
-  //     [awakenedFrost, 1],
-  //     [awakenedOrder, 1],
-  //   ],
-  //   20,
-  //   "Reagents",
-  //   1,
-  //   275,
-  //   null,
-  //   null,
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   null,
-  //   [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
-  // );
-  // const omniumDraconisRecipe = await createRecipe(
-  //   "Omnium Draconis",
-  //   omniumDraconis,
-  //   1,
-  //   alchemy,
-  //   [
-  //     [writhebark, 1],
-  //     [saxifrage, 1],
-  //     [hochenblume, 5],
-  //     [bubblePoppy, 1],
-  //   ],
-  //   10,
-  //   "Reagents",
-  //   1,
-  //   325,
-  //   null,
-  //   null,
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   null,
-  //   [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
-  // );
-  // const residualNeuralChannelingAgentRecipe = await createRecipe(
-  //   "Residual Neural Channeling Agent",
-  //   residualNeuralChannelingAgent,
-  //   5,
-  //   alchemy,
-  //   [
-  //     [awakenedAir, 1],
-  //     [awakenedEarth, 1],
-  //     [draconicVial, 5],
-  //     [saxifrage, 10],
-  //   ],
-  //   null,
-  //   "Air Potions",
-  //   1,
-  //   400,
-  //   null,
-  //   null,
-  //   "Potion Experimentation",
-  //   "Alchemist's Lab Bench",
-  //   "Learned via Potion Experimentation.",
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { PotionLore: 25, AirFormulatedPotions: 30 },
-  //     ],
-  //   ]
-  // );
-  // const bottledPutrescenceRecipe = await createRecipe(
-  //   "Bottled Putrescence",
-  //   bottledPutrescence,
-  //   5,
-  //   alchemy,
-  //   [
-  //     [awakenedAir, 1],
-  //     [awakenedDecay, 2],
-  //     [draconicVial, 5],
-  //     [hochenblume, 30],
-  //   ],
-  //   null,
-  //   "Air Potions",
-  //   3,
-  //   450,
-  //   null,
-  //   { Decayology: 0 },
-  //   "Potion Experimentation",
-  //   "Altar of Decay",
-  //   "Learned via Potion Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.",
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { PotionLore: 25, AirFormulatedPotions: 30 },
-  //     ],
-  //   ]
-  // );
-  // const potionOfGustsRecipe = await createRecipe(
-  //   "Potion of Gusts",
-  //   potionOfGusts,
-  //   5,
-  //   alchemy,
-  //   [
-  //     [awakenedAir, 1],
-  //     [draconicVial, 5],
-  //     [saxifrage, 5],
-  //     [hochenblume, 20],
-  //   ],
-  //   null,
-  //   "Air Potions",
-  //   3,
-  //   150,
-  //   null,
-  //   null,
-  //   "Potion Experimentation",
-  //   "Alchemist's Lab Bench",
-  //   "Learned via Potion Experimentation.",
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { PotionLore: 25, AirFormulatedPotions: 30 },
-  //     ],
-  //   ]
-  // );
-  // const potionOfShockingDisclosureRecipe = await createRecipe(
-  //   "Potion of Shocking Disclosure",
-  //   potionOfShockingDisclosure,
-  //   5,
-  //   alchemy,
-  //   [
-  //     [awakenedAir, 1],
-  //     [awakenedEarth, 1],
-  //     [draconicVial, 5],
-  //     [hochenblume, 10],
-  //   ],
-  //   null,
-  //   "Air Potions",
-  //   3,
-  //   150,
-  //   null,
-  //   null,
-  //   "Potion Experimentation",
-  //   "Alchemist's Lab Bench",
-  //   "Learned via Potion Experimentation.",
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { PotionLore: 25, AirFormulatedPotions: 30 },
-  //     ],
-  //   ]
-  // );
-  // const potionOfTheHushedZephyrRecipe = await createRecipe(
-  //   "Potion of Shocking Disclosure",
-  //   potionOfShockingDisclosure,
-  //   5,
-  //   alchemy,
-  //   [
-  //     [awakenedAir, 1],
-  //     [draconicVial, 5],
-  //     [hochenblume, 20],
-  //     [saxifrage, 8],
-  //   ],
-  //   null,
-  //   "Air Potions",
-  //   3,
-  //   150,
-  //   null,
-  //   null,
-  //   "Potion Experimentation",
-  //   "Alchemist's Lab Bench",
-  //   "Learned via Potion Experimentation.",
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { PotionLore: 25, AirFormulatedPotions: 30 },
-  //     ],
-  //   ]
-  // );
-  // const aeratedManaPotionRecipe = await createRecipe(
-  //   "Aerated Mana Potion",
-  //   aeratedManaPotion,
-  //   5,
-  //   alchemy,
-  //   [
-  //     [rousingAir, 1],
-  //     [draconicVial, 5],
-  //     [hochenblume, 15],
-  //   ],
-  //   5,
-  //   "Air Potions",
-  //   3,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { PotionLore: 25, AirFormulatedPotions: 30 },
-  //     ],
-  //   ]
-  // );
-  // const potionOfChilledClarityRecipe = await createRecipe(
-  //   "Potion of Chilled Clairty",
-  //   potionOfChilledClarity,
-  //   5,
-  //   alchemy,
-  //   [
-  //     [awakenedFrost, 1],
-  //     [awakenedDecay, 1],
-  //     [draconicVial, 5],
-  //     [bubblePoppy, 10],
-  //   ],
-  //   null,
-  //   "Frost Potions",
-  //   1,
-  //   450,
-  //   null,
-  //   { Decayology: 0 },
-  //   "Potion Experimentation",
-  //   "Altar of Decay",
-  //   "Learned via Potion Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.",
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { FrostFormulatedPotions: 30, PotionLore: 25 },
-  //     ],
-  //   ]
-  // );
-  // const delicateSuspensionOfSporesRecipe = await createRecipe(
-  //   "Delicate Suspension of Spores",
-  //   delicateSuspensionOfSpores,
-  //   5,
-  //   alchemy,
-  //   [
-  //     [awakenedFrost, 1],
-  //     [awakenedDecay, 1],
-  //     [draconicVial, 5],
-  //     [bubblePoppy, 10],
-  //   ],
-  //   null,
-  //   "Frost Potions",
-  //   1,
-  //   450,
-  //   null,
-  //   { Decayology: 0 },
-  //   "Potion Experimentation",
-  //   "Altar of Decay",
-  //   "Learned via Potion Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.",
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { FrostFormulatedPotions: 30, PotionLore: 25 },
-  //     ],
-  //   ]
-  // );
-  // const potionOfFrozenFocusRecipe = await createRecipe(
-  //   "Potion of Frozen Focus",
-  //   potionOfFrozenFocus,
-  //   5,
-  //   alchemy,
-  //   [
-  //     [awakenedFrost, 1],
-  //     [draconicVial, 5],
-  //     [hochenblume, 20],
-  //     [saxifrage, 8],
-  //   ],
-  //   null,
-  //   "Frost Potions",
-  //   1,
-  //   400,
-  //   null,
-  //   null,
-  //   "Potion Experimentation",
-  //   "Alchemist's Lab Bench",
-  //   "Learned via Potion Experimentation.",
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { FrostFormulatedPotions: 30, PotionLore: 25 },
-  //     ],
-  //   ]
-  // );
-  // const potionOfWitheringVitalityRecipe = await createRecipe(
-  //   "Potion of Withering Vitality",
-  //   potionOfWitheringVitality,
-  //   5,
-  //   alchemy,
-  //   [
-  //     [awakenedFrost, 1],
-  //     [awakenedDecay, 1],
-  //     [draconicVial, 5],
-  //     [writhebark, 10],
-  //   ],
-  //   null,
-  //   "Frost Potions",
-  //   1,
-  //   450,
-  //   null,
-  //   { Decayology: 0 },
-  //   "Potion Experimentation",
-  //   "Altar of Decay",
-  //   "Learned via Potion Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.",
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { FrostFormulatedPotions: 30, PotionLore: 25 },
-  //     ],
-  //   ]
-  // );
-  // const potionOfFrozenFatalityRecipe = await createRecipe(
-  //   "Potion of Frozen Fatality",
-  //   potionOfFrozenFatality,
-  //   5,
-  //   alchemy,
-  //   [
-  //     [awakenedFrost, 1],
-  //     [draconicVial, 5],
-  //     [writhebark, 5],
-  //     [hochenblume, 20],
-  //   ],
-  //   null,
-  //   "Frost Potions",
-  //   3,
-  //   200,
-  //   null,
-  //   null,
-  //   "Potion Experimentation",
-  //   "Alchemist's Lab Bench",
-  //   "Learned via Potion Experimentation.",
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { FrostFormulatedPotions: 30, PotionLore: 25 },
-  //     ],
-  //   ]
-  // );
-  // const refreshingHealingPotionRecipe = await createRecipe(
-  //   "Refreshing Healing Potion",
-  //   refreshingHealingPotion,
-  //   5,
-  //   alchemy,
-  //   [
-  //     [rousingFrost, 1],
-  //     [draconicVial, 5],
-  //     [hochenblume, 8],
-  //   ],
-  //   1,
-  //   "Frost Potions",
-  //   3,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { FrostFormulatedPotions: 30, PotionLore: 25 },
-  //     ],
-  //   ]
-  // );
-  // const potionCauldronOfUltimatePowerRecipe = await createRecipe(
-  //   "Potion Cauldron of Ultimate Power",
-  //   potionCauldronOfUltimatePower,
-  //   1,
-  //   alchemy,
-  //   [
-  //     [elementalPotionOfPower, 150],
-  //     [omniumDraconis, 20],
-  //   ],
-  //   null,
-  //   "Cauldrons",
-  //   2,
-  //   450,
-  //   null,
-  //   null,
-  //   "Raid Drop",
-  //   "Alchemist's Lab Bench",
-  //   "Learned from Elemental Codex of Ultimate Power, which drops from Vault of the Incarnates bosses on Heroic & Mythic.",
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Illustrious Insight",
-  //       {
-  //         FrostFormulatedPotions: 30,
-  //         PotionLore: 25,
-  //         AirFormulatedPotions: 30,
-  //       },
-  //     ],
-  //   ]
-  // );
-  // const potionCauldronOfPowerRecipe = await createRecipe(
-  //   "Potion Cauldron of Power",
-  //   potionCauldronOfPower,
-  //   1,
-  //   alchemy,
-  //   [
-  //     [elementalPotionOfPower, 100],
-  //     [omniumDraconis, 10],
-  //   ],
-  //   null,
-  //   "Cauldrons",
-  //   2,
-  //   425,
-  //   null,
-  //   { BatchProduction: 10 },
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   null,
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Illustrious Insight",
-  //       {
-  //         FrostFormulatedPotions: 30,
-  //         PotionLore: 25,
-  //         AirFormulatedPotions: 30,
-  //       },
-  //     ],
-  //   ]
-  // );
-  // const cauldronOfThePookaRecipe = await createRecipe(
-  //   "Cauldron of the Pooka",
-  //   cauldronOfThePooka,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [tuftOfPrimalWool, 1],
-  //     [omniumDraconis, 1],
-  //     [primalConvergent, 2],
-  //   ],
-  //   null,
-  //   "Cauldrons",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Alchemist's Lab Bench",
-  //   "Drops from Draconic Recipe in a Bottle.",
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       {
-  //         FrostFormulatedPotions: 30,
-  //         PotionLore: 25,
-  //         AirFormulatedPotions: 30,
-  //       },
-  //     ],
-  //   ]
-  // );
-  // const elementalPotionOfUltimatePowerRecipe = await createRecipe(
-  //   "Elemental Potion of Ultimate Power",
-  //   elementalPotionOfUltimatePower,
-  //   20,
-  //   alchemy,
-  //   [
-  //     [primalChaos, 20],
-  //     [awakenedOrder, 2],
-  //     [elementalPotionOfPower, 30],
-  //   ],
-  //   null,
-  //   "Elemental Phials and Potions",
-  //   1,
-  //   450,
-  //   null,
-  //   null,
-  //   "Raid Drop",
-  //   "Alchemist's Lab Bench",
-  //   "Learned from Elemental Codex of Ultimate Power, which drops from Vault of the Incarnates bosses on Heroic & Mythic.",
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Illustrious Insight",
-  //       {
-  //         FrostFormulatedPotions: 30,
-  //         PotionLore: 25,
-  //         AirFormulatedPotions: 30,
-  //       },
-  //     ],
-  //   ]
-  // );
-  // const elementalPotionOfPowerRecipe = await createRecipe(
-  //   "Elemental Potion of Power",
-  //   elementalPotionOfPower,
-  //   5,
-  //   alchemy,
-  //   [
-  //     [draconicVial, 5],
-  //     [omniumDraconis, 3],
-  //     [primalConvergent, 1],
-  //   ],
-  //   50,
-  //   "Elemental Phials and Potions",
-  //   3,
-  //   425,
-  //   null,
-  //   null,
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   null,
-  //   [
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       {
-  //         FrostFormulatedPotions: 30,
-  //         PotionLore: 25,
-  //         AirFormulatedPotions: 30,
-  //       },
-  //     ],
-  //   ]
-  // );
-  // const phialOfElementalChaosRecipe = await createRecipe(
-  //   "Phial of Elemental Chaos",
-  //   phialOfElementalChaos,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [draconicVial, 2],
-  //     [primalConvergent, 1],
-  //     [omniumDraconis, 2],
-  //   ],
-  //   null,
-  //   "Elemental Phials and Potions",
-  //   1,
-  //   450,
-  //   null,
-  //   null,
-  //   "Phial Experimentation",
-  //   "Alchemist's Lab Bench",
-  //   "Learned via Phial Experimentation.",
-  //   [
-  //     ["Alchemical Catalyst", { PhialMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { FrostFormulatedPhials: 30, PhialLore: 25, AirFormulatedPhials: 30 },
-  //     ],
-  //   ]
-  // );
-  // const phialOfChargedIsolationRecipe = await createRecipe(
-  //   "Phial of Charged Isolation",
-  //   phialOfChargedIsolation,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedAir, 1],
-  //     [awakenedEarth, 1],
-  //     [draconicVial, 2],
-  //     [saxifrage, 9],
-  //   ],
-  //   null,
-  //   "Air Phials",
-  //   1,
-  //   400,
-  //   null,
-  //   null,
-  //   "Phial Experimentation",
-  //   "Alchemist's Lab Bench",
-  //   "Learned via Phial Experimentation",
-  //   [
-  //     ["Alchemical Catalyst", { PhialMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { PhialLore: 25, AirFormulatedPhials: 30 },
-  //     ],
-  //   ]
-  // );
-  // const phialOfStaticEmpowermentRecipe = await createRecipe(
-  //   "Phial of Static Empowerment",
-  //   phialOfStaticEmpowerment,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedAir, 1],
-  //     [awakenedEarth, 1],
-  //     [draconicVial, 2],
-  //     [bubblePoppy, 5],
-  //   ],
-  //   null,
-  //   "Air Phials",
-  //   1,
-  //   400,
-  //   null,
-  //   null,
-  //   "Phial Experimentation",
-  //   "Alchemist's Lab Bench",
-  //   "Learned via Phial Experimentation",
-  //   [
-  //     ["Alchemical Catalyst", { PhialMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { PhialLore: 25, AirFormulatedPhials: 30 },
-  //     ],
-  //   ]
-  // );
-  // const phialOfStillAirRecipe = await createRecipe(
-  //   "Phial of Still Air",
-  //   phialOfStillAir,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedAir, 1],
-  //     [draconicVial, 2],
-  //     [bubblePoppy, 10],
-  //     [saxifrage, 5],
-  //   ],
-  //   null,
-  //   "Air Phials",
-  //   1,
-  //   400,
-  //   null,
-  //   null,
-  //   "Phial Experimentation",
-  //   "Alchemist's Lab Bench",
-  //   "Learned via Phial Experimentation",
-  //   [
-  //     ["Alchemical Catalyst", { PhialMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { PhialLore: 25, AirFormulatedPhials: 30 },
-  //     ],
-  //   ]
-  // );
-  // const phialOfTheEyeInTheStormRecipe = await createRecipe(
-  //   "Phial of the Eye in the Storm",
-  //   phialOfTheEyeInTheStorm,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedAir, 1],
-  //     [draconicVial, 2],
-  //     [bubblePoppy, 5],
-  //     [saxifrage, 10],
-  //   ],
-  //   null,
-  //   "Air Phials",
-  //   1,
-  //   400,
-  //   null,
-  //   null,
-  //   "Phial Experimentation",
-  //   "Alchemist's Lab Bench",
-  //   "Learned via Phial Experimentation",
-  //   [
-  //     ["Alchemical Catalyst", { PhialMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { PhialLore: 25, AirFormulatedPhials: 30 },
-  //     ],
-  //   ]
-  // );
-  // const aeratedPhialOfDeftnessRecipe = await createRecipe(
-  //   "Aerated Phial of Deftness",
-  //   aeratedPhialOfDeftness,
-  //   10,
-  //   alchemy,
-  //   [
-  //     [artisansMettle, 10],
-  //     [awakenedAir, 2],
-  //     [draconicVial, 10],
-  //     [saxifrage, 10],
-  //   ],
-  //   null,
-  //   "Air Phials",
-  //   2,
-  //   400,
-  //   null,
-  //   null,
-  //   "Phial Experimentation",
-  //   "Alchemist's Lab Bench",
-  //   "Learned via Phial Experimentation",
-  //   [
-  //     ["Alchemical Catalyst", { PhialMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { PhialLore: 25, AirFormulatedPhials: 30 },
-  //     ],
-  //   ]
-  // );
-  // const chargedPhialOfAlacrityRecipe = await createRecipe(
-  //   "Charged Phial of Alacrity",
-  //   chargedPhialOfAlacrity,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedAir, 1],
-  //     [awakenedEarth, 1],
-  //     [draconicVial, 2],
-  //     [writhebark, 4],
-  //   ],
-  //   null,
-  //   "Air Phials",
-  //   1,
-  //   200,
-  //   null,
-  //   null,
-  //   "Phial Experimentation",
-  //   "Alchemist's Lab Bench",
-  //   "Learned via Phial Experimentation",
-  //   [
-  //     ["Alchemical Catalyst", { PhialMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { PhialLore: 25, AirFormulatedPhials: 30 },
-  //     ],
-  //   ]
-  // );
-  // const aeratedPhialOfQuickHandsRecipe = await createRecipe(
-  //   "Aerated Phial of Quick Hands",
-  //   aeratedPhialOfQuickHands,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [rousingAir, 4],
-  //     [draconicVial, 2],
-  //     [hochenblume, 8],
-  //   ],
-  //   null,
-  //   "Air Phials",
-  //   2,
-  //   200,
-  //   { ArtisansConsortium: "Respected" },
-  //   null,
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   null,
-  //   [
-  //     ["Alchemical Catalyst", { PhialMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { PhialLore: 25, AirFormulatedPhials: 30 },
-  //     ],
-  //   ]
-  // );
-  // const phialOfIcyPreservationRecipe = await createRecipe(
-  //   "Phial of Icy Preservation",
-  //   phialOfIcyPreservation,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedDecay, 1],
-  //     [awakenedFrost, 1],
-  //     [draconicVial, 2],
-  //     [saxifrage, 9],
-  //   ],
-  //   null,
-  //   "Frost Phials",
-  //   1,
-  //   450,
-  //   null,
-  //   { Decayology: 0 },
-  //   "Phial Experimentation",
-  //   "Altar of Decay",
-  //   "Learned via Phial Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.",
-  //   [
-  //     ["Alchemical Catalyst", { PhialMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { FrostFormulatedPhials: 30, PhialLore: 25 },
-  //     ],
-  //   ]
-  // );
-  // const icedPhialOfCorruptingRageRecipe = await createRecipe(
-  //   "Iced Phial of Corrupting Rage",
-  //   icedPhialOfCorruptingRage,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedDecay, 1],
-  //     [awakenedFrost, 1],
-  //     [draconicVial, 2],
-  //     [writhebark, 9],
-  //   ],
-  //   null,
-  //   "Frost Phials",
-  //   1,
-  //   450,
-  //   null,
-  //   { Decayology: 0 },
-  //   "Phial Experimentation",
-  //   "Altar of Decay",
-  //   "Learned via Phial Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.",
-  //   [
-  //     ["Alchemical Catalyst", { PhialMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { FrostFormulatedPhials: 30, PhialLore: 25 },
-  //     ],
-  //   ]
-  // );
-  // const phialOfGlacialFuryRecipe = await createRecipe(
-  //   "Phial of Glacial Fury",
-  //   phialOfGlacialFury,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedFrost, 1],
-  //     [draconicVial, 2],
-  //     [writhebark, 5],
-  //     [bubblePoppy, 10],
-  //   ],
-  //   null,
-  //   "Frost Phials",
-  //   1,
-  //   400,
-  //   null,
-  //   null,
-  //   "Phial Experimentation",
-  //   "Alchemist's Lab Bench",
-  //   "Learned via Phial Experimentation.",
-  //   [
-  //     ["Alchemical Catalyst", { PhialMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { FrostFormulatedPhials: 30, PhialLore: 25 },
-  //     ],
-  //   ]
-  // );
-  // const steamingPhialOfFinesseRecipe = await createRecipe(
-  //   "Steaming Phial of Finesse",
-  //   steamingPhialOfFinesse,
-  //   10,
-  //   alchemy,
-  //   [
-  //     [artisansMettle, 10],
-  //     [awakenedFrost, 1],
-  //     [awakenedFire, 1],
-  //     [draconicVial, 10],
-  //     [writhebark, 8],
-  //   ],
-  //   null,
-  //   "Frost Phials",
-  //   2,
-  //   400,
-  //   null,
-  //   null,
-  //   "Phial Experimentation",
-  //   "Alchemist's Lab Bench",
-  //   "Learned via Phial Experimentation.",
-  //   [
-  //     ["Alchemical Catalyst", { PhialMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { FrostFormulatedPhials: 30, PhialLore: 25 },
-  //     ],
-  //   ]
-  // );
-  // const crystallinePhialOfPerceptionRecipe = await createRecipe(
-  //   "Crystalline Phial of Perception",
-  //   crystallinePhialOfPerception,
-  //   10,
-  //   alchemy,
-  //   [
-  //     [artisansMettle, 10],
-  //     [awakenedFrost, 2],
-  //     [draconicVial, 10],
-  //     [bubblePoppy, 10],
-  //   ],
-  //   null,
-  //   "Frost Phials",
-  //   2,
-  //   400,
-  //   null,
-  //   null,
-  //   "Phial Experimentation",
-  //   "Alchemist's Lab Bench",
-  //   "Learned via Phial Experimentation.",
-  //   [
-  //     ["Alchemical Catalyst", { PhialMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { FrostFormulatedPhials: 30, PhialLore: 25 },
-  //     ],
-  //   ]
-  // );
-  // const phialOfTepidVersatilityRecipe = await createRecipe(
-  //   "Phial of Tepid Versatility",
-  //   phialOfTepidVersatility,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedFrost, 2],
-  //     [draconicVial, 2],
-  //     [hochenblume, 16],
-  //   ],
-  //   25,
-  //   "Frost Phials",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Alchemical Catalyst", { PhialMastery: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { FrostFormulatedPhials: 30, PhialLore: 25 },
-  //     ],
-  //   ]
-  // );
-  // // const transmuteDecayToElementsRecipe = await(createRecipe("Transmute: Decay to Elements", transmuteDecayToElements, 1, alchemy, [[awakenedDecay, 1]], null, "Transmutations", 1, null, null, {Decayology: 20}, null, "Alchemist's Lab Bench", "Recover an 'assortment' of Rousing Elements. Has a CD."));
-  // // const transmuteOrderToElementsRecipe = await(createRecipe("Transmute: Order to Elements", transmuteOrderToElements, 1, alchemy, [[awakenedOrder, 1]], null, "Transmutations", 1, null, null, {Transmutation: 10}, null, "Alchemist's Lab Bench", "Creates one Awakened Air, Earth, Fire, & Frost. Has a CD."));
-  // const transmuteAwakenedAir = await createRecipe(
-  //   "Transmute: Awakened Air",
-  //   awakenedAir,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedFrost, 1],
-  //     [awakenedFire, 1],
-  //   ],
-  //   15,
-  //   "Transmutations",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   "Has a CD."
-  // );
-  // const transmuteAwakenedEarth = await createRecipe(
-  //   "Transmute: Awakened Earth",
-  //   awakenedEarth,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedFrost, 1],
-  //     [awakenedFire, 1],
-  //   ],
-  //   15,
-  //   "Transmutations",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   "Has a CD."
-  // );
-  // const transmuteAwakenedFire = await createRecipe(
-  //   "Transmute: Awakened Fire",
-  //   awakenedFire,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedEarth, 1],
-  //     [awakenedAir, 1],
-  //   ],
-  //   15,
-  //   "Transmutations",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   "Has a CD."
-  // );
-  // const transmuteAwakenedFrost = await createRecipe(
-  //   "Transmute: Awakened Frost",
-  //   awakenedFrost,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedEarth, 1],
-  //     [awakenedAir, 1],
-  //   ],
-  //   15,
-  //   "Transmutations",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   "Has a CD."
-  // );
-  // const potionAbsorptionInhibitorRecipe = await createRecipe(
-  //   "Potion Absorption Inhibitor",
-  //   potionAbsorptionInhibitor,
-  //   1,
-  //   alchemy,
-  //   [
-  //     [saxifrage, 10],
-  //     [hochenblume, 20],
-  //     [bubblePoppy, 10],
-  //     [primalConvergent, 4],
-  //   ],
-  //   null,
-  //   "Optional Reagents",
-  //   1,
-  //   325,
-  //   null,
-  //   null,
-  //   "Raid Drop",
-  //   "Alchemist's Lab Bench",
-  //   "Drops from 'bosses in Vault of the Incarnates'.",
-  //   [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
-  // );
-  // const illustriousInsightRecipeAlchemy = await createRecipe(
-  //   "Illustrious Insight",
-  //   illustriousInsight,
-  //   1,
-  //   alchemy,
-  //   [[artisansMettle, 50]],
-  //   null,
-  //   "Finishing Reagents",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Various Specializations",
-  //   "Alchemist's Lab Bench"
-  // );
-  // const writhefireOilRecipe = await createRecipe(
-  //   "Writhefire Oil",
-  //   writhefireOil,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedFire, 1],
-  //     [writhebark, 1],
-  //     [hochenblume, 2],
-  //   ],
-  //   35,
-  //   "Finishing Reagents",
-  //   1,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   null,
-  //   [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
-  // );
-  // const broodSaltRecipe = await createRecipe(
-  //   "Brood Salt",
-  //   broodSalt,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedFrost, 1],
-  //     [saxifrage, 6],
-  //     [hochenblume, 12],
-  //   ],
-  //   null,
-  //   "Finishing Reagents",
-  //   1,
-  //   300,
-  //   null,
-  //   { ChemicalSynthesis: 20 },
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   null,
-  //   [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
-  // );
-  // const stableFluidicDraconiumRecipe = await createRecipe(
-  //   "Stable Fluidic Draconium",
-  //   stableFluidicDraconium,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [awakenedAir, 1],
-  //     [draconiumOre, 3],
-  //     [writhebark, 3],
-  //   ],
-  //   null,
-  //   "Finishing Reagents",
-  //   1,
-  //   300,
-  //   { ArtisansConsortium: "Respected" },
-  //   null,
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   null,
-  //   [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
-  // );
-  // const agitatingPotionAugmentationRecipe = await createRecipe(
-  //   "Agitating Potion Augmentation",
-  //   agitatingPotionAugmentation,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [saxifrage, 5],
-  //     [hochenblume, 12],
-  //     [bubblePoppy, 6],
-  //   ],
-  //   null,
-  //   "Finishing Reagents",
-  //   1,
-  //   300,
-  //   { ArtisansConsortium: "Valued" },
-  //   null,
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   null,
-  //   [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
-  // );
-  // const reactivePhialEmbellishmentRecipe = await createRecipe(
-  //   "Reactive Phial Embellishment",
-  //   reactivePhialEmbellishment,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [writhebark, 6],
-  //     [hochenblume, 12],
-  //     [bubblePoppy, 6],
-  //   ],
-  //   null,
-  //   "Finishing Reagents",
-  //   1,
-  //   300,
-  //   { ArtisansConsortium: "Valued" },
-  //   null,
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   null,
-  //   [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
-  // );
-  // const sagaciousIncenseRecipe = await createRecipe(
-  //   "Sagacious Incense",
-  //   sagaciousIncense,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [primalConvergent, 1],
-  //     [saxifrage, 5],
-  //   ],
-  //   null,
-  //   "Incense",
-  //   1,
-  //   300,
-  //   { ArtisansConsortium: "Valued" },
-  //   null,
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   null,
-  //   [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
-  // );
-  // const exultantIncenseRecipe = await createRecipe(
-  //   "Exultant Incense",
-  //   exultantIncense,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [saxifrage, 6],
-  //     [hochenblume, 6],
-  //   ],
-  //   null,
-  //   "Incense",
-  //   1,
-  //   250,
-  //   { MaruukCentaur: 22 },
-  //   null,
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   null,
-  //   [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
-  // );
-  // const fervidIncenseRecipe = await createRecipe(
-  //   "Fervid Incense",
-  //   fervidIncense,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [writhebark, 6],
-  //     [hochenblume, 6],
-  //   ],
-  //   null,
-  //   "Incense",
-  //   1,
-  //   150,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Alchemist's Lab Bench",
-  //   "Drops from Draconic Recipe in a Bottle.",
-  //   [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
-  // );
-  // const somniferousIncenseRecipe = await createRecipe(
-  //   "Somniferous Incense",
-  //   somniferousIncense,
-  //   2,
-  //   alchemy,
-  //   [
-  //     [bubblePoppy, 6],
-  //     [hochenblume, 6],
-  //   ],
-  //   null,
-  //   "Incense",
-  //   1,
-  //   250,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Alchemist's Lab Bench",
-  //   "Drops from Draconic Recipe in a Bottle.",
-  //   [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
-  // );
-  // const alacritousAlchemistStoneRecipe = await createRecipe(
-  //   "Alacritous Alchemist Stone",
-  //   alacritousAlchemistStone,
-  //   1,
-  //   alchemy,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 60],
-  //     [glowingTitanOrb, 1],
-  //     [omniumDraconis, 15],
-  //     [elementalPotionOfPower, 12],
-  //     [potionOfFrozenFocus, 12],
-  //   ],
-  //   null,
-  //   "Alchemist Stones",
-  //   1,
-  //   275,
-  //   { MaruukCentaur: 13 },
-  //   null,
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", {}],
-  //     ["Alchemical Catalyst", { PotionMastery: 30 }],
-  //     ["Illustrious Insight", { PotionLore: 25 }],
-  //   ]
-  // );
-  // const sustainingAlchemistStoneRecipe = await createRecipe(
-  //   "Sustaining Alchemist Stone",
-  //   sustainingAlchemistStone,
-  //   1,
-  //   alchemy,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 60],
-  //     [glowingTitanOrb, 1],
-  //     [primalConvergent, 4],
-  //     [phialOfTepidVersatility, 6],
-  //     [phialOfElementalChaos, 6],
-  //   ],
-  //   1,
-  //   "Alchemist Stones",
-  //   1,
-  //   275,
-  //   { ValdrakkenAccord: 14 },
-  //   null,
-  //   null,
-  //   "Alchemist's Lab Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", {}],
-  //     ["Alchemical Catalyst", { PhialMastery: 30 }],
-  //     ["Illustrious Insight", { PhialLore: 25 }],
-  //   ]
-  // );
+  const primalConvergentRecipe = await createRecipe(
+    "Primal Convergent",
+    primalConvergent,
+    2,
+    alchemy,
+    [
+      [awakenedEarth, 1],
+      [awakenedFire, 1],
+      [awakenedAir, 1],
+      [awakenedFrost, 1],
+      [awakenedOrder, 1],
+    ],
+    20,
+    "Reagents",
+    1,
+    275,
+    null,
+    null,
+    null,
+    "Alchemist's Lab Bench",
+    null,
+    [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
+  );
+  const omniumDraconisRecipe = await createRecipe(
+    "Omnium Draconis",
+    omniumDraconis,
+    1,
+    alchemy,
+    [
+      [writhebark, 1],
+      [saxifrage, 1],
+      [hochenblume, 5],
+      [bubblePoppy, 1],
+    ],
+    10,
+    "Reagents",
+    1,
+    325,
+    null,
+    null,
+    null,
+    "Alchemist's Lab Bench",
+    null,
+    [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
+  );
+  const residualNeuralChannelingAgentRecipe = await createRecipe(
+    "Residual Neural Channeling Agent",
+    residualNeuralChannelingAgent,
+    5,
+    alchemy,
+    [
+      [awakenedAir, 1],
+      [awakenedEarth, 1],
+      [draconicVial, 5],
+      [saxifrage, 10],
+    ],
+    null,
+    "Air Potions",
+    1,
+    400,
+    null,
+    null,
+    "Potion Experimentation",
+    "Alchemist's Lab Bench",
+    "Learned via Potion Experimentation.",
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { PotionLore: 25, AirFormulatedPotions: 30 },
+      ],
+    ]
+  );
+  const bottledPutrescenceRecipe = await createRecipe(
+    "Bottled Putrescence",
+    bottledPutrescence,
+    5,
+    alchemy,
+    [
+      [awakenedAir, 1],
+      [awakenedDecay, 2],
+      [draconicVial, 5],
+      [hochenblume, 30],
+    ],
+    null,
+    "Air Potions",
+    3,
+    450,
+    null,
+    { Decayology: 0 },
+    "Potion Experimentation",
+    "Altar of Decay",
+    "Learned via Potion Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.",
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { PotionLore: 25, AirFormulatedPotions: 30 },
+      ],
+    ]
+  );
+  const potionOfGustsRecipe = await createRecipe(
+    "Potion of Gusts",
+    potionOfGusts,
+    5,
+    alchemy,
+    [
+      [awakenedAir, 1],
+      [draconicVial, 5],
+      [saxifrage, 5],
+      [hochenblume, 20],
+    ],
+    null,
+    "Air Potions",
+    3,
+    150,
+    null,
+    null,
+    "Potion Experimentation",
+    "Alchemist's Lab Bench",
+    "Learned via Potion Experimentation.",
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { PotionLore: 25, AirFormulatedPotions: 30 },
+      ],
+    ]
+  );
+  const potionOfShockingDisclosureRecipe = await createRecipe(
+    "Potion of Shocking Disclosure",
+    potionOfShockingDisclosure,
+    5,
+    alchemy,
+    [
+      [awakenedAir, 1],
+      [awakenedEarth, 1],
+      [draconicVial, 5],
+      [hochenblume, 10],
+    ],
+    null,
+    "Air Potions",
+    3,
+    150,
+    null,
+    null,
+    "Potion Experimentation",
+    "Alchemist's Lab Bench",
+    "Learned via Potion Experimentation.",
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { PotionLore: 25, AirFormulatedPotions: 30 },
+      ],
+    ]
+  );
+  const potionOfTheHushedZephyrRecipe = await createRecipe(
+    "Potion of Shocking Disclosure",
+    potionOfShockingDisclosure,
+    5,
+    alchemy,
+    [
+      [awakenedAir, 1],
+      [draconicVial, 5],
+      [hochenblume, 20],
+      [saxifrage, 8],
+    ],
+    null,
+    "Air Potions",
+    3,
+    150,
+    null,
+    null,
+    "Potion Experimentation",
+    "Alchemist's Lab Bench",
+    "Learned via Potion Experimentation.",
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { PotionLore: 25, AirFormulatedPotions: 30 },
+      ],
+    ]
+  );
+  const aeratedManaPotionRecipe = await createRecipe(
+    "Aerated Mana Potion",
+    aeratedManaPotion,
+    5,
+    alchemy,
+    [
+      [rousingAir, 1],
+      [draconicVial, 5],
+      [hochenblume, 15],
+    ],
+    5,
+    "Air Potions",
+    3,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { PotionLore: 25, AirFormulatedPotions: 30 },
+      ],
+    ]
+  );
+  const potionOfChilledClarityRecipe = await createRecipe(
+    "Potion of Chilled Clairty",
+    potionOfChilledClarity,
+    5,
+    alchemy,
+    [
+      [awakenedFrost, 1],
+      [awakenedDecay, 1],
+      [draconicVial, 5],
+      [bubblePoppy, 10],
+    ],
+    null,
+    "Frost Potions",
+    1,
+    450,
+    null,
+    { Decayology: 0 },
+    "Potion Experimentation",
+    "Altar of Decay",
+    "Learned via Potion Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.",
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { FrostFormulatedPotions: 30, PotionLore: 25 },
+      ],
+    ]
+  );
+  const delicateSuspensionOfSporesRecipe = await createRecipe(
+    "Delicate Suspension of Spores",
+    delicateSuspensionOfSpores,
+    5,
+    alchemy,
+    [
+      [awakenedFrost, 1],
+      [awakenedDecay, 1],
+      [draconicVial, 5],
+      [bubblePoppy, 10],
+    ],
+    null,
+    "Frost Potions",
+    1,
+    450,
+    null,
+    { Decayology: 0 },
+    "Potion Experimentation",
+    "Altar of Decay",
+    "Learned via Potion Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.",
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { FrostFormulatedPotions: 30, PotionLore: 25 },
+      ],
+    ]
+  );
+  const potionOfFrozenFocusRecipe = await createRecipe(
+    "Potion of Frozen Focus",
+    potionOfFrozenFocus,
+    5,
+    alchemy,
+    [
+      [awakenedFrost, 1],
+      [draconicVial, 5],
+      [hochenblume, 20],
+      [saxifrage, 8],
+    ],
+    null,
+    "Frost Potions",
+    1,
+    400,
+    null,
+    null,
+    "Potion Experimentation",
+    "Alchemist's Lab Bench",
+    "Learned via Potion Experimentation.",
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { FrostFormulatedPotions: 30, PotionLore: 25 },
+      ],
+    ]
+  );
+  const potionOfWitheringVitalityRecipe = await createRecipe(
+    "Potion of Withering Vitality",
+    potionOfWitheringVitality,
+    5,
+    alchemy,
+    [
+      [awakenedFrost, 1],
+      [awakenedDecay, 1],
+      [draconicVial, 5],
+      [writhebark, 10],
+    ],
+    null,
+    "Frost Potions",
+    1,
+    450,
+    null,
+    { Decayology: 0 },
+    "Potion Experimentation",
+    "Altar of Decay",
+    "Learned via Potion Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.",
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { FrostFormulatedPotions: 30, PotionLore: 25 },
+      ],
+    ]
+  );
+  const potionOfFrozenFatalityRecipe = await createRecipe(
+    "Potion of Frozen Fatality",
+    potionOfFrozenFatality,
+    5,
+    alchemy,
+    [
+      [awakenedFrost, 1],
+      [draconicVial, 5],
+      [writhebark, 5],
+      [hochenblume, 20],
+    ],
+    null,
+    "Frost Potions",
+    3,
+    200,
+    null,
+    null,
+    "Potion Experimentation",
+    "Alchemist's Lab Bench",
+    "Learned via Potion Experimentation.",
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { FrostFormulatedPotions: 30, PotionLore: 25 },
+      ],
+    ]
+  );
+  const refreshingHealingPotionRecipe = await createRecipe(
+    "Refreshing Healing Potion",
+    refreshingHealingPotion,
+    5,
+    alchemy,
+    [
+      [rousingFrost, 1],
+      [draconicVial, 5],
+      [hochenblume, 8],
+    ],
+    1,
+    "Frost Potions",
+    3,
+    40,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { FrostFormulatedPotions: 30, PotionLore: 25 },
+      ],
+    ]
+  );
+  const potionCauldronOfUltimatePowerRecipe = await createRecipe(
+    "Potion Cauldron of Ultimate Power",
+    potionCauldronOfUltimatePower,
+    1,
+    alchemy,
+    [
+      [elementalPotionOfPower, 150],
+      [omniumDraconis, 20],
+    ],
+    null,
+    "Cauldrons",
+    2,
+    450,
+    null,
+    null,
+    "Raid Drop",
+    "Alchemist's Lab Bench",
+    "Learned from Elemental Codex of Ultimate Power, which drops from Vault of the Incarnates bosses on Heroic & Mythic.",
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Illustrious Insight",
+        {
+          FrostFormulatedPotions: 30,
+          PotionLore: 25,
+          AirFormulatedPotions: 30,
+        },
+      ],
+    ]
+  );
+  const potionCauldronOfPowerRecipe = await createRecipe(
+    "Potion Cauldron of Power",
+    potionCauldronOfPower,
+    1,
+    alchemy,
+    [
+      [elementalPotionOfPower, 100],
+      [omniumDraconis, 10],
+    ],
+    null,
+    "Cauldrons",
+    2,
+    425,
+    null,
+    { BatchProduction: 10 },
+    null,
+    "Alchemist's Lab Bench",
+    null,
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Illustrious Insight",
+        {
+          FrostFormulatedPotions: 30,
+          PotionLore: 25,
+          AirFormulatedPotions: 30,
+        },
+      ],
+    ]
+  );
+  const cauldronOfThePookaRecipe = await createRecipe(
+    "Cauldron of the Pooka",
+    cauldronOfThePooka,
+    2,
+    alchemy,
+    [
+      [tuftOfPrimalWool, 1],
+      [omniumDraconis, 1],
+      [primalConvergent, 2],
+    ],
+    null,
+    "Cauldrons",
+    1,
+    300,
+    null,
+    null,
+    "World Drop",
+    "Alchemist's Lab Bench",
+    "Drops from Draconic Recipe in a Bottle.",
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        {
+          FrostFormulatedPotions: 30,
+          PotionLore: 25,
+          AirFormulatedPotions: 30,
+        },
+      ],
+    ]
+  );
+  const elementalPotionOfUltimatePowerRecipe = await createRecipe(
+    "Elemental Potion of Ultimate Power",
+    elementalPotionOfUltimatePower,
+    20,
+    alchemy,
+    [
+      [primalChaos, 20],
+      [awakenedOrder, 2],
+      [elementalPotionOfPower, 30],
+    ],
+    null,
+    "Elemental Phials and Potions",
+    1,
+    450,
+    null,
+    null,
+    "Raid Drop",
+    "Alchemist's Lab Bench",
+    "Learned from Elemental Codex of Ultimate Power, which drops from Vault of the Incarnates bosses on Heroic & Mythic.",
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Illustrious Insight",
+        {
+          FrostFormulatedPotions: 30,
+          PotionLore: 25,
+          AirFormulatedPotions: 30,
+        },
+      ],
+    ]
+  );
+  const elementalPotionOfPowerRecipe = await createRecipe(
+    "Elemental Potion of Power",
+    elementalPotionOfPower,
+    5,
+    alchemy,
+    [
+      [draconicVial, 5],
+      [omniumDraconis, 3],
+      [primalConvergent, 1],
+    ],
+    50,
+    "Elemental Phials and Potions",
+    3,
+    425,
+    null,
+    null,
+    null,
+    "Alchemist's Lab Bench",
+    null,
+    [
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        {
+          FrostFormulatedPotions: 30,
+          PotionLore: 25,
+          AirFormulatedPotions: 30,
+        },
+      ],
+    ]
+  );
+  const phialOfElementalChaosRecipe = await createRecipe(
+    "Phial of Elemental Chaos",
+    phialOfElementalChaos,
+    2,
+    alchemy,
+    [
+      [draconicVial, 2],
+      [primalConvergent, 1],
+      [omniumDraconis, 2],
+    ],
+    null,
+    "Elemental Phials and Potions",
+    1,
+    450,
+    null,
+    null,
+    "Phial Experimentation",
+    "Alchemist's Lab Bench",
+    "Learned via Phial Experimentation.",
+    [
+      ["Alchemical Catalyst", { PhialMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { FrostFormulatedPhials: 30, PhialLore: 25, AirFormulatedPhials: 30 },
+      ],
+    ]
+  );
+  const phialOfChargedIsolationRecipe = await createRecipe(
+    "Phial of Charged Isolation",
+    phialOfChargedIsolation,
+    2,
+    alchemy,
+    [
+      [awakenedAir, 1],
+      [awakenedEarth, 1],
+      [draconicVial, 2],
+      [saxifrage, 9],
+    ],
+    null,
+    "Air Phials",
+    1,
+    400,
+    null,
+    null,
+    "Phial Experimentation",
+    "Alchemist's Lab Bench",
+    "Learned via Phial Experimentation",
+    [
+      ["Alchemical Catalyst", { PhialMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { PhialLore: 25, AirFormulatedPhials: 30 },
+      ],
+    ]
+  );
+  const phialOfStaticEmpowermentRecipe = await createRecipe(
+    "Phial of Static Empowerment",
+    phialOfStaticEmpowerment,
+    2,
+    alchemy,
+    [
+      [awakenedAir, 1],
+      [awakenedEarth, 1],
+      [draconicVial, 2],
+      [bubblePoppy, 5],
+    ],
+    null,
+    "Air Phials",
+    1,
+    400,
+    null,
+    null,
+    "Phial Experimentation",
+    "Alchemist's Lab Bench",
+    "Learned via Phial Experimentation",
+    [
+      ["Alchemical Catalyst", { PhialMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { PhialLore: 25, AirFormulatedPhials: 30 },
+      ],
+    ]
+  );
+  const phialOfStillAirRecipe = await createRecipe(
+    "Phial of Still Air",
+    phialOfStillAir,
+    2,
+    alchemy,
+    [
+      [awakenedAir, 1],
+      [draconicVial, 2],
+      [bubblePoppy, 10],
+      [saxifrage, 5],
+    ],
+    null,
+    "Air Phials",
+    1,
+    400,
+    null,
+    null,
+    "Phial Experimentation",
+    "Alchemist's Lab Bench",
+    "Learned via Phial Experimentation",
+    [
+      ["Alchemical Catalyst", { PhialMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { PhialLore: 25, AirFormulatedPhials: 30 },
+      ],
+    ]
+  );
+  const phialOfTheEyeInTheStormRecipe = await createRecipe(
+    "Phial of the Eye in the Storm",
+    phialOfTheEyeInTheStorm,
+    2,
+    alchemy,
+    [
+      [awakenedAir, 1],
+      [draconicVial, 2],
+      [bubblePoppy, 5],
+      [saxifrage, 10],
+    ],
+    null,
+    "Air Phials",
+    1,
+    400,
+    null,
+    null,
+    "Phial Experimentation",
+    "Alchemist's Lab Bench",
+    "Learned via Phial Experimentation",
+    [
+      ["Alchemical Catalyst", { PhialMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { PhialLore: 25, AirFormulatedPhials: 30 },
+      ],
+    ]
+  );
+  const aeratedPhialOfDeftnessRecipe = await createRecipe(
+    "Aerated Phial of Deftness",
+    aeratedPhialOfDeftness,
+    10,
+    alchemy,
+    [
+      [artisansMettle, 10],
+      [awakenedAir, 2],
+      [draconicVial, 10],
+      [saxifrage, 10],
+    ],
+    null,
+    "Air Phials",
+    2,
+    400,
+    null,
+    null,
+    "Phial Experimentation",
+    "Alchemist's Lab Bench",
+    "Learned via Phial Experimentation",
+    [
+      ["Alchemical Catalyst", { PhialMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { PhialLore: 25, AirFormulatedPhials: 30 },
+      ],
+    ]
+  );
+  const chargedPhialOfAlacrityRecipe = await createRecipe(
+    "Charged Phial of Alacrity",
+    chargedPhialOfAlacrity,
+    2,
+    alchemy,
+    [
+      [awakenedAir, 1],
+      [awakenedEarth, 1],
+      [draconicVial, 2],
+      [writhebark, 4],
+    ],
+    null,
+    "Air Phials",
+    1,
+    200,
+    null,
+    null,
+    "Phial Experimentation",
+    "Alchemist's Lab Bench",
+    "Learned via Phial Experimentation",
+    [
+      ["Alchemical Catalyst", { PhialMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { PhialLore: 25, AirFormulatedPhials: 30 },
+      ],
+    ]
+  );
+  const aeratedPhialOfQuickHandsRecipe = await createRecipe(
+    "Aerated Phial of Quick Hands",
+    aeratedPhialOfQuickHands,
+    2,
+    alchemy,
+    [
+      [rousingAir, 4],
+      [draconicVial, 2],
+      [hochenblume, 8],
+    ],
+    null,
+    "Air Phials",
+    2,
+    200,
+    { ArtisansConsortium: "Respected" },
+    null,
+    null,
+    "Alchemist's Lab Bench",
+    null,
+    [
+      ["Alchemical Catalyst", { PhialMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { PhialLore: 25, AirFormulatedPhials: 30 },
+      ],
+    ]
+  );
+  const phialOfIcyPreservationRecipe = await createRecipe(
+    "Phial of Icy Preservation",
+    phialOfIcyPreservation,
+    2,
+    alchemy,
+    [
+      [awakenedDecay, 1],
+      [awakenedFrost, 1],
+      [draconicVial, 2],
+      [saxifrage, 9],
+    ],
+    null,
+    "Frost Phials",
+    1,
+    450,
+    null,
+    { Decayology: 0 },
+    "Phial Experimentation",
+    "Altar of Decay",
+    "Learned via Phial Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.",
+    [
+      ["Alchemical Catalyst", { PhialMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { FrostFormulatedPhials: 30, PhialLore: 25 },
+      ],
+    ]
+  );
+  const icedPhialOfCorruptingRageRecipe = await createRecipe(
+    "Iced Phial of Corrupting Rage",
+    icedPhialOfCorruptingRage,
+    2,
+    alchemy,
+    [
+      [awakenedDecay, 1],
+      [awakenedFrost, 1],
+      [draconicVial, 2],
+      [writhebark, 9],
+    ],
+    null,
+    "Frost Phials",
+    1,
+    450,
+    null,
+    { Decayology: 0 },
+    "Phial Experimentation",
+    "Altar of Decay",
+    "Learned via Phial Experimentation while having the Decayology specialization. Must be crafted at Altar of Decay.",
+    [
+      ["Alchemical Catalyst", { PhialMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { FrostFormulatedPhials: 30, PhialLore: 25 },
+      ],
+    ]
+  );
+  const phialOfGlacialFuryRecipe = await createRecipe(
+    "Phial of Glacial Fury",
+    phialOfGlacialFury,
+    2,
+    alchemy,
+    [
+      [awakenedFrost, 1],
+      [draconicVial, 2],
+      [writhebark, 5],
+      [bubblePoppy, 10],
+    ],
+    null,
+    "Frost Phials",
+    1,
+    400,
+    null,
+    null,
+    "Phial Experimentation",
+    "Alchemist's Lab Bench",
+    "Learned via Phial Experimentation.",
+    [
+      ["Alchemical Catalyst", { PhialMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { FrostFormulatedPhials: 30, PhialLore: 25 },
+      ],
+    ]
+  );
+  const steamingPhialOfFinesseRecipe = await createRecipe(
+    "Steaming Phial of Finesse",
+    steamingPhialOfFinesse,
+    10,
+    alchemy,
+    [
+      [artisansMettle, 10],
+      [awakenedFrost, 1],
+      [awakenedFire, 1],
+      [draconicVial, 10],
+      [writhebark, 8],
+    ],
+    null,
+    "Frost Phials",
+    2,
+    400,
+    null,
+    null,
+    "Phial Experimentation",
+    "Alchemist's Lab Bench",
+    "Learned via Phial Experimentation.",
+    [
+      ["Alchemical Catalyst", { PhialMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { FrostFormulatedPhials: 30, PhialLore: 25 },
+      ],
+    ]
+  );
+  const crystallinePhialOfPerceptionRecipe = await createRecipe(
+    "Crystalline Phial of Perception",
+    crystallinePhialOfPerception,
+    10,
+    alchemy,
+    [
+      [artisansMettle, 10],
+      [awakenedFrost, 2],
+      [draconicVial, 10],
+      [bubblePoppy, 10],
+    ],
+    null,
+    "Frost Phials",
+    2,
+    400,
+    null,
+    null,
+    "Phial Experimentation",
+    "Alchemist's Lab Bench",
+    "Learned via Phial Experimentation.",
+    [
+      ["Alchemical Catalyst", { PhialMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { FrostFormulatedPhials: 30, PhialLore: 25 },
+      ],
+    ]
+  );
+  const phialOfTepidVersatilityRecipe = await createRecipe(
+    "Phial of Tepid Versatility",
+    phialOfTepidVersatility,
+    2,
+    alchemy,
+    [
+      [awakenedFrost, 2],
+      [draconicVial, 2],
+      [hochenblume, 16],
+    ],
+    25,
+    "Frost Phials",
+    1,
+    300,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Alchemical Catalyst", { PhialMastery: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { FrostFormulatedPhials: 30, PhialLore: 25 },
+      ],
+    ]
+  );
+  // const transmuteDecayToElementsRecipe = await(createRecipe("Transmute: Decay to Elements", transmuteDecayToElements, 1, alchemy, [[awakenedDecay, 1]], null, "Transmutations", 1, null, null, {Decayology: 20}, null, "Alchemist's Lab Bench", "Recover an 'assortment' of Rousing Elements. Has a CD."));
+  // const transmuteOrderToElementsRecipe = await(createRecipe("Transmute: Order to Elements", transmuteOrderToElements, 1, alchemy, [[awakenedOrder, 1]], null, "Transmutations", 1, null, null, {Transmutation: 10}, null, "Alchemist's Lab Bench", "Creates one Awakened Air, Earth, Fire, & Frost. Has a CD."));
+  const transmuteAwakenedAir = await createRecipe(
+    "Transmute: Awakened Air",
+    awakenedAir,
+    2,
+    alchemy,
+    [
+      [awakenedFrost, 1],
+      [awakenedFire, 1],
+    ],
+    15,
+    "Transmutations",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Alchemist's Lab Bench",
+    "Has a CD."
+  );
+  const transmuteAwakenedEarth = await createRecipe(
+    "Transmute: Awakened Earth",
+    awakenedEarth,
+    2,
+    alchemy,
+    [
+      [awakenedFrost, 1],
+      [awakenedFire, 1],
+    ],
+    15,
+    "Transmutations",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Alchemist's Lab Bench",
+    "Has a CD."
+  );
+  const transmuteAwakenedFire = await createRecipe(
+    "Transmute: Awakened Fire",
+    awakenedFire,
+    2,
+    alchemy,
+    [
+      [awakenedEarth, 1],
+      [awakenedAir, 1],
+    ],
+    15,
+    "Transmutations",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Alchemist's Lab Bench",
+    "Has a CD."
+  );
+  const transmuteAwakenedFrost = await createRecipe(
+    "Transmute: Awakened Frost",
+    awakenedFrost,
+    2,
+    alchemy,
+    [
+      [awakenedEarth, 1],
+      [awakenedAir, 1],
+    ],
+    15,
+    "Transmutations",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Alchemist's Lab Bench",
+    "Has a CD."
+  );
+  const potionAbsorptionInhibitorRecipe = await createRecipe(
+    "Potion Absorption Inhibitor",
+    potionAbsorptionInhibitor,
+    1,
+    alchemy,
+    [
+      [saxifrage, 10],
+      [hochenblume, 20],
+      [bubblePoppy, 10],
+      [primalConvergent, 4],
+    ],
+    null,
+    "Optional Reagents",
+    1,
+    325,
+    null,
+    null,
+    "Raid Drop",
+    "Alchemist's Lab Bench",
+    "Drops from 'bosses in Vault of the Incarnates'.",
+    [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
+  );
+  const illustriousInsightRecipeAlchemy = await createRecipe(
+    "Illustrious Insight",
+    illustriousInsight,
+    1,
+    alchemy,
+    [[artisansMettle, 50]],
+    null,
+    "Finishing Reagents",
+    1,
+    null,
+    null,
+    null,
+    "Various Specializations",
+    "Alchemist's Lab Bench"
+  );
+  const writhefireOilRecipe = await createRecipe(
+    "Writhefire Oil",
+    writhefireOil,
+    2,
+    alchemy,
+    [
+      [awakenedFire, 1],
+      [writhebark, 1],
+      [hochenblume, 2],
+    ],
+    35,
+    "Finishing Reagents",
+    1,
+    60,
+    null,
+    null,
+    null,
+    "Alchemist's Lab Bench",
+    null,
+    [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
+  );
+  const broodSaltRecipe = await createRecipe(
+    "Brood Salt",
+    broodSalt,
+    2,
+    alchemy,
+    [
+      [awakenedFrost, 1],
+      [saxifrage, 6],
+      [hochenblume, 12],
+    ],
+    null,
+    "Finishing Reagents",
+    1,
+    300,
+    null,
+    { ChemicalSynthesis: 20 },
+    null,
+    "Alchemist's Lab Bench",
+    null,
+    [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
+  );
+  const stableFluidicDraconiumRecipe = await createRecipe(
+    "Stable Fluidic Draconium",
+    stableFluidicDraconium,
+    2,
+    alchemy,
+    [
+      [awakenedAir, 1],
+      [draconiumOre, 3],
+      [writhebark, 3],
+    ],
+    null,
+    "Finishing Reagents",
+    1,
+    300,
+    { ArtisansConsortium: "Respected" },
+    null,
+    null,
+    "Alchemist's Lab Bench",
+    null,
+    [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
+  );
+  const agitatingPotionAugmentationRecipe = await createRecipe(
+    "Agitating Potion Augmentation",
+    agitatingPotionAugmentation,
+    2,
+    alchemy,
+    [
+      [saxifrage, 5],
+      [hochenblume, 12],
+      [bubblePoppy, 6],
+    ],
+    null,
+    "Finishing Reagents",
+    1,
+    300,
+    { ArtisansConsortium: "Valued" },
+    null,
+    null,
+    "Alchemist's Lab Bench",
+    null,
+    [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
+  );
+  const reactivePhialEmbellishmentRecipe = await createRecipe(
+    "Reactive Phial Embellishment",
+    reactivePhialEmbellishment,
+    2,
+    alchemy,
+    [
+      [writhebark, 6],
+      [hochenblume, 12],
+      [bubblePoppy, 6],
+    ],
+    null,
+    "Finishing Reagents",
+    1,
+    300,
+    { ArtisansConsortium: "Valued" },
+    null,
+    null,
+    "Alchemist's Lab Bench",
+    null,
+    [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
+  );
+  const sagaciousIncenseRecipe = await createRecipe(
+    "Sagacious Incense",
+    sagaciousIncense,
+    2,
+    alchemy,
+    [
+      [primalConvergent, 1],
+      [saxifrage, 5],
+    ],
+    null,
+    "Incense",
+    1,
+    300,
+    { ArtisansConsortium: "Valued" },
+    null,
+    null,
+    "Alchemist's Lab Bench",
+    null,
+    [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
+  );
+  const exultantIncenseRecipe = await createRecipe(
+    "Exultant Incense",
+    exultantIncense,
+    2,
+    alchemy,
+    [
+      [saxifrage, 6],
+      [hochenblume, 6],
+    ],
+    null,
+    "Incense",
+    1,
+    250,
+    { MaruukCentaur: 22 },
+    null,
+    null,
+    "Alchemist's Lab Bench",
+    null,
+    [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
+  );
+  const fervidIncenseRecipe = await createRecipe(
+    "Fervid Incense",
+    fervidIncense,
+    2,
+    alchemy,
+    [
+      [writhebark, 6],
+      [hochenblume, 6],
+    ],
+    null,
+    "Incense",
+    1,
+    150,
+    null,
+    null,
+    "World Drop",
+    "Alchemist's Lab Bench",
+    "Drops from Draconic Recipe in a Bottle.",
+    [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
+  );
+  const somniferousIncenseRecipe = await createRecipe(
+    "Somniferous Incense",
+    somniferousIncense,
+    2,
+    alchemy,
+    [
+      [bubblePoppy, 6],
+      [hochenblume, 6],
+    ],
+    null,
+    "Incense",
+    1,
+    250,
+    null,
+    null,
+    "World Drop",
+    "Alchemist's Lab Bench",
+    "Drops from Draconic Recipe in a Bottle.",
+    [["Lesser Illustrious Insight", { ChemicalSynthesis: 35 }]]
+  );
+  const alacritousAlchemistStoneRecipe = await createRecipe(
+    "Alacritous Alchemist Stone",
+    alacritousAlchemistStone,
+    1,
+    alchemy,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 60],
+      [glowingTitanOrb, 1],
+      [omniumDraconis, 15],
+      [elementalPotionOfPower, 12],
+      [potionOfFrozenFocus, 12],
+    ],
+    null,
+    "Alchemist Stones",
+    1,
+    275,
+    { MaruukCentaur: 13 },
+    null,
+    null,
+    "Alchemist's Lab Bench",
+    null,
+    [
+      ["Primal Infusion", {}],
+      ["Alchemical Catalyst", { PotionMastery: 30 }],
+      ["Illustrious Insight", { PotionLore: 25 }],
+    ]
+  );
+  const sustainingAlchemistStoneRecipe = await createRecipe(
+    "Sustaining Alchemist Stone",
+    sustainingAlchemistStone,
+    1,
+    alchemy,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 60],
+      [glowingTitanOrb, 1],
+      [primalConvergent, 4],
+      [phialOfTepidVersatility, 6],
+      [phialOfElementalChaos, 6],
+    ],
+    null,
+    "Alchemist Stones",
+    1,
+    275,
+    { ValdrakkenAccord: 14 },
+    null,
+    null,
+    "Alchemist's Lab Bench",
+    null,
+    [
+      ["Primal Infusion", {}],
+      ["Alchemical Catalyst", { PhialMastery: 30 }],
+      ["Illustrious Insight", { PhialLore: 25 }],
+    ]
+  );
 
   // //blacksmithing recipes - 86 total
-  // const obsidianSearedAlloyRecipe = await createRecipe(
-  //   "Obsidian Seared Alloy",
-  //   obsidianSearedAlloy,
-  //   2,
-  //   blacksmithing,
-  //   [
-  //     [awakenedOrder, 1],
-  //     [awakenedFire, 1],
-  //     [primalFlux, 6],
-  //     [draconiumOre, 10],
-  //     [khazgoriteOre, 8],
-  //   ],
-  //   null,
-  //   "Smelting",
-  //   1,
-  //   325,
-  //   null,
-  //   null,
-  //   "Quest",
-  //   "Earth-Warder's Forge",
-  //   "Unlocked via 'A Head For Metal' quest in the Waking Shores.",
-  //   [["Lesser Illustrious Insight", { SpecialtySmithing: 40 }]]
-  // );
-  // const frostfireAlloyRecipe = await createRecipe(
-  //   "Frostfire Alloy",
-  //   frostfireAlloy,
-  //   2,
-  //   blacksmithing,
-  //   [
-  //     [awakenedFire, 1],
-  //     [awakenedFrost, 1],
-  //     [primalFlux, 4],
-  //     [draconiumOre, 5],
-  //     [khazgoriteOre, 4],
-  //   ],
-  //   25,
-  //   "Smelting",
-  //   1,
-  //   325,
-  //   null,
-  //   null,
-  //   null,
-  //   "Forge",
-  //   null,
-  //   [["Lesser Illustrious Insight", { SpecialtySmithing: 40 }]]
-  // );
-  // const infuriousAlloyRecipe = await createRecipe(
-  //   "Infurious Alloy",
-  //   infuriousAlloy,
-  //   2,
-  //   blacksmithing,
-  //   [
-  //     [awakenedIre, 2],
-  //     [primalFlux, 3],
-  //     [draconiumOre, 4],
-  //     [khazgoriteOre, 2],
-  //   ],
-  //   null,
-  //   "Smelting",
-  //   1,
-  //   200,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Forge",
-  //   "Received from Arena, BGs, or WM?",
-  //   [["Lesser Illustrious Insight", { SpecialtySmithing: 40 }]]
-  // );
-  // const primalMoltenAlloyRecipe = await createRecipe(
-  //   "Primal Molten Alloy",
-  //   primalMoltenAlloy,
-  //   2,
-  //   blacksmithing,
-  //   [
-  //     [awakenedEarth, 1],
-  //     [awakenedFire, 1],
-  //     [primalFlux, 4],
-  //     [draconiumOre, 5],
-  //     [khazgoriteOre, 4],
-  //   ],
-  //   25,
-  //   "Smelting",
-  //   1,
-  //   325,
-  //   null,
-  //   null,
-  //   null,
-  //   "Forge",
-  //   null,
-  //   [["Lesser Illustrious Insight", { SpecialtySmithing: 40 }]]
-  // );
-  // const illustriousInsightRecipeBlacksmithing = await createRecipe(
-  //   "Illustrious Insight",
-  //   illustriousInsight,
-  //   1,
-  //   blacksmithing,
-  //   [[artisansMettle, 50]],
-  //   null,
-  //   "Finishing Reagents",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Various Specializations",
-  //   "Anvil"
-  // );
-  // const armorSpikesRecipe = await createRecipe(
-  //   "Armor Spikes",
-  //   armorSpikes,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [awakenedFire, 3],
-  //     [aquaticMaw, 2],
-  //     [sereviteOre, 30],
-  //     [khazgoriteOre, 15],
-  //   ],
-  //   null,
-  //   "Optional Reagents",
-  //   1,
-  //   325,
-  //   { ArtisansConsortium: "Respected" },
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [["Lesser Illustrious Insight", { SpecialtySmithing: 40 }]]
-  // );
-  // const alliedChestplateOfGenerosityRecipe = await createRecipe(
-  //   "Allied Chestplate of Generosity",
-  //   alliedChestplateOfGenerosity,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [centaursTrophyNecklace, 1],
-  //     [obsidianSearedAlloy, 10],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   325,
-  //   null,
-  //   null,
-  //   "Raid Drop",
-  //   "Anvil",
-  //   "Drops from bosses in Vault of the Incarnates.",
-  //   [
-  //     ["Primal Infusion", { Armorsmithing: 0 }],
-  //     ["Quenching Fluid", { LargePlateArmor: 30 }],
-  //     ["Illustrious Insight", { Breastplates: 20 }],
-  //   ]
-  // );
-  // const alliedWristguardOfCompanionshipRecipe = await createRecipe(
-  //   "Allied Wristguard of Companionship",
-  //   alliedWristguardOfCompanionship,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 30],
-  //     [centaursTrophyNecklace, 1],
-  //     [obsidianSearedAlloy, 8],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   325,
-  //   null,
-  //   null,
-  //   "Raid Drop",
-  //   "Anvil",
-  //   "Drops from bosses in Vault of the Incarnates.",
-  //   [
-  //     ["Primal Infusion", { Armorsmithing: 0 }],
-  //     ["Quenching Fluid", { FineArmor: 30 }],
-  //     ["Illustrious Insight", { Vambraces: 20 }],
-  //   ]
-  // );
-  // const frostfireLegguardsOfPreparationRecipe = await createRecipe(
-  //   "Frostfire Legguards of Preparation",
-  //   frostfireLegguardsOfPreparation,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [frostySoul, 1],
-  //     [fierySoul, 1],
-  //     [frostfireAlloy, 16],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   325,
-  //   null,
-  //   null,
-  //   "Dungeon Drop",
-  //   "Anvil",
-  //   "Drops from Algeth'ar Academy & The Azure Vault.",
-  //   [
-  //     ["Primal Infusion", { Armorsmithing: 0 }],
-  //     ["Quenching Fluid", { LargePlateArmor: 30 }],
-  //     ["Illustrious Insight", { Greaves: 20 }],
-  //   ]
-  // );
-  // const infuriousHelmOfVengeanceRecipe = await createRecipe(
-  //   "Infurious Helm of Vengeance",
-  //   infuriousHelmOfVengeance,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [obsidianSearedAlloy, 2],
-  //     [infuriousAlloy, 20],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   325,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Anvil",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Primal Infusion", { Armorsmithing: 0 }],
-  //     ["Quenching Fluid", { SculptedArmor: 30 }],
-  //     ["Illustrious Insight", { Helms: 20 }],
-  //   ]
-  // );
-  // const infuriousWarbootsOfImpunityRecipe = await createRecipe(
-  //   "Infurious Warboots of Impunity",
-  //   infuriousWarbootsOfImpunity,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [largeSturdyFemur, 2],
-  //     [obsidianSearedAlloy, 2],
-  //     [infuriousAlloy, 16],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   325,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Anvil",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Primal Infusion", { Armorsmithing: 0 }],
-  //     ["Quenching Fluid", { SculptedArmor: 30 }],
-  //     ["Illustrious Insight", { Sabatons: 20 }],
-  //   ]
-  // );
-  // const primalMoltenBreastplateRecipe = await createRecipe(
-  //   "Primal Molten Breastplate",
-  //   primalMoltenBreastplate,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [primalMoltenAlloy, 16],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Breastplates: 0 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Armorsmithing: 0 }],
-  //     ["Missive", { LargePlateArmor: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { LargePlateArmor: 30 }],
-  //     ["Illustrious Insight", { Breastplates: 20 }],
-  //   ]
-  // );
-  // const primalMoltenGauntletsRecipe = await createRecipe(
-  //   "Primal Molten Gauntlets",
-  //   primalMoltenGauntlets,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [primalMoltenAlloy, 14],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Gauntlets: 0 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Armorsmithing: 0 }],
-  //     ["Missive", { FineArmor: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { FineArmor: 30 }],
-  //     ["Illustrious Insight", { Gauntlets: 20 }],
-  //   ]
-  // );
-  // const primalMoltenGreatbeltRecipe = await createRecipe(
-  //   "Primal Molten Greatbelt",
-  //   primalMoltenGreatbelt,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [primalMoltenAlloy, 13],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Belts: 0 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Armorsmithing: 0 }],
-  //     ["Missive", { FineArmor: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { FineArmor: 30 }],
-  //     ["Illustrious Insight", { Belts: 20 }],
-  //   ]
-  // );
-  // const primalMoltenHelmRecipe = await createRecipe(
-  //   "Primal Molten Helm",
-  //   primalMoltenHelm,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [primalMoltenAlloy, 16],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Helms: 0 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Armorsmithing: 0 }],
-  //     ["Missive", { SculptedArmor: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { SculptedArmor: 30 }],
-  //     ["Illustrious Insight", { Helms: 20 }],
-  //   ]
-  // );
-  // const primalMoltenLegplatesRecipe = await createRecipe(
-  //   "Primal Molten Legplates",
-  //   primalMoltenLegplates,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [primalMoltenAlloy, 16],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Greaves: 0 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Armorsmithing: 0 }],
-  //     ["Missive", { LargePlateArmor: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { LargePlateArmor: 30 }],
-  //     ["Illustrious Insight", { Greaves: 20 }],
-  //   ]
-  // );
-  // const primalMoltenPauldronsRecipe = await createRecipe(
-  //   "Primal Molten Pauldrons",
-  //   primalMoltenPauldrons,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [primalMoltenAlloy, 15],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Pauldrons: 0 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Armorsmithing: 0 }],
-  //     ["Missive", { SculptedArmor: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { SculptedArmor: 30 }],
-  //     ["Illustrious Insight", { Pauldrons: 20 }],
-  //   ]
-  // );
-  // const primalMoltenSabatonsRecipe = await createRecipe(
-  //   "Primal Molten Sabatons",
-  //   primalMoltenSabatons,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [primalMoltenAlloy, 14],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Sabatons: 0 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Armorsmithing: 0 }],
-  //     ["Missive", { SculptedArmor: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { SculptedArmor: 30 }],
-  //     ["Illustrious Insight", { Sabatons: 20 }],
-  //   ]
-  // );
-  // const primalMoltenVambracesRecipe = await createRecipe(
-  //   "Primal Molten Vambraces",
-  //   primalMoltenVambraces,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 30],
-  //     [primalMoltenAlloy, 14],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Vambraces: 0 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Armorsmithing: 0 }],
-  //     ["Missive", { FineArmor: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { FineArmor: 30 }],
-  //     ["Illustrious Insight", { Vambraces: 20 }],
-  //   ]
-  // );
-  // const unstableFrostfireBeltRecipe = await createRecipe(
-  //   "Unstable Frostfire Belt",
-  //   unstableFrostfireBelt,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [frostySoul, 1],
-  //     [fierySoul, 1],
-  //     [frostfireAlloy, 13],
-  //   ],
-  //   null,
-  //   "Armor",
-  //   1,
-  //   325,
-  //   null,
-  //   null,
-  //   "Dungeon Drop",
-  //   "Anvil",
-  //   "Drops from Algeth'ar Academy & The Azure Vault.",
-  //   [
-  //     ["Primal Infusion", { Armorsmithing: 0 }],
-  //     ["Quenching Fluid", { FineArmor: 30 }],
-  //     ["Illustrious Insight", { Belts: 20 }],
-  //   ]
-  // );
-  // const explorersExpertHelmRecipe = await createRecipe(
-  //   "Explorer's Expert Helm",
-  //   explorersExpertHelm,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 2],
-  //     [draconiumOre, 7],
-  //     [sereviteOre, 14],
-  //   ],
-  //   50,
-  //   "Armor",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { SculptedArmor: 0 }],
-  //     ["Quenching Fluid", { SculptedArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Helms: 20 }],
-  //   ]
-  // );
-  // const explorersExpertSpauldersRecipe = await createRecipe(
-  //   "Explorer's Expert Spaulders",
-  //   explorersExpertSpaulders,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 2],
-  //     [draconiumOre, 6],
-  //     [sereviteOre, 12],
-  //   ],
-  //   45,
-  //   "Armor",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { SculptedArmor: 0 }],
-  //     ["Quenching Fluid", { SculptedArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Pauldrons: 20 }],
-  //   ]
-  // );
-  // const explorersExpertGauntletsRecipe = await createRecipe(
-  //   "Explorer's Expert Gauntlets",
-  //   explorersExpertGauntlets,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 2],
-  //     [draconiumOre, 6],
-  //     [sereviteOre, 12],
-  //   ],
-  //   40,
-  //   "Armor",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { FineArmor: 0 }],
-  //     ["Quenching Fluid", { FineArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Gauntlets: 20 }],
-  //   ]
-  // );
-  // const crimsonCombatantsDraconiumArmguardsRecipe = await createRecipe(
-  //   "Crimson Combatant's Draconium Armguards",
-  //   crimsonCombatantsDraconiumArmguards,
-  //   1,
-  //   blacksmithing,
-  //   [[infuriousAlloy, 2]],
-  //   null,
-  //   "Armor",
-  //   2,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Anvil",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { FineArmor: 0 }],
-  //     ["Quenching Fluid", { FineArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Vambraces: 20 }],
-  //   ]
-  // );
-  // const crimsonCombatantsDraconiumBreastplateRecipe = await createRecipe(
-  //   "Crimson Combatant's Draconium Breastplate",
-  //   crimsonCombatantsDraconiumBreastplate,
-  //   1,
-  //   blacksmithing,
-  //   [[infuriousAlloy, 2]],
-  //   null,
-  //   "Armor",
-  //   2,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Anvil",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { LargePlateArmor: 0 }],
-  //     ["Quenching Fluid", { LargePlateArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Breastplates: 20 }],
-  //   ]
-  // );
-  // const crimsonCombatantsDraconiumGauntletsRecipe = await createRecipe(
-  //   "Crimson Combatant's Draconium Gauntlets",
-  //   crimsonCombatantsDraconiumGauntlets,
-  //   1,
-  //   blacksmithing,
-  //   [[infuriousAlloy, 2]],
-  //   null,
-  //   "Armor",
-  //   2,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Anvil",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { FineArmor: 0 }],
-  //     ["Quenching Fluid", { FineArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Gauntlets: 20 }],
-  //   ]
-  // );
-  // const crimsonCombatantsDraconiumGreavesRecipe = await createRecipe(
-  //   "Crimson Combatant's Draconium Greaves",
-  //   crimsonCombatantsDraconiumGreaves,
-  //   1,
-  //   blacksmithing,
-  //   [[infuriousAlloy, 2]],
-  //   null,
-  //   "Armor",
-  //   2,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Anvil",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { LargePlateArmor: 0 }],
-  //     ["Quenching Fluid", { LargePlateArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Greaves: 20 }],
-  //   ]
-  // );
-  // const crimsonCombatantsDraconiumHelmRecipe = await createRecipe(
-  //   "Crimson Combatant's Draconium Helm",
-  //   crimsonCombatantsDraconiumHelm,
-  //   1,
-  //   blacksmithing,
-  //   [[infuriousAlloy, 2]],
-  //   null,
-  //   "Armor",
-  //   2,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Anvil",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { SculptedArmor: 0 }],
-  //     ["Quenching Fluid", { SculptedArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Helms: 20 }],
-  //   ]
-  // );
-  // const crimsonCombatantsDraconiumPauldronsRecipe = await createRecipe(
-  //   "Crimson Combatant's Draconium Pauldrons",
-  //   crimsonCombatantsDraconiumPauldrons,
-  //   1,
-  //   blacksmithing,
-  //   [[infuriousAlloy, 2]],
-  //   null,
-  //   "Armor",
-  //   2,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Anvil",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { SculptedArmor: 0 }],
-  //     ["Quenching Fluid", { SculptedArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Pauldrons: 20 }],
-  //   ]
-  // );
-  // const crimsonCombatantsDraconiumSabatonsRecipe = await createRecipe(
-  //   "Crimson Combatant's Draconium Sabatons",
-  //   crimsonCombatantsDraconiumSabatons,
-  //   1,
-  //   blacksmithing,
-  //   [[infuriousAlloy, 2]],
-  //   null,
-  //   "Armor",
-  //   2,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Anvil",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { SculptedArmor: 0 }],
-  //     ["Quenching Fluid", { SculptedArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Sabatons: 20 }],
-  //   ]
-  // );
-  // const crimsonCombatantsDraconiumWaistguardRecipe = await createRecipe(
-  //   "Crimson Combatant's Draconium Waistguard",
-  //   crimsonCombatantsDraconiumWaistguard,
-  //   1,
-  //   blacksmithing,
-  //   [[infuriousAlloy, 2]],
-  //   null,
-  //   "Armor",
-  //   2,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Anvil",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { FineArmor: 0 }],
-  //     ["Quenching Fluid", { FineArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Belts: 20 }],
-  //   ]
-  // );
-  // const explorersExpertGreavesRecipe = await createRecipe(
-  //   "Explorer's Expert Greaves",
-  //   explorersExpertGreaves,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 2],
-  //     [draconiumOre, 7],
-  //     [sereviteOre, 14],
-  //   ],
-  //   35,
-  //   "Armor",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { LargePlateArmor: 0 }],
-  //     ["Quenching Fluid", { LargePlateArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Greaves: 20 }],
-  //   ]
-  // );
-  // const explorersExpertClaspRecipe = await createRecipe(
-  //   "Explorer's Expert Clasp",
-  //   explorersExpertClasp,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 2],
-  //     [draconiumOre, 4],
-  //     [sereviteOre, 10],
-  //   ],
-  //   30,
-  //   "Armor",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { FineArmor: 0 }],
-  //     ["Quenching Fluid", { FineArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Belts: 20 }],
-  //   ]
-  // );
-  // const explorersPlateChestguardRecipe = await createRecipe(
-  //   "Explorer's Plate Chestguard",
-  //   explorersPlateChestguard,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 2],
-  //     [draconiumOre, 3],
-  //     [sereviteOre, 10],
-  //   ],
-  //   10,
-  //   "Armor",
-  //   3,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { LargePlateArmor: 0 }],
-  //     ["Quenching Fluid", { LargePlateArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Breastplates: 20 }],
-  //   ]
-  // );
-  // const explorersPlateBootsRecipe = await createRecipe(
-  //   "Explorer's Plate Boots",
-  //   explorersPlateBoots,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 2],
-  //     [draconiumOre, 3],
-  //     [sereviteOre, 10],
-  //   ],
-  //   5,
-  //   "Armor",
-  //   3,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { SculptedArmor: 0 }],
-  //     ["Quenching Fluid", { SculptedArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Sabatons: 20 }],
-  //   ]
-  // );
-  // const explorersPlateBracersRecipe = await createRecipe(
-  //   "Explorer's Plate Bracers",
-  //   explorersPlateBracers,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 2],
-  //     [draconiumOre, 3],
-  //     [sereviteOre, 8],
-  //   ],
-  //   1,
-  //   "Armor",
-  //   3,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   "Learned by default.",
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { FineArmor: 0 }],
-  //     ["Quenching Fluid", { FineArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Vambraces: 20 }],
-  //   ]
-  // );
-  // const primalMoltenDefenderRecipe = await createRecipe(
-  //   "Primal Molten Defender",
-  //   primalMoltenDefender,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [primalMoltenAlloy, 15],
-  //   ],
-  //   null,
-  //   "Shields",
-  //   1,
-  //   280,
-  //   null,
-  //   { Shields: 0 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Armorsmithing: 0 }],
-  //     ["Missive", { LargePlateArmor: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { LargePlateArmor: 30 }],
-  //     ["Illustrious Insight", { Shields: 20 }],
-  //   ]
-  // );
-  // const shieldOfTheHearthRecipe = await createRecipe(
-  //   "Shield of the Hearth",
-  //   shieldOfTheHearth,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [earthenSoul, 1],
-  //     [glowingTitanOrb, 1],
-  //     [primalMoltenAlloy, 16],
-  //   ],
-  //   null,
-  //   "Shields",
-  //   1,
-  //   325,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Anvil",
-  //   "Apparently is 'stashed within the Dragon Isles'?",
-  //   [
-  //     ["Primal Infusion", { Armorsmithing: 0 }],
-  //     ["Quenching Fluid", { LargePlateArmor: 30 }],
-  //     ["Illustrious Insight", { Shields: 20 }],
-  //   ]
-  // );
-  // const draconiumDefenderRecipe = await createRecipe(
-  //   "Draconium Defender",
-  //   draconiumDefender,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 5],
-  //     [draconiumOre, 6],
-  //     [sereviteOre, 12],
-  //   ],
-  //   20,
-  //   "Shields",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { LargePlateArmor: 0 }],
-  //     ["Quenching Fluid", { LargePlateArmor: 30 }],
-  //     ["Lesser Illustrious Insight", { Shields: 20 }],
-  //   ]
-  // );
-  // const obsidianSearedClaymoreRecipe = await createRecipe(
-  //   "Obsidian Seared Claymore",
-  //   obsidianSearedClaymore,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 2],
-  //     [primalChaos, 160],
-  //     [obsidianSearedAlloy, 8],
-  //     [primalMoltenAlloy, 5],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   1,
-  //   300,
-  //   { ValdrakkenAccord: 14 },
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Weaponsmithing: 0 }],
-  //     ["Missive", { Blades: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { Blades: 30 }],
-  //     ["Illustrious Insight", { LongBlades: 25 }],
-  //   ]
-  // );
-  // const obsidianSearedCrusherRecipe = await createRecipe(
-  //   "Obsidian Seared Crusher",
-  //   obsidianSearedCrusher,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 2],
-  //     [primalChaos, 160],
-  //     [obsidianSearedAlloy, 7],
-  //     [primalMoltenAlloy, 7],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Anvil",
-  //   "Drops from mobs in the Obsidian Citadel.",
-  //   [
-  //     ["Primal Infusion", { Weaponsmithing: 0 }],
-  //     ["Missive", { Hafted: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { Hafted: 30 }],
-  //     ["Illustrious Insight", { MacesAndHammers: 25 }],
-  //   ]
-  // );
-  // const obsidianSearedFacesmasherRecipe = await createRecipe(
-  //   "Obsidian Seared Facesmasher",
-  //   obsidianSearedFacesmasher,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 80],
-  //     [obsidianSearedAlloy, 6],
-  //     [primalMoltenAlloy, 6],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   1,
-  //   300,
-  //   { MaruukCentaur: 13 },
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Weaponsmithing: 0 }],
-  //     ["Missive", { Blades: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { Blades: 30 }],
-  //     ["Illustrious Insight", { ShortBlades: 25 }],
-  //   ]
-  // );
-  // const obsidianSearedHalberdRecipe = await createRecipe(
-  //   "Obsidian Seared Halberd",
-  //   obsidianSearedHalberd,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 160],
-  //     [obsidianSearedAlloy, 6],
-  //     [primalMoltenAlloy, 8],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   1,
-  //   300,
-  //   { MaruukCentaur: 13 },
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Weaponsmithing: 0 }],
-  //     ["Missive", { Hafted: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { Hafted: 30 }],
-  //     ["Illustrious Insight", { AxesPicksAndPolearms: 25 }],
-  //   ]
-  // );
-  // const obsidianSearedHexswordRecipe = await createRecipe(
-  //   "Obsidian Seared Hexsword",
-  //   obsidianSearedHexsword,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 120],
-  //     [obsidianSearedAlloy, 6],
-  //     [primalMoltenAlloy, 6],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Anvil",
-  //   "Drops from mobs in the Obsidian Citadel.",
-  //   [
-  //     ["Primal Infusion", { Weaponsmithing: 0 }],
-  //     ["Missive", { Blades: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { Blades: 30 }],
-  //     ["Illustrious Insight", { LongBlades: 25 }],
-  //   ]
-  // );
-  // const obsidianSearedInvokerRecipe = await createRecipe(
-  //   "Obsidian Seared Invoker",
-  //   obsidianSearedInvoker,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 2],
-  //     [primalChaos, 160],
-  //     [obsidianSearedAlloy, 7],
-  //     [primalMoltenAlloy, 5],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   1,
-  //   300,
-  //   { ValdrakkenAccord: 14 },
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Weaponsmithing: 0 }],
-  //     ["Missive", { Hafted: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { Hafted: 30 }],
-  //     ["Illustrious Insight", { MacesAndHammers: 25 }],
-  //   ]
-  // );
-  // const obsidianSearedRuneaxeRecipe = await createRecipe(
-  //   "Obsidian Seared Runeaxe",
-  //   obsidianSearedRuneaxe,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 120],
-  //     [obsidianSearedAlloy, 6],
-  //     [primalMoltenAlloy, 6],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   1,
-  //   300,
-  //   { MaruukCentaur: 13 },
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Weaponsmithing: 0 }],
-  //     ["Missive", { Hafted: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { Hafted: 30 }],
-  //     ["Illustrious Insight", { AxesPicksAndPolearms: 25 }],
-  //   ]
-  // );
-  // const obsidianSearedSlicerRecipe = await createRecipe(
-  //   "Obsidian Seared Slicer",
-  //   obsidianSearedSlicer,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 80],
-  //     [obsidianSearedAlloy, 5],
-  //     [primalMoltenAlloy, 8],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Anvil",
-  //   "Drops from mobs in the Obsidian Citadel.",
-  //   [
-  //     ["Primal Infusion", { Weaponsmithing: 0 }],
-  //     ["Missive", { Hafted: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { Hafted: 30 }],
-  //     ["Illustrious Insight", { AxesPicksAndPolearms: 25 }],
-  //   ]
-  // );
-  // const primalMoltenGreataxeRecipe = await createRecipe(
-  //   "Primal Molten Greataxe",
-  //   primalMoltenGreataxe,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 2],
-  //     [primalChaos, 160],
-  //     [primalMoltenAlloy, 20],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   1,
-  //   300,
-  //   null,
-  //   { AxesPicksAndPolearms: 0 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Weaponsmithing: 0 }],
-  //     ["Missive", { Hafted: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { Hafted: 30 }],
-  //     ["Illustrious Insight", { AxesPicksAndPolearms: 25 }],
-  //   ]
-  // );
-  // const primalMoltenLongswordRecipe = await createRecipe(
-  //   "Primal Molten Longsword",
-  //   primalMoltenLongsword,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 80],
-  //     [primalMoltenAlloy, 17],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   1,
-  //   300,
-  //   null,
-  //   { LongBlades: 0 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Weaponsmithing: 0 }],
-  //     ["Missive", { Blades: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { Blades: 30 }],
-  //     ["Illustrious Insight", { LongBlades: 25 }],
-  //   ]
-  // );
-  // const primalMoltenMaceRecipe = await createRecipe(
-  //   "Primal Molten Mace",
-  //   primalMoltenMace,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 80],
-  //     [primalMoltenAlloy, 17],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   1,
-  //   300,
-  //   null,
-  //   { MacesAndHammers: 0 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Weaponsmithing: 0 }],
-  //     ["Missive", { Hafted: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { Hafted: 30 }],
-  //     ["Illustrious Insight", { MacesAndHammers: 25 }],
-  //   ]
-  // );
-  // const primalMoltenShortbladeRecipe = await createRecipe(
-  //   "Primal Molten Shortblade",
-  //   primalMoltenShortblade,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 80],
-  //     [primalMoltenAlloy, 17],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   1,
-  //   300,
-  //   null,
-  //   { ShortBlades: 0 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Weaponsmithing: 0 }],
-  //     ["Missive", { Blades: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { Blades: 30 }],
-  //     ["Illustrious Insight", { ShortBlades: 25 }],
-  //   ]
-  // );
-  // const primalMoltenSpellbladeRecipe = await createRecipe(
-  //   "Primal Molten Spellblade",
-  //   primalMoltenSpellblade,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 120],
-  //     [primalMoltenAlloy, 17],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   1,
-  //   300,
-  //   null,
-  //   { ShortBlades: 5 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Weaponsmithing: 0 }],
-  //     ["Missive", { Blades: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { Blades: 30 }],
-  //     ["Illustrious Insight", { ShortBlades: 25 }],
-  //   ]
-  // );
-  // const primalMoltenWarglaiveRecipe = await createRecipe(
-  //   "Primal Molten Warglaive",
-  //   primalMoltenWarglaive,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 80],
-  //     [primalMoltenAlloy, 17],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   1,
-  //   300,
-  //   null,
-  //   { LongBlades: 5 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Weaponsmithing: 0 }],
-  //     ["Missive", { Blades: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Quenching Fluid", { Blades: 30 }],
-  //     ["Illustrious Insight", { LongBlades: 25 }],
-  //   ]
-  // );
-  // const draconiumGreatMaceRecipe = await createRecipe(
-  //   "Draconium Great Mace",
-  //   draconiumGreatMace,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 6],
-  //     [draconiumOre, 10],
-  //     [sereviteOre, 20],
-  //   ],
-  //   50,
-  //   "Weapons",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { Hafted: 0 }],
-  //     ["Quenching Fluid", { Hafted: 30 }],
-  //     ["Lesser Illustrious Insight", { MacesAndHammers: 25 }],
-  //   ]
-  // );
-  // const draconiumStilettoRecipe = await createRecipe(
-  //   "Draconium Stiletto",
-  //   draconiumStiletto,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 6],
-  //     [draconiumOre, 6],
-  //     [sereviteOre, 12],
-  //   ],
-  //   45,
-  //   "Weapons",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { Blades: 0 }],
-  //     ["Quenching Fluid", { Blades: 30 }],
-  //     ["Lesser Illustrious Insight", { ShortBlades: 25 }],
-  //   ]
-  // );
-  // const draconiumGreatAxeRecipe = await createRecipe(
-  //   "Draconium Great Axe",
-  //   draconiumGreatAxe,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 6],
-  //     [draconiumOre, 10],
-  //     [sereviteOre, 20],
-  //   ],
-  //   40,
-  //   "Weapons",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { Hafted: 0 }],
-  //     ["Quenching Fluid", { Hafted: 30 }],
-  //     ["Lesser Illustrious Insight", { AxesPicksAndPolearms: 25 }],
-  //   ]
-  // );
-  // const draconiumKnucklesRecipe = await createRecipe(
-  //   "Draconium Knuckles",
-  //   draconiumKnuckles,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 6],
-  //     [draconiumOre, 6],
-  //     [sereviteOre, 12],
-  //   ],
-  //   30,
-  //   "Weapons",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { Blades: 0 }],
-  //     ["Quenching Fluid", { Blades: 30 }],
-  //     ["Lesser Illustrious Insight", { ShortBlades: 25 }],
-  //   ]
-  // );
-  // const draconiumSwordRecipe = await createRecipe(
-  //   "Draconium Sword",
-  //   draconiumSword,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 5],
-  //     [draconiumOre, 6],
-  //     [sereviteOre, 12],
-  //   ],
-  //   30,
-  //   "Weapons",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { Blades: 0 }],
-  //     ["Quenching Fluid", { Blades: 30 }],
-  //     ["Lesser Illustrious Insight", { LongBlades: 25 }],
-  //   ]
-  // );
-  // const draconiumAxeRecipe = await createRecipe(
-  //   "Draconium Axe",
-  //   draconiumAxe,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 5],
-  //     [draconiumOre, 6],
-  //     [sereviteOre, 12],
-  //   ],
-  //   25,
-  //   "Weapons",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { Hafted: 0 }],
-  //     ["Quenching Fluid", { Hafted: 30 }],
-  //     ["Lesser Illustrious Insight", { AxesPicksAndPolearms: 25 }],
-  //   ]
-  // );
-  // const draconiumDirkRecipe = await createRecipe(
-  //   "Draconium Dirk",
-  //   draconiumDirk,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 6],
-  //     [draconiumOre, 6],
-  //     [sereviteOre, 12],
-  //   ],
-  //   20,
-  //   "Weapons",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { Blades: 0 }],
-  //     ["Quenching Fluid", { Blades: 30 }],
-  //     ["Lesser Illustrious Insight", { ShortBlades: 25 }],
-  //   ]
-  // );
-  // const blackDragonTouchedHammerRecipe = await createRecipe(
-  //   "Black Dragon Touched Hammer",
-  //   blackDragonTouchedHammer,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [artisansMettle, 400],
-  //     [earthenSoul, 1],
-  //     [obsidianSearedAlloy, 7],
-  //   ],
-  //   null,
-  //   "Profession Tools and Accessories",
-  //   1,
-  //   450,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Earth-Warder's Forge",
-  //   "Dropped from Rohzor Forgesmash in the Waking Shores.",
-  //   [
-  //     ["Missive", {}],
-  //     ["Quenching Fluid", { Hafted: 30, Toolsmithing: 30 }],
-  //     ["Illustrious Insight", { MacesAndHammers: 25, SpecialtySmithing: 40 }],
-  //   ]
-  // );
-  // const khazgoriteBlacksmithsHammerRecipe = await createRecipe(
-  //   "Khaz'gorite Blacksmith's Hammer",
-  //   khazgoriteBlacksmithsHammer,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [artisansMettle, 225],
-  //     [primalFlux, 15],
-  //     [khazgoriteOre, 40],
-  //     [sereviteOre, 100],
-  //   ],
-  //   null,
-  //   "Profession Tools and Accessories",
-  //   1,
-  //   425,
-  //   null,
-  //   { MacesAndHammers: 10 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Quenching Fluid", { Hafted: 30, Toolsmithing: 30 }],
-  //     ["Illustrious Insight", { MacesAndHammers: 25, SpecialtySmithing: 40 }],
-  //   ]
-  // );
-  // const khazgoriteBlacksmithsToolboxRecipe = await createRecipe(
-  //   "Khaz'gorite Blacksmith's Toolbox",
-  //   khazgoriteBlacksmithsToolbox,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [artisansMettle, 225],
-  //     [primalFlux, 12],
-  //     [khazgoriteOre, 40],
-  //     [sereviteOre, 100],
-  //   ],
-  //   null,
-  //   "Profession Tools and Accessories",
-  //   1,
-  //   400,
-  //   null,
-  //   { Toolsmithing: 10 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Quenching Fluid", { Toolsmithing: 30 }],
-  //     ["Illustrious Insight", { SpecialtySmithing: 40 }],
-  //   ]
-  // );
-  // const khazgoriteLeatherworkersKnifeRecipe = await createRecipe(
-  //   "Khaz'gorite Leatherworker's Knife",
-  //   khazgoriteLeatherworkersKnife,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [artisansMettle, 225],
-  //     [primalFlux, 15],
-  //     [khazgoriteOre, 40],
-  //     [sereviteOre, 100],
-  //   ],
-  //   null,
-  //   "Profession Tools and Accessories",
-  //   1,
-  //   425,
-  //   { MaruukCentaur: 18 },
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
-  //     ["Illustrious Insight", { ShortBlades: 25, SpecialtySmithing: 40 }],
-  //   ]
-  // );
-  // const khazgoriteLeatherworkersToolsetRecipe = await createRecipe(
-  //   "Khaz'gorite Leatherworker's Toolset",
-  //   khazgoriteLeatherworkersToolset,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [artisansMettle, 300],
-  //     [primalFlux, 12],
-  //     [khazgoriteOre, 40],
-  //     [sereviteOre, 100],
-  //   ],
-  //   null,
-  //   "Profession Tools and Accessories",
-  //   1,
-  //   400,
-  //   { ValdrakkenAccord: 19 },
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Quenching Fluid", { Toolsmithing: 30 }],
-  //     ["Illustrious Insight", { SpecialtySmithing: 40 }],
-  //   ]
-  // );
-  // const khazgoriteNeedleSetRecipe = await createRecipe(
-  //   "Khaz'gorite Needle Set",
-  //   khazgoriteNeedleSet,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [artisansMettle, 300],
-  //     [primalFlux, 12],
-  //     [khazgoriteOre, 35],
-  //     [sereviteOre, 100],
-  //   ],
-  //   null,
-  //   "Profession Tools and Accessories",
-  //   1,
-  //   400,
-  //   { ValdrakkenAccord: 19 },
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Quenching Fluid", { Toolsmithing: 30 }],
-  //     ["Illustrious Insight", { SpecialtySmithing: 40 }],
-  //   ]
-  // );
-  // const khazgoritePickaxeRecipe = await createRecipe(
-  //   "Khaz'gorite Pickaxe",
-  //   khazgoritePickaxe,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [artisansMettle, 300],
-  //     [primalFlux, 15],
-  //     [khazgoriteOre, 45],
-  //     [sereviteOre, 100],
-  //   ],
-  //   null,
-  //   "Profession Tools and Accessories",
-  //   1,
-  //   425,
-  //   null,
-  //   { AxesPicksAndPolearms: 10 },
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Quenching Fluid", { Hafted: 30, Toolsmithing: 30 }],
-  //     [
-  //       "Illustrious Insight",
-  //       { AxesPicksAndPolearms: 25, SpecialtySmithing: 40 },
-  //     ],
-  //   ]
-  // );
-  // const khazgoriteSickleRecipe = await createRecipe(
-  //   "Khaz'gorite Sickle",
-  //   khazgoriteSickle,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [artisansMettle, 300],
-  //     [primalFlux, 15],
-  //     [khazgoriteOre, 40],
-  //     [sereviteOre, 100],
-  //   ],
-  //   null,
-  //   "Profession Tools and Accessories",
-  //   1,
-  //   425,
-  //   { ValdrakkenAccord: 19 },
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
-  //     ["Illustrious Insight", { LongBlades: 25, SpecialtySmithing: 40 }],
-  //   ]
-  // );
-  // const khazgoriteSkinningKnifeRecipe = await createRecipe(
-  //   "Khaz'gorite Skinning Knife",
-  //   khazgoriteSkinningKnife,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [artisansMettle, 300],
-  //     [primalFlux, 15],
-  //     [khazgoriteOre, 40],
-  //     [sereviteOre, 100],
-  //   ],
-  //   null,
-  //   "Profession Tools and Accessories",
-  //   1,
-  //   425,
-  //   { MaruukCentaur: 18 },
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
-  //     ["Illustrious Insight", { ShortBlades: 25, SpecialtySmithing: 40 }],
-  //   ]
-  // );
-  // const draconiumNeedleSetRecipe = await createRecipe(
-  //   "Draconium Needle Set",
-  //   draconiumNeedleSet,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 3],
-  //     [draconiumOre, 4],
-  //     [sereviteOre, 10],
-  //   ],
-  //   30,
-  //   "Profession Tools and Accessories",
-  //   2,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Quenching Fluid", { Toolsmithing: 30 }],
-  //     ["Lesser Illustrious Insight", { SpecialtySmithing: 40 }],
-  //   ]
-  // );
-  // const draconiumLeatherworkersToolsetRecipe = await createRecipe(
-  //   "Draconium Leatherworker's Toolset",
-  //   draconiumLeatherworkersToolset,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 3],
-  //     [sereviteOre, 12],
-  //     [draconiumOre, 3],
-  //   ],
-  //   25,
-  //   "Profession Tools and Accessories",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Quenching Fluid", { Toolsmithing: 30 }],
-  //     ["Lesser Illustrious Insight", { SpecialtySmithing: 40 }],
-  //   ]
-  // );
-  // const draconiumLeatherworkersKnifeRecipe = await createRecipe(
-  //   "Draconium Leatherworker's Knife",
-  //   draconiumLeatherworkersKnife,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 4],
-  //     [draconiumOre, 3],
-  //     [sereviteOre, 12],
-  //   ],
-  //   20,
-  //   "Profession Tools and Accessories",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { ShortBlades: 25, SpecialtySmithing: 40 },
-  //     ],
-  //   ]
-  // );
-  // const draconiumBlacksmithsToolboxRecipe = await createRecipe(
-  //   "Draconium Blacksmith's Toolbox",
-  //   draconiumBlacksmithsToolbox,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 3],
-  //     [sereviteOre, 12],
-  //     [draconiumOre, 3],
-  //   ],
-  //   15,
-  //   "Profession Tools and Accessories",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Quenching Fluid", { Toolsmithing: 30 }],
-  //     ["Lesser Illustrious Insight", { SpecialtySmithing: 40 }],
-  //   ]
-  // );
-  // const draconiumSkinningKnifeRecipe = await createRecipe(
-  //   "Draconium Skinning Knife",
-  //   draconiumSkinningKnife,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 4],
-  //     [draconiumOre, 3],
-  //     [sereviteOre, 10],
-  //   ],
-  //   15,
-  //   "Profession Tools and Accessories",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { ShortBlades: 25, SpecialtySmithing: 40 },
-  //     ],
-  //   ]
-  // );
-  // const draconiumSickleRecipe = await createRecipe(
-  //   "Draconium Sickle",
-  //   draconiumSickle,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 4],
-  //     [draconiumOre, 2],
-  //     [sereviteOre, 10],
-  //   ],
-  //   10,
-  //   "Profession Tools and Accessories",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
-  //     ["Lesser Illustrious Insight", { LongBlades: 25, SpecialtySmithing: 40 }],
-  //   ]
-  // );
-  // const draconiumPickaxeRecipe = await createRecipe(
-  //   "Draconium Pickaxe",
-  //   draconiumPickaxe,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 4],
-  //     [draconiumOre, 2],
-  //     [sereviteOre, 10],
-  //   ],
-  //   5,
-  //   "Profession Tools and Accessories",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Quenching Fluid", { Hafted: 30, Toolsmithing: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { AxesPicksAndPolearms: 25, SpecialtySmithing: 40 },
-  //     ],
-  //   ]
-  // );
-  // const draconiumBlacksmithsHammerRecipe = await createRecipe(
-  //   "Draconium Blacksmith's Hammer",
-  //   draconiumBlacksmithsHammer,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 4],
-  //     [draconiumOre, 2],
-  //     [sereviteOre, 10],
-  //   ],
-  //   1,
-  //   "Profession Tools and Accessories",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   "Learned by default.",
-  //   [
-  //     ["Missive", {}],
-  //     ["Quenching Fluid", { Hafted: 30, Toolsmithing: 30 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { MacesAndHammers: 25, SpecialtySmithing: 40 },
-  //     ],
-  //   ]
-  // );
-  // const mastersHammerRecipe = await createRecipe(
-  //   "Master's Hammer",
-  //   mastersHammer,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 10],
-  //     [obsidianSearedAlloy, 1],
-  //     [primalMoltenAlloy, 2],
-  //     [frostfireAlloy, 2],
-  //   ],
-  //   null,
-  //   "Consumable Tools",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Various Specializations",
-  //   "Anvil",
-  //   "Similar to Illustrious Insight - any Specialization rank that mentions Master's Hammer gives you this recipe."
-  // );
-  // const sturdyExpeditionShovelRecipe = await createRecipe(
-  //   "Sturdy Expedition Shovel",
-  //   sturdyExpeditionShovel,
-  //   2,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 2],
-  //     [sereviteOre, 10],
-  //   ],
-  //   null,
-  //   "Consumable Tools",
-  //   1,
-  //   null,
-  //   { DragonscaleExpedition: "?" },
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [["Quenching Fluid", { Toolsmithing: 30 }]]
-  // );
-  // const sereviteRepairHammerRecipe = await createRecipe(
-  //   "Serevite Repair Hammer",
-  //   sereviteRepairHammer,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 3],
-  //     [sereviteOre, 8],
-  //   ],
-  //   15,
-  //   "Consumable Tools",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [["Quenching Fluid", { Toolsmithing: 30 }]]
-  // );
-  // const sereviteSkeletonKeyRecipe = await createRecipe(
-  //   "Serevite Skeleton Key",
-  //   sereviteSkeletonKey,
-  //   5,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 3],
-  //     [sereviteOre, 20],
-  //   ],
-  //   5,
-  //   "Consumable Tools",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Anvil",
-  //   null,
-  //   [["Quenching Fluid", { Toolsmithing: 30 }]]
-  // );
-  // const primalRazorstoneRecipe = await createRecipe(
-  //   "Primal Razorstone",
-  //   primalRazorstone,
-  //   5,
-  //   blacksmithing,
-  //   [
-  //     [glossyStone, 4],
-  //     [silkenGemdust, 1],
-  //   ],
-  //   null,
-  //   "Stonework",
-  //   1,
-  //   325,
-  //   { ArtisansConsortium: "Valued" },
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { SpecialtySmithing: 40 }]]
-  // );
-  // const primalWhetstoneRecipe = await createRecipe(
-  //   "Primal Whetstone",
-  //   primalWhetstone,
-  //   5,
-  //   blacksmithing,
-  //   [
-  //     [awakenedFire, 1],
-  //     [glossyStone, 4],
-  //   ],
-  //   35,
-  //   "Stonework",
-  //   1,
-  //   325,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { SpecialtySmithing: 40 }]]
-  // );
-  // const primalWeightstoneRecipe = await createRecipe(
-  //   "Primal Weightstone",
-  //   primalWeightstone,
-  //   5,
-  //   blacksmithing,
-  //   [
-  //     [awakenedEarth, 1],
-  //     [glossyStone, 4],
-  //   ],
-  //   30,
-  //   "Stonework",
-  //   1,
-  //   325,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { SpecialtySmithing: 40 }]]
-  // );
-  // const alvinTheAnvilRecipe = await createRecipe(
-  //   "Alvin the Anvil",
-  //   alvinTheAnvil,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [earthenSoul, 1],
-  //     [primalMoltenAlloy, 6],
-  //     [frostfireAlloy, 6],
-  //     [infuriousAlloy, 6],
-  //   ],
-  //   null,
-  //   "Pets",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Anvil",
-  //   "Drops from 'Powerful Blacksmiths'?"
-  // );
-  // const prototypeExplorersBardingFrameworkRecipe = await createRecipe(
-  //   "Prototype Explorer's Barding Framework",
-  //   prototypeExplorersBardingFramework,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 5],
-  //     [primalBearSpine, 3],
-  //     [sereviteOre, 20],
-  //     [primalMoltenAlloy, 1],
-  //     [obsidianSearedAlloy, 2],
-  //   ],
-  //   null,
-  //   "Dragon Riding",
-  //   1,
-  //   null,
-  //   { MaruukCentaur: 22 },
-  //   null,
-  //   null,
-  //   "Anvil"
-  // );
-  // const prototypeRegalBardingFrameworkRecipe = await createRecipe(
-  //   "Prototype Regal Barding Framework",
-  //   prototypeRegalBardingFramework,
-  //   1,
-  //   blacksmithing,
-  //   [
-  //     [primalFlux, 5],
-  //     [mastodonTusk, 3],
-  //     [sereviteOre, 20],
-  //     [frostfireAlloy, 1],
-  //     [obsidianSearedAlloy, 2],
-  //   ],
-  //   null,
-  //   "Dragon Riding",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Anvil",
-  //   "Drops from Draconic Recipe in a Bottle."
-  // );
+  const obsidianSearedAlloyRecipe = await createRecipe(
+    "Obsidian Seared Alloy",
+    obsidianSearedAlloy,
+    2,
+    blacksmithing,
+    [
+      [awakenedOrder, 1],
+      [awakenedFire, 1],
+      [primalFlux, 6],
+      [draconiumOre, 10],
+      [khazgoriteOre, 8],
+    ],
+    null,
+    "Smelting",
+    1,
+    325,
+    null,
+    null,
+    "Quest",
+    "Earth-Warder's Forge",
+    "Unlocked via 'A Head For Metal' quest in the Waking Shores.",
+    [["Lesser Illustrious Insight", { SpecialtySmithing: 40 }]]
+  );
+  const frostfireAlloyRecipe = await createRecipe(
+    "Frostfire Alloy",
+    frostfireAlloy,
+    2,
+    blacksmithing,
+    [
+      [awakenedFire, 1],
+      [awakenedFrost, 1],
+      [primalFlux, 4],
+      [draconiumOre, 5],
+      [khazgoriteOre, 4],
+    ],
+    25,
+    "Smelting",
+    1,
+    325,
+    null,
+    null,
+    null,
+    "Forge",
+    null,
+    [["Lesser Illustrious Insight", { SpecialtySmithing: 40 }]]
+  );
+  const infuriousAlloyRecipe = await createRecipe(
+    "Infurious Alloy",
+    infuriousAlloy,
+    2,
+    blacksmithing,
+    [
+      [awakenedIre, 2],
+      [primalFlux, 3],
+      [draconiumOre, 4],
+      [khazgoriteOre, 2],
+    ],
+    null,
+    "Smelting",
+    1,
+    200,
+    null,
+    null,
+    "PvP Victory",
+    "Forge",
+    "Received from Arena, BGs, or WM?",
+    [["Lesser Illustrious Insight", { SpecialtySmithing: 40 }]]
+  );
+  const primalMoltenAlloyRecipe = await createRecipe(
+    "Primal Molten Alloy",
+    primalMoltenAlloy,
+    2,
+    blacksmithing,
+    [
+      [awakenedEarth, 1],
+      [awakenedFire, 1],
+      [primalFlux, 4],
+      [draconiumOre, 5],
+      [khazgoriteOre, 4],
+    ],
+    25,
+    "Smelting",
+    1,
+    325,
+    null,
+    null,
+    null,
+    "Forge",
+    null,
+    [["Lesser Illustrious Insight", { SpecialtySmithing: 40 }]]
+  );
+  const illustriousInsightRecipeBlacksmithing = await createRecipe(
+    "Illustrious Insight",
+    illustriousInsight,
+    1,
+    blacksmithing,
+    [[artisansMettle, 50]],
+    null,
+    "Finishing Reagents",
+    1,
+    null,
+    null,
+    null,
+    "Various Specializations",
+    "Anvil"
+  );
+  const armorSpikesRecipe = await createRecipe(
+    "Armor Spikes",
+    armorSpikes,
+    1,
+    blacksmithing,
+    [
+      [awakenedFire, 3],
+      [aquaticMaw, 2],
+      [sereviteOre, 30],
+      [khazgoriteOre, 15],
+    ],
+    null,
+    "Optional Reagents",
+    1,
+    325,
+    { ArtisansConsortium: "Respected" },
+    null,
+    null,
+    "Anvil",
+    null,
+    [["Lesser Illustrious Insight", { SpecialtySmithing: 40 }]]
+  );
+  const alliedChestplateOfGenerosityRecipe = await createRecipe(
+    "Allied Chestplate of Generosity",
+    alliedChestplateOfGenerosity,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [centaursTrophyNecklace, 1],
+      [obsidianSearedAlloy, 10],
+    ],
+    null,
+    "Armor",
+    1,
+    325,
+    null,
+    null,
+    "Raid Drop",
+    "Anvil",
+    "Drops from bosses in Vault of the Incarnates.",
+    [
+      ["Primal Infusion", { Armorsmithing: 0 }],
+      ["Quenching Fluid", { LargePlateArmor: 30 }],
+      ["Illustrious Insight", { Breastplates: 20 }],
+    ]
+  );
+  const alliedWristguardOfCompanionshipRecipe = await createRecipe(
+    "Allied Wristguard of Companionship",
+    alliedWristguardOfCompanionship,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 30],
+      [centaursTrophyNecklace, 1],
+      [obsidianSearedAlloy, 8],
+    ],
+    null,
+    "Armor",
+    1,
+    325,
+    null,
+    null,
+    "Raid Drop",
+    "Anvil",
+    "Drops from bosses in Vault of the Incarnates.",
+    [
+      ["Primal Infusion", { Armorsmithing: 0 }],
+      ["Quenching Fluid", { FineArmor: 30 }],
+      ["Illustrious Insight", { Vambraces: 20 }],
+    ]
+  );
+  const frostfireLegguardsOfPreparationRecipe = await createRecipe(
+    "Frostfire Legguards of Preparation",
+    frostfireLegguardsOfPreparation,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [frostySoul, 1],
+      [fierySoul, 1],
+      [frostfireAlloy, 16],
+    ],
+    null,
+    "Armor",
+    1,
+    325,
+    null,
+    null,
+    "Dungeon Drop",
+    "Anvil",
+    "Drops from Algeth'ar Academy & The Azure Vault.",
+    [
+      ["Primal Infusion", { Armorsmithing: 0 }],
+      ["Quenching Fluid", { LargePlateArmor: 30 }],
+      ["Illustrious Insight", { Greaves: 20 }],
+    ]
+  );
+  const infuriousHelmOfVengeanceRecipe = await createRecipe(
+    "Infurious Helm of Vengeance",
+    infuriousHelmOfVengeance,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [obsidianSearedAlloy, 2],
+      [infuriousAlloy, 20],
+    ],
+    null,
+    "Armor",
+    1,
+    325,
+    null,
+    null,
+    "PvP Victory",
+    "Anvil",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Primal Infusion", { Armorsmithing: 0 }],
+      ["Quenching Fluid", { SculptedArmor: 30 }],
+      ["Illustrious Insight", { Helms: 20 }],
+    ]
+  );
+  const infuriousWarbootsOfImpunityRecipe = await createRecipe(
+    "Infurious Warboots of Impunity",
+    infuriousWarbootsOfImpunity,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [largeSturdyFemur, 2],
+      [obsidianSearedAlloy, 2],
+      [infuriousAlloy, 16],
+    ],
+    null,
+    "Armor",
+    1,
+    325,
+    null,
+    null,
+    "PvP Victory",
+    "Anvil",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Primal Infusion", { Armorsmithing: 0 }],
+      ["Quenching Fluid", { SculptedArmor: 30 }],
+      ["Illustrious Insight", { Sabatons: 20 }],
+    ]
+  );
+  const primalMoltenBreastplateRecipe = await createRecipe(
+    "Primal Molten Breastplate",
+    primalMoltenBreastplate,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [primalMoltenAlloy, 16],
+    ],
+    null,
+    "Armor",
+    1,
+    280,
+    null,
+    { Breastplates: 0 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Armorsmithing: 0 }],
+      ["Missive", { LargePlateArmor: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { LargePlateArmor: 30 }],
+      ["Illustrious Insight", { Breastplates: 20 }],
+    ]
+  );
+  const primalMoltenGauntletsRecipe = await createRecipe(
+    "Primal Molten Gauntlets",
+    primalMoltenGauntlets,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [primalMoltenAlloy, 14],
+    ],
+    null,
+    "Armor",
+    1,
+    280,
+    null,
+    { Gauntlets: 0 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Armorsmithing: 0 }],
+      ["Missive", { FineArmor: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { FineArmor: 30 }],
+      ["Illustrious Insight", { Gauntlets: 20 }],
+    ]
+  );
+  const primalMoltenGreatbeltRecipe = await createRecipe(
+    "Primal Molten Greatbelt",
+    primalMoltenGreatbelt,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [primalMoltenAlloy, 13],
+    ],
+    null,
+    "Armor",
+    1,
+    280,
+    null,
+    { Belts: 0 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Armorsmithing: 0 }],
+      ["Missive", { FineArmor: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { FineArmor: 30 }],
+      ["Illustrious Insight", { Belts: 20 }],
+    ]
+  );
+  const primalMoltenHelmRecipe = await createRecipe(
+    "Primal Molten Helm",
+    primalMoltenHelm,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [primalMoltenAlloy, 16],
+    ],
+    null,
+    "Armor",
+    1,
+    280,
+    null,
+    { Helms: 0 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Armorsmithing: 0 }],
+      ["Missive", { SculptedArmor: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { SculptedArmor: 30 }],
+      ["Illustrious Insight", { Helms: 20 }],
+    ]
+  );
+  const primalMoltenLegplatesRecipe = await createRecipe(
+    "Primal Molten Legplates",
+    primalMoltenLegplates,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [primalMoltenAlloy, 16],
+    ],
+    null,
+    "Armor",
+    1,
+    280,
+    null,
+    { Greaves: 0 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Armorsmithing: 0 }],
+      ["Missive", { LargePlateArmor: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { LargePlateArmor: 30 }],
+      ["Illustrious Insight", { Greaves: 20 }],
+    ]
+  );
+  const primalMoltenPauldronsRecipe = await createRecipe(
+    "Primal Molten Pauldrons",
+    primalMoltenPauldrons,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [primalMoltenAlloy, 15],
+    ],
+    null,
+    "Armor",
+    1,
+    280,
+    null,
+    { Pauldrons: 0 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Armorsmithing: 0 }],
+      ["Missive", { SculptedArmor: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { SculptedArmor: 30 }],
+      ["Illustrious Insight", { Pauldrons: 20 }],
+    ]
+  );
+  const primalMoltenSabatonsRecipe = await createRecipe(
+    "Primal Molten Sabatons",
+    primalMoltenSabatons,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [primalMoltenAlloy, 14],
+    ],
+    null,
+    "Armor",
+    1,
+    280,
+    null,
+    { Sabatons: 0 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Armorsmithing: 0 }],
+      ["Missive", { SculptedArmor: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { SculptedArmor: 30 }],
+      ["Illustrious Insight", { Sabatons: 20 }],
+    ]
+  );
+  const primalMoltenVambracesRecipe = await createRecipe(
+    "Primal Molten Vambraces",
+    primalMoltenVambraces,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 30],
+      [primalMoltenAlloy, 14],
+    ],
+    null,
+    "Armor",
+    1,
+    280,
+    null,
+    { Vambraces: 0 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Armorsmithing: 0 }],
+      ["Missive", { FineArmor: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { FineArmor: 30 }],
+      ["Illustrious Insight", { Vambraces: 20 }],
+    ]
+  );
+  const unstableFrostfireBeltRecipe = await createRecipe(
+    "Unstable Frostfire Belt",
+    unstableFrostfireBelt,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [frostySoul, 1],
+      [fierySoul, 1],
+      [frostfireAlloy, 13],
+    ],
+    null,
+    "Armor",
+    1,
+    325,
+    null,
+    null,
+    "Dungeon Drop",
+    "Anvil",
+    "Drops from Algeth'ar Academy & The Azure Vault.",
+    [
+      ["Primal Infusion", { Armorsmithing: 0 }],
+      ["Quenching Fluid", { FineArmor: 30 }],
+      ["Illustrious Insight", { Belts: 20 }],
+    ]
+  );
+  const explorersExpertHelmRecipe = await createRecipe(
+    "Explorer's Expert Helm",
+    explorersExpertHelm,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 2],
+      [draconiumOre, 7],
+      [sereviteOre, 14],
+    ],
+    50,
+    "Armor",
+    2,
+    60,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { SculptedArmor: 0 }],
+      ["Quenching Fluid", { SculptedArmor: 30 }],
+      ["Lesser Illustrious Insight", { Helms: 20 }],
+    ]
+  );
+  const explorersExpertSpauldersRecipe = await createRecipe(
+    "Explorer's Expert Spaulders",
+    explorersExpertSpaulders,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 2],
+      [draconiumOre, 6],
+      [sereviteOre, 12],
+    ],
+    45,
+    "Armor",
+    2,
+    60,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { SculptedArmor: 0 }],
+      ["Quenching Fluid", { SculptedArmor: 30 }],
+      ["Lesser Illustrious Insight", { Pauldrons: 20 }],
+    ]
+  );
+  const explorersExpertGauntletsRecipe = await createRecipe(
+    "Explorer's Expert Gauntlets",
+    explorersExpertGauntlets,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 2],
+      [draconiumOre, 6],
+      [sereviteOre, 12],
+    ],
+    40,
+    "Armor",
+    2,
+    60,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { FineArmor: 0 }],
+      ["Quenching Fluid", { FineArmor: 30 }],
+      ["Lesser Illustrious Insight", { Gauntlets: 20 }],
+    ]
+  );
+  const crimsonCombatantsDraconiumArmguardsRecipe = await createRecipe(
+    "Crimson Combatant's Draconium Armguards",
+    crimsonCombatantsDraconiumArmguards,
+    1,
+    blacksmithing,
+    [[infuriousAlloy, 2]],
+    null,
+    "Armor",
+    2,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Anvil",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive", { FineArmor: 0 }],
+      ["Quenching Fluid", { FineArmor: 30 }],
+      ["Lesser Illustrious Insight", { Vambraces: 20 }],
+    ]
+  );
+  const crimsonCombatantsDraconiumBreastplateRecipe = await createRecipe(
+    "Crimson Combatant's Draconium Breastplate",
+    crimsonCombatantsDraconiumBreastplate,
+    1,
+    blacksmithing,
+    [[infuriousAlloy, 2]],
+    null,
+    "Armor",
+    2,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Anvil",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive", { LargePlateArmor: 0 }],
+      ["Quenching Fluid", { LargePlateArmor: 30 }],
+      ["Lesser Illustrious Insight", { Breastplates: 20 }],
+    ]
+  );
+  const crimsonCombatantsDraconiumGauntletsRecipe = await createRecipe(
+    "Crimson Combatant's Draconium Gauntlets",
+    crimsonCombatantsDraconiumGauntlets,
+    1,
+    blacksmithing,
+    [[infuriousAlloy, 2]],
+    null,
+    "Armor",
+    2,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Anvil",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive", { FineArmor: 0 }],
+      ["Quenching Fluid", { FineArmor: 30 }],
+      ["Lesser Illustrious Insight", { Gauntlets: 20 }],
+    ]
+  );
+  const crimsonCombatantsDraconiumGreavesRecipe = await createRecipe(
+    "Crimson Combatant's Draconium Greaves",
+    crimsonCombatantsDraconiumGreaves,
+    1,
+    blacksmithing,
+    [[infuriousAlloy, 2]],
+    null,
+    "Armor",
+    2,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Anvil",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive", { LargePlateArmor: 0 }],
+      ["Quenching Fluid", { LargePlateArmor: 30 }],
+      ["Lesser Illustrious Insight", { Greaves: 20 }],
+    ]
+  );
+  const crimsonCombatantsDraconiumHelmRecipe = await createRecipe(
+    "Crimson Combatant's Draconium Helm",
+    crimsonCombatantsDraconiumHelm,
+    1,
+    blacksmithing,
+    [[infuriousAlloy, 2]],
+    null,
+    "Armor",
+    2,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Anvil",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive", { SculptedArmor: 0 }],
+      ["Quenching Fluid", { SculptedArmor: 30 }],
+      ["Lesser Illustrious Insight", { Helms: 20 }],
+    ]
+  );
+  const crimsonCombatantsDraconiumPauldronsRecipe = await createRecipe(
+    "Crimson Combatant's Draconium Pauldrons",
+    crimsonCombatantsDraconiumPauldrons,
+    1,
+    blacksmithing,
+    [[infuriousAlloy, 2]],
+    null,
+    "Armor",
+    2,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Anvil",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive", { SculptedArmor: 0 }],
+      ["Quenching Fluid", { SculptedArmor: 30 }],
+      ["Lesser Illustrious Insight", { Pauldrons: 20 }],
+    ]
+  );
+  const crimsonCombatantsDraconiumSabatonsRecipe = await createRecipe(
+    "Crimson Combatant's Draconium Sabatons",
+    crimsonCombatantsDraconiumSabatons,
+    1,
+    blacksmithing,
+    [[infuriousAlloy, 2]],
+    null,
+    "Armor",
+    2,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Anvil",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive", { SculptedArmor: 0 }],
+      ["Quenching Fluid", { SculptedArmor: 30 }],
+      ["Lesser Illustrious Insight", { Sabatons: 20 }],
+    ]
+  );
+  const crimsonCombatantsDraconiumWaistguardRecipe = await createRecipe(
+    "Crimson Combatant's Draconium Waistguard",
+    crimsonCombatantsDraconiumWaistguard,
+    1,
+    blacksmithing,
+    [[infuriousAlloy, 2]],
+    null,
+    "Armor",
+    2,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Anvil",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive", { FineArmor: 0 }],
+      ["Quenching Fluid", { FineArmor: 30 }],
+      ["Lesser Illustrious Insight", { Belts: 20 }],
+    ]
+  );
+  const explorersExpertGreavesRecipe = await createRecipe(
+    "Explorer's Expert Greaves",
+    explorersExpertGreaves,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 2],
+      [draconiumOre, 7],
+      [sereviteOre, 14],
+    ],
+    35,
+    "Armor",
+    2,
+    60,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { LargePlateArmor: 0 }],
+      ["Quenching Fluid", { LargePlateArmor: 30 }],
+      ["Lesser Illustrious Insight", { Greaves: 20 }],
+    ]
+  );
+  const explorersExpertClaspRecipe = await createRecipe(
+    "Explorer's Expert Clasp",
+    explorersExpertClasp,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 2],
+      [draconiumOre, 4],
+      [sereviteOre, 10],
+    ],
+    30,
+    "Armor",
+    2,
+    60,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { FineArmor: 0 }],
+      ["Quenching Fluid", { FineArmor: 30 }],
+      ["Lesser Illustrious Insight", { Belts: 20 }],
+    ]
+  );
+  const explorersPlateChestguardRecipe = await createRecipe(
+    "Explorer's Plate Chestguard",
+    explorersPlateChestguard,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 2],
+      [draconiumOre, 3],
+      [sereviteOre, 10],
+    ],
+    10,
+    "Armor",
+    3,
+    40,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { LargePlateArmor: 0 }],
+      ["Quenching Fluid", { LargePlateArmor: 30 }],
+      ["Lesser Illustrious Insight", { Breastplates: 20 }],
+    ]
+  );
+  const explorersPlateBootsRecipe = await createRecipe(
+    "Explorer's Plate Boots",
+    explorersPlateBoots,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 2],
+      [draconiumOre, 3],
+      [sereviteOre, 10],
+    ],
+    5,
+    "Armor",
+    3,
+    40,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { SculptedArmor: 0 }],
+      ["Quenching Fluid", { SculptedArmor: 30 }],
+      ["Lesser Illustrious Insight", { Sabatons: 20 }],
+    ]
+  );
+  const explorersPlateBracersRecipe = await createRecipe(
+    "Explorer's Plate Bracers",
+    explorersPlateBracers,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 2],
+      [draconiumOre, 3],
+      [sereviteOre, 8],
+    ],
+    1,
+    "Armor",
+    3,
+    40,
+    null,
+    null,
+    null,
+    "Anvil",
+    "Learned by default.",
+    [
+      ["Training Matrix", {}],
+      ["Missive", { FineArmor: 0 }],
+      ["Quenching Fluid", { FineArmor: 30 }],
+      ["Lesser Illustrious Insight", { Vambraces: 20 }],
+    ]
+  );
+  const primalMoltenDefenderRecipe = await createRecipe(
+    "Primal Molten Defender",
+    primalMoltenDefender,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [primalMoltenAlloy, 15],
+    ],
+    null,
+    "Shields",
+    1,
+    280,
+    null,
+    { Shields: 0 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Armorsmithing: 0 }],
+      ["Missive", { LargePlateArmor: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { LargePlateArmor: 30 }],
+      ["Illustrious Insight", { Shields: 20 }],
+    ]
+  );
+  const shieldOfTheHearthRecipe = await createRecipe(
+    "Shield of the Hearth",
+    shieldOfTheHearth,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [earthenSoul, 1],
+      [glowingTitanOrb, 1],
+      [primalMoltenAlloy, 16],
+    ],
+    null,
+    "Shields",
+    1,
+    325,
+    null,
+    null,
+    "World Drop",
+    "Anvil",
+    "Apparently is 'stashed within the Dragon Isles'?",
+    [
+      ["Primal Infusion", { Armorsmithing: 0 }],
+      ["Quenching Fluid", { LargePlateArmor: 30 }],
+      ["Illustrious Insight", { Shields: 20 }],
+    ]
+  );
+  const draconiumDefenderRecipe = await createRecipe(
+    "Draconium Defender",
+    draconiumDefender,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 5],
+      [draconiumOre, 6],
+      [sereviteOre, 12],
+    ],
+    20,
+    "Shields",
+    2,
+    60,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { LargePlateArmor: 0 }],
+      ["Quenching Fluid", { LargePlateArmor: 30 }],
+      ["Lesser Illustrious Insight", { Shields: 20 }],
+    ]
+  );
+  const obsidianSearedClaymoreRecipe = await createRecipe(
+    "Obsidian Seared Claymore",
+    obsidianSearedClaymore,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 2],
+      [primalChaos, 160],
+      [obsidianSearedAlloy, 8],
+      [primalMoltenAlloy, 5],
+    ],
+    null,
+    "Weapons",
+    1,
+    300,
+    { ValdrakkenAccord: 14 },
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Weaponsmithing: 0 }],
+      ["Missive", { Blades: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { Blades: 30 }],
+      ["Illustrious Insight", { LongBlades: 25 }],
+    ]
+  );
+  const obsidianSearedCrusherRecipe = await createRecipe(
+    "Obsidian Seared Crusher",
+    obsidianSearedCrusher,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 2],
+      [primalChaos, 160],
+      [obsidianSearedAlloy, 7],
+      [primalMoltenAlloy, 7],
+    ],
+    null,
+    "Weapons",
+    1,
+    300,
+    null,
+    null,
+    "World Drop",
+    "Anvil",
+    "Drops from mobs in the Obsidian Citadel.",
+    [
+      ["Primal Infusion", { Weaponsmithing: 0 }],
+      ["Missive", { Hafted: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { Hafted: 30 }],
+      ["Illustrious Insight", { MacesAndHammers: 25 }],
+    ]
+  );
+  const obsidianSearedFacesmasherRecipe = await createRecipe(
+    "Obsidian Seared Facesmasher",
+    obsidianSearedFacesmasher,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 80],
+      [obsidianSearedAlloy, 6],
+      [primalMoltenAlloy, 6],
+    ],
+    null,
+    "Weapons",
+    1,
+    300,
+    { MaruukCentaur: 13 },
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Weaponsmithing: 0 }],
+      ["Missive", { Blades: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { Blades: 30 }],
+      ["Illustrious Insight", { ShortBlades: 25 }],
+    ]
+  );
+  const obsidianSearedHalberdRecipe = await createRecipe(
+    "Obsidian Seared Halberd",
+    obsidianSearedHalberd,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 160],
+      [obsidianSearedAlloy, 6],
+      [primalMoltenAlloy, 8],
+    ],
+    null,
+    "Weapons",
+    1,
+    300,
+    { MaruukCentaur: 13 },
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Weaponsmithing: 0 }],
+      ["Missive", { Hafted: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { Hafted: 30 }],
+      ["Illustrious Insight", { AxesPicksAndPolearms: 25 }],
+    ]
+  );
+  const obsidianSearedHexswordRecipe = await createRecipe(
+    "Obsidian Seared Hexsword",
+    obsidianSearedHexsword,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 120],
+      [obsidianSearedAlloy, 6],
+      [primalMoltenAlloy, 6],
+    ],
+    null,
+    "Weapons",
+    1,
+    300,
+    null,
+    null,
+    "World Drop",
+    "Anvil",
+    "Drops from mobs in the Obsidian Citadel.",
+    [
+      ["Primal Infusion", { Weaponsmithing: 0 }],
+      ["Missive", { Blades: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { Blades: 30 }],
+      ["Illustrious Insight", { LongBlades: 25 }],
+    ]
+  );
+  const obsidianSearedInvokerRecipe = await createRecipe(
+    "Obsidian Seared Invoker",
+    obsidianSearedInvoker,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 2],
+      [primalChaos, 160],
+      [obsidianSearedAlloy, 7],
+      [primalMoltenAlloy, 5],
+    ],
+    null,
+    "Weapons",
+    1,
+    300,
+    { ValdrakkenAccord: 14 },
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Weaponsmithing: 0 }],
+      ["Missive", { Hafted: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { Hafted: 30 }],
+      ["Illustrious Insight", { MacesAndHammers: 25 }],
+    ]
+  );
+  const obsidianSearedRuneaxeRecipe = await createRecipe(
+    "Obsidian Seared Runeaxe",
+    obsidianSearedRuneaxe,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 120],
+      [obsidianSearedAlloy, 6],
+      [primalMoltenAlloy, 6],
+    ],
+    null,
+    "Weapons",
+    1,
+    300,
+    { MaruukCentaur: 13 },
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Weaponsmithing: 0 }],
+      ["Missive", { Hafted: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { Hafted: 30 }],
+      ["Illustrious Insight", { AxesPicksAndPolearms: 25 }],
+    ]
+  );
+  const obsidianSearedSlicerRecipe = await createRecipe(
+    "Obsidian Seared Slicer",
+    obsidianSearedSlicer,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 80],
+      [obsidianSearedAlloy, 5],
+      [primalMoltenAlloy, 8],
+    ],
+    null,
+    "Weapons",
+    1,
+    300,
+    null,
+    null,
+    "World Drop",
+    "Anvil",
+    "Drops from mobs in the Obsidian Citadel.",
+    [
+      ["Primal Infusion", { Weaponsmithing: 0 }],
+      ["Missive", { Hafted: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { Hafted: 30 }],
+      ["Illustrious Insight", { AxesPicksAndPolearms: 25 }],
+    ]
+  );
+  const primalMoltenGreataxeRecipe = await createRecipe(
+    "Primal Molten Greataxe",
+    primalMoltenGreataxe,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 2],
+      [primalChaos, 160],
+      [primalMoltenAlloy, 20],
+    ],
+    null,
+    "Weapons",
+    1,
+    300,
+    null,
+    { AxesPicksAndPolearms: 0 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Weaponsmithing: 0 }],
+      ["Missive", { Hafted: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { Hafted: 30 }],
+      ["Illustrious Insight", { AxesPicksAndPolearms: 25 }],
+    ]
+  );
+  const primalMoltenLongswordRecipe = await createRecipe(
+    "Primal Molten Longsword",
+    primalMoltenLongsword,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 80],
+      [primalMoltenAlloy, 17],
+    ],
+    null,
+    "Weapons",
+    1,
+    300,
+    null,
+    { LongBlades: 0 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Weaponsmithing: 0 }],
+      ["Missive", { Blades: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { Blades: 30 }],
+      ["Illustrious Insight", { LongBlades: 25 }],
+    ]
+  );
+  const primalMoltenMaceRecipe = await createRecipe(
+    "Primal Molten Mace",
+    primalMoltenMace,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 80],
+      [primalMoltenAlloy, 17],
+    ],
+    null,
+    "Weapons",
+    1,
+    300,
+    null,
+    { MacesAndHammers: 0 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Weaponsmithing: 0 }],
+      ["Missive", { Hafted: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { Hafted: 30 }],
+      ["Illustrious Insight", { MacesAndHammers: 25 }],
+    ]
+  );
+  const primalMoltenShortbladeRecipe = await createRecipe(
+    "Primal Molten Shortblade",
+    primalMoltenShortblade,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 80],
+      [primalMoltenAlloy, 17],
+    ],
+    null,
+    "Weapons",
+    1,
+    300,
+    null,
+    { ShortBlades: 0 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Weaponsmithing: 0 }],
+      ["Missive", { Blades: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { Blades: 30 }],
+      ["Illustrious Insight", { ShortBlades: 25 }],
+    ]
+  );
+  const primalMoltenSpellbladeRecipe = await createRecipe(
+    "Primal Molten Spellblade",
+    primalMoltenSpellblade,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 120],
+      [primalMoltenAlloy, 17],
+    ],
+    null,
+    "Weapons",
+    1,
+    300,
+    null,
+    { ShortBlades: 5 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Weaponsmithing: 0 }],
+      ["Missive", { Blades: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { Blades: 30 }],
+      ["Illustrious Insight", { ShortBlades: 25 }],
+    ]
+  );
+  const primalMoltenWarglaiveRecipe = await createRecipe(
+    "Primal Molten Warglaive",
+    primalMoltenWarglaive,
+    1,
+    blacksmithing,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 80],
+      [primalMoltenAlloy, 17],
+    ],
+    null,
+    "Weapons",
+    1,
+    300,
+    null,
+    { LongBlades: 5 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Primal Infusion", { Weaponsmithing: 0 }],
+      ["Missive", { Blades: 0 }],
+      ["Embellishment", {}],
+      ["Quenching Fluid", { Blades: 30 }],
+      ["Illustrious Insight", { LongBlades: 25 }],
+    ]
+  );
+  const draconiumGreatMaceRecipe = await createRecipe(
+    "Draconium Great Mace",
+    draconiumGreatMace,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 6],
+      [draconiumOre, 10],
+      [sereviteOre, 20],
+    ],
+    50,
+    "Weapons",
+    2,
+    60,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { Hafted: 0 }],
+      ["Quenching Fluid", { Hafted: 30 }],
+      ["Lesser Illustrious Insight", { MacesAndHammers: 25 }],
+    ]
+  );
+  const draconiumStilettoRecipe = await createRecipe(
+    "Draconium Stiletto",
+    draconiumStiletto,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 6],
+      [draconiumOre, 6],
+      [sereviteOre, 12],
+    ],
+    45,
+    "Weapons",
+    2,
+    60,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { Blades: 0 }],
+      ["Quenching Fluid", { Blades: 30 }],
+      ["Lesser Illustrious Insight", { ShortBlades: 25 }],
+    ]
+  );
+  const draconiumGreatAxeRecipe = await createRecipe(
+    "Draconium Great Axe",
+    draconiumGreatAxe,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 6],
+      [draconiumOre, 10],
+      [sereviteOre, 20],
+    ],
+    40,
+    "Weapons",
+    2,
+    60,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { Hafted: 0 }],
+      ["Quenching Fluid", { Hafted: 30 }],
+      ["Lesser Illustrious Insight", { AxesPicksAndPolearms: 25 }],
+    ]
+  );
+  const draconiumKnucklesRecipe = await createRecipe(
+    "Draconium Knuckles",
+    draconiumKnuckles,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 6],
+      [draconiumOre, 6],
+      [sereviteOre, 12],
+    ],
+    30,
+    "Weapons",
+    2,
+    60,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { Blades: 0 }],
+      ["Quenching Fluid", { Blades: 30 }],
+      ["Lesser Illustrious Insight", { ShortBlades: 25 }],
+    ]
+  );
+  const draconiumSwordRecipe = await createRecipe(
+    "Draconium Sword",
+    draconiumSword,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 5],
+      [draconiumOre, 6],
+      [sereviteOre, 12],
+    ],
+    30,
+    "Weapons",
+    2,
+    60,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { Blades: 0 }],
+      ["Quenching Fluid", { Blades: 30 }],
+      ["Lesser Illustrious Insight", { LongBlades: 25 }],
+    ]
+  );
+  const draconiumAxeRecipe = await createRecipe(
+    "Draconium Axe",
+    draconiumAxe,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 5],
+      [draconiumOre, 6],
+      [sereviteOre, 12],
+    ],
+    25,
+    "Weapons",
+    2,
+    60,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { Hafted: 0 }],
+      ["Quenching Fluid", { Hafted: 30 }],
+      ["Lesser Illustrious Insight", { AxesPicksAndPolearms: 25 }],
+    ]
+  );
+  const draconiumDirkRecipe = await createRecipe(
+    "Draconium Dirk",
+    draconiumDirk,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 6],
+      [draconiumOre, 6],
+      [sereviteOre, 12],
+    ],
+    20,
+    "Weapons",
+    2,
+    60,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { Blades: 0 }],
+      ["Quenching Fluid", { Blades: 30 }],
+      ["Lesser Illustrious Insight", { ShortBlades: 25 }],
+    ]
+  );
+  const blackDragonTouchedHammerRecipe = await createRecipe(
+    "Black Dragon Touched Hammer",
+    blackDragonTouchedHammer,
+    1,
+    blacksmithing,
+    [
+      [artisansMettle, 400],
+      [earthenSoul, 1],
+      [obsidianSearedAlloy, 7],
+    ],
+    null,
+    "Profession Tools and Accessories",
+    1,
+    450,
+    null,
+    null,
+    "World Drop",
+    "Earth-Warder's Forge",
+    "Dropped from Rohzor Forgesmash in the Waking Shores.",
+    [
+      ["Missive", {}],
+      ["Quenching Fluid", { Hafted: 30, Toolsmithing: 30 }],
+      ["Illustrious Insight", { MacesAndHammers: 25, SpecialtySmithing: 40 }],
+    ]
+  );
+  const khazgoriteBlacksmithsHammerRecipe = await createRecipe(
+    "Khaz'gorite Blacksmith's Hammer",
+    khazgoriteBlacksmithsHammer,
+    1,
+    blacksmithing,
+    [
+      [artisansMettle, 225],
+      [primalFlux, 15],
+      [khazgoriteOre, 40],
+      [sereviteOre, 100],
+    ],
+    null,
+    "Profession Tools and Accessories",
+    1,
+    425,
+    null,
+    { MacesAndHammers: 10 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Missive", {}],
+      ["Quenching Fluid", { Hafted: 30, Toolsmithing: 30 }],
+      ["Illustrious Insight", { MacesAndHammers: 25, SpecialtySmithing: 40 }],
+    ]
+  );
+  const khazgoriteBlacksmithsToolboxRecipe = await createRecipe(
+    "Khaz'gorite Blacksmith's Toolbox",
+    khazgoriteBlacksmithsToolbox,
+    1,
+    blacksmithing,
+    [
+      [artisansMettle, 225],
+      [primalFlux, 12],
+      [khazgoriteOre, 40],
+      [sereviteOre, 100],
+    ],
+    null,
+    "Profession Tools and Accessories",
+    1,
+    400,
+    null,
+    { Toolsmithing: 10 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Quenching Fluid", { Toolsmithing: 30 }],
+      ["Illustrious Insight", { SpecialtySmithing: 40 }],
+    ]
+  );
+  const khazgoriteLeatherworkersKnifeRecipe = await createRecipe(
+    "Khaz'gorite Leatherworker's Knife",
+    khazgoriteLeatherworkersKnife,
+    1,
+    blacksmithing,
+    [
+      [artisansMettle, 225],
+      [primalFlux, 15],
+      [khazgoriteOre, 40],
+      [sereviteOre, 100],
+    ],
+    null,
+    "Profession Tools and Accessories",
+    1,
+    425,
+    { MaruukCentaur: 18 },
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Missive", {}],
+      ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
+      ["Illustrious Insight", { ShortBlades: 25, SpecialtySmithing: 40 }],
+    ]
+  );
+  const khazgoriteLeatherworkersToolsetRecipe = await createRecipe(
+    "Khaz'gorite Leatherworker's Toolset",
+    khazgoriteLeatherworkersToolset,
+    1,
+    blacksmithing,
+    [
+      [artisansMettle, 300],
+      [primalFlux, 12],
+      [khazgoriteOre, 40],
+      [sereviteOre, 100],
+    ],
+    null,
+    "Profession Tools and Accessories",
+    1,
+    400,
+    { ValdrakkenAccord: 19 },
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Quenching Fluid", { Toolsmithing: 30 }],
+      ["Illustrious Insight", { SpecialtySmithing: 40 }],
+    ]
+  );
+  const khazgoriteNeedleSetRecipe = await createRecipe(
+    "Khaz'gorite Needle Set",
+    khazgoriteNeedleSet,
+    1,
+    blacksmithing,
+    [
+      [artisansMettle, 300],
+      [primalFlux, 12],
+      [khazgoriteOre, 35],
+      [sereviteOre, 100],
+    ],
+    null,
+    "Profession Tools and Accessories",
+    1,
+    400,
+    { ValdrakkenAccord: 19 },
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Quenching Fluid", { Toolsmithing: 30 }],
+      ["Illustrious Insight", { SpecialtySmithing: 40 }],
+    ]
+  );
+  const khazgoritePickaxeRecipe = await createRecipe(
+    "Khaz'gorite Pickaxe",
+    khazgoritePickaxe,
+    1,
+    blacksmithing,
+    [
+      [artisansMettle, 300],
+      [primalFlux, 15],
+      [khazgoriteOre, 45],
+      [sereviteOre, 100],
+    ],
+    null,
+    "Profession Tools and Accessories",
+    1,
+    425,
+    null,
+    { AxesPicksAndPolearms: 10 },
+    null,
+    "Anvil",
+    null,
+    [
+      ["Missive", {}],
+      ["Quenching Fluid", { Hafted: 30, Toolsmithing: 30 }],
+      [
+        "Illustrious Insight",
+        { AxesPicksAndPolearms: 25, SpecialtySmithing: 40 },
+      ],
+    ]
+  );
+  const khazgoriteSickleRecipe = await createRecipe(
+    "Khaz'gorite Sickle",
+    khazgoriteSickle,
+    1,
+    blacksmithing,
+    [
+      [artisansMettle, 300],
+      [primalFlux, 15],
+      [khazgoriteOre, 40],
+      [sereviteOre, 100],
+    ],
+    null,
+    "Profession Tools and Accessories",
+    1,
+    425,
+    { ValdrakkenAccord: 19 },
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Missive", {}],
+      ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
+      ["Illustrious Insight", { LongBlades: 25, SpecialtySmithing: 40 }],
+    ]
+  );
+  const khazgoriteSkinningKnifeRecipe = await createRecipe(
+    "Khaz'gorite Skinning Knife",
+    khazgoriteSkinningKnife,
+    1,
+    blacksmithing,
+    [
+      [artisansMettle, 300],
+      [primalFlux, 15],
+      [khazgoriteOre, 40],
+      [sereviteOre, 100],
+    ],
+    null,
+    "Profession Tools and Accessories",
+    1,
+    425,
+    { MaruukCentaur: 18 },
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Missive", {}],
+      ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
+      ["Illustrious Insight", { ShortBlades: 25, SpecialtySmithing: 40 }],
+    ]
+  );
+  const draconiumNeedleSetRecipe = await createRecipe(
+    "Draconium Needle Set",
+    draconiumNeedleSet,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 3],
+      [draconiumOre, 4],
+      [sereviteOre, 10],
+    ],
+    30,
+    "Profession Tools and Accessories",
+    2,
+    80,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Quenching Fluid", { Toolsmithing: 30 }],
+      ["Lesser Illustrious Insight", { SpecialtySmithing: 40 }],
+    ]
+  );
+  const draconiumLeatherworkersToolsetRecipe = await createRecipe(
+    "Draconium Leatherworker's Toolset",
+    draconiumLeatherworkersToolset,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 3],
+      [sereviteOre, 12],
+      [draconiumOre, 3],
+    ],
+    25,
+    "Profession Tools and Accessories",
+    3,
+    80,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Quenching Fluid", { Toolsmithing: 30 }],
+      ["Lesser Illustrious Insight", { SpecialtySmithing: 40 }],
+    ]
+  );
+  const draconiumLeatherworkersKnifeRecipe = await createRecipe(
+    "Draconium Leatherworker's Knife",
+    draconiumLeatherworkersKnife,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 4],
+      [draconiumOre, 3],
+      [sereviteOre, 12],
+    ],
+    20,
+    "Profession Tools and Accessories",
+    3,
+    80,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Missive", {}],
+      ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { ShortBlades: 25, SpecialtySmithing: 40 },
+      ],
+    ]
+  );
+  const draconiumBlacksmithsToolboxRecipe = await createRecipe(
+    "Draconium Blacksmith's Toolbox",
+    draconiumBlacksmithsToolbox,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 3],
+      [sereviteOre, 12],
+      [draconiumOre, 3],
+    ],
+    15,
+    "Profession Tools and Accessories",
+    3,
+    80,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Quenching Fluid", { Toolsmithing: 30 }],
+      ["Lesser Illustrious Insight", { SpecialtySmithing: 40 }],
+    ]
+  );
+  const draconiumSkinningKnifeRecipe = await createRecipe(
+    "Draconium Skinning Knife",
+    draconiumSkinningKnife,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 4],
+      [draconiumOre, 3],
+      [sereviteOre, 10],
+    ],
+    15,
+    "Profession Tools and Accessories",
+    3,
+    80,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Missive", {}],
+      ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { ShortBlades: 25, SpecialtySmithing: 40 },
+      ],
+    ]
+  );
+  const draconiumSickleRecipe = await createRecipe(
+    "Draconium Sickle",
+    draconiumSickle,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 4],
+      [draconiumOre, 2],
+      [sereviteOre, 10],
+    ],
+    10,
+    "Profession Tools and Accessories",
+    3,
+    80,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Missive", {}],
+      ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
+      ["Lesser Illustrious Insight", { LongBlades: 25, SpecialtySmithing: 40 }],
+    ]
+  );
+  const draconiumPickaxeRecipe = await createRecipe(
+    "Draconium Pickaxe",
+    draconiumPickaxe,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 4],
+      [draconiumOre, 2],
+      [sereviteOre, 10],
+    ],
+    5,
+    "Profession Tools and Accessories",
+    3,
+    80,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [
+      ["Missive", {}],
+      ["Quenching Fluid", { Hafted: 30, Toolsmithing: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { AxesPicksAndPolearms: 25, SpecialtySmithing: 40 },
+      ],
+    ]
+  );
+  const draconiumBlacksmithsHammerRecipe = await createRecipe(
+    "Draconium Blacksmith's Hammer",
+    draconiumBlacksmithsHammer,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 4],
+      [draconiumOre, 2],
+      [sereviteOre, 10],
+    ],
+    1,
+    "Profession Tools and Accessories",
+    3,
+    80,
+    null,
+    null,
+    null,
+    "Anvil",
+    "Learned by default.",
+    [
+      ["Missive", {}],
+      ["Quenching Fluid", { Hafted: 30, Toolsmithing: 30 }],
+      [
+        "Lesser Illustrious Insight",
+        { MacesAndHammers: 25, SpecialtySmithing: 40 },
+      ],
+    ]
+  );
+  const mastersHammerRecipe = await createRecipe(
+    "Master's Hammer",
+    mastersHammer,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 10],
+      [obsidianSearedAlloy, 1],
+      [primalMoltenAlloy, 2],
+      [frostfireAlloy, 2],
+    ],
+    null,
+    "Consumable Tools",
+    1,
+    null,
+    null,
+    null,
+    "Various Specializations",
+    "Anvil",
+    "Similar to Illustrious Insight - any Specialization rank that mentions Master's Hammer gives you this recipe."
+  );
+  const sturdyExpeditionShovelRecipe = await createRecipe(
+    "Sturdy Expedition Shovel",
+    sturdyExpeditionShovel,
+    2,
+    blacksmithing,
+    [
+      [primalFlux, 2],
+      [sereviteOre, 10],
+    ],
+    null,
+    "Consumable Tools",
+    1,
+    null,
+    { DragonscaleExpedition: "?" },
+    null,
+    null,
+    "Anvil",
+    null,
+    [["Quenching Fluid", { Toolsmithing: 30 }]]
+  );
+  const sereviteRepairHammerRecipe = await createRecipe(
+    "Serevite Repair Hammer",
+    sereviteRepairHammer,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 3],
+      [sereviteOre, 8],
+    ],
+    15,
+    "Consumable Tools",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [["Quenching Fluid", { Toolsmithing: 30 }]]
+  );
+  const sereviteSkeletonKeyRecipe = await createRecipe(
+    "Serevite Skeleton Key",
+    sereviteSkeletonKey,
+    5,
+    blacksmithing,
+    [
+      [primalFlux, 3],
+      [sereviteOre, 20],
+    ],
+    5,
+    "Consumable Tools",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Anvil",
+    null,
+    [["Quenching Fluid", { Toolsmithing: 30 }]]
+  );
+  const primalRazorstoneRecipe = await createRecipe(
+    "Primal Razorstone",
+    primalRazorstone,
+    5,
+    blacksmithing,
+    [
+      [glossyStone, 4],
+      [silkenGemdust, 1],
+    ],
+    null,
+    "Stonework",
+    1,
+    325,
+    { ArtisansConsortium: "Valued" },
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { SpecialtySmithing: 40 }]]
+  );
+  const primalWhetstoneRecipe = await createRecipe(
+    "Primal Whetstone",
+    primalWhetstone,
+    5,
+    blacksmithing,
+    [
+      [awakenedFire, 1],
+      [glossyStone, 4],
+    ],
+    35,
+    "Stonework",
+    1,
+    325,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { SpecialtySmithing: 40 }]]
+  );
+  const primalWeightstoneRecipe = await createRecipe(
+    "Primal Weightstone",
+    primalWeightstone,
+    5,
+    blacksmithing,
+    [
+      [awakenedEarth, 1],
+      [glossyStone, 4],
+    ],
+    30,
+    "Stonework",
+    1,
+    325,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { SpecialtySmithing: 40 }]]
+  );
+  const alvinTheAnvilRecipe = await createRecipe(
+    "Alvin the Anvil",
+    alvinTheAnvil,
+    1,
+    blacksmithing,
+    [
+      [earthenSoul, 1],
+      [primalMoltenAlloy, 6],
+      [frostfireAlloy, 6],
+      [infuriousAlloy, 6],
+    ],
+    null,
+    "Pets",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Anvil",
+    "Drops from 'Powerful Blacksmiths'?"
+  );
+  const prototypeExplorersBardingFrameworkRecipe = await createRecipe(
+    "Prototype Explorer's Barding Framework",
+    prototypeExplorersBardingFramework,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 5],
+      [primalBearSpine, 3],
+      [sereviteOre, 20],
+      [primalMoltenAlloy, 1],
+      [obsidianSearedAlloy, 2],
+    ],
+    null,
+    "Dragon Riding",
+    1,
+    null,
+    { MaruukCentaur: 22 },
+    null,
+    null,
+    "Anvil"
+  );
+  const prototypeRegalBardingFrameworkRecipe = await createRecipe(
+    "Prototype Regal Barding Framework",
+    prototypeRegalBardingFramework,
+    1,
+    blacksmithing,
+    [
+      [primalFlux, 5],
+      [mastodonTusk, 3],
+      [sereviteOre, 20],
+      [frostfireAlloy, 1],
+      [obsidianSearedAlloy, 2],
+    ],
+    null,
+    "Dragon Riding",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Anvil",
+    "Drops from Draconic Recipe in a Bottle."
+  );
 
   // //enchanting recipes - 68 total
-  // const illustriousInsightRecipeEnchanting = await createRecipe(
-  //   "Illustrious Insight",
-  //   illustriousInsight,
-  //   1,
-  //   enchanting,
-  //   [[artisansMettle, 50]],
-  //   null,
-  //   "Finishing Reagents",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Various Specializations",
-  //   "Enchanter's Lectern"
-  // );
-  // const gracefulAvoidanceRecipe = await createRecipe(
-  //   "Graceful Avoidance",
-  //   gracefulAvoidance,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 8],
-  //     [vibrantShard, 3],
-  //   ],
-  //   null,
-  //   "Cloak Enchantments",
-  //   1,
-  //   400,
-  //   { DragonscaleExpedition: 9 },
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Adaptive: 30 }]]
-  // );
-  // const homeboundSpeedRecipe = await createRecipe(
-  //   "Homebound Speed",
-  //   homeboundSpeed,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 8],
-  //     [vibrantShard, 3],
-  //   ],
-  //   null,
-  //   "Cloak Enchantments",
-  //   1,
-  //   400,
-  //   { ValdrakkenAccord: 11 },
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Adaptive: 30 }]]
-  // );
-  // const regenerativeLeechRecipe = await createRecipe(
-  //   "Regenerative Leech",
-  //   regenerativeLeech,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 8],
-  //     [vibrantShard, 3],
-  //   ],
-  //   null,
-  //   "Cloak Enchantments",
-  //   1,
-  //   400,
-  //   { IskaaraTuskarr: 10 },
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Adaptive: 30 }]]
-  // );
-  // const writOfAvoidanceCloakRecipe = await createRecipe(
-  //   "Writ of Avoidance",
-  //   writOfAvoidanceCloak,
-  //   1,
-  //   enchanting,
-  //   [[chromaticDust, 12]],
-  //   25,
-  //   "Cloak Enchantments",
-  //   1,
-  //   200,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Adaptive: 30 }]]
-  // );
-  // const writOfLeechCloakRecipe = await createRecipe(
-  //   "Writ of Leech",
-  //   writOfLeechCloak,
-  //   1,
-  //   enchanting,
-  //   [[chromaticDust, 12]],
-  //   25,
-  //   "Cloak Enchantments",
-  //   1,
-  //   200,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Adaptive: 30 }]]
-  // );
-  // const writOfSpeedCloakRecipe = await createRecipe(
-  //   "Writ of Speed",
-  //   writOfSpeedCloak,
-  //   1,
-  //   enchanting,
-  //   [[chromaticDust, 12]],
-  //   25,
-  //   "Cloak Enchantments",
-  //   1,
-  //   200,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Adaptive: 30 }]]
-  // );
-  // const acceleratedAgilityRecipe = await createRecipe(
-  //   "Accelerated Agility",
-  //   acceleratedAgility,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [vibrantShard, 3],
-  //     [resonantCrystal, 2],
-  //   ],
-  //   null,
-  //   "Chest Enchantments",
-  //   1,
-  //   400,
-  //   { IskaaraTuskarr: 10 },
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
-  // );
-  // const reserveOfIntellectRecipe = await createRecipe(
-  //   "Reserve of Intellect",
-  //   reserveOfIntellect,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [vibrantShard, 4],
-  //     [resonantCrystal, 1],
-  //   ],
-  //   null,
-  //   "Chest Enchantments",
-  //   1,
-  //   400,
-  //   null,
-  //   { MagicalReinforcement: 20 },
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
-  // );
-  // const sustainedStrengthRecipe = await createRecipe(
-  //   "Sustained Strength",
-  //   sustainedStrength,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [vibrantShard, 4],
-  //     [resonantCrystal, 2],
-  //   ],
-  //   null,
-  //   "Chest Enchantments",
-  //   1,
-  //   400,
-  //   { MaruukCentaur: 8 },
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
-  // );
-  // const wakingStatsRecipe = await createRecipe(
-  //   "Waking Stats",
-  //   wakingStats,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 8],
-  //     [vibrantShard, 3],
-  //   ],
-  //   null,
-  //   "Chest Enchantments",
-  //   1,
-  //   350,
-  //   null,
-  //   { MagicalReinforcement: 0 },
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
-  // );
-  // const devotionOfAvoidanceRecipe = await createRecipe(
-  //   "Devotion of Avoidance",
-  //   devotionOfAvoidance,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 5],
-  //     [vibrantShard, 4],
-  //   ],
-  //   null,
-  //   "Bracer Enchantments",
-  //   1,
-  //   425,
-  //   null,
-  //   { Adaptive: 0 },
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Adaptive: 30 }]]
-  // );
-  // const devotionOfLeechRecipe = await createRecipe(
-  //   "Devotion of Leech",
-  //   devotionOfLeech,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 5],
-  //     [vibrantShard, 4],
-  //   ],
-  //   null,
-  //   "Bracer Enchantments",
-  //   1,
-  //   425,
-  //   null,
-  //   { Adaptive: 10 },
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Adaptive: 30 }]]
-  // );
-  // const devotionOfSpeedRecipe = await createRecipe(
-  //   "Devotion of Speed",
-  //   devotionOfSpeed,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 5],
-  //     [vibrantShard, 4],
-  //   ],
-  //   null,
-  //   "Bracer Enchantments",
-  //   1,
-  //   425,
-  //   null,
-  //   { Adaptive: 20 },
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Adaptive: 30 }]]
-  // );
-  // const writOfAvoidanceBracerRecipe = await createRecipe(
-  //   "Writ of Avoidance",
-  //   writOfAvoidanceBracer,
-  //   1,
-  //   enchanting,
-  //   [[vibrantShard, 1]],
-  //   15,
-  //   "Bracer Enchantments",
-  //   1,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Adaptive: 30 }]]
-  // );
-  // const writOfLeechBracerRecipe = await createRecipe(
-  //   "Writ of Leech",
-  //   writOfLeechBracer,
-  //   1,
-  //   enchanting,
-  //   [[vibrantShard, 1]],
-  //   15,
-  //   "Bracer Enchantments",
-  //   1,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Adaptive: 30 }]]
-  // );
-  // const writOfSpeedBracerRecipe = await createRecipe(
-  //   "Writ of Speed",
-  //   writOfSpeedBracer,
-  //   1,
-  //   enchanting,
-  //   [[vibrantShard, 1]],
-  //   15,
-  //   "Bracer Enchantments",
-  //   1,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Adaptive: 30 }]]
-  // );
-  // const plainsrunnersBreezeRecipe = await createRecipe(
-  //   "Plainsrunner's Breeze",
-  //   plainsrunnersBreeze,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [vibrantShard, 4],
-  //     [awakenedAir, 1],
-  //     [awakenedEarth, 1],
-  //   ],
-  //   null,
-  //   "Boot Enchantments",
-  //   1,
-  //   450,
-  //   { MaruukCentaur: 8 },
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Earthen: 10, Wafting: 10 }]]
-  // );
-  // const ridersReassuranceRecipe = await createRecipe(
-  //   "Rider's Reassurance",
-  //   ridersReassurance,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [vibrantShard, 4],
-  //     [awakenedAir, 1],
-  //     [awakenedEarth, 1],
-  //   ],
-  //   null,
-  //   "Boot Enchantments",
-  //   1,
-  //   450,
-  //   { DragonscaleExpedition: 9 },
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Earthen: 10, Wafting: 10 }]]
-  // );
-  // const watchersLoamRecipe = await createRecipe(
-  //   "Watcher's Loam",
-  //   watchersLoam,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [vibrantShard, 4],
-  //     [awakenedAir, 1],
-  //     [awakenedEarth, 1],
-  //   ],
-  //   null,
-  //   "Boot Enchantments",
-  //   1,
-  //   450,
-  //   { ValdrakkenAccord: 11 },
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Earthen: 10, Wafting: 10 }]]
-  // );
-  // const devotionOfCriticalStrikeRecipe = await createRecipe(
-  //   "Devotion of Critical Strike",
-  //   devotionOfCriticalStrike,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 5],
-  //     [vibrantShard, 3],
-  //   ],
-  //   35,
-  //   "Ring Enchantments",
-  //   1,
-  //   425,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
-  // );
-  // const devotionOfHasteRecipe = await createRecipe(
-  //   "Devotion of Haste",
-  //   devotionOfHaste,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 5],
-  //     [vibrantShard, 3],
-  //   ],
-  //   35,
-  //   "Ring Enchantments",
-  //   1,
-  //   425,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
-  // );
-  // const devotionOfMasteryRecipe = await createRecipe(
-  //   "Devotion of Mastery",
-  //   devotionOfMastery,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 5],
-  //     [vibrantShard, 3],
-  //   ],
-  //   35,
-  //   "Ring Enchantments",
-  //   1,
-  //   425,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
-  // );
-  // const devotionOfVersatilityRecipe = await createRecipe(
-  //   "Devotion of Versatility",
-  //   devotionOfVersatility,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 5],
-  //     [vibrantShard, 3],
-  //   ],
-  //   30,
-  //   "Ring Enchantments",
-  //   1,
-  //   425,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
-  // );
-  // const writOfCriticalStrikeRecipe = await createRecipe(
-  //   "Writ of Critical Strike",
-  //   writOfCriticalStrike,
-  //   1,
-  //   enchanting,
-  //   [[chromaticDust, 3]],
-  //   5,
-  //   "Ring Enchantments",
-  //   1,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
-  // );
-  // const writOfHasteRecipe = await createRecipe(
-  //   "Writ of Haste",
-  //   writOfHaste,
-  //   1,
-  //   enchanting,
-  //   [[chromaticDust, 3]],
-  //   5,
-  //   "Ring Enchantments",
-  //   1,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
-  // );
-  // const writOfMasteryRecipe = await createRecipe(
-  //   "Writ of Mastery",
-  //   writOfMastery,
-  //   1,
-  //   enchanting,
-  //   [[chromaticDust, 3]],
-  //   5,
-  //   "Ring Enchantments",
-  //   1,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
-  // );
-  // const writOfVersatilityRecipe = await createRecipe(
-  //   "Writ of Versatility",
-  //   writOfHaste,
-  //   1,
-  //   enchanting,
-  //   [[chromaticDust, 3]],
-  //   1,
-  //   "Ring Enchantments",
-  //   1,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Learned by default.",
-  //   [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
-  // );
-  // const burningDevotionRecipe = await createRecipe(
-  //   "Burning Devotion",
-  //   burningDevotion,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [vibrantShard, 5],
-  //     [resonantCrystal, 4],
-  //     [awakenedFire, 6],
-  //     [glowingTitanOrb, 3],
-  //   ],
-  //   null,
-  //   "Weapon Enchantments",
-  //   1,
-  //   425,
-  //   null,
-  //   { Burning: 0 },
-  //   null,
-  //   null,
-  //   null,
-  //   [["Illustrious Insight", { Burning: 10 }]]
-  // );
-  // const earthenDevotionRecipe = await createRecipe(
-  //   "Earthen Devotion",
-  //   earthenDevotion,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [vibrantShard, 5],
-  //     [resonantCrystal, 4],
-  //     [awakenedEarth, 6],
-  //     [glowingTitanOrb, 3],
-  //   ],
-  //   null,
-  //   "Weapon Enchantments",
-  //   1,
-  //   425,
-  //   null,
-  //   { Earthen: 0 },
-  //   null,
-  //   null,
-  //   null,
-  //   [["Illustrious Insight", { Earthen: 10 }]]
-  // );
-  // const frozenDevotionRecipe = await createRecipe(
-  //   "Frozen Devotion",
-  //   frozenDevotion,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [vibrantShard, 5],
-  //     [resonantCrystal, 4],
-  //     [awakenedFrost, 6],
-  //     [glowingTitanOrb, 3],
-  //   ],
-  //   null,
-  //   "Weapon Enchantments",
-  //   1,
-  //   425,
-  //   null,
-  //   { Frozen: 0 },
-  //   null,
-  //   null,
-  //   null,
-  //   [["Illustrious Insight", { Frozen: 10 }]]
-  // );
-  // const sophicDevotionRecipe = await createRecipe(
-  //   "Sophic Devotion",
-  //   sophicDevotion,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [vibrantShard, 5],
-  //     [resonantCrystal, 4],
-  //     [awakenedOrder, 4],
-  //     [glowingTitanOrb, 3],
-  //   ],
-  //   null,
-  //   "Weapon Enchantments",
-  //   1,
-  //   425,
-  //   null,
-  //   { Sophic: 0 },
-  //   null,
-  //   null,
-  //   null,
-  //   [["Illustrious Insight", { Sophic: 10 }]]
-  // );
-  // const waftingDevotionRecipe = await createRecipe(
-  //   "Wafting Devotion",
-  //   waftingDevotion,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [vibrantShard, 5],
-  //     [resonantCrystal, 4],
-  //     [awakenedAir, 6],
-  //     [glowingTitanOrb, 3],
-  //   ],
-  //   null,
-  //   "Weapon Enchantments",
-  //   1,
-  //   425,
-  //   null,
-  //   { Wafting: 0 },
-  //   null,
-  //   null,
-  //   null,
-  //   [["Illustrious Insight", { Wafting: 10 }]]
-  // );
-  // const burningWritRecipe = await createRecipe(
-  //   "Burning Writ",
-  //   burningWrit,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 15],
-  //     [resonantCrystal, 2],
-  //     [awakenedFire, 4],
-  //   ],
-  //   50,
-  //   "Weapon Enchantments",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Illustrious Insight", { Burning: 10 }]]
-  // );
-  // const earthenWritRecipe = await createRecipe(
-  //   "Earthen Writ",
-  //   earthenWrit,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 15],
-  //     [resonantCrystal, 2],
-  //     [awakenedEarth, 4],
-  //   ],
-  //   50,
-  //   "Weapon Enchantments",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Illustrious Insight", { Earthen: 10 }]]
-  // );
-  // const frozenWritRecipe = await createRecipe(
-  //   "Frozen Writ",
-  //   frozenWrit,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 15],
-  //     [resonantCrystal, 2],
-  //     [awakenedFrost, 4],
-  //   ],
-  //   50,
-  //   "Weapon Enchantments",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Illustrious Insight", { Frozen: 10 }]]
-  // );
-  // const sophicWritRecipe = await createRecipe(
-  //   "Sophic Writ",
-  //   sophicWrit,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 15],
-  //     [resonantCrystal, 2],
-  //     [awakenedOrder, 3],
-  //   ],
-  //   50,
-  //   "Weapon Enchantments",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Illustrious Insight", { Sophic: 10 }]]
-  // );
-  // const waftingWritRecipe = await createRecipe(
-  //   "Wafting Writ",
-  //   waftingWrit,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 15],
-  //     [resonantCrystal, 2],
-  //     [awakenedAir, 4],
-  //   ],
-  //   50,
-  //   "Weapon Enchantments",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Illustrious Insight", { Wafting: 10 }]]
-  // );
-  // const draconicDeftnessRecipe = await createRecipe(
-  //   "Draconic Deftness",
-  //   draconicDeftness,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [vibrantShard, 4],
-  //     [resonantCrystal, 2],
-  //     [iridescentPlume, 3],
-  //   ],
-  //   null,
-  //   "Profession Tool Enchantments",
-  //   1,
-  //   400,
-  //   { ArtisansConsortium: "Valued" },
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Illustrious Insight", { Artistry: 30 }]]
-  // );
-  // const draconicFinesseRecipe = await createRecipe(
-  //   "Draconic Finesse",
-  //   draconicFinesse,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [vibrantShard, 4],
-  //     [resonantCrystal, 2],
-  //     [iridescentPlume, 3],
-  //   ],
-  //   null,
-  //   "Profession Tool Enchantments",
-  //   1,
-  //   400,
-  //   { ArtisansConsortium: "Valued" },
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Illustrious Insight", { Artistry: 30 }]]
-  // );
-  // const draconicInspirationRecipe = await createRecipe(
-  //   "Draconic Inspiration",
-  //   draconicInspiration,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [vibrantShard, 4],
-  //     [resonantCrystal, 2],
-  //     [iridescentPlume, 3],
-  //   ],
-  //   null,
-  //   "Profession Tool Enchantments",
-  //   1,
-  //   400,
-  //   null,
-  //   { Artistry: 0 },
-  //   null,
-  //   null,
-  //   null,
-  //   [["Illustrious Insight", { Artistry: 30 }]]
-  // );
-  // const draconicPerceptionRecipe = await createRecipe(
-  //   "Draconic Perception",
-  //   draconicPerception,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [vibrantShard, 4],
-  //     [resonantCrystal, 2],
-  //     [iridescentPlume, 3],
-  //   ],
-  //   null,
-  //   "Profession Tool Enchantments",
-  //   1,
-  //   400,
-  //   { ArtisansConsortium: "Valued" },
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Illustrious Insight", { Artistry: 30 }]]
-  // );
-  // const draconicResourcefulnessRecipe = await createRecipe(
-  //   "Draconic Resourcefulness",
-  //   draconicResourcefulness,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [vibrantShard, 4],
-  //     [resonantCrystal, 2],
-  //     [iridescentPlume, 3],
-  //   ],
-  //   null,
-  //   "Profession Tool Enchantments",
-  //   1,
-  //   400,
-  //   null,
-  //   { Artistry: 15 },
-  //   null,
-  //   null,
-  //   null,
-  //   [["Illustrious Insight", { Artistry: 30 }]]
-  // );
-  // const torchOfPrimalAwakeningRecipe = await createRecipe(
-  //   "Torch of Primal Awakening",
-  //   torchOfPrimalAwakening,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 120],
-  //     [vibrantShard, 2],
-  //     [resonantCrystal, 3],
-  //     [runedWrithebark, 2],
-  //     [primalMoltenAlloy, 2],
-  //   ],
-  //   null,
-  //   "Rods and Wands",
-  //   1,
-  //   265,
-  //   null,
-  //   { RodsAndWands: 30 },
-  //   null,
-  //   "Enchanter's Lectern",
-  //   null,
-  //   [
-  //     ["Missive", { RodsAndWands: 0 }],
-  //     ["Primal Infusion", { RodsAndWands: 20 }],
-  //     ["Embellishment", {}],
-  //     ["Illustrious Insight", { RodsAndWands: 45 }],
-  //   ]
-  // );
-  // const runedKhazgoriteRodRecipe = await createRecipe(
-  //   "Runed Khaz'gorite Rod",
-  //   runedKhazgoriteRod,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [artisansMettle, 300],
-  //     [vibrantShard, 5],
-  //     [resonantCrystal, 1],
-  //     [khazgoriteOre, 4],
-  //     [runedWrithebark, 2],
-  //   ],
-  //   null,
-  //   "Rods and Wands",
-  //   1,
-  //   350,
-  //   null,
-  //   { RodsAndWands: 10 },
-  //   null,
-  //   "Enchanter's Lectern",
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Illustrious Insight", { RodsAndWands: 45 }],
-  //   ]
-  // );
-  // const runedDraconiumRodRecipe = await createRecipe(
-  //   "Runed Draconium Rod",
-  //   runedDraconiumRod,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 4],
-  //     [draconiumOre, 3],
-  //     [writhebark, 2],
-  //   ],
-  //   10,
-  //   "Rods and Wands",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   "Enchanter's Lectern",
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Lesser Illustrious Insight", { RodsAndWands: 45 }],
-  //   ]
-  // );
-  // const enchantedWrithebarkWandRecipe = await createRecipe(
-  //   "Enchanted Writhebark Wand",
-  //   enchantedWrithebarkWand,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 6],
-  //     [writhebark, 2],
-  //   ],
-  //   5,
-  //   "Rods and Wands",
-  //   3,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   "Enchanter's Lectern",
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { RodsAndWands: 0 }],
-  //     ["Lesser Illustrious Insight", { RodsAndWands: 45 }],
-  //   ]
-  // );
-  // const runedSereviteRodRecipe = await createRecipe(
-  //   "Runed Serevite Rod",
-  //   runedSereviteRod,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 3],
-  //     [sereviteRod, 1],
-  //   ],
-  //   1,
-  //   "Rods and Wands",
-  //   1,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   "Enchanter's Lectern",
-  //   "Learned by default.",
-  //   [
-  //     ["Missive", {}],
-  //     ["Lesser Illustrious Insight", { RodsAndWands: 45 }],
-  //   ]
-  // );
-  // const illusionPrimalAirRecipe = await createRecipe(
-  //   "Illusion: Primal Air",
-  //   illusionPrimalAir,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [resonantCrystal, 2],
-  //     [awakenedAir, 20],
-  //   ],
-  //   null,
-  //   "Illusory Goods",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Enchanter's Lectern",
-  //   "Drops during Primal Storms."
-  // );
-  // const illusionPrimalEarthRecipe = await createRecipe(
-  //   "Illusion: Primal Earth",
-  //   illusionPrimalEarth,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [resonantCrystal, 2],
-  //     [awakenedEarth, 20],
-  //   ],
-  //   null,
-  //   "Illusory Goods",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Enchanter's Lectern",
-  //   "Drops during Primal Storms."
-  // );
-  // const illusionPrimalFireRecipe = await createRecipe(
-  //   "Illusion: Primal Fire",
-  //   illusionPrimalFire,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [resonantCrystal, 2],
-  //     [awakenedFire, 20],
-  //   ],
-  //   null,
-  //   "Illusory Goods",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Enchanter's Lectern",
-  //   "Drops during Primal Storms."
-  // );
-  // const illusionPrimalFrostRecipe = await createRecipe(
-  //   "Illusion: Primal Frost",
-  //   illusionPrimalFrost,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [resonantCrystal, 2],
-  //     [awakenedFrost, 20],
-  //   ],
-  //   null,
-  //   "Illusory Goods",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Enchanter's Lectern",
-  //   "Drops during Primal Storms."
-  // );
-  // const illusionPrimalMasteryRecipe = await createRecipe(
-  //   "Illusion: Primal Mastery",
-  //   illusionPrimalMastery,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [resonantCrystal, 5],
-  //     [awakenedAir, 5],
-  //     [awakenedEarth, 5],
-  //     [awakenedFire, 5],
-  //     [awakenedFrost, 5],
-  //   ],
-  //   null,
-  //   "Illusory Goods",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Raid Drop",
-  //   "Enchanter's Lectern",
-  //   "Drops from Kurog Grimtotem in Vault of the Incarnates."
-  // );
-  // const primalInvocationExtractRecipe = await createRecipe(
-  //   "Primal Invocation Extract",
-  //   primalInvocationExtract,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [awakenedAir, 1],
-  //     [awakenedEarth, 1],
-  //     [awakenedFire, 1],
-  //     [awakenedFrost, 1],
-  //     [awakenedOrder, 1],
-  //   ],
-  //   null,
-  //   "Illusory Goods",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   "Other",
-  //   "Enchanter's Lectern",
-  //   "Received from 'Primal Extraction - Glimmers of Insight'?",
-  //   [
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { Burning: 10, Earthen: 10, Sophic: 10, Frozen: 10, Wafting: 10 },
-  //     ],
-  //   ]
-  // );
-  // const khadgarsDisenchantingRodRecipe = await createRecipe(
-  //   "Khadgar's Disenchanting Rod",
-  //   khadgarsDisenchantingRod,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 12],
-  //     [vibrantShard, 6],
-  //     [resonantCrystal, 3],
-  //   ],
-  //   null,
-  //   "Illusory Goods",
-  //   1,
-  //   null,
-  //   null,
-  //   { IllusoryGoods: 30 },
-  //   null,
-  //   "Enchanter's Lectern"
-  // );
-  // const illusoryAdornmentOrderRecipe = await createRecipe(
-  //   "Illusory Adornment: Order",
-  //   illusoryAdornmentOrder,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 2],
-  //     [rousingOrder, 2],
-  //   ],
-  //   null,
-  //   "Illusory Goods",
-  //   1,
-  //   275,
-  //   null,
-  //   { IllusoryGoods: 20 },
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Sophic: 10 }]]
-  // );
-  // const illusoryAdornmentAirRecipe = await createRecipe(
-  //   "Illusory Adornment: Air",
-  //   illusoryAdornmentAir,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 2],
-  //     [rousingAir, 2],
-  //   ],
-  //   40,
-  //   "Illusory Goods",
-  //   1,
-  //   275,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Wafting: 10 }]]
-  // );
-  // const illusoryAdornmentEarthRecipe = await createRecipe(
-  //   "Illusory Adornment: Earth",
-  //   illusoryAdornmentEarth,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 2],
-  //     [rousingEarth, 2],
-  //   ],
-  //   40,
-  //   "Illusory Goods",
-  //   1,
-  //   275,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Earthen: 10 }]]
-  // );
-  // const illusoryAdornmentFireRecipe = await createRecipe(
-  //   "Illusory Adornment: Fire",
-  //   illusoryAdornmentFire,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 2],
-  //     [rousingFire, 2],
-  //   ],
-  //   40,
-  //   "Illusory Goods",
-  //   1,
-  //   275,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Burning: 10 }]]
-  // );
-  // const illusoryAdornmentFrostRecipe = await createRecipe(
-  //   "Illusory Adornment: Frost",
-  //   illusoryAdornmentFrost,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 2],
-  //     [rousingFrost, 2],
-  //   ],
-  //   40,
-  //   "Illusory Goods",
-  //   1,
-  //   275,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { Frozen: 10 }]]
-  // );
-  // const scepterOfSpectacleOrderRecipe = await createRecipe(
-  //   "Scepter of Spectacle: Order",
-  //   scepterOfSpectacleOrder,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 1],
-  //     [rousingOrder, 3],
-  //     [writhebark, 1],
-  //   ],
-  //   null,
-  //   "Illusory Goods",
-  //   1,
-  //   null,
-  //   null,
-  //   { IllusoryGoods: 10 },
-  //   null,
-  //   "Enchanter's Lectern"
-  // );
-  // const scepterOfSpectacleAirRecipe = await createRecipe(
-  //   "Scepter of Spectacle: Air",
-  //   scepterOfSpectacleAir,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 1],
-  //     [rousingAir, 3],
-  //     [writhebark, 1],
-  //   ],
-  //   20,
-  //   "Illusory Goods",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Enchanter's Lectern"
-  // );
-  // const scepterOfSpectacleFrostRecipe = await createRecipe(
-  //   "Scepter of Spectacle: Frost",
-  //   scepterOfSpectacleFrost,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 1],
-  //     [rousingFrost, 3],
-  //     [writhebark, 1],
-  //   ],
-  //   20,
-  //   "Illusory Goods",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Enchanter's Lectern"
-  // );
-  // const scepterOfSpectacleEarthRecipe = await createRecipe(
-  //   "Scepter of Spectacle: Earth",
-  //   scepterOfSpectacleEarth,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 1],
-  //     [rousingEarth, 3],
-  //     [writhebark, 1],
-  //   ],
-  //   1,
-  //   "Illusory Goods",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Enchanter's Lectern",
-  //   "Learned by default."
-  // );
-  // const scepterOfSpectacleFireRecipe = await createRecipe(
-  //   "Scepter of Spectacle: Fire",
-  //   scepterOfSpectacleFire,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [chromaticDust, 1],
-  //     [rousingFire, 3],
-  //     [writhebark, 1],
-  //   ],
-  //   1,
-  //   "Illusory Goods",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Enchanter's Lectern",
-  //   "Learned by default."
-  // );
-  // const crystallineShatterResonantCrystal = await createRecipe(
-  //   "Crystalline Shatter",
-  //   vibrantShard,
-  //   3,
-  //   enchanting,
-  //   [[resonantCrystal, 1]],
-  //   null,
-  //   "Shatters",
-  //   0,
-  //   null,
-  //   null,
-  //   { DraconicDisenchantment: 10 }
-  // );
-  // const crystallineShatterVibrantShard = await createRecipe(
-  //   "Crystalline Shatter",
-  //   chromaticDust,
-  //   3,
-  //   enchanting,
-  //   [[vibrantShard, 1]],
-  //   null,
-  //   "Shatters",
-  //   0,
-  //   null,
-  //   null,
-  //   { DraconicDisenchantment: 10 }
-  // );
-  // // const elementalShatter = await(createRecipe("Elemental Shatter", null, 1, enchanting, [[awakenedAir, 1]], null, "Shatters", 0, null, null, {PrimalExtraction: 10}, null, null, "Gain an element's power for 10 minutes."));
-  // const sophicAmalgamationRecipe = await createRecipe(
-  //   "Sophic Amalgamation",
-  //   sophicAmalgamation,
-  //   1,
-  //   enchanting,
-  //   [
-  //     [resonantCrystal, 3],
-  //     [awakenedOrder, 3],
-  //   ],
-  //   null,
-  //   "Magical Merchandise",
-  //   1,
-  //   null,
-  //   null,
-  //   { PrimalExtraction: 20 },
-  //   null,
-  //   "Enchanter's Lectern"
-  // );
+  const illustriousInsightRecipeEnchanting = await createRecipe(
+    "Illustrious Insight",
+    illustriousInsight,
+    1,
+    enchanting,
+    [[artisansMettle, 50]],
+    null,
+    "Finishing Reagents",
+    1,
+    null,
+    null,
+    null,
+    "Various Specializations",
+    "Enchanter's Lectern"
+  );
+  const gracefulAvoidanceRecipe = await createRecipe(
+    null,
+    gracefulAvoidance,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 8],
+      [vibrantShard, 3],
+    ],
+    null,
+    "Cloak Enchantments",
+    1,
+    400,
+    { DragonscaleExpedition: 9 },
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { Adaptive: 30 }]]
+  );
+  const homeboundSpeedRecipe = await createRecipe(
+    null,
+    homeboundSpeed,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 8],
+      [vibrantShard, 3],
+    ],
+    null,
+    "Cloak Enchantments",
+    1,
+    400,
+    { ValdrakkenAccord: 11 },
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { Adaptive: 30 }]]
+  );
+  const regenerativeLeechRecipe = await createRecipe(
+    null,
+    regenerativeLeech,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 8],
+      [vibrantShard, 3],
+    ],
+    null,
+    "Cloak Enchantments",
+    1,
+    400,
+    { IskaaraTuskarr: 10 },
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { Adaptive: 30 }]]
+  );
+  const writOfAvoidanceCloakRecipe = await createRecipe(
+    null,
+    writOfAvoidanceCloak,
+    1,
+    enchanting,
+    [[chromaticDust, 12]],
+    25,
+    "Cloak Enchantments",
+    1,
+    200,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { Adaptive: 30 }]]
+  );
+  const writOfLeechCloakRecipe = await createRecipe(
+    null,
+    writOfLeechCloak,
+    1,
+    enchanting,
+    [[chromaticDust, 12]],
+    25,
+    "Cloak Enchantments",
+    1,
+    200,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { Adaptive: 30 }]]
+  );
+  const writOfSpeedCloakRecipe = await createRecipe(
+    null,
+    writOfSpeedCloak,
+    1,
+    enchanting,
+    [[chromaticDust, 12]],
+    25,
+    "Cloak Enchantments",
+    1,
+    200,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { Adaptive: 30 }]]
+  );
+  const acceleratedAgilityRecipe = await createRecipe(
+    null,
+    acceleratedAgility,
+    1,
+    enchanting,
+    [
+      [vibrantShard, 3],
+      [resonantCrystal, 2],
+    ],
+    null,
+    "Chest Enchantments",
+    1,
+    400,
+    { IskaaraTuskarr: 10 },
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
+  );
+  const reserveOfIntellectRecipe = await createRecipe(
+    null,
+    reserveOfIntellect,
+    1,
+    enchanting,
+    [
+      [vibrantShard, 4],
+      [resonantCrystal, 1],
+    ],
+    null,
+    "Chest Enchantments",
+    1,
+    400,
+    null,
+    { MagicalReinforcement: 20 },
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
+  );
+  const sustainedStrengthRecipe = await createRecipe(
+    null,
+    sustainedStrength,
+    1,
+    enchanting,
+    [
+      [vibrantShard, 4],
+      [resonantCrystal, 2],
+    ],
+    null,
+    "Chest Enchantments",
+    1,
+    400,
+    { MaruukCentaur: 8 },
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
+  );
+  const wakingStatsRecipe = await createRecipe(
+    null,
+    wakingStats,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 8],
+      [vibrantShard, 3],
+    ],
+    null,
+    "Chest Enchantments",
+    1,
+    350,
+    null,
+    { MagicalReinforcement: 0 },
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
+  );
+  const devotionOfAvoidanceRecipe = await createRecipe(
+    null,
+    devotionOfAvoidance,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 5],
+      [vibrantShard, 4],
+    ],
+    null,
+    "Bracer Enchantments",
+    1,
+    425,
+    null,
+    { Adaptive: 0 },
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { Adaptive: 30 }]]
+  );
+  const devotionOfLeechRecipe = await createRecipe(
+    null,
+    devotionOfLeech,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 5],
+      [vibrantShard, 4],
+    ],
+    null,
+    "Bracer Enchantments",
+    1,
+    425,
+    null,
+    { Adaptive: 10 },
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { Adaptive: 30 }]]
+  );
+  const devotionOfSpeedRecipe = await createRecipe(
+    null,
+    devotionOfSpeed,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 5],
+      [vibrantShard, 4],
+    ],
+    null,
+    "Bracer Enchantments",
+    1,
+    425,
+    null,
+    { Adaptive: 20 },
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { Adaptive: 30 }]]
+  );
+  const writOfAvoidanceBracerRecipe = await createRecipe(
+    null,
+    writOfAvoidanceBracer,
+    1,
+    enchanting,
+    [[vibrantShard, 1]],
+    15,
+    "Bracer Enchantments",
+    1,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { Adaptive: 30 }]]
+  );
+  const writOfLeechBracerRecipe = await createRecipe(
+    null,
+    writOfLeechBracer,
+    1,
+    enchanting,
+    [[vibrantShard, 1]],
+    15,
+    "Bracer Enchantments",
+    1,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { Adaptive: 30 }]]
+  );
+  const writOfSpeedBracerRecipe = await createRecipe(
+    null,
+    writOfSpeedBracer,
+    1,
+    enchanting,
+    [[vibrantShard, 1]],
+    15,
+    "Bracer Enchantments",
+    1,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { Adaptive: 30 }]]
+  );
+  const plainsrunnersBreezeRecipe = await createRecipe(
+    null,
+    plainsrunnersBreeze,
+    1,
+    enchanting,
+    [
+      [vibrantShard, 4],
+      [awakenedAir, 1],
+      [awakenedEarth, 1],
+    ],
+    null,
+    "Boot Enchantments",
+    1,
+    450,
+    { MaruukCentaur: 8 },
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { Earthen: 10, Wafting: 10 }]]
+  );
+  const ridersReassuranceRecipe = await createRecipe(
+    null,
+    ridersReassurance,
+    1,
+    enchanting,
+    [
+      [vibrantShard, 4],
+      [awakenedAir, 1],
+      [awakenedEarth, 1],
+    ],
+    null,
+    "Boot Enchantments",
+    1,
+    450,
+    { DragonscaleExpedition: 9 },
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { Earthen: 10, Wafting: 10 }]]
+  );
+  const watchersLoamRecipe = await createRecipe(
+    null,
+    watchersLoam,
+    1,
+    enchanting,
+    [
+      [vibrantShard, 4],
+      [awakenedAir, 1],
+      [awakenedEarth, 1],
+    ],
+    null,
+    "Boot Enchantments",
+    1,
+    450,
+    { ValdrakkenAccord: 11 },
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { Earthen: 10, Wafting: 10 }]]
+  );
+  const devotionOfCriticalStrikeRecipe = await createRecipe(
+    null,
+    devotionOfCriticalStrike,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 5],
+      [vibrantShard, 3],
+    ],
+    35,
+    "Ring Enchantments",
+    1,
+    425,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
+  );
+  const devotionOfHasteRecipe = await createRecipe(
+    null,
+    devotionOfHaste,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 5],
+      [vibrantShard, 3],
+    ],
+    35,
+    "Ring Enchantments",
+    1,
+    425,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
+  );
+  const devotionOfMasteryRecipe = await createRecipe(
+    null,
+    devotionOfMastery,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 5],
+      [vibrantShard, 3],
+    ],
+    35,
+    "Ring Enchantments",
+    1,
+    425,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
+  );
+  const devotionOfVersatilityRecipe = await createRecipe(
+    null,
+    devotionOfVersatility,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 5],
+      [vibrantShard, 3],
+    ],
+    30,
+    "Ring Enchantments",
+    1,
+    425,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
+  );
+  const writOfCriticalStrikeRecipe = await createRecipe(
+    null,
+    writOfCriticalStrike,
+    1,
+    enchanting,
+    [[chromaticDust, 3]],
+    5,
+    "Ring Enchantments",
+    1,
+    40,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
+  );
+  const writOfHasteRecipe = await createRecipe(
+    null,
+    writOfHaste,
+    1,
+    enchanting,
+    [[chromaticDust, 3]],
+    5,
+    "Ring Enchantments",
+    1,
+    40,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
+  );
+  const writOfMasteryRecipe = await createRecipe(
+    null,
+    writOfMastery,
+    1,
+    enchanting,
+    [[chromaticDust, 3]],
+    5,
+    "Ring Enchantments",
+    1,
+    40,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
+  );
+  const writOfVersatilityRecipe = await createRecipe(
+    null,
+    writOfHaste,
+    1,
+    enchanting,
+    [[chromaticDust, 3]],
+    1,
+    "Ring Enchantments",
+    1,
+    40,
+    null,
+    null,
+    null,
+    null,
+    "Learned by default.",
+    [["Lesser Illustrious Insight", { MagicalReinforcement: 30 }]]
+  );
+  const burningDevotionRecipe = await createRecipe(
+    null,
+    burningDevotion,
+    1,
+    enchanting,
+    [
+      [vibrantShard, 5],
+      [resonantCrystal, 4],
+      [awakenedFire, 6],
+      [glowingTitanOrb, 3],
+    ],
+    null,
+    "Weapon Enchantments",
+    1,
+    425,
+    null,
+    { Burning: 0 },
+    null,
+    null,
+    null,
+    [["Illustrious Insight", { Burning: 10 }]]
+  );
+  const earthenDevotionRecipe = await createRecipe(
+    null,
+    earthenDevotion,
+    1,
+    enchanting,
+    [
+      [vibrantShard, 5],
+      [resonantCrystal, 4],
+      [awakenedEarth, 6],
+      [glowingTitanOrb, 3],
+    ],
+    null,
+    "Weapon Enchantments",
+    1,
+    425,
+    null,
+    { Earthen: 0 },
+    null,
+    null,
+    null,
+    [["Illustrious Insight", { Earthen: 10 }]]
+  );
+  const frozenDevotionRecipe = await createRecipe(
+    null,
+    frozenDevotion,
+    1,
+    enchanting,
+    [
+      [vibrantShard, 5],
+      [resonantCrystal, 4],
+      [awakenedFrost, 6],
+      [glowingTitanOrb, 3],
+    ],
+    null,
+    "Weapon Enchantments",
+    1,
+    425,
+    null,
+    { Frozen: 0 },
+    null,
+    null,
+    null,
+    [["Illustrious Insight", { Frozen: 10 }]]
+  );
+  const sophicDevotionRecipe = await createRecipe(
+    null,
+    sophicDevotion,
+    1,
+    enchanting,
+    [
+      [vibrantShard, 5],
+      [resonantCrystal, 4],
+      [awakenedOrder, 4],
+      [glowingTitanOrb, 3],
+    ],
+    null,
+    "Weapon Enchantments",
+    1,
+    425,
+    null,
+    { Sophic: 0 },
+    null,
+    null,
+    null,
+    [["Illustrious Insight", { Sophic: 10 }]]
+  );
+  const waftingDevotionRecipe = await createRecipe(
+    null,
+    waftingDevotion,
+    1,
+    enchanting,
+    [
+      [vibrantShard, 5],
+      [resonantCrystal, 4],
+      [awakenedAir, 6],
+      [glowingTitanOrb, 3],
+    ],
+    null,
+    "Weapon Enchantments",
+    1,
+    425,
+    null,
+    { Wafting: 0 },
+    null,
+    null,
+    null,
+    [["Illustrious Insight", { Wafting: 10 }]]
+  );
+  const burningWritRecipe = await createRecipe(
+    null,
+    burningWrit,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 15],
+      [resonantCrystal, 2],
+      [awakenedFire, 4],
+    ],
+    50,
+    "Weapon Enchantments",
+    1,
+    300,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Illustrious Insight", { Burning: 10 }]]
+  );
+  const earthenWritRecipe = await createRecipe(
+    null,
+    earthenWrit,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 15],
+      [resonantCrystal, 2],
+      [awakenedEarth, 4],
+    ],
+    50,
+    "Weapon Enchantments",
+    1,
+    300,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Illustrious Insight", { Earthen: 10 }]]
+  );
+  const frozenWritRecipe = await createRecipe(
+    null,
+    frozenWrit,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 15],
+      [resonantCrystal, 2],
+      [awakenedFrost, 4],
+    ],
+    50,
+    "Weapon Enchantments",
+    1,
+    300,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Illustrious Insight", { Frozen: 10 }]]
+  );
+  const sophicWritRecipe = await createRecipe(
+    null,
+    sophicWrit,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 15],
+      [resonantCrystal, 2],
+      [awakenedOrder, 3],
+    ],
+    50,
+    "Weapon Enchantments",
+    1,
+    300,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Illustrious Insight", { Sophic: 10 }]]
+  );
+  const waftingWritRecipe = await createRecipe(
+    null,
+    waftingWrit,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 15],
+      [resonantCrystal, 2],
+      [awakenedAir, 4],
+    ],
+    50,
+    "Weapon Enchantments",
+    1,
+    300,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Illustrious Insight", { Wafting: 10 }]]
+  );
+  const draconicDeftnessRecipe = await createRecipe(
+    null,
+    draconicDeftness,
+    1,
+    enchanting,
+    [
+      [vibrantShard, 4],
+      [resonantCrystal, 2],
+      [iridescentPlume, 3],
+    ],
+    null,
+    "Profession Tool Enchantments",
+    1,
+    400,
+    { ArtisansConsortium: "Valued" },
+    null,
+    null,
+    null,
+    null,
+    [["Illustrious Insight", { Artistry: 30 }]]
+  );
+  const draconicFinesseRecipe = await createRecipe(
+    null,
+    draconicFinesse,
+    1,
+    enchanting,
+    [
+      [vibrantShard, 4],
+      [resonantCrystal, 2],
+      [iridescentPlume, 3],
+    ],
+    null,
+    "Profession Tool Enchantments",
+    1,
+    400,
+    { ArtisansConsortium: "Valued" },
+    null,
+    null,
+    null,
+    null,
+    [["Illustrious Insight", { Artistry: 30 }]]
+  );
+  const draconicInspirationRecipe = await createRecipe(
+    null,
+    draconicInspiration,
+    1,
+    enchanting,
+    [
+      [vibrantShard, 4],
+      [resonantCrystal, 2],
+      [iridescentPlume, 3],
+    ],
+    null,
+    "Profession Tool Enchantments",
+    1,
+    400,
+    null,
+    { Artistry: 0 },
+    null,
+    null,
+    null,
+    [["Illustrious Insight", { Artistry: 30 }]]
+  );
+  const draconicPerceptionRecipe = await createRecipe(
+    null,
+    draconicPerception,
+    1,
+    enchanting,
+    [
+      [vibrantShard, 4],
+      [resonantCrystal, 2],
+      [iridescentPlume, 3],
+    ],
+    null,
+    "Profession Tool Enchantments",
+    1,
+    400,
+    { ArtisansConsortium: "Valued" },
+    null,
+    null,
+    null,
+    null,
+    [["Illustrious Insight", { Artistry: 30 }]]
+  );
+  const draconicResourcefulnessRecipe = await createRecipe(
+    null,
+    draconicResourcefulness,
+    1,
+    enchanting,
+    [
+      [vibrantShard, 4],
+      [resonantCrystal, 2],
+      [iridescentPlume, 3],
+    ],
+    null,
+    "Profession Tool Enchantments",
+    1,
+    400,
+    null,
+    { Artistry: 15 },
+    null,
+    null,
+    null,
+    [["Illustrious Insight", { Artistry: 30 }]]
+  );
+  const torchOfPrimalAwakeningRecipe = await createRecipe(
+    "Torch of Primal Awakening",
+    torchOfPrimalAwakening,
+    1,
+    enchanting,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 120],
+      [vibrantShard, 2],
+      [resonantCrystal, 3],
+      [runedWrithebark, 2],
+      [primalMoltenAlloy, 2],
+    ],
+    null,
+    "Rods and Wands",
+    1,
+    265,
+    null,
+    { RodsAndWands: 30 },
+    null,
+    "Enchanter's Lectern",
+    null,
+    [
+      ["Missive", { RodsAndWands: 0 }],
+      ["Primal Infusion", { RodsAndWands: 20 }],
+      ["Embellishment", {}],
+      ["Illustrious Insight", { RodsAndWands: 45 }],
+    ]
+  );
+  const runedKhazgoriteRodRecipe = await createRecipe(
+    "Runed Khaz'gorite Rod",
+    runedKhazgoriteRod,
+    1,
+    enchanting,
+    [
+      [artisansMettle, 300],
+      [vibrantShard, 5],
+      [resonantCrystal, 1],
+      [khazgoriteOre, 4],
+      [runedWrithebark, 2],
+    ],
+    null,
+    "Rods and Wands",
+    1,
+    350,
+    null,
+    { RodsAndWands: 10 },
+    null,
+    "Enchanter's Lectern",
+    null,
+    [
+      ["Missive", {}],
+      ["Illustrious Insight", { RodsAndWands: 45 }],
+    ]
+  );
+  const runedDraconiumRodRecipe = await createRecipe(
+    "Runed Draconium Rod",
+    runedDraconiumRod,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 4],
+      [draconiumOre, 3],
+      [writhebark, 2],
+    ],
+    10,
+    "Rods and Wands",
+    3,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Missive", {}],
+      ["Lesser Illustrious Insight", { RodsAndWands: 45 }],
+    ]
+  );
+  const enchantedWrithebarkWandRecipe = await createRecipe(
+    "Enchanted Writhebark Wand",
+    enchantedWrithebarkWand,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 6],
+      [writhebark, 2],
+    ],
+    5,
+    "Rods and Wands",
+    3,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive", { RodsAndWands: 0 }],
+      ["Lesser Illustrious Insight", { RodsAndWands: 45 }],
+    ]
+  );
+  const runedSereviteRodRecipe = await createRecipe(
+    "Runed Serevite Rod",
+    runedSereviteRod,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 3],
+      [sereviteRod, 1],
+    ],
+    1,
+    "Rods and Wands",
+    1,
+    40,
+    null,
+    null,
+    null,
+    null,
+    "Learned by default.",
+    [
+      ["Missive", {}],
+      ["Lesser Illustrious Insight", { RodsAndWands: 45 }],
+    ]
+  );
+  const illusionPrimalAirRecipe = await createRecipe(
+    "Illusion: Primal Air",
+    illusionPrimalAir,
+    1,
+    enchanting,
+    [
+      [resonantCrystal, 2],
+      [awakenedAir, 20],
+    ],
+    null,
+    "Illusory Goods",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Enchanter's Lectern",
+    "Drops during Primal Storms."
+  );
+  const illusionPrimalEarthRecipe = await createRecipe(
+    "Illusion: Primal Earth",
+    illusionPrimalEarth,
+    1,
+    enchanting,
+    [
+      [resonantCrystal, 2],
+      [awakenedEarth, 20],
+    ],
+    null,
+    "Illusory Goods",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Enchanter's Lectern",
+    "Drops during Primal Storms."
+  );
+  const illusionPrimalFireRecipe = await createRecipe(
+    "Illusion: Primal Fire",
+    illusionPrimalFire,
+    1,
+    enchanting,
+    [
+      [resonantCrystal, 2],
+      [awakenedFire, 20],
+    ],
+    null,
+    "Illusory Goods",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Enchanter's Lectern",
+    "Drops during Primal Storms."
+  );
+  const illusionPrimalFrostRecipe = await createRecipe(
+    "Illusion: Primal Frost",
+    illusionPrimalFrost,
+    1,
+    enchanting,
+    [
+      [resonantCrystal, 2],
+      [awakenedFrost, 20],
+    ],
+    null,
+    "Illusory Goods",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Enchanter's Lectern",
+    "Drops during Primal Storms."
+  );
+  const illusionPrimalMasteryRecipe = await createRecipe(
+    "Illusion: Primal Mastery",
+    illusionPrimalMastery,
+    1,
+    enchanting,
+    [
+      [resonantCrystal, 5],
+      [awakenedAir, 5],
+      [awakenedEarth, 5],
+      [awakenedFire, 5],
+      [awakenedFrost, 5],
+    ],
+    null,
+    "Illusory Goods",
+    1,
+    null,
+    null,
+    null,
+    "Raid Drop",
+    "Enchanter's Lectern",
+    "Drops from Kurog Grimtotem in Vault of the Incarnates."
+  );
+  const primalInvocationExtractRecipe = await createRecipe(
+    "Primal Invocation Extract",
+    primalInvocationExtract,
+    1,
+    enchanting,
+    [
+      [awakenedAir, 1],
+      [awakenedEarth, 1],
+      [awakenedFire, 1],
+      [awakenedFrost, 1],
+      [awakenedOrder, 1],
+    ],
+    null,
+    "Illusory Goods",
+    1,
+    300,
+    null,
+    null,
+    "Other",
+    "Enchanter's Lectern",
+    "Received from 'Primal Extraction - Glimmers of Insight'? Primal Extraction is an Enchanting sub-specialization.",
+    [
+      [
+        "Lesser Illustrious Insight",
+        { Burning: 10, Earthen: 10, Sophic: 10, Frozen: 10, Wafting: 10 },
+      ],
+    ]
+  );
+  const khadgarsDisenchantingRodRecipe = await createRecipe(
+    "Khadgar's Disenchanting Rod",
+    khadgarsDisenchantingRod,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 12],
+      [vibrantShard, 6],
+      [resonantCrystal, 3],
+    ],
+    null,
+    "Illusory Goods",
+    1,
+    null,
+    null,
+    { IllusoryGoods: 30 },
+    null,
+    "Enchanter's Lectern"
+  );
+  const illusoryAdornmentOrderRecipe = await createRecipe(
+    "Illusory Adornment: Order",
+    illusoryAdornmentOrder,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 2],
+      [rousingOrder, 2],
+    ],
+    null,
+    "Illusory Goods",
+    1,
+    275,
+    null,
+    { IllusoryGoods: 20 },
+    null,
+    "Enchanter's Lectern",
+    null,
+    [["Lesser Illustrious Insight", { Sophic: 10 }]]
+  );
+  const illusoryAdornmentAirRecipe = await createRecipe(
+    "Illusory Adornment: Air",
+    illusoryAdornmentAir,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 2],
+      [rousingAir, 2],
+    ],
+    40,
+    "Illusory Goods",
+    1,
+    275,
+    null,
+    null,
+    null,
+    "Enchanter's Lectern",
+    null,
+    [["Lesser Illustrious Insight", { Wafting: 10 }]]
+  );
+  const illusoryAdornmentEarthRecipe = await createRecipe(
+    "Illusory Adornment: Earth",
+    illusoryAdornmentEarth,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 2],
+      [rousingEarth, 2],
+    ],
+    40,
+    "Illusory Goods",
+    1,
+    275,
+    null,
+    null,
+    null,
+    "Enchanter's Lectern",
+    null,
+    [["Lesser Illustrious Insight", { Earthen: 10 }]]
+  );
+  const illusoryAdornmentFireRecipe = await createRecipe(
+    "Illusory Adornment: Fire",
+    illusoryAdornmentFire,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 2],
+      [rousingFire, 2],
+    ],
+    40,
+    "Illusory Goods",
+    1,
+    275,
+    null,
+    null,
+    null,
+    "Enchanter's Lectern",
+    null,
+    [["Lesser Illustrious Insight", { Burning: 10 }]]
+  );
+  const illusoryAdornmentFrostRecipe = await createRecipe(
+    "Illusory Adornment: Frost",
+    illusoryAdornmentFrost,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 2],
+      [rousingFrost, 2],
+    ],
+    40,
+    "Illusory Goods",
+    1,
+    275,
+    null,
+    null,
+    null,
+    "Enchanter's Lectern",
+    null,
+    [["Lesser Illustrious Insight", { Frozen: 10 }]]
+  );
+  const scepterOfSpectacleOrderRecipe = await createRecipe(
+    "Scepter of Spectacle: Order",
+    scepterOfSpectacleOrder,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 1],
+      [rousingOrder, 3],
+      [writhebark, 1],
+    ],
+    null,
+    "Illusory Goods",
+    1,
+    null,
+    null,
+    { IllusoryGoods: 10 },
+    null,
+    "Enchanter's Lectern"
+  );
+  const scepterOfSpectacleAirRecipe = await createRecipe(
+    "Scepter of Spectacle: Air",
+    scepterOfSpectacleAir,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 1],
+      [rousingAir, 3],
+      [writhebark, 1],
+    ],
+    20,
+    "Illusory Goods",
+    1
+  );
+  const scepterOfSpectacleFrostRecipe = await createRecipe(
+    "Scepter of Spectacle: Frost",
+    scepterOfSpectacleFrost,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 1],
+      [rousingFrost, 3],
+      [writhebark, 1],
+    ],
+    20,
+    "Illusory Goods",
+    1
+  );
+  const scepterOfSpectacleEarthRecipe = await createRecipe(
+    "Scepter of Spectacle: Earth",
+    scepterOfSpectacleEarth,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 1],
+      [rousingEarth, 3],
+      [writhebark, 1],
+    ],
+    1,
+    "Illusory Goods",
+    1,
+    null,
+    null,
+    null,
+    null,
+    null,
+    "Learned by default."
+  );
+  const scepterOfSpectacleFireRecipe = await createRecipe(
+    "Scepter of Spectacle: Fire",
+    scepterOfSpectacleFire,
+    1,
+    enchanting,
+    [
+      [chromaticDust, 1],
+      [rousingFire, 3],
+      [writhebark, 1],
+    ],
+    1,
+    "Illusory Goods",
+    1,
+    null,
+    null,
+    null,
+    null,
+    null,
+    "Learned by default."
+  );
+  const crystallineShatterResonantCrystal = await createRecipe(
+    "Crystalline Shatter (Resonant Crystal to Vibrant Shard)",
+    vibrantShard,
+    3,
+    enchanting,
+    [[resonantCrystal, 1]],
+    null,
+    "Shatters",
+    0,
+    null,
+    null,
+    { DraconicDisenchantment: 10 }
+  );
+  const crystallineShatterVibrantShard = await createRecipe(
+    "Crystalline Shatter (Vibrant Shard to Chromatic Dust)",
+    chromaticDust,
+    3,
+    enchanting,
+    [[vibrantShard, 1]],
+    null,
+    "Shatters",
+    0,
+    null,
+    null,
+    { DraconicDisenchantment: 10 }
+  );
+  const elementalShatterFrostRecipe = await createRecipe(
+    null,
+    elementalShatterFrost,
+    1,
+    enchanting,
+    [[awakenedFrost, 1]],
+    null,
+    "Shatters",
+    0,
+    null,
+    null,
+    { PrimalExtraction: 10 },
+    null,
+    null,
+    "Shatter an Awakened element to gain its power (an amount of secondary stat, or primary w/ Order) for 10-20 min. Can only be performed in the Dragon Isles",
+    null,
+    "inv_10_enchanting2_elementalswirl_color1"
+  );
+
+  const elementalShatterAirRecipe = await createRecipe(
+    null,
+    elementalShatterAir,
+    1,
+    enchanting,
+    [[awakenedAir, 1]],
+    null,
+    "Shatters",
+    0,
+    null,
+    null,
+    { PrimalExtraction: 10 },
+    null,
+    null,
+    "Shatter an Awakened element to gain its power (an amount of secondary stat, or primary w/ Order) for 10-20 min. Can only be performed in the Dragon Isles",
+    null,
+    "inv_10_enchanting2_elementalswirl_color1"
+  );
+
+  const elementalShatterOrderRecipe = await createRecipe(
+    null,
+    elementalShatterOrder,
+    1,
+    enchanting,
+    [[awakenedOrder, 1]],
+    null,
+    "Shatters",
+    0,
+    null,
+    null,
+    { PrimalExtraction: 10 },
+    null,
+    null,
+    "Shatter an Awakened element to gain its power (an amount of secondary stat, or primary w/ Order) for 10-20 min. Can only be performed in the Dragon Isles",
+    null,
+    "inv_10_enchanting2_elementalswirl_color1"
+  );
+  const elementalShatterFireRecipe = await createRecipe(
+    null,
+    elementalShatterFire,
+    1,
+    enchanting,
+    [[awakenedFire, 1]],
+    null,
+    "Shatters",
+    0,
+    null,
+    null,
+    { PrimalExtraction: 10 },
+    null,
+    null,
+    "Shatter an Awakened element to gain its power (an amount of secondary stat, or primary w/ Order) for 10-20 min. Can only be performed in the Dragon Isles",
+    null,
+    "inv_10_enchanting2_elementalswirl_color1"
+  );
+  const elementalShatterEarthRecipe = await createRecipe(
+    null,
+    elementalShatterEarth,
+    1,
+    enchanting,
+    [[awakenedEarth, 1]],
+    null,
+    "Shatters",
+    0,
+    null,
+    null,
+    { PrimalExtraction: 10 },
+    null,
+    null,
+    "Shatter an Awakened element to gain its power (an amount of secondary stat, or primary w/ Order) for 10-20 min. Can only be performed in the Dragon Isles",
+    null,
+    "inv_10_enchanting2_elementalswirl_color1"
+  );
+  const sophicAmalgamationRecipe = await createRecipe(
+    "Sophic Amalgamation",
+    sophicAmalgamation,
+    1,
+    enchanting,
+    [
+      [resonantCrystal, 3],
+      [awakenedOrder, 3],
+    ],
+    null,
+    "Magical Merchandise",
+    1,
+    null,
+    null,
+    { PrimalExtraction: 20 },
+    null,
+    "Enchanter's Lectern"
+  );
 
   //engineering recipes - 91 total
   const arclightCapacitorRecipe = await createRecipe(
