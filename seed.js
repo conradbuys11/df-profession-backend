@@ -41,7 +41,7 @@ const Item = sequelize.define(
     bindOn: { type: DataTypes.STRING },
     isUniqueEquipped: { type: DataTypes.STRING },
     qualityLevels: { type: DataTypes.INTEGER, defaultValue: 1 },
-    finishingReagentType: { type: DataTypes.STRING },
+    finishingReagentType: { type: DataTypes.ARRAY(DataTypes.STRING) },
     primaryStats: { type: DataTypes.ARRAY(DataTypes.ARRAY(DataTypes.STRING)) },
     secondaryStats: {
       type: DataTypes.ARRAY(DataTypes.ARRAY(DataTypes.STRING)),
@@ -590,7 +590,6 @@ const statArrayProfToolAccessory = (
         : quality.toLowerCase() === "medium"
         ? arr.push([6, 6, 6, 6, 6])
         : arr.push([4, 4, 4, 4, 4]);
-      console.log(arr);
       return arr;
     } else {
       arr = [nameOfStat];
@@ -1049,8 +1048,8 @@ const makeTables = async () => {
     "Rare",
     "Optional Crafting Reagent",
     null,
-    "Training Matrix",
-    "Set Item Level based on Crafting Quality (333 - 343), add Soulbound and Required Level 64."
+    ["Training Matrix"],
+    "+20 Recipe Difficulty. Set Item Level based on Crafting Quality (333 - 343), add Soulbound and Required Level 64."
   );
   const titanTrainingMatrixTwo = await createItem(
     "Titan Training Matrix II",
@@ -1062,8 +1061,8 @@ const makeTables = async () => {
     "Rare",
     "Optional Crafting Reagent",
     null,
-    "Training Matrix",
-    "Set Item Level based on Crafting Quality (346 - 356), add Soulbound and Required Level 70."
+    ["Training Matrix"],
+    "+40 Recipe Difficulty. Set Item Level based on Crafting Quality (346 - 356), add Soulbound and Required Level 70."
   );
   const titanTrainingMatrixThree = await createItem(
     "Titan Training Matrix III",
@@ -1075,8 +1074,8 @@ const makeTables = async () => {
     "Rare",
     "Optional Crafting Reagent",
     null,
-    "Training Matrix",
-    "Set Item Level based on Crafting Quality (359 - 369), add Soulbound and Required Level 70."
+    ["Training Matrix"],
+    "+60 Recipe Difficulty. Set Item Level based on Crafting Quality (359 - 369), add Soulbound and Required Level 70."
   );
   const titanTrainingMatrixFour = await createItem(
     "Titan Training Matrix IV",
@@ -1084,12 +1083,66 @@ const makeTables = async () => {
     "Pickup",
     200,
     "Unfortunately, nobody can be told what the Titan Matrix is. You have to see it for yourself.",
-    "Like the Crafter's Marks in Shadowlands. Drops from bosses in Mythic dungeons.",
+    "Like the Crafter's Marks in Shadowlands. Enhances the ilvl of Rare crafted gear. Drops from bosses in Mythic dungeons.",
     "Epic",
     "Optional Crafting Reagent",
     null,
-    "Training Matrix",
-    "Set Item Level based on Crafting Quality (372 - 382), add Soulbound and Required Level 70."
+    ["Training Matrix"],
+    "+150 Recipe Difficulty. Set Item Level based on Crafting Quality (372 - 382), add Soulbound and Required Level 70."
+  );
+  const primalInfusion = await createItem(
+    "Primal Infusion",
+    "inv_10_gearcraft_primalinfusion_color1",
+    "Pickup",
+    200,
+    "This mysterious object crackles with elemental energies.",
+    "Like the Crafter's Marks in Shadowlands. Enhances the ilvl Epic crafted gear. Made by combining 10 Primal Focus & 100 Primal Chaos.",
+    "Epic",
+    "Optional Crafting Reagent",
+    1,
+    ["Primal Infusion"],
+    "+30 Recipe Difficulty. Set Item level based on Crafting Quality (395 - 405)."
+  );
+  const concentratedPrimalInfusion = await createItem(
+    "Concentrated Primal Infusion",
+    "inv_10_gearcraft_distilledprimalinfusion_color1",
+    "Pickup",
+    200,
+    "It radiates barely contained elemental energy.",
+    "Like the Crafter's Marks in Shadowlands. Enhances the ilvl Epic crafted gear. Made by combining 10 Concentrated Primal Focus & 150 Primal Chaos.",
+    "Epic",
+    "Optional Crafting Reagent",
+    1,
+    ["Primal Infusion"],
+    "+50 Recipe Difficulty. Set Item level based on Crafting Quality (408 - 418)."
+  );
+  const primalFocus = await createItem(
+    "Primal Focus",
+    "inv_10_misc_dragonorb_color1",
+    "Pickup",
+    1000,
+    "Used to make an Optional Reagent for crafting heroically powerful equipment.",
+    "Unsure where this drops from - maybe Heroic Vault bosses? Makes Primal Infusion, the second best 'Crafter's Mark' in Dragonflight.",
+    "Epic",
+    "Crafting Reagent",
+    1,
+    null,
+    null,
+    "Combine 10 Primal Focus with 100 Primal Chaos to create a Primal Infusion."
+  );
+  const concentratedPrimalFocus = await createItem(
+    "Concentrated Primal Focus",
+    "inv_10_misc_dragonorb_color2",
+    "Pickup",
+    1000,
+    "Used to make an Optional Reagent for crafting mythically powerful equipment.",
+    "Unsure where this drops from - maybe Mythic Vault bosses? Makes Concentrated Primal Infusion, the best 'Crafter's Mark' in Dragonflight.",
+    "Epic",
+    "Crafting Reagent",
+    1,
+    null,
+    null,
+    "Combine 10 Concentrated Primal Focus with 150 Primal Chaos to create a Concentrated Primal Infusion."
   );
   const illustriousInsight = await createItem(
     "Illustrious Insight",
@@ -1101,7 +1154,7 @@ const makeTables = async () => {
     "Rare",
     "Finishing Crafting Reagent",
     null,
-    "Illustrious Insight",
+    ["Illustrious Insight"],
     "When crafting: Increases Skill by 30.",
     "Break into 5 Lesser Illustrious Insight."
   );
@@ -1115,7 +1168,7 @@ const makeTables = async () => {
     "Rare",
     "Finishing Crafting Reagent",
     null,
-    "Lesser Illustrious Insight",
+    ["Lesser Illustrious Insight"],
     "When crafting: Increases Skill by 30.",
     "Combine 5 Lesser Illustrious Insight into a full Illustrious Insight."
   );
@@ -1906,7 +1959,7 @@ const makeTables = async () => {
     "Rare",
     "Optional Crafting Reagent",
     3,
-    "Embellishment",
+    ["Embellishment"],
     "While above 90% health, gain Mastery. Also add Unique-Equipped: Embellished (2)."
   );
   const bronzedGripWrappings = await createItem(
@@ -1919,7 +1972,7 @@ const makeTables = async () => {
     "Rare",
     "Optional Crafting Reagent",
     3,
-    "Embellishment",
+    ["Embellishment"],
     "Your spells sometimes cause a ripple in time. Also add Unique-Equipped: Embellished (2)."
   );
   const abrasivePolishingCloth = await createItem(
@@ -1932,7 +1985,7 @@ const makeTables = async () => {
     "Uncommon",
     "Finishing Crafting Reagent",
     3,
-    "Polishing Cloth",
+    ["Polishing Cloth"],
     "When crafting: You are 9-15% (based on quality) more likely to improve at Jewelcrafting, but Recipe Difficulty is increased by 18-30."
   );
   const vibrantPolishingCloth = await createItem(
@@ -1945,7 +1998,7 @@ const makeTables = async () => {
     "Uncommon",
     "Finishing Crafting Reagent",
     3,
-    "Polishing Cloth",
+    ["Polishing Cloth"],
     "When crafting: Increases bonus Skill from Inspiration by 7-12% (based on quality) and Inspiration by 30-50."
   );
   const chromaticEmbroideryThread = await createItem(
@@ -1958,7 +2011,7 @@ const makeTables = async () => {
     "Uncommon",
     "Finishing Crafting Reagent",
     3,
-    "Embroidery Thread",
+    ["Embroidery Thread"],
     "When crafting: Increases bonus Skill from Inspiration by 7-12% (based on quality) and Crafting Speed by 12-20%."
   );
   const shimmeringEmbroideryThread = await createItem(
@@ -1971,7 +2024,7 @@ const makeTables = async () => {
     "Uncommon",
     "Finishing Crafting Reagent",
     3,
-    "Embroidery Thread",
+    ["Embroidery Thread"],
     "When crafting: Increases reagents saved from Resourcefulness by 15-25%. (based on quality)"
   );
   const blazingEmbroideryThread = await createItem(
@@ -1984,7 +2037,7 @@ const makeTables = async () => {
     "Uncommon",
     "Finishing Crafting Reagent",
     3,
-    "Embroidery Thread",
+    ["Embroidery Thread"],
     "When crafting: You are 9-15% (based on quality) more likely to improve at Tailoring, but Recipe Difficulty is increased by 18-30."
   );
   const vibrantWilderclothGirdle = await createItem(
@@ -3308,7 +3361,7 @@ const makeTables = async () => {
     "Uncommon",
     "Finishing Crafting Reagent",
     3,
-    "Spare Parts",
+    ["Spare Parts"],
     "When crafting: Increases your Resourcefulness by 33/44/55 (based on quality) and Inspiration by 30/40/50."
   );
   const haphazardlyTetheredWires = await createItem(
@@ -3321,7 +3374,7 @@ const makeTables = async () => {
     "Uncommon",
     "Finishing Crafting Reagent",
     3,
-    "Spare Parts",
+    ["Spare Parts"],
     "When crafting: When crafting: You are 9/12/15% more likely (based on quality) to improve at Engineering, but Recipe Difficulty is increased by 18/24/30."
   );
   const calibratedSafetySwitch = await createItem(
@@ -3334,7 +3387,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Safety Components",
+    ["Safety Components"],
     "+20/15/10 Recipe Difficulty (based on quality). Provides the following property: Reduces the likelihood of this device's tinker malfunctioning by 15%."
   );
   const criticalFailurePreventionUnit = await createItem(
@@ -3347,7 +3400,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Safety Components",
+    ["Safety Components"],
     "+20/15/10 Recipe Difficulty (based on quality). Provides the following property: Tinkers slotted into this device can no longer catastrophically malfunction."
   );
   const magazineOfHealingDarts = await createItem(
@@ -3360,7 +3413,7 @@ const makeTables = async () => {
     "Rare",
     "Optional Crafting Reagent",
     3,
-    "Embellishment",
+    ["Embellishment"],
     "+35/30/25 Recipe Difficulty (based on quality). When you heal you sometimes fire a Healing Dart. Also add Unique-Equipped: Embellished (2)."
   );
   const springLoadedCapacitorCasing = await createItem(
@@ -3373,7 +3426,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Safety Components",
+    ["Safety Components"],
     "+20/15/10 Recipe Difficulty (based on quality). The tinker slotted within this device will sometimes dislodge the battery instead of malfunctioning."
   );
   const tinkerAlarmOTurret = await createItem(
@@ -3386,7 +3439,7 @@ const makeTables = async () => {
     "Rare",
     "Tinker Module",
     3,
-    "Tinker",
+    ["Tinker"],
     "Place a hidden Alarm-O-Turret on a nearby targeted location. If an enemy player enters its detection radius, it will alert you of their presence and attempt to defend the area for 30 sec or until destroyed."
   );
   const tinkerArclightVitalCorrectors = await createItem(
@@ -3399,7 +3452,7 @@ const makeTables = async () => {
     "Rare",
     "Tinker Module",
     3,
-    "Tinker",
+    ["Tinker"],
     "Carelessly cross a few frayed wires within the vicinity of a fallen ally in a desperate attempt to jolt them back to life with 60% health and 20% mana. Castable in combat. What could possibly go wrong?Cannot be used by players higher than level 70."
   );
   const tinkerPolarityAmplifier = await createItem(
@@ -3412,7 +3465,7 @@ const makeTables = async () => {
     "Rare",
     "Tinker Module",
     3,
-    "Tinker",
+    ["Tinker"],
     "Grants a magnetic charge that changes periodically. Aim a magnet toward an enemy player. If your polarities are opposite, you both will be rooted for 6 sec. If they are identical, you both will be repelled away from each other. Your target must have also have a magnetic charge."
   );
   const tinkerSupercollideOTron = await createItem(
@@ -3425,7 +3478,7 @@ const makeTables = async () => {
     "Rare",
     "Tinker Module",
     3,
-    "Tinker",
+    ["Tinker"],
     "Lock on to a distant enemy target, up to 12 to 60 yds away. After 1.5 sec, if your path remains unobstructed, you will charge toward them at the speed of sound. Both you and your target will be stunned for 1.5 sec upon collision."
   );
   const tinkerGroundedCircuitry = await createItem(
@@ -3438,7 +3491,7 @@ const makeTables = async () => {
     "Rare",
     "Tinker Module",
     3,
-    "Tinker",
+    ["Tinker"],
     "Guarantees the next slotted Tinker use to succeed. The cooldown of this effect is reduced at higher qualities."
   );
   const tinkerBreathOfNeltharion = await createItem(
@@ -3451,7 +3504,7 @@ const makeTables = async () => {
     "Rare",
     "Tinker Module",
     3,
-    "Tinker",
+    ["Tinker"],
     "Reveal a flamethrower to deal 69,335 Fire damage in a cone in front of you for 6 sec."
   );
   const tinkerPlaneDisplacer = await createItem(
@@ -3464,7 +3517,7 @@ const makeTables = async () => {
     "Rare",
     "Tinker Module",
     3,
-    "Tinker",
+    ["Tinker"],
     "Grants the user invisibility for 12-18 sec."
   );
   const battleReadyBinoculars = await createItem(
@@ -3825,7 +3878,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Cogwheel",
+    ["Cogwheel"],
     "+35/25/15 Recipe Difficulty (based on quality.) Provides the following property: Allocate the secondary stats of Engineering crafted goggles or bracers to Mastery."
   );
   const oneSizeFitsAllGear = await createItem(
@@ -3838,7 +3891,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Cogwheel",
+    ["Cogwheel"],
     "+35/25/15 Recipe Difficulty (based on quality.) Provides the following property: Allocate the secondary stats of Engineering crafted goggles or bracers to Versatility."
   );
   const rapidlyTickingGear = await createItem(
@@ -3851,7 +3904,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Cogwheel",
+    ["Cogwheel"],
     "+35/25/15 Recipe Difficulty (based on quality.) Provides the following property: Allocate the secondary stats of Engineering crafted goggles or bracers to Haste."
   );
   const razorSharpGear = await createItem(
@@ -3864,7 +3917,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Cogwheel",
+    ["Cogwheel"],
     "+35/25/15 Recipe Difficulty (based on quality.) Provides the following property: Allocate the secondary stats of Engineering crafted goggles or bracers to Critical Strike."
   );
   const highIntensityThermalScanner = await createItem(
@@ -6273,7 +6326,7 @@ const makeTables = async () => {
     "Rare",
     "Optional Crafting Reagent",
     3,
-    "Embellishment",
+    ["Embellishment"],
     "+35/30/25 Recipe Difficulty (based on quality). Provides the following property: Increase the duration of Dragon Isles potions by 50% and add Unique-Equipped: Embellished (2)."
   );
   const writhefireOil = await createItem(
@@ -6286,7 +6339,7 @@ const makeTables = async () => {
     "Uncommon",
     "Finishing Crafting Reagent",
     3,
-    "Chain Oil",
+    ["Curing Agent", "Chain Oil", "Quenching Fluid"],
     "When crafting: You are 9%/12%/15% (based on difficulty) more likely to improve at your profession, but Recipe Difficulty is increased by 18/24/30 (based on quality.)"
   );
   const broodSalt = await createItem(
@@ -6299,7 +6352,11 @@ const makeTables = async () => {
     "Uncommon",
     "Finishing Crafting Reagent",
     3,
-    "Curing Agent",
+    [
+      "Curing Agent",
+      "Alchemical Catalyst - Potion",
+      "Alchemical Catalyst - Phial",
+    ],
     "When crafting: Increases Inspiration by 30/40/50 (based on quality) and Crafting Speed by 12/16/20% (based on quality.)"
   );
   const stableFluidicDraconium = await createItem(
@@ -6312,7 +6369,7 @@ const makeTables = async () => {
     "Uncommon",
     "Finishing Crafting Reagent",
     3,
-    "Chain Oil",
+    ["Chain Oil", "Quenching Fluid"],
     "When crafting: Increases bonus Skill from Inspiration by 15%/20%/25% (based on quality)."
   );
   const agitatingPotionAugmentation = await createItem(
@@ -6321,11 +6378,11 @@ const makeTables = async () => {
     null,
     200,
     null,
-    "Only usable on Potions.",
+    null,
     "Uncommon",
     "Finishing Crafting Reagent",
     3,
-    "Alchemical Catalyst",
+    ["Alchemical Catalyst - Potion"],
     "When crafting: Increases Inspiration by 30/36/45 (based on quality) and Multicraft by 27/36/45 (based on quality.)"
   );
   const reactivePhialEmbellishment = await createItem(
@@ -6334,11 +6391,11 @@ const makeTables = async () => {
     null,
     200,
     null,
-    "Only usable on Phials.",
+    null,
     "Uncommon",
     "Finishing Crafting Reagent",
     3,
-    "Alchemical Catalyst",
+    ["Alchemical Catalyst - Phial"],
     "When crafting: Increases Inspiration by 30/36/45 (based on quality) and Multicraft by 27/36/45 (based on quality.)"
   );
   const sagaciousIncense = await createItem(
@@ -6570,7 +6627,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Missive",
+    ["Missive - Combat"],
     "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Versatility and Haste."
   );
   const draconicMissiveOfTheFeverflare = await createItem(
@@ -6583,7 +6640,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Missive",
+    ["Missive - Combat"],
     "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Mastery and Haste."
   );
   const draconicMissiveOfTheFireflash = await createItem(
@@ -6596,7 +6653,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Missive",
+    ["Missive - Combat"],
     "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Critical Strike and Haste."
   );
   const draconicMissiveOfTheHarmonious = await createItem(
@@ -6609,7 +6666,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Missive",
+    ["Missive - Combat"],
     "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Versatility and Mastery."
   );
   const draconicMissiveOfThePeerless = await createItem(
@@ -6622,7 +6679,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Missive",
+    ["Missive - Combat"],
     "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Critical Strike and Mastery."
   );
   const draconicMissiveOfTheQuickblade = await createItem(
@@ -6635,7 +6692,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Missive",
+    ["Missive - Combat"],
     "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Versatility and Critical Strike."
   );
   const draconicMissiveOfCraftingSpeed = await createItem(
@@ -6648,7 +6705,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Missive",
+    ["Missive - Crafting"],
     "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Crafting Speed."
   );
   const draconicMissiveOfInspiration = await createItem(
@@ -6661,7 +6718,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Missive",
+    ["Missive - Crafting"],
     "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Inspiration."
   );
   const draconicMissiveOfMulticraft = await createItem(
@@ -6674,7 +6731,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Missive",
+    ["Missive - Crafting"],
     "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Multicraft."
   );
   const draconicMissiveOfResourcefulness = await createItem(
@@ -6687,7 +6744,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Missive",
+    ["Missive - Crafting"],
     "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Resourcefulness."
   );
   const draconicMissiveOfDeftness = await createItem(
@@ -6700,7 +6757,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Missive",
+    ["Missive - Gathering"],
     "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Deftness."
   );
   const draconicMissiveOfFinesse = await createItem(
@@ -6713,7 +6770,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Missive",
+    ["Missive - Gathering"],
     "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Finesse."
   );
   const draconicMissiveOfPerception = await createItem(
@@ -6726,7 +6783,7 @@ const makeTables = async () => {
     "Uncommon",
     "Optional Crafting Reagent",
     3,
-    "Missive",
+    ["Missive - Gathering"],
     "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Perception."
   );
   const darkmoonDeckDance = await createItem(
@@ -7079,7 +7136,7 @@ const makeTables = async () => {
     "Rare",
     "Optional Crafting Reagent",
     3,
-    "Darkmoon Sigil",
+    ["Darkmoon Sigil"],
     "+20/15/10 Recipe Difficulty (based on quality). Provides the following property: Your Darkmoon Deck no longer has Even cards."
   );
   const jetscaleSigil = await createItem(
@@ -7092,7 +7149,7 @@ const makeTables = async () => {
     "Rare",
     "Optional Crafting Reagent",
     3,
-    "Darkmoon Sigil",
+    ["Darkmoon Sigil"],
     "+20/15/10 Recipe Difficulty (based on quality). Provides the following property: Your Darkmoon Deck no longer shuffles when the Ace is drawn."
   );
   const sagescaleSigil = await createItem(
@@ -7105,7 +7162,7 @@ const makeTables = async () => {
     "Rare",
     "Optional Crafting Reagent",
     3,
-    "Darkmoon Sigil",
+    ["Darkmoon Sigil"],
     "+20/15/10 Recipe Difficulty (based on quality). Provides the following property: Your Darkmoon Deck only shuffles when you jump."
   );
   const azurescaleSigil = await createItem(
@@ -7118,7 +7175,7 @@ const makeTables = async () => {
     "Rare",
     "Optional Crafting Reagent",
     3,
-    "Darkmoon Sigil",
+    ["Darkmoon Sigil"],
     "+20/15/10 Recipe Difficulty (based on quality). Provides the following property: Your Darkmoon Deck now shuffles from greatest to least."
   );
   const bronzescaleSigil = await createItem(
@@ -7131,7 +7188,7 @@ const makeTables = async () => {
     "Rare",
     "Optional Crafting Reagent",
     3,
-    "Darkmoon Sigil",
+    ["Darkmoon Sigil"],
     "+20/15/10 Recipe Difficulty (based on quality). Provides the following property: Your Darkmoon Deck shuffles faster."
   );
   const vantusRuneVaultOfTheIncarnates = await createItem(
@@ -7794,102 +7851,106 @@ const makeTables = async () => {
     );
   };
 
-  const renewedProtoDrakeSilverAndBlueArmor = makeDragonInscriptionItem(
+  const renewedProtoDrakeSilverAndBlueArmor = await makeDragonInscriptionItem(
     "Renewed Proto-Drake",
     "Silver and Blue Armor",
     "inv_glyph_majordeathknight"
   );
-  const renewedProtoDrakeSteelAndYellowArmor = makeDragonInscriptionItem(
+  const renewedProtoDrakeSteelAndYellowArmor = await makeDragonInscriptionItem(
     "Renewed Proto-Drake",
     "Steel and Yellow Armor",
     "inv_glyph_majordeathknight"
   );
-  const renewedProtoDrakeBovineHorns = makeDragonInscriptionItem(
+  const renewedProtoDrakeBovineHorns = await makeDragonInscriptionItem(
     "Renewed Proto-Drake",
     "Bovine Horns",
     "inv_glyph_minordeathknight"
   );
-  const renewedProtoDrakePredatorPattern = makeDragonInscriptionItem(
+  const renewedProtoDrakePredatorPattern = await makeDragonInscriptionItem(
     "Renewed Proto-Drake",
     "Predator Pattern",
     "inv_glyph_majordeathknight"
   );
-  const renewedProtoDrakeSpinedCrest = makeDragonInscriptionItem(
+  const renewedProtoDrakeSpinedCrest = await makeDragonInscriptionItem(
     "Renewed Proto-Drake",
     "Spined Crest",
     "inv_glyph_minordeathknight"
   );
-  const windborneVelocidrakeSilverAndBlueArmor = makeDragonInscriptionItem(
-    "Windborne Velocidrake",
-    "Silver and Blue Armor",
-    "inv_glyph_majorhunter"
-  );
-  const windborneVelocidrakeSteelAndOrangeArmor = makeDragonInscriptionItem(
-    "Windborne Velocidrake",
-    "Steel and Orange Armor",
-    "inv_glyph_majorhunter"
-  );
-  const windborneVelocidrakeBlackFur = makeDragonInscriptionItem(
+  const windborneVelocidrakeSilverAndBlueArmor =
+    await makeDragonInscriptionItem(
+      "Windborne Velocidrake",
+      "Silver and Blue Armor",
+      "inv_glyph_majorhunter"
+    );
+  const windborneVelocidrakeSteelAndOrangeArmor =
+    await makeDragonInscriptionItem(
+      "Windborne Velocidrake",
+      "Steel and Orange Armor",
+      "inv_glyph_majorhunter"
+    );
+  const windborneVelocidrakeBlackFur = await makeDragonInscriptionItem(
     "Windborne Velocidrake",
     "Black Fur",
     "inv_glyph_minorhunter"
   );
-  const windborneVelocidrakeSpinedHead = makeDragonInscriptionItem(
+  const windborneVelocidrakeSpinedHead = await makeDragonInscriptionItem(
     "Windborne Velocidrake",
     "Spined Head",
     "inv_glyph_minorhunter"
   );
-  const windborneVelocidrakeWindsweptPattern = makeDragonInscriptionItem(
+  const windborneVelocidrakeWindsweptPattern = await makeDragonInscriptionItem(
     "Windborne Velocidrake",
     "Windswept Pattern",
     "inv_glyph_majorhunter"
   );
-  const highlandDrakeSilverAndBlueArmor = makeDragonInscriptionItem(
+  const highlandDrakeSilverAndBlueArmor = await makeDragonInscriptionItem(
     "Highland Drake",
     "Silver and Blue Armor",
     "inv_glyph_majormage"
   );
-  const highlandDrakeSteelAndYellowArmor = makeDragonInscriptionItem(
+  const highlandDrakeSteelAndYellowArmor = await makeDragonInscriptionItem(
     "Highland Drake",
     "Steel and Yellow Armor",
     "inv_glyph_majormage"
   );
-  const highlandDrakeBlackHair = makeDragonInscriptionItem(
+  const highlandDrakeBlackHair = await makeDragonInscriptionItem(
     "Highland Drake",
     "Black Hair",
     "inv_glyph_minormage"
   );
-  const highlandDrakeSpinedCrest = makeDragonInscriptionItem(
+  const highlandDrakeSpinedCrest = await makeDragonInscriptionItem(
     "Highland Drake",
     "Spined Crest",
     "inv_glyph_minormage"
   );
-  const highlandDrakeSpinedThroat = makeDragonInscriptionItem(
+  const highlandDrakeSpinedThroat = await makeDragonInscriptionItem(
     "Highland Drake",
     "Spined Throat",
     "inv_glyph_minormage"
   );
-  const cliffsideWylderdrakeSilverAndBlueArmor = makeDragonInscriptionItem(
-    "Cliffside Wylderdrake",
-    "Silver and Blue Armor",
-    "inv_glyph_majordruid"
-  );
-  const cliffsideWylderdrakeSteelAndYellowArmor = makeDragonInscriptionItem(
-    "Cliffside Wylderdrake",
-    "Steel and Yellow Armor",
-    "inv_glyph_majordruid"
-  );
-  const cliffsideWylderdrakeConicalHead = makeDragonInscriptionItem(
+  const cliffsideWylderdrakeSilverAndBlueArmor =
+    await makeDragonInscriptionItem(
+      "Cliffside Wylderdrake",
+      "Silver and Blue Armor",
+      "inv_glyph_majordruid"
+    );
+  const cliffsideWylderdrakeSteelAndYellowArmor =
+    await makeDragonInscriptionItem(
+      "Cliffside Wylderdrake",
+      "Steel and Yellow Armor",
+      "inv_glyph_majordruid"
+    );
+  const cliffsideWylderdrakeConicalHead = await makeDragonInscriptionItem(
     "Cliffside Wylderdrake",
     "Conical Head",
     "inv_glyph_minordruid"
   );
-  const cliffsideWylderdrakeRedHair = makeDragonInscriptionItem(
+  const cliffsideWylderdrakeRedHair = await makeDragonInscriptionItem(
     "Cliffside Wylderdrake",
     "Red Hair",
     "inv_glyph_minordruid"
   );
-  const cliffsideWylderdrakeTripleHeadHorns = makeDragonInscriptionItem(
+  const cliffsideWylderdrakeTripleHeadHorns = await makeDragonInscriptionItem(
     "Cliffside Wylderdrake",
     "Triple Head Horns",
     "inv_glyph_minordruid"
@@ -8313,7 +8374,7 @@ const makeTables = async () => {
     "Rare",
     "Optional Crafting Reagent",
     3,
-    "Embellishment",
+    ["Embellishment"],
     "+35/30/25 Recipe Difficulty (based on quality). Provides the following property: Adorn your armor with thick spikes and add Unique-Equipped: Embellished (2)."
   );
   const alliedChestplateOfGenerosity = await createItem(
@@ -10133,396 +10194,2015 @@ const makeTables = async () => {
   );
 
   // //leatherworking items
-  // const lifeBoundBelt = await createItem("Life-Bound Belt", 1, 382, 392);
-  // const lifeBoundBindings = await createItem(
-  //   "Life-Bound Bindings",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const lifeBoundBoots = await createItem("Life-Bound Boots", 1, 382, 392);
-  // const lifeBoundCap = await createItem("Life-Bound Cap", 1, 382, 392);
-  // const lifeBoundChestpiece = await createItem(
-  //   "Life-Bound Chestpiece",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const lifeBoundGloves = await createItem("Life-Bound Gloves", 1, 382, 392);
-  // const lifeBoundShoulderpads = await createItem(
-  //   "Life-Bound Shoulderpads",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const lifeBoundTrousers = await createItem(
-  //   "Life-Bound Trousers",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const pioneersPracticedCowl = await createItem(
-  //   "Pioneer's Practiced Cowl",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const pioneersPracticedLeggings = await createItem(
-  //   "Pioneer's Practiced Leggings",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const pioneersPracticedShoulders = await createItem(
-  //   "Pioneer's Practiced Shoulders",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const pioneersPracticedGloves = await createItem(
-  //   "Pioneer's Practiced Gloves",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const pioneersPracticedBelt = await createItem(
-  //   "Pioneer's Practiced Belt",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const pioneersLeatherTunic = await createItem(
-  //   "Pioneer's Leather Tunic",
-  //   1,
-  //   306,
-  //   316
-  // );
-  // const pioneersLeatherBoots = await createItem(
-  //   "Pioneer's Leather Boots",
-  //   1,
-  //   306,
-  //   316
-  // );
-  // const pioneersLeatherWristguards = await createItem(
-  //   "Pioneer's Leather Wristguards",
-  //   1,
-  //   306,
-  //   316
-  // );
-  // const flameTouchedChain = await createItem(
-  //   "Flame-Touched Chain",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const flameTouchedChainmail = await createItem(
-  //   "Flame-Touched Chainmail",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const flameTouchedCuffs = await createItem(
-  //   "Flame-Touched Cuffs",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const flameTouchedHandguards = await createItem(
-  //   "Flame-Touched Handguards",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const flameTouchedHelmet = await createItem(
-  //   "Flame-Touched Helmet",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const flameTouchedLegguards = await createItem(
-  //   "Flame-Touched Legguards",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const flameTouchedSpaulders = await createItem(
-  //   "Flame-Touched Spaulders",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const flameTouchedTreads = await createItem(
-  //   "Flame-Touched Treads",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const trailblazersToughenedCoif = await createItem(
-  //   "Trailblazer's Toughened Coif",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const trailblazersToughenedLegguards = await createItem(
-  //   "Trailblazer's Toughened Legguards",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const trailblazersToughenedSpikes = await createItem(
-  //   "Trailblazer's Toughened Spikes",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const trailblazersToughenedGrips = await createItem(
-  //   "Trailblazer's Toughened Grips",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const trailblazersToughenedChainbelt = await createItem(
-  //   "Trailblazer's Toughened Chainbelt",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const trailblazersScaleVest = await createItem(
-  //   "Trailblazer's Scale Vest",
-  //   1,
-  //   306,
-  //   316
-  // );
-  // const trailblazersScaleBoots = await createItem(
-  //   "Trailblazer's Scale Boots",
-  //   1,
-  //   306,
-  //   316
-  // );
-  // const trailblazersScaleBracers = await createItem(
-  //   "Trailblazer's Scale Bracers",
-  //   1,
-  //   306,
-  //   316
-  // );
-  // const expertAlchemistsHat = await createItem(
-  //   "Expert Alchemist's Hat",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const expertSkinnersCap = await createItem(
-  //   "Expert Skinner's Cap",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const flameproofApron = await createItem("Flameproof Apron", 1, 356, 371);
-  // const lavishFloralPack = await createItem("Lavish Floral Pack", 1, 356, 371);
-  // const masterworkSmock = await createItem("Masterwork Smock", 1, 356, 371);
-  // const reinforcedPack = await createItem("Reinforced Pack", 1, 356, 371);
-  // const resplendentCover = await createItem("Resplendent Cover", 1, 356, 371);
-  // const shockproofGloves = await createItem("Shockproof Gloves", 1, 356, 371);
-  // const alchemistsHat = await createItem("Alchemist's Hat", 1, 317, 332);
-  // const smithingApron = await createItem("Smithing Apron", 1, 317, 332);
-  // const jewelersCover = await createItem("Jeweler's Cover", 1, 317, 332);
-  // const protectiveGloves = await createItem("Protective Gloves", 1, 317, 332);
-  // const durablePack = await createItem("Durable Pack", 1, 317, 332);
-  // const floralBasket = await createItem("Floral Basket", 1, 317, 332);
-  // const skinnersCap = await createItem("Skinner's Cap", 1, 317, 332);
-  // const resilientSmock = await createItem("Resilient Smock", 1, 317, 332);
-  // const bonewroughtCrossbow = await createItem(
-  //   "Bonewrought Crossbow",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const ancestorsDewDrippers = await createItem(
-  //   "Ancestor's Dew Drippers",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const flaringCowl = await createItem("Flaring Cowl", 1, 382, 392);
-  // const oldSpiritsWristwraps = await createItem(
-  //   "Old Spirit's Wristwraps",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const scaleReinGrips = await createItem("Scale Rein Grips", 1, 382, 392);
-  // const snowballMakers = await createItem("Snowball Makers", 1, 382, 392);
-  // const stringOfSpiritualKnickKnacks = await createItem(
-  //   "String of Spiritual Knick-Knacks",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const windSpiritsLasso = await createItem("Wind Spirit's Lasso", 1, 382, 392);
-  // const alliedHeartwarmingFurCoat = await createItem(
-  //   "Allied Heartwarming Fur Coat",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const alliedLegguardsOfSansokKhan = await createItem(
-  //   "Allied Legguards of Sansok Khan",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const bowOfTheDragonHunters = await createItem(
-  //   "Bow of the Dragon Hunters",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // //this block below need pvp ilvls
-  // const infuriousBootsOfReprieve = await createItem(
-  //   "Infurious Boots of Reprieve",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const infuriousChainhelmProtector = await createItem(
-  //   "Infurious Chainhelm Protector",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const infuriousFootwrapsOfIndemnity = await createItem(
-  //   "Infurious Footwraps of Indemnity",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const infuriousSpiritsHood = await createItem(
-  //   "Infurious Spirit's Hood",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const crimsonCombatantsAdamantChainmail = await createItem(
-  //   "Crimson Combatant's Adamant Chainmail",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsAdamantCowl = await createItem(
-  //   "Crimson Combatant's Adamant Cowl",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsAdamantCuffs = await createItem(
-  //   "Crimson Combatant's Adamant Cuffs",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsAdamantEpaulettes = await createItem(
-  //   "Crimson Combatant's Adamant Epaulettes",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsAdamantGauntlets = await createItem(
-  //   "Crimson Combatant's Adamant Gauntlets",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsAdamantGirdle = await createItem(
-  //   "Crimson Combatant's Adamant Girdle",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsAdamantLeggings = await createItem(
-  //   "Crimson Combatant's Adamant Leggings",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsAdamantTreads = await createItem(
-  //   "Crimson Combatant's Adamant Treads",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsResilientBelt = await createItem(
-  //   "Crimson Combatant's Resilient Belt",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsResilientBoots = await createItem(
-  //   "Crimson Combatant's Resilient Boots",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsResilientChestpiece = await createItem(
-  //   "Crimson Combatant's Resilient Chestpiece",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsResilientGloves = await createItem(
-  //   "Crimson Combatant's Resilient Gloves",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsResilientMask = await createItem(
-  //   "Crimson Combatant's Resilient Mask",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsResilientShoulderpads = await createItem(
-  //   "Crimson Combatant's Resilient Shoulderpads",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsResilientTrousers = await createItem(
-  //   "Crimson Combatant's Resilient Trousers",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsResilientWristwraps = await createItem(
-  //   "Crimson Combatant's Resilient Wristwraps",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const acidicHailstoneTreads = await createItem(
-  //   "Acidic Hailstone Treads",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const slimyExpulsionBoots = await createItem(
-  //   "Slimy Expulsion Boots",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const toxicThornFootwraps = await createItem(
-  //   "Toxic Thorn Footwraps",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const venomSteepedStompers = await createItem(
-  //   "Venom-Steeped Stompers",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const witherrotTome = await createItem("Witherrot Tome", 1, 382, 392);
+  const lifeBoundBelt = await createItem(
+    "Life-Bound Belt",
+    "inv_belt_leather_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Waist",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      secondaryStatArrayEpic("Random Stat 1", "medium"),
+      secondaryStatArrayEpic("Random Stat 2", "medium"),
+    ]
+  );
+  const lifeBoundBindings = await createItem(
+    "Life-Bound Bindings",
+    "inv_bracer_leather_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Wrist",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("small")],
+    [
+      secondaryStatArrayEpic("Stamina", "small"),
+      secondaryStatArrayEpic("Random Stat 1", "small"),
+      secondaryStatArrayEpic("Random Stat 2", "small"),
+    ]
+  );
+  const lifeBoundBoots = await createItem(
+    "Life-Bound Boots",
+    "inv_boot_leather_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Feet",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      secondaryStatArrayEpic("Random Stat 1", "medium"),
+      secondaryStatArrayEpic("Random Stat 2", "medium"),
+    ]
+  );
+  const lifeBoundCap = await createItem(
+    "Life-Bound Cap",
+    "inv_helm_leather_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Head",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("Stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
+    ]
+  );
+  const lifeBoundChestpiece = await createItem(
+    "Life-Bound Chestpiece",
+    "inv_chest_leather_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Chest",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("Stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
+    ]
+  );
+  const lifeBoundGloves = await createItem(
+    "Life-Bound Gloves",
+    "inv_glove_leather_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Hands",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      secondaryStatArrayEpic("Random Stat 1", "medium"),
+      secondaryStatArrayEpic("Random Stat 2", "medium"),
+    ]
+  );
+  const lifeBoundShoulderpads = await createItem(
+    "Life-Bound Shoulderpads",
+    "inv_shoulder_leather_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Shoulder",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      secondaryStatArrayEpic("Random Stat 1", "medium"),
+      secondaryStatArrayEpic("Random Stat 2", "medium"),
+    ]
+  );
+  const lifeBoundTrousers = await createItem(
+    "Life-Bound Trousers",
+    "inv_pant_leather_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Legs",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("Stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
+    ]
+  );
+  const pioneersPracticedCowl = await createItem(
+    "Pioneer's Practiced Cowl",
+    "inv_leather_dragonquest_b_01_helm",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Head",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("Stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
+    ]
+  );
+  const pioneersPracticedLeggings = await createItem(
+    "Pioneer's Practiced Leggings",
+    "inv_leather_dragonquest_b_01_pant",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Legs",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("Stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
+    ]
+  );
+  const pioneersPracticedShoulders = await createItem(
+    "Pioneer's Practiced Shoulders",
+    "inv_leather_dragonquest_b_01_shoulder",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Shoulder",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("Stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
+    ]
+  );
+  const pioneersPracticedGloves = await createItem(
+    "Pioneer's Practiced Gloves",
+    "inv_leather_dragonquest_b_01_glove",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Hands",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("Stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
+    ]
+  );
+  const pioneersPracticedBelt = await createItem(
+    "Pioneer's Practiced Belt",
+    "inv_leather_dragonquest_b_01_belt",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Waist",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("Stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
+    ]
+  );
+  const pioneersLeatherTunic = await createItem(
+    "Pioneer's Leather Tunic",
+    "inv_leather_dragonquest_b_01_chest",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Shoulder",
+    null,
+    [306, 308, 310, 313, 316],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayBaby("large")],
+    [
+      secondaryStatArrayBaby("Stamina", "large"),
+      secondaryStatArrayBaby("Random Stat 1", "large"),
+      secondaryStatArrayBaby("Random Stat 2", "large"),
+    ]
+  );
+  const pioneersLeatherBoots = await createItem(
+    "Pioneer's Leather Boots",
+    "inv_leather_dragonquest_b_01_boot",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Feet",
+    null,
+    [306, 308, 310, 313, 316],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayBaby("medium")],
+    [
+      secondaryStatArrayBaby("Stamina", "medium"),
+      secondaryStatArrayBaby("Random Stat 1", "medium"),
+      secondaryStatArrayBaby("Random Stat 2", "medium"),
+    ]
+  );
+  const pioneersLeatherWristguards = await createItem(
+    "Pioneer's Leather Wristguards",
+    "inv_leather_dragonquest_b_01_bracer",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leather",
+    "Wrist",
+    null,
+    [306, 308, 310, 313, 316],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayBaby("small")],
+    [
+      secondaryStatArrayBaby("Stamina", "small"),
+      secondaryStatArrayBaby("Random Stat 1", "small"),
+      secondaryStatArrayBaby("Random Stat 2", "small"),
+    ]
+  );
+  const flameTouchedChain = await createItem(
+    "Flame-Touched Chain",
+    "inv_belt_mail_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Waist",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      secondaryStatArrayEpic("Random Stat 1", "medium"),
+      secondaryStatArrayEpic("Random Stat 2", "medium"),
+    ]
+  );
+  const flameTouchedChainmail = await createItem(
+    "Flame-Touched Chainmail",
+    "inv_chest_mail_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Chest",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("Stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
+    ]
+  );
+  const flameTouchedCuffs = await createItem(
+    "Flame-Touched Cuffs",
+    "inv_bracer_mail_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Wrist",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("small")],
+    [
+      secondaryStatArrayEpic("Stamina", "small"),
+      secondaryStatArrayEpic("Random Stat 1", "small"),
+      secondaryStatArrayEpic("Random Stat 2", "small"),
+    ]
+  );
+  const flameTouchedHandguards = await createItem(
+    "Flame-Touched Handguards",
+    "inv_glove_mail_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Hands",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      secondaryStatArrayEpic("Random Stat 1", "medium"),
+      secondaryStatArrayEpic("Random Stat 2", "medium"),
+    ]
+  );
+  const flameTouchedHelmet = await createItem(
+    "Flame-Touched Helmet",
+    "inv_helm_mail_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Head",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("Stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
+    ]
+  );
+  const flameTouchedLegguards = await createItem(
+    "Flame-Touched Legguards",
+    "inv_pant_mail_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Legs",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("Stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
+    ]
+  );
+  const flameTouchedSpaulders = await createItem(
+    "Flame-Touched Spaulders",
+    "inv_shoulder_mail_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Shoulder",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      secondaryStatArrayEpic("Random Stat 1", "medium"),
+      secondaryStatArrayEpic("Random Stat 2", "medium"),
+    ]
+  );
+  const flameTouchedTreads = await createItem(
+    "Flame-Touched Treads",
+    "inv_boot_mail_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Feet",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      secondaryStatArrayEpic("Random Stat 1", "medium"),
+      secondaryStatArrayEpic("Random Stat 2", "medium"),
+    ]
+  );
+  const trailblazersToughenedCoif = await createItem(
+    "Trailblazer's Toughened Coif",
+    "inv_mail_dragonquest_b_01_helm",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Head",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("Stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
+    ]
+  );
+  const trailblazersToughenedLegguards = await createItem(
+    "Trailblazer's Toughened Legguards",
+    "inv_mail_dragonquest_b_01_pant",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Legs",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("Stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
+    ]
+  );
+  const trailblazersToughenedSpikes = await createItem(
+    "Trailblazer's Toughened Spikes",
+    "inv_mail_dragonquest_b_01_shoulder",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Shoulder",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("Stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
+    ]
+  );
+  const trailblazersToughenedGrips = await createItem(
+    "Trailblazer's Toughened Grips",
+    "inv_mail_dragonquest_b_01_gloves",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Hands",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("Stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
+    ]
+  );
+  const trailblazersToughenedChainbelt = await createItem(
+    "Trailblazer's Toughened Chainbelt",
+    "inv_mail_dragonquest_b_01_belt",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Waist",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("Stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
+    ]
+  );
+  const trailblazersScaleVest = await createItem(
+    "Trailblazer's Scale Vest",
+    "inv_mail_dragonquest_b_01_chest",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Shoulder",
+    null,
+    [306, 308, 310, 313, 316],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayBaby("large")],
+    [
+      secondaryStatArrayBaby("Stamina", "large"),
+      secondaryStatArrayBaby("Random Stat 1", "large"),
+      secondaryStatArrayBaby("Random Stat 2", "large"),
+    ]
+  );
+  const trailblazersScaleBoots = await createItem(
+    "Trailblazer's Scale Boots",
+    "inv_mail_dragonquest_b_01_boots",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Feet",
+    null,
+    [306, 308, 310, 313, 316],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayBaby("medium")],
+    [
+      secondaryStatArrayBaby("Stamina", "medium"),
+      secondaryStatArrayBaby("Random Stat 1", "medium"),
+      secondaryStatArrayBaby("Random Stat 2", "medium"),
+    ]
+  );
+  const trailblazersScaleBracers = await createItem(
+    "Trailblazer's Scale Bracers",
+    "inv_mail_dragonquest_b_01_bracer",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Mail",
+    "Wrist",
+    null,
+    [306, 308, 310, 313, 316],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayBaby("small")],
+    [
+      secondaryStatArrayBaby("Stamina", "small"),
+      secondaryStatArrayBaby("Random Stat 1", "small"),
+      secondaryStatArrayBaby("Random Stat 2", "small"),
+    ]
+  );
+  const expertAlchemistsHat = await createItem(
+    "Expert Alchemist's Hat",
+    "inv_armor_helm_alchemy_b_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Alchemy Accessory",
+    "Head",
+    "Head (1)",
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [
+      ["Inspiration", 38, "?", "?", 48, 53],
+      ["Multicraft", 25, "?", "?", 32, 35],
+    ]
+  );
+  const expertSkinnersCap = await createItem(
+    "Expert Skinner's Cap",
+    "inv_helm_armor_skinning_a_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Skinning Accessory",
+    "Head",
+    "Head (1)",
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [
+      ["Inspiration", 32, "?", "?", 40, 44],
+      ["Multicraft", 32, "?", "?", 40, 44],
+    ]
+  );
+  const flameproofApron = await createItem(
+    "Flameproof Apron",
+    "inv_tabard_blacksmithing_b_01_black",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Blacksmithing Accessory",
+    "Chest",
+    "Chest (1)",
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [
+      ["Inspiration", 38, "?", "?", 48, 53],
+      ["Multicraft", 25, "?", "?", 32, 35],
+    ]
+  );
+  const lavishFloralPack = await createItem(
+    "Lavish Floral Pack",
+    "inv_cape_special_herbalism_b_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Herbalism Accessory",
+    "Back",
+    "Back (1)",
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [["Finesse", 64, "?", 74, 81, 88]]
+  );
+  const masterworkSmock = await createItem(
+    "Masterwork Smock",
+    "inv_armor_leatherworking_b_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leatherworking Accessory",
+    "Chest",
+    "Chest (1)",
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [
+      ["Inspiration", 38, "?", "?", 48, 53],
+      ["Multicraft", 25, "?", "?", 32, 35],
+    ]
+  );
+  const reinforcedPack = await createItem(
+    "Reinforced Pack",
+    "inv_cape_special_skinning_c_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Skinning Accessory",
+    "Back",
+    "Back (1)",
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [["Finesse", 64, "?", 74, 81, 88]]
+  );
+  const resplendentCover = await createItem(
+    "Resplendent Cover",
+    "inv_tabard_jewelcrafting_b_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Jewelcrafting Accessory",
+    "Chest",
+    "Chest (1)",
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [
+      ["Resplendent Cover", 25, "?", "?", 32, 35],
+      ["Multicraft", 38, "?", "?", 48, 53],
+    ]
+  );
+  const shockproofGloves = await createItem(
+    "Shockproof Gloves",
+    "inv_armor_engineering_b_01_orange",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Engineering Accessory",
+    "Hands",
+    "Hands (1)",
+    [356, 362, 368, 375, 382],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [["Resourcefulness", 32, "?", "?", 40, 44]]
+  );
+  const alchemistsHat = await createItem(
+    "Alchemist's Hat",
+    "inv_armor_helm_alchemy_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Alchemy Accessory",
+    "Head",
+    "Head (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [
+      ["Inspiration", 28, "?", "?", "?", 38],
+      ["Multicraft", 18, "?", "?", "?", 25],
+    ]
+  );
+  const smithingApron = await createItem(
+    "Smithing Apron",
+    "inv_tabard_blacksmithing_b_01_brown",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Blacksmithing Accessory",
+    "Chest",
+    "Chest (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [
+      ["Inspiration", 28, "?", "?", "?", 38],
+      ["Multicraft", 18, "?", "?", "?", 25],
+    ]
+  );
+  const jewelersCover = await createItem(
+    "Jeweler's Cover",
+    "inv_tabard_jewelcrafting_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Jewelcrafting Accessory",
+    "Chest",
+    "Chest (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [
+      ["Resourcefulness", 18, "?", "?", "?", 25],
+      ["Crafting Speed", 28, "?", "?", "?", 38],
+    ]
+  );
+  const protectiveGloves = await createItem(
+    "Protective Gloves",
+    "inv_armor_engineering_b_01_orange",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Engineering Accessory",
+    "Hands",
+    "Hands (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [
+      ["Resourcefulness", 23, "?", "?", "?", 32],
+      ["Crafting Speed", 23, "?", "?", "?", 32],
+    ]
+  );
+  const durablePack = await createItem(
+    "Durable Pack",
+    "inv_cape_special_skinning_c_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Skinning Accessory",
+    "Back",
+    "Back (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [["Finesse", 46, "?", "?", "?", 64]]
+  );
+  const floralBasket = await createItem(
+    "Floral Basket",
+    "inv_cape_special_herbalism_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Herbalism Accessory",
+    "Back",
+    "Back (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [["Finesse", 46, "?", "?", "?", 64]]
+  );
+  const skinnersCap = await createItem(
+    "Skinner's Cap",
+    "inv_helm_armor_skinning_a_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Skinning Accessory",
+    "Head",
+    "Head (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [
+      ["Deftness", 23, "?", "?", "?", 32],
+      ["Perception", 23, "?", "?", "?", 32],
+    ]
+  );
+  const resilientSmock = await createItem(
+    "Resilient Smock",
+    "inv_armor_leatherworking_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Leatherworking Accessory",
+    "Chest",
+    "Chest (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [
+      ["Inspiration", 28, "?", "?", "?", 38],
+      ["Multicraft", 18, "?", "?", "?", 25],
+    ]
+  );
+  const bonewroughtCrossbow = await createItem(
+    "Bonewrought Crossbow",
+    "inv_crossbow_2h_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Crossbow",
+    "Ranged",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("Stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
+    ]
+  );
+  const ancestorsDewDrippers = await createItem(
+    "Ancestor's Dew Drippers",
+    "inv_mail_dragondungeon_c_01_shoulder",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Horizon Strider's Garments set (Wind Spirit's Lasso, Scale Rein Grips, Ancestor's Dew Drippers). 2 Set: Critical damage and healing have a chance to spur you on, granting Haste for 10 sec. This effect stacks up to 5 times.",
+    null,
+    "Mail",
+    "Shoulder",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      ["Haste", 268, "?", "?", "?", 285],
+      ["Versatility", 201, "?", "?", "?", 213],
+    ]
+  );
+  const flaringCowl = await createItem(
+    "Flaring Cowl",
+    "inv_helm_leather_legiondungeon_c_02",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "While in combat, you are wrapped in an intense heat which burns nearby foes for 611 Fire damage every 3 sec.",
+    null,
+    "Leather",
+    "Head",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("Stamina", "large"),
+      ["Haste", 262, "?", "?", "?", 278],
+      ["Mastery", 358, "?", "?", "?", 379],
+    ]
+  );
+  const oldSpiritsWristwraps = await createItem(
+    "Old Spirit's Wristwraps",
+    "inv_bracer_leather_raiddemonhunterprimalist_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Playful Spirit's Fur set (Old Spirit's Wristwraps, Snowball Makers, String of Spiritual Knick-Knacks). 2 Set: Your spells and abilities have a chance to pelt your target with a magic snowball, causing enemies to take Frost damage or allies to receive healing.",
+    null,
+    "Leather",
+    "Wrist",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("small")],
+    [
+      secondaryStatArrayEpic("Stamina", "small"),
+      ["Critical Strike", 201, "?", "?", "?", 213],
+      ["Mastery", 126, "?", "?", "?", 133],
+    ]
+  );
+  const scaleReinGrips = await createItem(
+    "Scale Rein Grips",
+    "inv_mail_raidhunterprimalist_d_01_glove",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Horizon Strider's Garments set (Wind Spirit's Lasso, Scale Rein Grips, Ancestor's Dew Drippers). 2 Set: Critical damage and healing have a chance to spur you on, granting Haste for 10 sec. This effect stacks up to 5 times.",
+    null,
+    "Mail",
+    "Shoulder",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      ["Critical Strike", 196, "?", "?", "?", 208],
+      ["Haste", 268, "?", "?", "?", 285],
+    ]
+  );
+  const snowballMakers = await createItem(
+    "Snowball Makers",
+    "inv_leather_dragondungeon_c_01_glove",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Playful Spirit's Fur set (Old Spirit's Wristwraps, Snowball Makers, String of Spiritual Knick-Knacks). 2 Set: Your spells and abilities have a chance to pelt your target with a magic snowball, causing enemies to take Frost damage or allies to receive healing.",
+    null,
+    "Leather",
+    "Hands",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      ["Haste", 168, "?", "?", "?", 178],
+      ["Mastery", 268, "?", "?", "?", 285],
+    ]
+  );
+  const stringOfSpiritualKnickKnacks = await createItem(
+    "String of Spiritual Knick-Knacks",
+    "inv_belt_leather_raidrogueprimalist_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Playful Spirit's Fur set (Old Spirit's Wristwraps, Snowball Makers, String of Spiritual Knick-Knacks). 2 Set: Your spells and abilities have a chance to pelt your target with a magic snowball, causing enemies to take Frost damage or allies to receive healing.",
+    null,
+    "Leather",
+    "Waist",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      ["Critical Strike", 268, "?", "?", "?", 285],
+      ["Haste", 168, "?", "?", "?", 178],
+    ]
+  );
+  const windSpiritsLasso = await createItem(
+    "Wind Spirit's Lasso",
+    "inv_belt_mail_raidevokerprimalist_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Horizon Strider's Garments set (Wind Spirit's Lasso, Scale Rein Grips, Ancestor's Dew Drippers). 2 Set: Critical damage and healing have a chance to spur you on, granting Haste for 10 sec. This effect stacks up to 5 times.",
+    null,
+    "Mail",
+    "Waist",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      ["Haste", 196, "?", "?", "?", 208],
+      ["Mastery", 268, "?", "?", "?", 285],
+    ]
+  );
+  const alliedHeartwarmingFurCoat = await createItem(
+    "Allied Heartwarming Fur Coat",
+    "inv_leather_dragondungeon_c_01_chest",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Your spells and abilities have a chance to rally you and your 4 closest allies within 30 yards to victory for 10 sec, increasing Versatility by 191/195/?/205/211 (based on quality.)",
+    null,
+    "Leather",
+    "Chest",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("Stamina", "large"),
+      ["Haste", 358, "?", "?", "?", 379],
+      ["Versatility", 224, "?", "?", "?", 237],
+    ]
+  );
+  const alliedLegguardsOfSansokKhan = await createItem(
+    "Allied Legguards of Sansok Khan",
+    "inv_mail_dragondungeon_c_01_pant",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Your spells and abilities have a chance to rally you and your 4 closest allies within 30 yards to victory for 10 sec, increasing Versatility by 191/195/?/205/211 (based on quality.)",
+    null,
+    "Mail",
+    "Legs",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("Stamina", "large"),
+      ["Critical Strike", 358, "?", "?", "?", 379],
+      ["Mastery", 262, "?", "?", "?", 278],
+    ]
+  );
+  const bowOfTheDragonHunters = await createItem(
+    "Bow of the Dragon Hunters",
+    "inv_bow_1h_dragondungeon_c_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Bow",
+    "Ranged",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("Stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
+    ]
+  );
+  const infuriousBootsOfReprieve = await createItem(
+    "Infurious Boots of Reprieve",
+    "inv_boot_mail_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Gladiator's Distinction reduces the duration of incoming crowd control effects by an additional 5%. Increases item level to 424 in Arenas and Battlegrounds.",
+    null,
+    "Mail",
+    "Feet",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      ["Haste", 168, "?", "?", "?", 178],
+      ["Versatility", 302, "?", "?", "?", 320],
+    ]
+  );
+  const infuriousChainhelmProtector = await createItem(
+    "Infurious Chainhelm Protector",
+    "inv_helm_mail_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Whenever a player in slain within 20 yards of you, you are filled with a burst of tenacity and gain 1034/?/?/?/1097 Versatility (based on quality) for 10 sec. Increases item level to 424 in Arenas and Battlegrounds.",
+    null,
+    "Mail",
+    "Head",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("Stamina", "large"),
+      ["Critical Strike", 224, "?", "?", "?", 237],
+      ["Versatility", 402, "?", "?", "?", 427],
+    ]
+  );
+  const infuriousFootwrapsOfIndemnity = await createItem(
+    "Infurious Footwraps of Indemnity",
+    "inv_boot_leather_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Gladiator's Distinction reduces the duration of incoming crowd control effects by an additional 5%. Increases item level to 424 in Arenas and Battlegrounds.",
+    null,
+    "Leather",
+    "Feet",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      ["Critical Strike", 168, "?", "?", "?", 178],
+      ["Versatility", 302, "?", "?", "?", 320],
+    ]
+  );
+  const infuriousSpiritsHood = await createItem(
+    "Infurious Spirit's Hood",
+    "inv_helm_leather_dragonpvp_d_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "The ancestral spirits assist you, causing you to deal 1% more damage to enemy players who attack you for 5 sec. Increases item level to 424 in Arenas and Battlegrounds.",
+    null,
+    "Leather",
+    "Head",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("Stamina", "large"),
+      ["Versatility", 402, "?", "?", "?", 427],
+      ["Mastery", 179, "?", "?", "?", 190],
+    ]
+  );
+  const crimsonCombatantsAdamantChainmail = await createItem(
+    "Crimson Combatant's Adamant Chainmail",
+    "inv_mail_dragonquest_b_01_chest",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Mail",
+    "Chest",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("Stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
+    ]
+  );
+  const crimsonCombatantsAdamantCowl = await createItem(
+    "Crimson Combatant's Adamant Cowl",
+    "inv_mail_dragonquest_b_01_helm",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Mail",
+    "Head",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("Stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
+    ]
+  );
+  const crimsonCombatantsAdamantCuffs = await createItem(
+    "Crimson Combatant's Adamant Cuffs",
+    "inv_mail_dragonquest_b_01_bracer",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Mail",
+    "Chest",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("small")],
+    [
+      secondaryStatArrayRare("Stamina", "small"),
+      secondaryStatArrayRare("Random Stat 1", "small"),
+      secondaryStatArrayRare("Random Stat 2", "small"),
+    ]
+  );
+  const crimsonCombatantsAdamantEpaulettes = await createItem(
+    "Crimson Combatant's Adamant Epaulettes",
+    "inv_mail_dragonquest_b_01_shoulder",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Mail",
+    "Shoulder",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("Stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
+    ]
+  );
+  const crimsonCombatantsAdamantGauntlets = await createItem(
+    "Crimson Combatant's Adamant Gauntlets",
+    "inv_mail_dragonquest_b_01_gloves",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Mail",
+    "Hands",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("Stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
+    ]
+  );
+  const crimsonCombatantsAdamantGirdle = await createItem(
+    "Crimson Combatant's Adamant Girdle",
+    "inv_mail_dragonquest_b_01_belt",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Mail",
+    "Waist",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("Stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
+    ]
+  );
+  const crimsonCombatantsAdamantLeggings = await createItem(
+    "Crimson Combatant's Adamant Leggings",
+    "inv_mail_dragonquest_b_01_pants",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Mail",
+    "Legs",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("Stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
+    ]
+  );
+  const crimsonCombatantsAdamantTreads = await createItem(
+    "Crimson Combatant's Adamant Treads",
+    "inv_mail_dragonquest_b_01_boots",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Mail",
+    "Feet",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("Stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
+    ]
+  );
+  const crimsonCombatantsResilientBelt = await createItem(
+    "Crimson Combatant's Resilient Belt",
+    "inv_leather_dragonquest_b_01_belt",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Leather",
+    "Waist",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("Stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
+    ]
+  );
+  const crimsonCombatantsResilientBoots = await createItem(
+    "Crimson Combatant's Resilient Boots",
+    "inv_leather_dragonquest_b_01_boot",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Leather",
+    "Feet",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("Stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
+    ]
+  );
+  const crimsonCombatantsResilientChestpiece = await createItem(
+    "Crimson Combatant's Resilient Chestpiece",
+    "inv_leather_dragonquest_b_01_chest",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Leather",
+    "Chest",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("Stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
+    ]
+  );
+  const crimsonCombatantsResilientGloves = await createItem(
+    "Crimson Combatant's Resilient Gloves",
+    "inv_leather_dragonquest_b_01_glove",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Leather",
+    "Hands",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("Stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
+    ]
+  );
+  const crimsonCombatantsResilientMask = await createItem(
+    "Crimson Combatant's Resilient Mask",
+    "inv_leather_dragonquest_b_01_helm",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Leather",
+    "Head",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("Stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
+    ]
+  );
+  const crimsonCombatantsResilientShoulderpads = await createItem(
+    "Crimson Combatant's Resilient Shoulderpads",
+    "inv_leather_dragonquest_b_01_shoulder",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Leather",
+    "Shoulder",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("medium")],
+    [
+      secondaryStatArrayRare("Stamina", "medium"),
+      secondaryStatArrayRare("Random Stat 1", "medium"),
+      secondaryStatArrayRare("Random Stat 2", "medium"),
+    ]
+  );
+  const crimsonCombatantsResilientTrousers = await createItem(
+    "Crimson Combatant's Resilient Trousers",
+    "inv_leather_dragonquest_b_01_pant",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Leather",
+    "Legs",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("Stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
+    ]
+  );
+  const crimsonCombatantsResilientWristwraps = await createItem(
+    "Crimson Combatant's Resilient Wristwraps",
+    "inv_leather_dragonquest_b_01_bracer",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    "Leather",
+    "Wrist",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayRare("small")],
+    [
+      secondaryStatArrayRare("Stamina", "small"),
+      secondaryStatArrayRare("Random Stat 1", "small"),
+      secondaryStatArrayRare("Random Stat 2", "small"),
+    ]
+  );
+  const acidicHailstoneTreads = await createItem(
+    "Acidic Hailstone Treads",
+    "inv_mail_dragondungeon_c_01_boot",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "These boots permeate a deep chill through you, causing your spells and abilities to sometimes deal an additional 3129/?/?/?/3484 Frost damage (based on quality), but permanently slow your movement speed by 10%. These effects are increased by 100% if you equip an item crafted with a Toxified Armor Patch.",
+    null,
+    "Mail",
+    "Feet",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      ["Critical Strike", 268, "?", "?", "?", 285],
+      ["Mastery", 196, "?", "?", "?", 208],
+    ]
+  );
+  const slimyExpulsionBoots = await createItem(
+    "Slimy Expulsion Boots",
+    "inv_leather_dragondungeon_c_01_boot",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "These boots ooze a toxic slime which slow your actions, reducing Haste by 85/?/?/?/90 (based on quality). Your attacks will occasionally splash slime onto your target, dealing 3129/?/?/?/3484 Nature damage (based on quality). These effects are increased by 100% if you equip an item crafted with a Toxified Armor Patch.",
+    null,
+    "Leather",
+    "Feet",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      ["Versatility", 168, "?", "?", "?", 178],
+      ["Mastery", 268, "?", "?", "?", 285],
+    ]
+  );
+  const toxicThornFootwraps = await createItem(
+    "Toxic Thorn Footwraps",
+    "inv_leather_dragondungeon_c_01_boot",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "The thorns feed off your vitality, reducing Stamina by 48/?/?/?/53 (based on quality). Your spells and abilities have a chance to launch magical thorns at your target, healing allies for 5632/?/?/?/6271 (based on quality) or striking enemies for 2503/?/?/?/2787 Nature damage (based on quality). These effects are increased by 100% if you equip an item crafted with a Toxified Armor Patch.",
+    null,
+    "Leather",
+    "Feet",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      ["Critical Strike", 168, "?", "?", "?", 178],
+      ["Haste", 268, "?", "?", "?", 285],
+    ]
+  );
+  const venomSteepedStompers = await createItem(
+    "Venom-Steeped Stompers",
+    "inv_mail_dragondungeon_c_01_boot",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Toxins course through you, occasionally triggering Potent Venom. When affected by Potent Venom, you lose 258/?/?/?/273 of your lowest secondary stat (based on quality) and gain 646/?/?/?/685 of your highest secondary stat (based on quality) for 10 sec. These effects are increased by 100% if you equip an item crafted with a Toxified Armor Patch.",
+    null,
+    "Mail",
+    "Feet",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("medium")],
+    [
+      secondaryStatArrayEpic("Stamina", "medium"),
+      ["Versatility", 168, "?", "?", "?", 178],
+      ["Mastery", 268, "?", "?", "?", 285],
+    ]
+  );
+  const witherrotTome = await createItem(
+    "Witherrot Tome",
+    "inv_offhand_1h_dragonquest_b_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Dealing damage with spells and abilities has a small chance to inflict a Tome-Wrought Rot upon your target, causing them to take 1177/?/?/?/1582 Nature damage (based on quality) every 2 sec, and slowing their movement speed by 30% for 10 sec.",
+    null,
+    null,
+    "Off-Hand",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    [["Agility", "Intellect", "", "", ""], primaryStatArrayEpic("1h")],
+    [
+      secondaryStatArrayEpic("Stamina", "1h"),
+      secondaryStatArrayEpic("Random Stat 1", "1h"),
+      secondaryStatArrayEpic("Random Stat 2", "1h"),
+    ]
+  );
   const finishedPrototypeExplorersBarding = await createItem(
     "Finished Prototype Explorer's Barding",
     "inv_belt_41b",
@@ -10543,7 +12223,17 @@ const makeTables = async () => {
     "Epic",
     "Crafting Reagent"
   );
-  // const earthshineScales = await createItem("Earthshine Scales", 1000);
+  const earthshineScales = await createItem(
+    "Earthshine Scales",
+    "inv_10_skinning_dragonscales_green",
+    null,
+    1000,
+    "Crafted by players with the Leatherworking skill. Can be bought and sold on the auction house.",
+    null,
+    "Rare",
+    "Crafting Reagent",
+    3
+  );
   const frostbiteScales = await createItem(
     "Frostbite Scales",
     "inv_10_skinning_dragonscales_blue",
@@ -10555,8 +12245,28 @@ const makeTables = async () => {
     "Crafting Reagent",
     3
   );
-  // const infuriousHide = await createItem("Infurious Hide", 1000);
-  // const infuriousScales = await createItem("Infurious Scales", 1000);
+  const infuriousHide = await createItem(
+    "Infurious Hide",
+    "inv_10_skinning_leather_rarehide_color4",
+    null,
+    1000,
+    "Crafted by players with the Leatherworking skill. Can be bought and sold on the auction house.",
+    null,
+    "Rare",
+    "Crafting Reagent",
+    3
+  );
+  const infuriousScales = await createItem(
+    "Infurious Scales",
+    "inv_10_skinning_dragonscales_red",
+    null,
+    1000,
+    "Crafted by players with the Leatherworking skill. Can be bought and sold on the auction house.",
+    null,
+    "Rare",
+    "Crafting Reagent",
+    3
+  );
   const mireslushHide = await createItem(
     "Mireslush Hide",
     "inv_10_skinning_leather_rarehide_color2",
@@ -10580,15 +12290,130 @@ const makeTables = async () => {
     "Crafting Reagent",
     3
   );
-  // const fangAdornments = await createItem("Fang Adornments", 1000);
-  // const toxifiedArmorPatch = await createItem("Toxified Armor Patch", 1000);
-  // const fierceArmorKit = await createItem("Fierce Armor Kit", 1000);
-  // const frostedArmorKit = await createItem("Frosted Armor Kit", 1000);
-  // const reinforcedArmorKit = await createItem("Reinforced Armor Kit", 1000);
-  // const feralHideDrums = await createItem("Feral Hide Drums", 1000);
-  // const artisansSign = await createItem("Artisan's Sign");
-  // const gnollTent = await createItem("Gnoll Tent");
-  // const tuskarrBeanBag = await createItem("Tuskarr Bean Bag");
+  const fangAdornments = await createItem(
+    "Fang Adornments",
+    "inv_misc_blacksaberonfang",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Optional Crafting Reagent",
+    3,
+    ["Embellishment"],
+    "+35/30/25 Recipe Difficulty (based on quality). Provides the following property: Physical attacks sometimes deal extra physical damage. Also add Unique-Equipped: Embellished (2)."
+  );
+  const toxifiedArmorPatch = await createItem(
+    "Toxified Armor Patch",
+    "inv_misc_cataclysmarmorkit_10",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Optional Crafting Reagent",
+    3,
+    ["Embellishment"],
+    "+35/30/25 Recipe Difficulty (based on quality). Provides the following property: Infuses the item with the essence of decay. Also add Unique-Equipped: Embellished (2)."
+  );
+  const fierceArmorKit = await createItem(
+    "Fierce Armor Kit",
+    "inv_10_skinning_consumable_armorkit_color3",
+    null,
+    20,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Apply a Fierce Armor Kit to your leg armor, causing it to permanently gain 248/302/335 Stamina (based on quality), as well as 331/403/472 Agility and Strength (based on quality). (1 Sec Cooldown)"
+  );
+  const frostedArmorKit = await createItem(
+    "Frosted Armor Kit",
+    "inv_10_skinning_consumable_armorkit_color2",
+    null,
+    20,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Apply a Frosted Armor Kit to your leg armor, permanently increasing its armor by 264/320/376 Stamina (based on quality). Additionally, the item also gains 331/403/472 Agility and Strength (based on quality). (1 Sec Cooldown)"
+  );
+  const reinforcedArmorKit = await createItem(
+    "Reinforced Armor Kit",
+    "inv_10_skinning_consumable_armorkit_color1",
+    null,
+    20,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Apply a Reinforced Armor Kit to your leg armor, causing it to permanently gain 197/240/283 Agility and Strength (based on quality). (1 Sec Cooldown)"
+  );
+  const feralHideDrums = await createItem(
+    "Feral Hide Drums",
+    "inv_10_skinning_consumable_leatherdrums_color1",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Increases Haste by 15% for all party and raid members. Lasts 40 sec. Allies receiving this effect will become Exhausted and be unable to benefit from Bloodlust, Heroism or Time Warp again for 10 min. (2 Min Cooldown)"
+  );
+  const artisansSign = await createItem(
+    "Artisan's Sign",
+    "inv_misc_clipboard01",
+    null,
+    1,
+    "For sale! Discount prices! Act now!",
+    null,
+    "Rare",
+    "Toy",
+    1,
+    null,
+    null,
+    "Adds this toy to your Toy Box. Place a sign so everyone can know where the best goods are sold. (1 Hr Cooldown)"
+  );
+  const gnollTent = await createItem(
+    "Gnoll Tent",
+    "inv_10_tailoring2_tent_color3",
+    null,
+    1,
+    null,
+    null,
+    "Rare",
+    "Toy",
+    1,
+    null,
+    null,
+    "Adds this toy to your Toy Box. Place a Gnoll tent to rest and relax under. (2 Min Cooldown)"
+  );
+  const tuskarrBeanBag = await createItem(
+    "Tuskarr Bean Bag",
+    "inv_misc_bag_10",
+    null,
+    1,
+    "The finest of tuskarr leisure apparatuses.",
+    null,
+    "Rare",
+    "Toy",
+    1,
+    null,
+    null,
+    "Adds this toy to your Toy Box. Place a beanbag that can be sat on and lasts for 2 min. (2 Min Cooldown)"
+  );
 
   // //cooking items
   // const ooeyGooeyChocolate = await createItem("Ooey-Gooey Chocolate", 1000);
@@ -12253,7 +14078,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Armorsmithing: 0 }],
-      ["Missive", { LargePlateArmor: 0 }],
+      ["Missive - Combat", { LargePlateArmor: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { LargePlateArmor: 30 }],
       ["Illustrious Insight", { Breastplates: 20 }],
@@ -12280,7 +14105,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Armorsmithing: 0 }],
-      ["Missive", { FineArmor: 0 }],
+      ["Missive - Combat", { FineArmor: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { FineArmor: 30 }],
       ["Illustrious Insight", { Gauntlets: 20 }],
@@ -12307,7 +14132,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Armorsmithing: 0 }],
-      ["Missive", { FineArmor: 0 }],
+      ["Missive - Combat", { FineArmor: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { FineArmor: 30 }],
       ["Illustrious Insight", { Belts: 20 }],
@@ -12334,7 +14159,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Armorsmithing: 0 }],
-      ["Missive", { SculptedArmor: 0 }],
+      ["Missive - Combat", { SculptedArmor: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { SculptedArmor: 30 }],
       ["Illustrious Insight", { Helms: 20 }],
@@ -12361,7 +14186,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Armorsmithing: 0 }],
-      ["Missive", { LargePlateArmor: 0 }],
+      ["Missive - Combat", { LargePlateArmor: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { LargePlateArmor: 30 }],
       ["Illustrious Insight", { Greaves: 20 }],
@@ -12388,7 +14213,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Armorsmithing: 0 }],
-      ["Missive", { SculptedArmor: 0 }],
+      ["Missive - Combat", { SculptedArmor: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { SculptedArmor: 30 }],
       ["Illustrious Insight", { Pauldrons: 20 }],
@@ -12415,7 +14240,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Armorsmithing: 0 }],
-      ["Missive", { SculptedArmor: 0 }],
+      ["Missive - Combat", { SculptedArmor: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { SculptedArmor: 30 }],
       ["Illustrious Insight", { Sabatons: 20 }],
@@ -12442,7 +14267,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Armorsmithing: 0 }],
-      ["Missive", { FineArmor: 0 }],
+      ["Missive - Combat", { FineArmor: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { FineArmor: 30 }],
       ["Illustrious Insight", { Vambraces: 20 }],
@@ -12496,7 +14321,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { SculptedArmor: 0 }],
+      ["Missive - Combat", { SculptedArmor: 0 }],
       ["Quenching Fluid", { SculptedArmor: 30 }],
       ["Lesser Illustrious Insight", { Helms: 20 }],
     ]
@@ -12522,7 +14347,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { SculptedArmor: 0 }],
+      ["Missive - Combat", { SculptedArmor: 0 }],
       ["Quenching Fluid", { SculptedArmor: 30 }],
       ["Lesser Illustrious Insight", { Pauldrons: 20 }],
     ]
@@ -12548,7 +14373,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { FineArmor: 0 }],
+      ["Missive - Combat", { FineArmor: 0 }],
       ["Quenching Fluid", { FineArmor: 30 }],
       ["Lesser Illustrious Insight", { Gauntlets: 20 }],
     ]
@@ -12569,7 +14394,7 @@ const makeTables = async () => {
     "Anvil",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { FineArmor: 0 }],
+      ["Missive - Combat", { FineArmor: 0 }],
       ["Quenching Fluid", { FineArmor: 30 }],
       ["Lesser Illustrious Insight", { Vambraces: 20 }],
     ]
@@ -12590,7 +14415,7 @@ const makeTables = async () => {
     "Anvil",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { LargePlateArmor: 0 }],
+      ["Missive - Combat", { LargePlateArmor: 0 }],
       ["Quenching Fluid", { LargePlateArmor: 30 }],
       ["Lesser Illustrious Insight", { Breastplates: 20 }],
     ]
@@ -12611,7 +14436,7 @@ const makeTables = async () => {
     "Anvil",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { FineArmor: 0 }],
+      ["Missive - Combat", { FineArmor: 0 }],
       ["Quenching Fluid", { FineArmor: 30 }],
       ["Lesser Illustrious Insight", { Gauntlets: 20 }],
     ]
@@ -12632,7 +14457,7 @@ const makeTables = async () => {
     "Anvil",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { LargePlateArmor: 0 }],
+      ["Missive - Combat", { LargePlateArmor: 0 }],
       ["Quenching Fluid", { LargePlateArmor: 30 }],
       ["Lesser Illustrious Insight", { Greaves: 20 }],
     ]
@@ -12653,7 +14478,7 @@ const makeTables = async () => {
     "Anvil",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { SculptedArmor: 0 }],
+      ["Missive - Combat", { SculptedArmor: 0 }],
       ["Quenching Fluid", { SculptedArmor: 30 }],
       ["Lesser Illustrious Insight", { Helms: 20 }],
     ]
@@ -12674,7 +14499,7 @@ const makeTables = async () => {
     "Anvil",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { SculptedArmor: 0 }],
+      ["Missive - Combat", { SculptedArmor: 0 }],
       ["Quenching Fluid", { SculptedArmor: 30 }],
       ["Lesser Illustrious Insight", { Pauldrons: 20 }],
     ]
@@ -12695,7 +14520,7 @@ const makeTables = async () => {
     "Anvil",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { SculptedArmor: 0 }],
+      ["Missive - Combat", { SculptedArmor: 0 }],
       ["Quenching Fluid", { SculptedArmor: 30 }],
       ["Lesser Illustrious Insight", { Sabatons: 20 }],
     ]
@@ -12716,7 +14541,7 @@ const makeTables = async () => {
     "Anvil",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { FineArmor: 0 }],
+      ["Missive - Combat", { FineArmor: 0 }],
       ["Quenching Fluid", { FineArmor: 30 }],
       ["Lesser Illustrious Insight", { Belts: 20 }],
     ]
@@ -12742,7 +14567,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { LargePlateArmor: 0 }],
+      ["Missive - Combat", { LargePlateArmor: 0 }],
       ["Quenching Fluid", { LargePlateArmor: 30 }],
       ["Lesser Illustrious Insight", { Greaves: 20 }],
     ]
@@ -12768,7 +14593,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { FineArmor: 0 }],
+      ["Missive - Combat", { FineArmor: 0 }],
       ["Quenching Fluid", { FineArmor: 30 }],
       ["Lesser Illustrious Insight", { Belts: 20 }],
     ]
@@ -12794,7 +14619,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { LargePlateArmor: 0 }],
+      ["Missive - Combat", { LargePlateArmor: 0 }],
       ["Quenching Fluid", { LargePlateArmor: 30 }],
       ["Lesser Illustrious Insight", { Breastplates: 20 }],
     ]
@@ -12820,7 +14645,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { SculptedArmor: 0 }],
+      ["Missive - Combat", { SculptedArmor: 0 }],
       ["Quenching Fluid", { SculptedArmor: 30 }],
       ["Lesser Illustrious Insight", { Sabatons: 20 }],
     ]
@@ -12846,7 +14671,7 @@ const makeTables = async () => {
     "Learned by default.",
     [
       ["Training Matrix", {}],
-      ["Missive", { FineArmor: 0 }],
+      ["Missive - Combat", { FineArmor: 0 }],
       ["Quenching Fluid", { FineArmor: 30 }],
       ["Lesser Illustrious Insight", { Vambraces: 20 }],
     ]
@@ -12872,7 +14697,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Armorsmithing: 0 }],
-      ["Missive", { LargePlateArmor: 0 }],
+      ["Missive - Combat", { LargePlateArmor: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { LargePlateArmor: 30 }],
       ["Illustrious Insight", { Shields: 20 }],
@@ -12926,7 +14751,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { LargePlateArmor: 0 }],
+      ["Missive - Combat", { LargePlateArmor: 0 }],
       ["Quenching Fluid", { LargePlateArmor: 30 }],
       ["Lesser Illustrious Insight", { Shields: 20 }],
     ]
@@ -12953,7 +14778,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Weaponsmithing: 0 }],
-      ["Missive", { Blades: 0 }],
+      ["Missive - Combat", { Blades: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { Blades: 30 }],
       ["Illustrious Insight", { LongBlades: 25 }],
@@ -12981,7 +14806,7 @@ const makeTables = async () => {
     "Drops from mobs in the Obsidian Citadel.",
     [
       ["Primal Infusion", { Weaponsmithing: 0 }],
-      ["Missive", { Hafted: 0 }],
+      ["Missive - Combat", { Hafted: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { Hafted: 30 }],
       ["Illustrious Insight", { MacesAndHammers: 25 }],
@@ -13009,7 +14834,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Weaponsmithing: 0 }],
-      ["Missive", { Blades: 0 }],
+      ["Missive - Combat", { Blades: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { Blades: 30 }],
       ["Illustrious Insight", { ShortBlades: 25 }],
@@ -13037,7 +14862,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Weaponsmithing: 0 }],
-      ["Missive", { Hafted: 0 }],
+      ["Missive - Combat", { Hafted: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { Hafted: 30 }],
       ["Illustrious Insight", { AxesPicksAndPolearms: 25 }],
@@ -13065,7 +14890,7 @@ const makeTables = async () => {
     "Drops from mobs in the Obsidian Citadel.",
     [
       ["Primal Infusion", { Weaponsmithing: 0 }],
-      ["Missive", { Blades: 0 }],
+      ["Missive - Combat", { Blades: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { Blades: 30 }],
       ["Illustrious Insight", { LongBlades: 25 }],
@@ -13093,7 +14918,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Weaponsmithing: 0 }],
-      ["Missive", { Hafted: 0 }],
+      ["Missive - Combat", { Hafted: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { Hafted: 30 }],
       ["Illustrious Insight", { MacesAndHammers: 25 }],
@@ -13121,7 +14946,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Weaponsmithing: 0 }],
-      ["Missive", { Hafted: 0 }],
+      ["Missive - Combat", { Hafted: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { Hafted: 30 }],
       ["Illustrious Insight", { AxesPicksAndPolearms: 25 }],
@@ -13149,7 +14974,7 @@ const makeTables = async () => {
     "Drops from mobs in the Obsidian Citadel.",
     [
       ["Primal Infusion", { Weaponsmithing: 0 }],
-      ["Missive", { Hafted: 0 }],
+      ["Missive - Combat", { Hafted: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { Hafted: 30 }],
       ["Illustrious Insight", { AxesPicksAndPolearms: 25 }],
@@ -13176,7 +15001,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Weaponsmithing: 0 }],
-      ["Missive", { Hafted: 0 }],
+      ["Missive - Combat", { Hafted: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { Hafted: 30 }],
       ["Illustrious Insight", { AxesPicksAndPolearms: 25 }],
@@ -13203,7 +15028,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Weaponsmithing: 0 }],
-      ["Missive", { Blades: 0 }],
+      ["Missive - Combat", { Blades: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { Blades: 30 }],
       ["Illustrious Insight", { LongBlades: 25 }],
@@ -13230,7 +15055,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Weaponsmithing: 0 }],
-      ["Missive", { Hafted: 0 }],
+      ["Missive - Combat", { Hafted: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { Hafted: 30 }],
       ["Illustrious Insight", { MacesAndHammers: 25 }],
@@ -13257,7 +15082,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Weaponsmithing: 0 }],
-      ["Missive", { Blades: 0 }],
+      ["Missive - Combat", { Blades: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { Blades: 30 }],
       ["Illustrious Insight", { ShortBlades: 25 }],
@@ -13284,7 +15109,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Weaponsmithing: 0 }],
-      ["Missive", { Blades: 0 }],
+      ["Missive - Combat", { Blades: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { Blades: 30 }],
       ["Illustrious Insight", { ShortBlades: 25 }],
@@ -13311,7 +15136,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Weaponsmithing: 0 }],
-      ["Missive", { Blades: 0 }],
+      ["Missive - Combat", { Blades: 0 }],
       ["Embellishment", {}],
       ["Quenching Fluid", { Blades: 30 }],
       ["Illustrious Insight", { LongBlades: 25 }],
@@ -13338,7 +15163,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Hafted: 0 }],
+      ["Missive - Combat", { Hafted: 0 }],
       ["Quenching Fluid", { Hafted: 30 }],
       ["Lesser Illustrious Insight", { MacesAndHammers: 25 }],
     ]
@@ -13364,7 +15189,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Blades: 0 }],
+      ["Missive - Combat", { Blades: 0 }],
       ["Quenching Fluid", { Blades: 30 }],
       ["Lesser Illustrious Insight", { ShortBlades: 25 }],
     ]
@@ -13390,7 +15215,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Hafted: 0 }],
+      ["Missive - Combat", { Hafted: 0 }],
       ["Quenching Fluid", { Hafted: 30 }],
       ["Lesser Illustrious Insight", { AxesPicksAndPolearms: 25 }],
     ]
@@ -13416,7 +15241,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Blades: 0 }],
+      ["Missive - Combat", { Blades: 0 }],
       ["Quenching Fluid", { Blades: 30 }],
       ["Lesser Illustrious Insight", { ShortBlades: 25 }],
     ]
@@ -13442,7 +15267,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Blades: 0 }],
+      ["Missive - Combat", { Blades: 0 }],
       ["Quenching Fluid", { Blades: 30 }],
       ["Lesser Illustrious Insight", { LongBlades: 25 }],
     ]
@@ -13468,7 +15293,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Hafted: 0 }],
+      ["Missive - Combat", { Hafted: 0 }],
       ["Quenching Fluid", { Hafted: 30 }],
       ["Lesser Illustrious Insight", { AxesPicksAndPolearms: 25 }],
     ]
@@ -13494,7 +15319,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Blades: 0 }],
+      ["Missive - Combat", { Blades: 0 }],
       ["Quenching Fluid", { Blades: 30 }],
       ["Lesser Illustrious Insight", { ShortBlades: 25 }],
     ]
@@ -13519,7 +15344,7 @@ const makeTables = async () => {
     "Earth-Warder's Forge",
     "Dropped from Rohzor Forgesmash in the Waking Shores.",
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Quenching Fluid", { Hafted: 30, Toolsmithing: 30 }],
       ["Illustrious Insight", { MacesAndHammers: 25, SpecialtySmithing: 40 }],
     ]
@@ -13545,7 +15370,7 @@ const makeTables = async () => {
     "Anvil",
     null,
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Quenching Fluid", { Hafted: 30, Toolsmithing: 30 }],
       ["Illustrious Insight", { MacesAndHammers: 25, SpecialtySmithing: 40 }],
     ]
@@ -13596,7 +15421,7 @@ const makeTables = async () => {
     "Anvil",
     null,
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
       ["Illustrious Insight", { ShortBlades: 25, SpecialtySmithing: 40 }],
     ]
@@ -13672,7 +15497,7 @@ const makeTables = async () => {
     "Anvil",
     null,
     [
-      ["Missive", {}],
+      ["Missive - Gathering", {}],
       ["Quenching Fluid", { Hafted: 30, Toolsmithing: 30 }],
       [
         "Illustrious Insight",
@@ -13701,7 +15526,7 @@ const makeTables = async () => {
     "Anvil",
     null,
     [
-      ["Missive", {}],
+      ["Missive - Gathering", {}],
       ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
       ["Illustrious Insight", { LongBlades: 25, SpecialtySmithing: 40 }],
     ]
@@ -13727,7 +15552,7 @@ const makeTables = async () => {
     "Anvil",
     null,
     [
-      ["Missive", {}],
+      ["Missive - Gathering", {}],
       ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
       ["Illustrious Insight", { ShortBlades: 25, SpecialtySmithing: 40 }],
     ]
@@ -13800,7 +15625,7 @@ const makeTables = async () => {
     "Anvil",
     null,
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
       [
         "Lesser Illustrious Insight",
@@ -13852,7 +15677,7 @@ const makeTables = async () => {
     "Anvil",
     null,
     [
-      ["Missive", {}],
+      ["Missive - Gathering", {}],
       ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
       [
         "Lesser Illustrious Insight",
@@ -13880,7 +15705,7 @@ const makeTables = async () => {
     "Anvil",
     null,
     [
-      ["Missive", {}],
+      ["Missive - Gathering", {}],
       ["Quenching Fluid", { Blades: 30, Toolsmithing: 30 }],
       ["Lesser Illustrious Insight", { LongBlades: 25, SpecialtySmithing: 40 }],
     ]
@@ -13905,7 +15730,7 @@ const makeTables = async () => {
     "Anvil",
     null,
     [
-      ["Missive", {}],
+      ["Missive - Gathering", {}],
       ["Quenching Fluid", { Hafted: 30, Toolsmithing: 30 }],
       [
         "Lesser Illustrious Insight",
@@ -13933,7 +15758,7 @@ const makeTables = async () => {
     "Anvil",
     "Learned by default.",
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Quenching Fluid", { Hafted: 30, Toolsmithing: 30 }],
       [
         "Lesser Illustrious Insight",
@@ -15019,7 +16844,7 @@ const makeTables = async () => {
     "Enchanter's Lectern",
     null,
     [
-      ["Missive", { RodsAndWands: 0 }],
+      ["Missive - Combat", { RodsAndWands: 0 }],
       ["Primal Infusion", { RodsAndWands: 20 }],
       ["Embellishment", {}],
       ["Illustrious Insight", { RodsAndWands: 45 }],
@@ -15047,7 +16872,7 @@ const makeTables = async () => {
     "Enchanter's Lectern",
     null,
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Illustrious Insight", { RodsAndWands: 45 }],
     ]
   );
@@ -15071,7 +16896,7 @@ const makeTables = async () => {
     null,
     null,
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Lesser Illustrious Insight", { RodsAndWands: 45 }],
     ]
   );
@@ -15095,7 +16920,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { RodsAndWands: 0 }],
+      ["Missive - Combat", { RodsAndWands: 0 }],
       ["Lesser Illustrious Insight", { RodsAndWands: 45 }],
     ]
   );
@@ -15118,7 +16943,7 @@ const makeTables = async () => {
     null,
     "Learned by default.",
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Lesser Illustrious Insight", { RodsAndWands: 45 }],
     ]
   );
@@ -16463,7 +18288,7 @@ const makeTables = async () => {
     "Dropped from bosses in Vault of the Incarnates.",
     [
       ["Primal Infusion", { Gear: 10 }],
-      ["Missive", { Gear: 20 }],
+      ["Missive - Combat", { Gear: 20 }],
       ["Embellishment", { Gear: 35 }],
       ["Illustrious Insight", { Gear: 15 }],
       ["Spare Parts", { FunctionOverForm: 10 }],
@@ -16491,7 +18316,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Gear: 20 }],
+      ["Missive - Combat", { Gear: 20 }],
       ["Lesser Illustrious Insight", { Gear: 15 }],
       ["Spare Parts", { FunctionOverForm: 10 }],
     ]
@@ -17476,7 +19301,7 @@ const makeTables = async () => {
     "Tinker's Workbench",
     null,
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Illustrious Insight", { GearsForGear: 15 }],
       ["Spare Parts", { FunctionOverForm: 10 }],
     ]
@@ -17527,7 +19352,7 @@ const makeTables = async () => {
     "Tinker's Workbench",
     null,
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Illustrious Insight", { GearsForGear: 15 }],
       ["Spare Parts", { FunctionOverForm: 10 }],
     ]
@@ -17553,7 +19378,7 @@ const makeTables = async () => {
     "Tinker's Workbench",
     null,
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Illustrious Insight", { GearsForGear: 15 }],
       ["Spare Parts", { FunctionOverForm: 10 }],
     ]
@@ -17675,7 +19500,7 @@ const makeTables = async () => {
     null,
     null,
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Lesser Illustrious Insight", { GearsForGear: 15 }],
       ["Spare Parts", { FunctionOverForm: 10 }],
     ]
@@ -17725,7 +19550,7 @@ const makeTables = async () => {
     null,
     null,
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Lesser Illustrious Insight", { GearsForGear: 15 }],
       ["Spare Parts", { FunctionOverForm: 10 }],
     ]
@@ -17750,7 +19575,7 @@ const makeTables = async () => {
     null,
     null,
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Lesser Illustrious Insight", { GearsForGear: 15 }],
       ["Spare Parts", { FunctionOverForm: 10 }],
     ]
@@ -18442,7 +20267,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Runebinding: 0 }],
-      ["Missive", { RunicScripture: 0 }],
+      ["Missive - Combat", { RunicScripture: 0 }],
       ["Embellishment", {}],
       ["Illustrious Insight", { RuneMastery: 40, Codexes: 25 }],
       ["Blotting Sand", { Ruenbinding: 30 }],
@@ -18471,7 +20296,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Runebinding: 0 }],
-      ["Missive", { Woodcarving: 0 }],
+      ["Missive - Combat", { Woodcarving: 0 }],
       ["Embellishment", {}],
       ["Illustrious Insight", { RuneMastery: 40, Staves: 25 }],
       ["Blotting Sand", { Ruenbinding: 30 }],
@@ -18500,7 +20325,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", { Runebinding: 0 }],
-      ["Missive", { Woodcarving: 0 }],
+      ["Missive - Combat", { Woodcarving: 0 }],
       ["Embellishment", {}],
       ["Illustrious Insight", { RuneMastery: 40, Staves: 25 }],
       ["Blotting Sand", { Ruenbinding: 30 }],
@@ -18555,7 +20380,7 @@ const makeTables = async () => {
     null,
     null,
     [
-      ["Missive", { RunicScripture: 0 }],
+      ["Missive - Combat", { RunicScripture: 0 }],
       ["Embellishment", {}],
       ["Lesser Illustrious Insight", { RuneMastery: 40, Codexes: 25 }],
       ["Blotting Sand", { Runebinding: 30 }],
@@ -18580,7 +20405,7 @@ const makeTables = async () => {
     null,
     null,
     [
-      ["Missive", { Woodcarving: 0 }],
+      ["Missive - Combat", { Woodcarving: 0 }],
       ["Embellishment", {}],
       ["Lesser Illustrious Insight", { RuneMastery: 40, Staves: 25 }],
       ["Blotting Sand", { Runebinding: 30 }],
@@ -18605,7 +20430,7 @@ const makeTables = async () => {
     null,
     null,
     [
-      ["Missive", { Woodcarving: 0 }],
+      ["Missive - Combat", { Woodcarving: 0 }],
       ["Embellishment", {}],
       ["Lesser Illustrious Insight", { RuneMastery: 40, Staves: 25 }],
       ["Blotting Sand", { Runebinding: 30 }],
@@ -18832,7 +20657,7 @@ const makeTables = async () => {
     "Scribe's Drafting Table",
     null,
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Illustrious Insight", { RuneMastery: 40, ProfessionTools: 20 }],
       ["Blotting Sand", { Runebinding: 30 }],
     ]
@@ -18881,7 +20706,7 @@ const makeTables = async () => {
     "Scribe's Drafting Table",
     null,
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Illustrious Insight", { RuneMastery: 40, ProfessionTools: 20 }],
       ["Blotting Sand", { Runebinding: 30 }],
     ]
@@ -18905,7 +20730,7 @@ const makeTables = async () => {
     null,
     null,
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Lesser Illustrious Insight", { RuneMastery: 40, ProfessionTools: 20 }],
       ["Blotting Sand", { Runebinding: 30 }],
     ]
@@ -18953,7 +20778,7 @@ const makeTables = async () => {
     null,
     null,
     [
-      ["Missive", {}],
+      ["Missive - Crafting", {}],
       ["Lesser Illustrious Insight", { RuneMastery: 40, ProfessionTools: 20 }],
       ["Blotting Sand", { Runebinding: 30 }],
     ]
@@ -21042,7 +22867,7 @@ const makeTables = async () => {
   //   "Jeweler's Bench",
   //   "Drops from bosses in Vault of the Incarnates.",
   //   [
-  //     ["Missive", { Jewelry: 15 }],
+  //     ["Missive - Combat", { Jewelry: 15 }],
   //     ["Primal Infusion", { Jewelry: 25 }],
   //     ["Illustrious Insight", { Necklaces: 30 }],
   //     ["Polishing Cloth", { Jewelry: 30 }],
@@ -21070,7 +22895,7 @@ const makeTables = async () => {
   //   "Jeweler's Bench",
   //   "Drops from 'powerful creatures' in Primal Storms.",
   //   [
-  //     ["Missive", { Jewelry: 15 }],
+  //     ["Missive - Combat", { Jewelry: 15 }],
   //     ["Primal Infusion", { Jewelry: 25 }],
   //     ["Illustrious Insight", { Necklaces: 30 }],
   //     ["Polishing Cloth", { Jewelry: 30 }],
@@ -21099,7 +22924,7 @@ const makeTables = async () => {
   //   "Jeweler's Bench",
   //   "Drops from 'Chest of the Elements' in the Primalist Tomorrow zone.",
   //   [
-  //     ["Missive", { Jewelry: 15 }],
+  //     ["Missive - Combat", { Jewelry: 15 }],
   //     ["Primal Infusion", { Jewelry: 25 }],
   //     ["Illustrious Insight", { Rings: 30 }],
   //     ["Polishing Cloth", { Jewelry: 30 }],
@@ -21127,7 +22952,7 @@ const makeTables = async () => {
   //   "Jeweler's Bench",
   //   null,
   //   [
-  //     ["Missive", { Jewelry: 15 }],
+  //     ["Missive - Combat", { Jewelry: 15 }],
   //     ["Primal Infusion", { Jewelry: 25 }],
   //     ["Embellishment", { Rings: 15 }],
   //     ["Illustrious Insight", { Rings: 30 }],
@@ -21156,7 +22981,7 @@ const makeTables = async () => {
   //   "Jeweler's Bench",
   //   null,
   //   [
-  //     ["Missive", { Jewelry: 15 }],
+  //     ["Missive - Combat", { Jewelry: 15 }],
   //     ["Primal Infusion", { Jewelry: 25 }],
   //     ["Embellishment", { Necklaces: 15 }],
   //     ["Illustrious Insight", { Necklaces: 30 }],
@@ -21183,7 +23008,7 @@ const makeTables = async () => {
   //   "Jeweler's Bench",
   //   "Received from Arena, BGs, or WM?",
   //   [
-  //     ["Missive", { Jewelry: 15 }],
+  //     ["Missive - Combat", { Jewelry: 15 }],
   //     ["Lesser Illustrious Insight", { Necklaces: 30 }],
   //     ["Polishing Cloth", { Jewelry: 30 }],
   //   ]
@@ -21208,7 +23033,7 @@ const makeTables = async () => {
   //   "Jeweler's Bench",
   //   "Received from Arena, BGs, or WM?",
   //   [
-  //     ["Missive", { Jewelry: 15 }],
+  //     ["Missive - Combat", { Jewelry: 15 }],
   //     ["Lesser Illustrious Insight", { Rings: 30 }],
   //     ["Polishing Cloth", { Jewelry: 30 }],
   //   ]
@@ -21233,7 +23058,7 @@ const makeTables = async () => {
   //   null,
   //   null,
   //   [
-  //     ["Missive", { Jewelry: 15 }],
+  //     ["Missive - Combat", { Jewelry: 15 }],
   //     ["Training Matrix", {}],
   //     ["Lesser Illustrious Insight", { Rings: 30 }],
   //     ["Polishing Cloth", { Jewelry: 30 }],
@@ -21258,7 +23083,7 @@ const makeTables = async () => {
   //   null,
   //   null,
   //   [
-  //     ["Missive", { Jewelry: 15 }],
+  //     ["Missive - Combat", { Jewelry: 15 }],
   //     ["Training Matrix", {}],
   //     ["Lesser Illustrious Insight", { Necklaces: 30 }],
   //     ["Polishing Cloth", { Jewelry: 30 }],
@@ -21927,2595 +23752,2595 @@ const makeTables = async () => {
   // );
 
   // //leatherworking recipes - 101 total
-  // const lifeBoundBeltRecipe = await createRecipe(
-  //   null,
-  //   lifeBoundBelt,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [pristineVorquinHorn, 4],
-  //     [earthshineScales, 13],
-  //     [resilientLeather, 150],
-  //   ],
-  //   null,
-  //   "Leather Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { BeltsLeather: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Missive", { EmbroideredLeatherArmor: 0 }],
-  //     ["Illustrious Insight", { BeltsLeather: 20 }],
-  //     ["Curing Agent", { EmbroideredLeatherArmor: 30 }],
-  //   ]
-  // );
-  // const lifeBoundBindingsRecipe = await createRecipe(
-  //   null,
-  //   lifeBoundBindings,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 30],
-  //     [windsongPlumage, 3],
-  //     [earthshineScales, 10],
-  //     [resilientLeather, 150],
-  //   ],
-  //   null,
-  //   "Leather Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Wristwraps: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Missive", { ShapedLeatherArmor: 0 }],
-  //     ["Illustrious Insight", { Wristwraps: 20 }],
-  //     ["Curing Agent", { ShapedLeatherArmor: 30 }],
-  //   ]
-  // );
-  // const lifeBoundBootsRecipe = await createRecipe(
-  //   null,
-  //   lifeBoundBoots,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [crystalspineFur, 4],
-  //     [frostbiteScales, 13],
-  //     [resilientLeather, 150],
-  //   ],
-  //   null,
-  //   "Leather Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { BootsLeather: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Missive", { EmbroideredLeatherArmor: 0 }],
-  //     ["Illustrious Insight", { BootsLeather: 20 }],
-  //     ["Curing Agent", { EmbroideredLeatherArmor: 30 }],
-  //   ]
-  // );
-  // const lifeBoundCapRecipe = await createRecipe(
-  //   null,
-  //   lifeBoundCap,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [windsongPlumage, 4],
-  //     [mireslushHide, 15],
-  //     [resilientLeather, 150],
-  //   ],
-  //   null,
-  //   "Leather Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Helms: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Missive", { ShapedLeatherArmor: 0 }],
-  //     ["Illustrious Insight", { Helms: 20 }],
-  //     ["Curing Agent", { ShapedLeatherArmor: 30 }],
-  //   ]
-  // );
-  // const lifeBoundChestpieceRecipe = await createRecipe(
-  //   null,
-  //   lifeBoundChestpiece,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [flawlessProtoDragonScale, 4],
-  //     [mireslushHide, 15],
-  //     [resilientLeather, 150],
-  //   ],
-  //   null,
-  //   "Leather Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Chestpieces: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Missive", { ShapedLeatherArmor: 0 }],
-  //     ["Illustrious Insight", { Chestpieces: 20 }],
-  //     ["Curing Agent", { ShapedLeatherArmor: 30 }],
-  //   ]
-  // );
-  // const lifeBoundGlovesRecipe = await createRecipe(
-  //   null,
-  //   lifeBoundGloves,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [salamantherScales, 4],
-  //     [frostbiteScales, 13],
-  //     [resilientLeather, 150],
-  //   ],
-  //   null,
-  //   "Leather Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Gloves: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Missive", { EmbroideredLeatherArmor: 0 }],
-  //     ["Illustrious Insight", { Gloves: 20 }],
-  //     ["Curing Agent", { EmbroideredLeatherArmor: 30 }],
-  //   ]
-  // );
-  // const lifeBoundShoulderpadsRecipe = await createRecipe(
-  //   null,
-  //   lifeBoundShoulderpads,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [fireInfusedHide, 4],
-  //     [stonecrustHide, 13],
-  //     [resilientLeather, 150],
-  //   ],
-  //   null,
-  //   "Leather Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Shoulderpads: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Missive", { ShapedLeatherArmor: 0 }],
-  //     ["Illustrious Insight", { Shoulderpads: 20 }],
-  //     ["Curing Agent", { ShapedLeatherArmor: 30 }],
-  //   ]
-  // );
-  // const lifeBoundTrousersRecipe = await createRecipe(
-  //   null,
-  //   lifeBoundTrousers,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [cacophonousThunderscale, 4],
-  //     [stonecrustHide, 15],
-  //     [resilientLeather, 150],
-  //   ],
-  //   null,
-  //   "Leather Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Legguards: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Missive", { EmbroideredLeatherArmor: 0 }],
-  //     ["Illustrious Insight", { Legguards: 20 }],
-  //     ["Curing Agent", { EmbroideredLeatherArmor: 30 }],
-  //   ]
-  // );
-  // const pioneersPracticedCowlRecipe = await createRecipe(
-  //   null,
-  //   pioneersPracticedCowl,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [resilientLeather, 10],
-  //     [denseHide, 3],
-  //   ],
-  //   50,
-  //   "Leather Armor",
-  //   3,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { ShapedLeatherArmor: 0 }],
-  //     ["Lesser Illustrious Insight", { Helms: 20 }],
-  //     ["Curing Agent", { ShapedLeatherArmor: 30 }],
-  //   ]
-  // );
-  // const pioneersPracticedLeggingsRecipe = await createRecipe(
-  //   null,
-  //   pioneersPracticedLeggings,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [resilientLeather, 10],
-  //     [denseHide, 3],
-  //   ],
-  //   45,
-  //   "Leather Armor",
-  //   3,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { EmbroideredLeatherArmor: 0 }],
-  //     ["Lesser Illustrious Insight", { Legguards: 20 }],
-  //     ["Curing Agent", { EmbroideredLeatherArmor: 30 }],
-  //   ]
-  // );
-  // const pioneersPracticedShouldersRecipe = await createRecipe(
-  //   null,
-  //   pioneersPracticedShoulders,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [resilientLeather, 16],
-  //     [denseHide, 2],
-  //   ],
-  //   40,
-  //   "Leather Armor",
-  //   3,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { ShapedLeatherArmor: 0 }],
-  //     ["Lesser Illustrious Insight", { Shoulderpads: 20 }],
-  //     ["Curing Agent", { ShapedLeatherArmor: 30 }],
-  //   ]
-  // );
-  // const pioneersPracticedGlovesRecipe = await createRecipe(
-  //   null,
-  //   pioneersPracticedGloves,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [resilientLeather, 16],
-  //     [denseHide, 2],
-  //   ],
-  //   25,
-  //   "Leather Armor",
-  //   3,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { EmbroideredLeatherArmor: 0 }],
-  //     ["Lesser Illustrious Insight", { Gloves: 20 }],
-  //     ["Curing Agent", { EmbroideredLeatherArmor: 30 }],
-  //   ]
-  // );
-  // const pioneersPracticedBeltRecipe = await createRecipe(
-  //   null,
-  //   pioneersPracticedBelt,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [resilientLeather, 16],
-  //     [denseHide, 2],
-  //   ],
-  //   20,
-  //   "Leather Armor",
-  //   3,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { EmbroideredLeatherArmor: 0 }],
-  //     ["Lesser Illustrious Insight", { BeltsLeather: 20 }],
-  //     ["Curing Agent", { EmbroideredLeatherArmor: 30 }],
-  //   ]
-  // );
-  // const pioneersLeatherTunicRecipe = await createRecipe(
-  //   null,
-  //   pioneersLeatherTunic,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [resilientLeather, 25],
-  //     [adamantScales, 15],
-  //   ],
-  //   10,
-  //   "Leather Armor",
-  //   3,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { ShapedLeatherArmor: 0 }],
-  //     ["Lesser Illustrious Insight", { Chestpieces: 20 }],
-  //     ["Curing Agent", { ShapedLeatherArmor: 30 }],
-  //   ]
-  // );
-  // const pioneersLeatherBootsRecipe = await createRecipe(
-  //   null,
-  //   pioneersLeatherBoots,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [resilientLeather, 20],
-  //     [adamantScales, 10],
-  //   ],
-  //   5,
-  //   "Leather Armor",
-  //   3,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { EmbroideredLeatherArmor: 0 }],
-  //     ["Lesser Illustrious Insight", { BootsLeather: 20 }],
-  //     ["Curing Agent", { EmbroideredLeatherArmor: 30 }],
-  //   ]
-  // );
-  // const pioneersLeatherWristguardsRecipe = await createRecipe(
-  //   null,
-  //   pioneersLeatherWristguards,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [resilientLeather, 15],
-  //     [adamantScales, 5],
-  //   ],
-  //   1,
-  //   "Leather Armor",
-  //   3,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Learned by default.",
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { ShapedLeatherArmor: 0 }],
-  //     ["Lesser Illustrious Insight", { Wristwraps: 20 }],
-  //     ["Curing Agent", { ShapedLeatherArmor: 30 }],
-  //   ]
-  // );
-  // const flameTouchedChainRecipe = await createRecipe(
-  //   null,
-  //   flameTouchedChain,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [crystalspineFur, 4],
-  //     [earthshineScales, 14],
-  //     [adamantScales, 150],
-  //   ],
-  //   null,
-  //   "Mail Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { BeltsMail: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { MailArmorCrafting: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Missive", { IntricateMail: 0 }],
-  //     ["Illustrious Insight", { BeltsMail: 20 }],
-  //     ["Chain Oil", { IntricateMail: 30 }],
-  //   ]
-  // );
-  // const flameTouchedChainmailRecipe = await createRecipe(
-  //   null,
-  //   flameTouchedChainmail,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [flawlessProtoDragonScale, 4],
-  //     [stonecrustHide, 15],
-  //     [adamantScales, 150],
-  //   ],
-  //   null,
-  //   "Mail Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { MailShirts: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { MailArmorCrafting: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Missive", { LargeMail: 0 }],
-  //     ["Illustrious Insight", { MailShirts: 20 }],
-  //     ["Chain Oil", { LargeMail: 30 }],
-  //   ]
-  // );
-  // const flameTouchedCuffsRecipe = await createRecipe(
-  //   null,
-  //   flameTouchedCuffs,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 30],
-  //     [windsongPlumage, 4],
-  //     [earthshineScales, 10],
-  //     [adamantScales, 150],
-  //   ],
-  //   null,
-  //   "Mail Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Bracers: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { MailArmorCrafting: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Missive", { LargeMail: 0 }],
-  //     ["Illustrious Insight", { Bracers: 20 }],
-  //     ["Chain Oil", { LargeMail: 30 }],
-  //   ]
-  // );
-  // const flameTouchedHandguardsRecipe = await createRecipe(
-  //   null,
-  //   flameTouchedHandguards,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [rockfangLeather, 4],
-  //     [earthshineScales, 13],
-  //     [adamantScales, 150],
-  //   ],
-  //   null,
-  //   "Mail Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Gauntlets: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { MailArmorCrafting: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Missive", { IntricateMail: 0 }],
-  //     ["Illustrious Insight", { Gauntlets: 20 }],
-  //     ["Chain Oil", { IntricateMail: 30 }],
-  //   ]
-  // );
-  // const flameTouchedHelmetRecipe = await createRecipe(
-  //   null,
-  //   flameTouchedHelmet,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [cacophonousThunderscale, 4],
-  //     [stonecrustHide, 15],
-  //     [adamantScales, 150],
-  //   ],
-  //   null,
-  //   "Mail Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { MailHelms: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { MailArmorCrafting: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Missive", { LargeMail: 0 }],
-  //     ["Illustrious Insight", { MailHelms: 20 }],
-  //     ["Chain Oil", { LargeMail: 30 }],
-  //   ]
-  // );
-  // const flameTouchedLegguardsRecipe = await createRecipe(
-  //   null,
-  //   flameTouchedLegguards,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [cacophonousThunderscale, 4],
-  //     [stonecrustHide, 15],
-  //     [adamantScales, 150],
-  //   ],
-  //   null,
-  //   "Mail Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Greaves: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { MailArmorCrafting: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Missive", { IntricateMail: 0 }],
-  //     ["Illustrious Insight", { Greaves: 20 }],
-  //     ["Chain Oil", { IntricateMail: 30 }],
-  //   ]
-  // );
-  // const flameTouchedSpauldersRecipe = await createRecipe(
-  //   null,
-  //   flameTouchedSpaulders,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [windsongPlumage, 4],
-  //     [earthshineScales, 13],
-  //     [adamantScales, 150],
-  //   ],
-  //   null,
-  //   "Mail Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { Shoulderguards: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { MailArmorCrafting: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Missive", { LargeMail: 0 }],
-  //     ["Illustrious Insight", { Shoulderguards: 20 }],
-  //     ["Chain Oil", { LargeMail: 30 }],
-  //   ]
-  // );
-  // const flameTouchedTreadsRecipe = await createRecipe(
-  //   null,
-  //   flameTouchedTreads,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [crystalspineFur, 4],
-  //     [earthshineScales, 13],
-  //     [adamantScales, 150],
-  //   ],
-  //   null,
-  //   "Mail Armor",
-  //   1,
-  //   280,
-  //   null,
-  //   { BootsMail: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { MailArmorCrafting: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Missive", { IntricateMail: 0 }],
-  //     ["Illustrious Insight", { BootsMail: 20 }],
-  //     ["Chain Oil", { IntricateMail: 30 }],
-  //   ]
-  // );
-  // const trailblazersToughenedCoifRecipe = await createRecipe(
-  //   null,
-  //   trailblazersToughenedCoif,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [adamantScales, 10],
-  //     [lustrousScaledHide, 2],
-  //   ],
-  //   50,
-  //   "Mail Armor",
-  //   3,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { LargeMail: 0 }],
-  //     ["Lesser Illustrious Insight", { MailHelms: 20 }],
-  //     ["Chain Oil", { LargeMail: 30 }],
-  //   ]
-  // );
-  // const trailblazersToughenedLegguardsRecipe = await createRecipe(
-  //   null,
-  //   trailblazersToughenedLegguards,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [adamantScales, 6],
-  //     [lustrousScaledHide, 3],
-  //   ],
-  //   45,
-  //   "Mail Armor",
-  //   3,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { IntricateMail: 0 }],
-  //     ["Lesser Illustrious Insight", { Greaves: 20 }],
-  //     ["Chain Oil", { IntricateMail: 30 }],
-  //   ]
-  // );
-  // const trailblazersToughenedSpikesRecipe = await createRecipe(
-  //   null,
-  //   trailblazersToughenedSpikes,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [adamantScales, 16],
-  //     [lustrousScaledHide, 2],
-  //   ],
-  //   40,
-  //   "Mail Armor",
-  //   3,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { LargeMail: 0 }],
-  //     ["Lesser Illustrious Insight", { Shoulderguards: 20 }],
-  //     ["Chain Oil", { LargeMail: 30 }],
-  //   ]
-  // );
-  // const trailblazersToughenedGripsRecipe = await createRecipe(
-  //   null,
-  //   trailblazersToughenedGrips,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [adamantScales, 16],
-  //     [lustrousScaledHide, 2],
-  //   ],
-  //   25,
-  //   "Mail Armor",
-  //   3,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { IntricateMail: 0 }],
-  //     ["Lesser Illustrious Insight", { Gauntlets: 20 }],
-  //     ["Chain Oil", { IntricateMail: 30 }],
-  //   ]
-  // );
-  // const trailblazersToughenedChainbeltRecipe = await createRecipe(
-  //   null,
-  //   trailblazersToughenedChainbelt,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [adamantScales, 16],
-  //     [lustrousScaledHide, 2],
-  //   ],
-  //   20,
-  //   "Mail Armor",
-  //   3,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { IntricateMail: 0 }],
-  //     ["Lesser Illustrious Insight", { BeltsMail: 20 }],
-  //     ["Chain Oil", { IntricateMail: 30 }],
-  //   ]
-  // );
-  // const trailblazersScaleVestRecipe = await createRecipe(
-  //   null,
-  //   trailblazersScaleVest,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [adamantScales, 25],
-  //     [resilientLeather, 15],
-  //   ],
-  //   10,
-  //   "Mail Armor",
-  //   3,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { LargeMail: 0 }],
-  //     ["Lesser Illustrious Insight", { MailShirts: 20 }],
-  //     ["Chain Oil", { LargeMail: 30 }],
-  //   ]
-  // );
-  // const trailblazersScaleBootsRecipe = await createRecipe(
-  //   null,
-  //   trailblazersScaleVest,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [adamantScales, 20],
-  //     [resilientLeather, 10],
-  //   ],
-  //   5,
-  //   "Mail Armor",
-  //   3,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { IntricateMail: 0 }],
-  //     ["Lesser Illustrious Insight", { BootsMail: 20 }],
-  //     ["Chain Oil", { IntricateMail: 30 }],
-  //   ]
-  // );
-  // const trailblazersScaleBracersRecipe = await createRecipe(
-  //   null,
-  //   trailblazersScaleBracers,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [adamantScales, 15],
-  //     [resilientLeather, 5],
-  //   ],
-  //   1,
-  //   "Mail Armor",
-  //   3,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Learned by default.",
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", { LargeMail: 0 }],
-  //     ["Lesser Illustrious Insight", { Bracers: 20 }],
-  //     ["Chain Oil", { LargeMail: 30 }],
-  //   ]
-  // );
-  // const expertAlchemistsHatRecipe = await createRecipe(
-  //   null,
-  //   expertAlchemistsHat,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [artisansMettle, 225],
-  //     [awakenedAir, 12],
-  //     [frostbiteScales, 8],
-  //     [resilientLeather, 80],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   275,
-  //   { MaruukCentaur: 18 },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [["Illustrious Insight", { BondingAndStitching: 25 }]]
-  // );
-  // const expertSkinnersCapRecipe = await createRecipe(
-  //   null,
-  //   expertSkinnersCap,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [artisansMettle, 225],
-  //     [windsongPlumage, 4],
-  //     [tuftOfPrimalWool, 2],
-  //     [earthshineScales, 10],
-  //     [resilientLeather, 80],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   275,
-  //   { IskaaraTuskarr: 18 },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [["Illustrious Insight", { BondingAndStitching: 25 }]]
-  // );
-  // const flameproofApronRecipe = await createRecipe(
-  //   null,
-  //   flameproofApron,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [artisansMettle, 225],
-  //     [flawlessProtoDragonScale, 10],
-  //     [stonecrustHide, 8],
-  //     [adamantScales, 80],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   275,
-  //   { MaruukCentaur: 18 },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [["Illustrious Insight", { BondingAndStitching: 25 }]]
-  // );
-  // const lavishFloralPackRecipe = await createRecipe(
-  //   null,
-  //   lavishFloralPack,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [artisansMettle, 225],
-  //     [crystalspineFur, 15],
-  //     [mireslushHide, 10],
-  //     [resilientLeather, 60],
-  //     [omniumDraconis, 5],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   275,
-  //   { IskaaraTuskarr: 18 },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [["Illustrious Insight", { BondingAndStitching: 25 }]]
-  // );
-  // const masterworkSmockRecipe = await createRecipe(
-  //   null,
-  //   masterworkSmock,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [artisansMettle, 225],
-  //     [crystalspineFur, 15],
-  //     [mireslushHide, 10],
-  //     [resilientLeather, 80],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   275,
-  //   { MaruukCentaur: 18 },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [["Illustrious Insight", { BondingAndStitching: 25 }]]
-  // );
-  // const reinforcedPackRecipe = await createRecipe(
-  //   null,
-  //   reinforcedPack,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [artisansMettle, 225],
-  //     [pristineVorquinHorn, 15],
-  //     [earthshineScales, 10],
-  //     [resilientLeather, 80],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   275,
-  //   { MaruukCentaur: 18 },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [["Illustrious Insight", { BondingAndStitching: 25 }]]
-  // );
-  // const resplendentCoverRecipe = await createRecipe(
-  //   null,
-  //   resplendentCover,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [artisansMettle, 225],
-  //     [salamantherScales, 20],
-  //     [stonecrustHide, 10],
-  //     [resilientLeather, 80],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   275,
-  //   { IskaaraTuskarr: 18 },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [["Illustrious Insight", { BondingAndStitching: 25 }]]
-  // );
-  // const shockproofGlovesRecipe = await createRecipe(
-  //   null,
-  //   shockproofGloves,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [artisansMettle, 225],
-  //     [rockfangLeather, 15],
-  //     [earthshineScales, 10],
-  //     [adamantScales, 80],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   275,
-  //   { IskaaraTuskarr: 18 },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [["Illustrious Insight", { BondingAndStitching: 25 }]]
-  // );
-  // const alchemistsHatRecipe = await createRecipe(
-  //   null,
-  //   alchemistsHat,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [lustrousScaledHide, 2],
-  //     [resilientLeather, 10],
-  //   ],
-  //   35,
-  //   "Profession Equipment",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { BondingAndStitching: 25 }]]
-  // );
-  // const smithingApronRecipe = await createRecipe(
-  //   null,
-  //   smithingApron,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [denseHide, 2],
-  //     [adamantScales, 10],
-  //   ],
-  //   35,
-  //   "Profession Equipment",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { BondingAndStitching: 25 }]]
-  // );
-  // const jewelersCoverRecipe = await createRecipe(
-  //   null,
-  //   jewelersCover,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [denseHide, 2],
-  //     [resilientLeather, 10],
-  //   ],
-  //   30,
-  //   "Profession Equipment",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { BondingAndStitching: 25 }]]
-  // );
-  // const protectiveGlovesRecipe = await createRecipe(
-  //   null,
-  //   protectiveGloves,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [lustrousScaledHide, 2],
-  //     [adamantScales, 10],
-  //   ],
-  //   30,
-  //   "Profession Equipment",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { BondingAndStitching: 25 }]]
-  // );
-  // const durablePackRecipe = await createRecipe(
-  //   null,
-  //   durablePack,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [resilientLeather, 20],
-  //     [denseHide, 1],
-  //   ],
-  //   15,
-  //   "Profession Equipment",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { BondingAndStitching: 25 }]]
-  // );
-  // const floralBasketRecipe = await createRecipe(
-  //   null,
-  //   floralBasket,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [denseHide, 2],
-  //     [resilientLeather, 5],
-  //     [hochenblume, 5],
-  //   ],
-  //   10,
-  //   "Profession Equipment",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { BondingAndStitching: 25 }]]
-  // );
-  // const skinnersCapRecipe = await createRecipe(
-  //   null,
-  //   skinnersCap,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [resilientLeather, 30],
-  //     [lustrousScaledHide, 1],
-  //   ],
-  //   5,
-  //   "Profession Equipment",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { BondingAndStitching: 25 }]]
-  // );
-  // const resilientSmockRecipe = await createRecipe(
-  //   null,
-  //   resilientSmock,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [resilientLeather, 20],
-  //     [adamantScales, 10],
-  //   ],
-  //   1,
-  //   "Profession Equipment",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Learned by default.",
-  //   [["Lesser Illustrious Insight", { BondingAndStitching: 25 }]]
-  // );
-  // const bonewroughtCrossbowRecipe = await createRecipe(
-  //   null,
-  //   bonewroughtCrossbow,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [pristineVorquinHorn, 2],
-  //     [runedWrithebark, 1],
-  //     [resilientLeather, 20],
-  //   ],
-  //   35,
-  //   "Weapons",
-  //   3,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Training Matrix", {}],
-  //     ["Missive", {}],
-  //     ["Lesser Illustrious Insight", { BondingAndStitching: 25 }],
-  //   ]
-  // );
-  // const ancestorsDewDrippersRecipe = await createRecipe(
-  //   null,
-  //   ancestorsDewDrippers,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [crystalspineFur, 10],
-  //     [mireslushHide, 18],
-  //     [adamantScales, 150],
-  //   ],
-  //   null,
-  //   "Elemental Patterns",
-  //   1,
-  //   415,
-  //   { MaruukCentaur: 13 },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { MailArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { Shoulderguards: 20, ElementalMastery: 25 }],
-  //     ["Chain Oil", { LargeMail: 30, PrimordialLeatherworking: 35 }],
-  //   ]
-  // );
-  // const flaringCowlRecipe = await createRecipe(
-  //   null,
-  //   flaringCowl,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [fierySoul, 1],
-  //     [awakenedFire, 10],
-  //     [earthshineScales, 16],
-  //     [resilientLeather, 100],
-  //   ],
-  //   null,
-  //   "Elemental Patterns",
-  //   1,
-  //   415,
-  //   null,
-  //   { ElementalMastery: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { Helms: 20, ElementalMastery: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { ShapedLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const oldSpiritsWristwrapsRecipe = await createRecipe(
-  //   null,
-  //   oldSpiritsWristwraps,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 30],
-  //     [rockfangLeather, 10],
-  //     [mireslushHide, 16],
-  //     [resilientLeather, 150],
-  //   ],
-  //   null,
-  //   "Elemental Patterns",
-  //   1,
-  //   415,
-  //   null,
-  //   null,
-  //   "Raid Drop",
-  //   "Leatherworker's Tool Bench",
-  //   "Drops from bosses in Vault of the Incarnates.",
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { Wristwraps: 20, ElementalMastery: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { ShapedLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const scaleReinGripsRecipe = await createRecipe(
-  //   null,
-  //   scaleReinGrips,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [salamantherScales, 12],
-  //     [earthshineScales, 18],
-  //     [adamantScales, 150],
-  //   ],
-  //   null,
-  //   "Elemental Patterns",
-  //   1,
-  //   415,
-  //   null,
-  //   null,
-  //   "Raid Drop",
-  //   "Leatherworker's Tool Bench",
-  //   "Drops from bosses in Vault of the Incarnates.",
-  //   [
-  //     ["Primal Infusion", { MailArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { Gauntlets: 20, ElementalMastery: 25 }],
-  //     ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
-  //   ]
-  // );
-  // const snowballMakersRecipe = await createRecipe(
-  //   null,
-  //   snowballMakers,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [crystalspineFur, 10],
-  //     [frostbiteScales, 20],
-  //     [resilientLeather, 150],
-  //   ],
-  //   null,
-  //   "Elemental Patterns",
-  //   1,
-  //   415,
-  //   { IskaaraTuskarr: 15 },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { Gloves: 20, ElementalMastery: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const stringOfSpiritualKnickKnacksRecipe = await createRecipe(
-  //   null,
-  //   stringOfSpiritualKnickKnacks,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [salamantherScales, 10],
-  //     [mireslushHide, 20],
-  //     [resilientLeather, 150],
-  //   ],
-  //   null,
-  //   "Elemental Patterns",
-  //   1,
-  //   415,
-  //   null,
-  //   null,
-  //   "Raid Drop",
-  //   "Leatherworker's Tool Bench",
-  //   "Drops from bosses in Vault of the Incarnates.",
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { BeltsLeather: 20, ElementalMastery: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const windSpiritsLassoRecipe = await createRecipe(
-  //   null,
-  //   windSpiritsLasso,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [awakenedAir, 10],
-  //     [mireslushHide, 16],
-  //     [adamantScales, 150],
-  //   ],
-  //   null,
-  //   "Elemental Patterns",
-  //   1,
-  //   415,
-  //   null,
-  //   null,
-  //   "Raid Drop",
-  //   "Leatherworker's Tool Bench",
-  //   "Drops from bosses in Vault of the Incarnates.",
-  //   [
-  //     ["Primal Infusion", { MailArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { BeltsMail: 20, ElementalMastery: 25 }],
-  //     ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
-  //   ]
-  // );
-  // const alliedHeartwarmingFurCoatRecipe = await createRecipe(
-  //   null,
-  //   alliedHeartwarmingFurCoat,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [fireInfusedHide, 10],
-  //     [tuftOfPrimalWool, 3],
-  //     [frostbiteScales, 20],
-  //     [resilientLeather, 150],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   415,
-  //   { IskaaraTuskarr: 15 },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { Chestpieces: 20, BestialPrimacy: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { ShapedLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const alliedLegguardsOfSansokKhanRecipe = await createRecipe(
-  //   null,
-  //   alliedLegguardsOfSansokKhan,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [centaursTrophyNecklace, 1],
-  //     [earthshineScales, 20],
-  //     [adamantScales, 150],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   450,
-  //   { MaruukCentaur: 13 },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { MailArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { Greaves: 20, BestialPrimacy: 25 }],
-  //     ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
-  //   ]
-  // );
-  // const bowOfTheDragonHuntersRecipe = await createRecipe(
-  //   null,
-  //   bowOfTheDragonHunters,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 2],
-  //     [primalChaos, 160],
-  //     [awakenedAir, 6],
-  //     [tallstriderSinew, 2],
-  //     [mireslushHide, 10],
-  //     [runedWrithebark, 2],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   280,
-  //   null,
-  //   { BestialPrimacy: 0 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", {}],
-  //     ["Missive", {}],
-  //     ["Embellishment", {}],
-  //     ["Illustrious Insight", { BondingAndStitching: 25, BestialPrimacy: 25 }],
-  //   ]
-  // );
-  // const infuriousBootsOfReprieveRecipe = await createRecipe(
-  //   null,
-  //   infuriousBootsOfReprieve,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [centaursTrophyNecklace, 1],
-  //     [infuriousHide, 16],
-  //     [adamantScales, 100],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   415,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Primal Infusion", { MailArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { BootsMail: 20, BestialPrimacy: 25 }],
-  //     ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
-  //   ]
-  // );
-  // const infuriousChainhelmProtectorRecipe = await createRecipe(
-  //   null,
-  //   infuriousChainhelmProtector,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [centaursTrophyNecklace, 1],
-  //     [infuriousScales, 20],
-  //     [adamantScales, 100],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   415,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Primal Infusion", { MailArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { MailHelms: 20, BestialPrimacy: 25 }],
-  //     ["Chain Oil", { LargeMail: 30, PrimordialLeatherworking: 35 }],
-  //   ]
-  // );
-  // const infuriousFootwrapsOfIndemnityRecipe = await createRecipe(
-  //   null,
-  //   infuriousFootwrapsOfIndemnity,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [crystalspineFur, 8],
-  //     [infuriousScales, 16],
-  //     [resilientLeather, 100],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   415,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { BootsLeather: 20, BestialPrimacy: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const infuriousSpiritsHoodRecipe = await createRecipe(
-  //   null,
-  //   infuriousSpiritsHood,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 50],
-  //     [fireInfusedHide, 8],
-  //     [infuriousHide, 20],
-  //     [resilientLeather, 100],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   415,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { Helms: 20, BestialPrimacy: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { ShapedLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const crimsonCombatantsAdamantChainmailRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsAdamantChainmail,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [cacophonousThunderscale, 2],
-  //     [infuriousScales, 1],
-  //     [adamantScales, 15],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { LargeMail: 0 }],
-  //     ["Lesser Illustrious Insight", { MailShirts: 20, BestialPrimacy: 25 }],
-  //     ["Chain Oil", { LargeMail: 30, PrimordialLeatherworking: 35 }],
-  //   ]
-  // );
-  // const crimsonCombatantsAdamantCowlRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsAdamantCowl,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [windsongPlumage, 2],
-  //     [infuriousScales, 1],
-  //     [adamantScales, 15],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { LargeMail: 0 }],
-  //     ["Lesser Illustrious Insight", { MailHelms: 20, BestialPrimacy: 25 }],
-  //     ["Chain Oil", { LargeMail: 30, PrimordialLeatherworking: 35 }],
-  //   ]
-  // );
-  // const crimsonCombatantsAdamantCuffsRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsAdamantCuffs,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [crystalspineFur, 2],
-  //     [infuriousScales, 1],
-  //     [adamantScales, 10],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { LargeMail: 0 }],
-  //     ["Lesser Illustrious Insight", { Bracers: 20, BestialPrimacy: 25 }],
-  //     ["Chain Oil", { LargeMail: 30, PrimordialLeatherworking: 35 }],
-  //   ]
-  // );
-  // const crimsonCombatantsAdamantEpaulettesRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsAdamantEpaulettes,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [fireInfusedHide, 2],
-  //     [infuriousScales, 1],
-  //     [adamantScales, 12],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { LargeMail: 0 }],
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { Shoulderguards: 20, BestialPrimacy: 25 },
-  //     ],
-  //     ["Chain Oil", { LargeMail: 30, PrimordialLeatherworking: 35 }],
-  //   ]
-  // );
-  // const crimsonCombatantsAdamantGauntletsRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsAdamantGauntlets,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [salamantherScales, 2],
-  //     [infuriousScales, 1],
-  //     [adamantScales, 12],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { IntricateMail: 0 }],
-  //     ["Lesser Illustrious Insight", { Gauntlets: 20, BestialPrimacy: 25 }],
-  //     ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
-  //   ]
-  // );
-  // const crimsonCombatantsAdamantGirdleRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsAdamantGirdle,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [salamantherScales, 2],
-  //     [infuriousScales, 1],
-  //     [adamantScales, 10],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { IntricateMail: 0 }],
-  //     ["Lesser Illustrious Insight", { BeltsMail: 20, BestialPrimacy: 25 }],
-  //     ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
-  //   ]
-  // );
-  // const crimsonCombatantsAdamantLeggingsRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsAdamantLeggings,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [rockfangLeather, 2],
-  //     [infuriousScales, 1],
-  //     [adamantScales, 15],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { IntricateMail: 0 }],
-  //     ["Lesser Illustrious Insight", { Greaves: 20, BestialPrimacy: 25 }],
-  //     ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
-  //   ]
-  // );
-  // const crimsonCombatantsAdamantTreadsRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsAdamantTreads,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [crystalspineFur, 2],
-  //     [infuriousScales, 1],
-  //     [adamantScales, 12],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { IntricateMail: 0 }],
-  //     ["Lesser Illustrious Insight", { BootsMail: 20, BestialPrimacy: 25 }],
-  //     ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
-  //   ]
-  // );
-  // const crimsonCombatantsResilientBeltRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsResilientBelt,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [salamantherScales, 2],
-  //     [infuriousHide, 1],
-  //     [resilientLeather, 10],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { EmbroideredLeatherArmor: 0 }],
-  //     ["Lesser Illustrious Insight", { BeltsLeather: 20, BestialPrimacy: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const crimsonCombatantsResilientBootsRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsResilientBelt,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [crystalspineFur, 2],
-  //     [infuriousHide, 1],
-  //     [resilientLeather, 12],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { EmbroideredLeatherArmor: 0 }],
-  //     ["Lesser Illustrious Insight", { BootsLeather: 20, BestialPrimacy: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const crimsonCombatantsResilientChestpieceRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsResilientChestpiece,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [cacophonousThunderscale, 2],
-  //     [infuriousHide, 1],
-  //     [resilientLeather, 15],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { ShapedLeatherArmor: 0 }],
-  //     ["Lesser Illustrious Insight", { Chestpieces: 20, BestialPrimacy: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { ShapedLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const crimsonCombatantsResilientGlovesRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsResilientGloves,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [salamantherScales, 2],
-  //     [infuriousHide, 1],
-  //     [resilientLeather, 12],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { EmbroideredLeatherArmor: 0 }],
-  //     ["Lesser Illustrious Insight", { Gloves: 20, BestialPrimacy: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const crimsonCombatantsResilientMaskRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsResilientMask,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [windsongPlumage, 2],
-  //     [infuriousHide, 1],
-  //     [resilientLeather, 15],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { ShapedLeatherArmor: 0 }],
-  //     ["Lesser Illustrious Insight", { Helms: 20, BestialPrimacy: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { ShapedLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const crimsonCombatantsResilientShoulderpadsRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsResilientShoulderpads,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [fireInfusedHide, 2],
-  //     [infuriousHide, 1],
-  //     [resilientLeather, 12],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { ShapedLeatherArmor: 0 }],
-  //     ["Lesser Illustrious Insight", { Shoulderpads: 20, BestialPrimacy: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { ShapedLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const crimsonCombatantsResilientTrousersRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsResilientTrousers,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [rockfangLeather, 2],
-  //     [infuriousHide, 1],
-  //     [resilientLeather, 15],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { EmbroideredLeatherArmor: 0 }],
-  //     ["Lesser Illustrious Insight", { Legguards: 20, BestialPrimacy: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const crimsonCombatantsResilientWristwrapsRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsResilientWristwraps,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [crystalspineFur, 2],
-  //     [infuriousHide, 1],
-  //     [resilientLeather, 10],
-  //   ],
-  //   null,
-  //   "Bestial Patterns",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive", { ShapedLeatherArmor: 0 }],
-  //     ["Lesser Illustrious Insight", { Wristwraps: 20, BestialPrimacy: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { ShapedLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const acidicHailstoneTreadsRecipe = await createRecipe(
-  //   null,
-  //   acidicHailstoneTreads,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [rockfangLeather, 12],
-  //     [frostbiteScales, 18],
-  //     [adamantScales, 150],
-  //   ],
-  //   null,
-  //   "Decayed Patterns",
-  //   1,
-  //   415,
-  //   null,
-  //   null,
-  //   "Dungeon Drop",
-  //   "Altar of Decay",
-  //   "Drops from Decayed Creates in Brackenhide Hollow.",
-  //   [
-  //     ["Primal Infusion", { MailArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { BootsMail: 20, DecayingGrasp: 25 }],
-  //     ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
-  //   ]
-  // );
-  // const slimyExpulsionBootsRecipe = await createRecipe(
-  //   null,
-  //   slimyExpulsionBoots,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [salamantherScales, 10],
-  //     [stonecrustHide, 18],
-  //     [resilientLeather, 150],
-  //   ],
-  //   null,
-  //   "Decayed Patterns",
-  //   1,
-  //   415,
-  //   null,
-  //   null,
-  //   "Dungeon Drop",
-  //   "Altar of Decay",
-  //   "Drops from Decayed Creates in Brackenhide Hollow.",
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { BootsLeather: 20, DecayingGrasp: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const toxicThornFootwrapsRecipe = await createRecipe(
-  //   null,
-  //   toxicThornFootwraps,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [cacophonousThunderscale, 6],
-  //     [frostbiteScales, 18],
-  //     [resilientLeather, 150],
-  //   ],
-  //   null,
-  //   "Decayed Patterns",
-  //   1,
-  //   415,
-  //   null,
-  //   null,
-  //   "Dungeon Drop",
-  //   "Altar of Decay",
-  //   "Drops from Decayed Creates in Brackenhide Hollow.",
-  //   [
-  //     ["Primal Infusion", { LeatherArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { BootsLeather: 20, DecayingGrasp: 25 }],
-  //     [
-  //       "Curing Agent",
-  //       { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
-  //     ],
-  //   ]
-  // );
-  // const venomSteepedStompersRecipe = await createRecipe(
-  //   null,
-  //   venomSteepedStompers,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [cacophonousThunderscale, 6],
-  //     [stonecrustHide, 18],
-  //     [adamantScales, 150],
-  //   ],
-  //   null,
-  //   "Decayed Patterns",
-  //   1,
-  //   415,
-  //   null,
-  //   null,
-  //   "Dungeon Drop",
-  //   "Altar of Decay",
-  //   "Drops from Decayed Creates in Brackenhide Hollow.",
-  //   [
-  //     ["Primal Infusion", { MailArmorCrafting: 0 }],
-  //     ["Illustrious Insight", { BootsMail: 20, DecayingGrasp: 25 }],
-  //     ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
-  //   ]
-  // );
-  // const witherrotTomeRecipe = await createRecipe(
-  //   null,
-  //   witherrotTome,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [awakenedDecay, 15],
-  //     [tallstriderSinew, 2],
-  //     [stonecrustHide, 14],
-  //     [resilientLeather, 100],
-  //   ],
-  //   null,
-  //   "Decayed Patterns",
-  //   1,
-  //   300,
-  //   null,
-  //   { DecayingGrasp: 0 },
-  //   null,
-  //   "Altar of Decay",
-  //   null,
-  //   [
-  //     ["Primal Infusion", {}],
-  //     ["Illustrious Insight", { DecayingGrasp: 25 }],
-  //   ]
-  // );
-  // const finishedPrototypeExplorersBardingRecipe = await createRecipe(
-  //   null,
-  //   finishedPrototypeExplorersBarding,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [prototypeExplorersBardingFramework, 1],
-  //     [tuftOfPrimalWool, 1],
-  //     [lustrousScaledHide, 6],
-  //     [resilientLeather, 80],
-  //   ],
-  //   null,
-  //   "Reagents",
-  //   1,
-  //   null,
-  //   { MaruukCentaur: 22 },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench"
-  // );
-  // const finishedPrototypeRegalBardingRecipe = await createRecipe(
-  //   null,
-  //   finishedPrototypeExplorersBarding,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [prototypeRegalBardingFramework, 1],
-  //     [tuftOfPrimalWool, 1],
-  //     [lustrousScaledHide, 6],
-  //     [resilientLeather, 80],
-  //   ],
-  //   null,
-  //   "Reagents",
-  //   1,
-  //   null,
-  //   { IskaaraTuskarr: 29 },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench"
-  // );
-  // const earthshineScalesRecipe = await createRecipe(
-  //   null,
-  //   earthshineScales,
-  //   2,
-  //   leatherworking,
-  //   [
-  //     [awakenedEarth, 1],
-  //     [awakenedFrost, 1],
-  //     [lustrousScaledHide, 2],
-  //   ],
-  //   25,
-  //   "Reagents",
-  //   1,
-  //   375,
-  //   null,
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { CuringAndTanning: 25, ElementalMastery: 25 },
-  //     ],
-  //   ]
-  // );
-  // const frostbiteScalesRecipe = await createRecipe(
-  //   null,
-  //   frostbiteScales,
-  //   2,
-  //   leatherworking,
-  //   [
-  //     [awakenedFrost, 1],
-  //     [awakenedDecay, 1],
-  //     [lustrousScaledHide, 2],
-  //   ],
-  //   25,
-  //   "Reagents",
-  //   1,
-  //   375,
-  //   null,
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { CuringAndTanning: 25, DecayingGrasp: 25 },
-  //     ],
-  //   ]
-  // );
-  // const infuriousHideRecipe = await createRecipe(
-  //   null,
-  //   infuriousHide,
-  //   2,
-  //   leatherworking,
-  //   [
-  //     [awakenedIre, 2],
-  //     [denseHide, 2],
-  //   ],
-  //   null,
-  //   "Reagents",
-  //   1,
-  //   375,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { CuringAndTanning: 25, BestialPrimacy: 25 },
-  //     ],
-  //   ]
-  // );
-  // const infuriousScalesRecipe = await createRecipe(
-  //   null,
-  //   infuriousScales,
-  //   2,
-  //   leatherworking,
-  //   [
-  //     [awakenedIre, 2],
-  //     [lustrousScaledHide, 2],
-  //   ],
-  //   null,
-  //   "Reagents",
-  //   1,
-  //   375,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { CuringAndTanning: 25, BestialPrimacy: 25 },
-  //     ],
-  //   ]
-  // );
-  // const mireslushHideRecipe = await createRecipe(
-  //   null,
-  //   mireslushHide,
-  //   2,
-  //   leatherworking,
-  //   [
-  //     [awakenedEarth, 1],
-  //     [awakenedFrost, 1],
-  //     [denseHide, 2],
-  //   ],
-  //   25,
-  //   "Reagents",
-  //   1,
-  //   375,
-  //   null,
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { CuringAndTanning: 25, ElementalMastery: 25 },
-  //     ],
-  //   ]
-  // );
-  // const stonecrustHideRecipe = await createRecipe(
-  //   null,
-  //   stonecrustHide,
-  //   2,
-  //   leatherworking,
-  //   [
-  //     [awakenedDecay, 1],
-  //     [awakenedEarth, 1],
-  //     [denseHide, 2],
-  //   ],
-  //   25,
-  //   "Reagents",
-  //   1,
-  //   375,
-  //   null,
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [
-  //     [
-  //       "Lesser Illustrious Insight",
-  //       { CuringAndTanning: 25, DecayingGrasp: 25 },
-  //     ],
-  //   ]
-  // );
-  // const fangAdornmentsRecipe = await createRecipe(
-  //   null,
-  //   fangAdornments,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [rockfangLeather, 2],
-  //     [pristineVorquinHorn, 2],
-  //     [aquaticMaw, 1],
-  //     [mastodonTusk, 1],
-  //     [earthshineScales, 3],
-  //     [resilientLeather, 60],
-  //   ],
-  //   null,
-  //   "Optional Reagents",
-  //   1,
-  //   350,
-  //   null,
-  //   { BestialPrimacy: 20 },
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [["Lesser Illustrious Insight", { BestialPrimacy: 25 }]]
-  // );
-  // const toxifiedArmorPatchRecipe = await createRecipe(
-  //   null,
-  //   toxifiedArmorPatch,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [awakenedDecay, 8],
-  //     [stonecrustHide, 2],
-  //     [adamantScales, 60],
-  //   ],
-  //   null,
-  //   "Optional Reagents",
-  //   1,
-  //   350,
-  //   null,
-  //   { DecayingGrasp: 20 },
-  //   null,
-  //   "Altar of Decay",
-  //   null,
-  //   [["Lesser Illustrious Insight", { DecayingGrasp: 25 }]]
-  // );
-  // const illustriousInsightRecipeLeatherworking = await createRecipe(
-  //   "Illustrious Insight",
-  //   illustriousInsight,
-  //   1,
-  //   leatherworking,
-  //   [[artisansMettle, 50]],
-  //   null,
-  //   "Finishing Reagents",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Various Specializations",
-  //   "Leatherworker's Tool Bench"
-  // );
-  // const fierceArmorKitRecipe = await createRecipe(
-  //   null,
-  //   fierceArmorKit,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [awakenedEarth, 10],
-  //     [stonecrustHide, 4],
-  //     [resilientLeather, 60],
-  //   ],
-  //   null,
-  //   "Armor Kits",
-  //   1,
-  //   375,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Leatherworker's Tool Bench",
-  //   "Received from Maruuk Centaur Hunts.",
-  //   [["Illustrious Insight", { CuringAndTanning: 25, BestialPrimacy: 25 }]]
-  // );
-  // const frostedArmorKitRecipe = await createRecipe(
-  //   null,
-  //   frostedArmorKit,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [awakenedFrost, 10],
-  //     [frostbiteScales, 4],
-  //     [adamantScales, 60],
-  //   ],
-  //   null,
-  //   "Armor Kits",
-  //   1,
-  //   375,
-  //   { CobaltAssembly: "High" },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench",
-  //   null,
-  //   [["Illustrious Insight", { CuringAndTanning: 25, ElementalMastery: 25 }]]
-  // );
-  // const reinforcedArmorKitRecipe = await createRecipe(
-  //   null,
-  //   reinforcedArmorKit,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [cacophonousThunderscale, 2],
-  //     [denseHide, 1],
-  //     [resilientLeather, 50],
-  //   ],
-  //   10,
-  //   "Armor Kits",
-  //   1,
-  //   150,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { CuringAndTanning: 25 }]]
-  // );
-  // const feralHideDrumsRecipe = await createRecipe(
-  //   null,
-  //   feralHideDrums,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [denseHide, 1],
-  //     [resilientLeather, 10],
-  //   ],
-  //   15,
-  //   "Drums",
-  //   1
-  // );
-  // const artisansSignRecipe = await createRecipe(
-  //   null,
-  //   artisansSign,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [pentagoldSeal, 4],
-  //     [rockfangLeather, 5],
-  //     [denseHide, 2],
-  //     [runedWrithebark, 4],
-  //   ],
-  //   null,
-  //   "Toys",
-  //   1,
-  //   null,
-  //   { ArtisansConsortium: "Esteemed" },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench"
-  // );
-  // const gnollTentRecipe = await createRecipe(
-  //   null,
-  //   gnollTent,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [primalBearSpine, 1],
-  //     [denseHide, 20],
-  //     [lustrousScaledHide, 15],
-  //     [resilientLeather, 200],
-  //   ],
-  //   null,
-  //   "Toys",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Leatherworker's Tool Bench",
-  //   "Drops from Gnolls."
-  // );
-  // const tuskarrBeanBagRecipe = await createRecipe(
-  //   null,
-  //   tuskarrBeanBag,
-  //   1,
-  //   leatherworking,
-  //   [
-  //     [contouredFowlfeather, 100],
-  //     [denseHide, 30],
-  //     [resilientLeather, 200],
-  //   ],
-  //   null,
-  //   "Toys",
-  //   1,
-  //   null,
-  //   { IskaaraTuskarr: 23 },
-  //   null,
-  //   null,
-  //   "Leatherworker's Tool Bench"
-  // );
+  const lifeBoundBeltRecipe = await createRecipe(
+    null,
+    lifeBoundBelt,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [pristineVorquinHorn, 4],
+      [earthshineScales, 13],
+      [resilientLeather, 150],
+    ],
+    null,
+    "Leather Armor",
+    1,
+    280,
+    null,
+    { BeltsLeather: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Embellishment", {}],
+      ["Missive - Combat", { EmbroideredLeatherArmor: 0 }],
+      ["Illustrious Insight", { BeltsLeather: 20 }],
+      ["Curing Agent", { EmbroideredLeatherArmor: 30 }],
+    ]
+  );
+  const lifeBoundBindingsRecipe = await createRecipe(
+    null,
+    lifeBoundBindings,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 30],
+      [windsongPlumage, 3],
+      [earthshineScales, 10],
+      [resilientLeather, 150],
+    ],
+    null,
+    "Leather Armor",
+    1,
+    280,
+    null,
+    { Wristwraps: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Embellishment", {}],
+      ["Missive - Combat", { ShapedLeatherArmor: 0 }],
+      ["Illustrious Insight", { Wristwraps: 20 }],
+      ["Curing Agent", { ShapedLeatherArmor: 30 }],
+    ]
+  );
+  const lifeBoundBootsRecipe = await createRecipe(
+    null,
+    lifeBoundBoots,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [crystalspineFur, 4],
+      [frostbiteScales, 13],
+      [resilientLeather, 150],
+    ],
+    null,
+    "Leather Armor",
+    1,
+    280,
+    null,
+    { BootsLeather: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Embellishment", {}],
+      ["Missive - Combat", { EmbroideredLeatherArmor: 0 }],
+      ["Illustrious Insight", { BootsLeather: 20 }],
+      ["Curing Agent", { EmbroideredLeatherArmor: 30 }],
+    ]
+  );
+  const lifeBoundCapRecipe = await createRecipe(
+    null,
+    lifeBoundCap,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [windsongPlumage, 4],
+      [mireslushHide, 15],
+      [resilientLeather, 150],
+    ],
+    null,
+    "Leather Armor",
+    1,
+    280,
+    null,
+    { Helms: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Embellishment", {}],
+      ["Missive - Combat", { ShapedLeatherArmor: 0 }],
+      ["Illustrious Insight", { Helms: 20 }],
+      ["Curing Agent", { ShapedLeatherArmor: 30 }],
+    ]
+  );
+  const lifeBoundChestpieceRecipe = await createRecipe(
+    null,
+    lifeBoundChestpiece,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [flawlessProtoDragonScale, 4],
+      [mireslushHide, 15],
+      [resilientLeather, 150],
+    ],
+    null,
+    "Leather Armor",
+    1,
+    280,
+    null,
+    { Chestpieces: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Embellishment", {}],
+      ["Missive - Combat", { ShapedLeatherArmor: 0 }],
+      ["Illustrious Insight", { Chestpieces: 20 }],
+      ["Curing Agent", { ShapedLeatherArmor: 30 }],
+    ]
+  );
+  const lifeBoundGlovesRecipe = await createRecipe(
+    null,
+    lifeBoundGloves,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [salamantherScales, 4],
+      [frostbiteScales, 13],
+      [resilientLeather, 150],
+    ],
+    null,
+    "Leather Armor",
+    1,
+    280,
+    null,
+    { Gloves: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Embellishment", {}],
+      ["Missive - Combat", { EmbroideredLeatherArmor: 0 }],
+      ["Illustrious Insight", { Gloves: 20 }],
+      ["Curing Agent", { EmbroideredLeatherArmor: 30 }],
+    ]
+  );
+  const lifeBoundShoulderpadsRecipe = await createRecipe(
+    null,
+    lifeBoundShoulderpads,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [fireInfusedHide, 4],
+      [stonecrustHide, 13],
+      [resilientLeather, 150],
+    ],
+    null,
+    "Leather Armor",
+    1,
+    280,
+    null,
+    { Shoulderpads: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Embellishment", {}],
+      ["Missive - Combat", { ShapedLeatherArmor: 0 }],
+      ["Illustrious Insight", { Shoulderpads: 20 }],
+      ["Curing Agent", { ShapedLeatherArmor: 30 }],
+    ]
+  );
+  const lifeBoundTrousersRecipe = await createRecipe(
+    null,
+    lifeBoundTrousers,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [cacophonousThunderscale, 4],
+      [stonecrustHide, 15],
+      [resilientLeather, 150],
+    ],
+    null,
+    "Leather Armor",
+    1,
+    280,
+    null,
+    { Legguards: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Embellishment", {}],
+      ["Missive - Combat", { EmbroideredLeatherArmor: 0 }],
+      ["Illustrious Insight", { Legguards: 20 }],
+      ["Curing Agent", { EmbroideredLeatherArmor: 30 }],
+    ]
+  );
+  const pioneersPracticedCowlRecipe = await createRecipe(
+    null,
+    pioneersPracticedCowl,
+    1,
+    leatherworking,
+    [
+      [resilientLeather, 10],
+      [denseHide, 3],
+    ],
+    50,
+    "Leather Armor",
+    3,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", { ShapedLeatherArmor: 0 }],
+      ["Lesser Illustrious Insight", { Helms: 20 }],
+      ["Curing Agent", { ShapedLeatherArmor: 30 }],
+    ]
+  );
+  const pioneersPracticedLeggingsRecipe = await createRecipe(
+    null,
+    pioneersPracticedLeggings,
+    1,
+    leatherworking,
+    [
+      [resilientLeather, 10],
+      [denseHide, 3],
+    ],
+    45,
+    "Leather Armor",
+    3,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", { EmbroideredLeatherArmor: 0 }],
+      ["Lesser Illustrious Insight", { Legguards: 20 }],
+      ["Curing Agent", { EmbroideredLeatherArmor: 30 }],
+    ]
+  );
+  const pioneersPracticedShouldersRecipe = await createRecipe(
+    null,
+    pioneersPracticedShoulders,
+    1,
+    leatherworking,
+    [
+      [resilientLeather, 16],
+      [denseHide, 2],
+    ],
+    40,
+    "Leather Armor",
+    3,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", { ShapedLeatherArmor: 0 }],
+      ["Lesser Illustrious Insight", { Shoulderpads: 20 }],
+      ["Curing Agent", { ShapedLeatherArmor: 30 }],
+    ]
+  );
+  const pioneersPracticedGlovesRecipe = await createRecipe(
+    null,
+    pioneersPracticedGloves,
+    1,
+    leatherworking,
+    [
+      [resilientLeather, 16],
+      [denseHide, 2],
+    ],
+    25,
+    "Leather Armor",
+    3,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", { EmbroideredLeatherArmor: 0 }],
+      ["Lesser Illustrious Insight", { Gloves: 20 }],
+      ["Curing Agent", { EmbroideredLeatherArmor: 30 }],
+    ]
+  );
+  const pioneersPracticedBeltRecipe = await createRecipe(
+    null,
+    pioneersPracticedBelt,
+    1,
+    leatherworking,
+    [
+      [resilientLeather, 16],
+      [denseHide, 2],
+    ],
+    20,
+    "Leather Armor",
+    3,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", { EmbroideredLeatherArmor: 0 }],
+      ["Lesser Illustrious Insight", { BeltsLeather: 20 }],
+      ["Curing Agent", { EmbroideredLeatherArmor: 30 }],
+    ]
+  );
+  const pioneersLeatherTunicRecipe = await createRecipe(
+    null,
+    pioneersLeatherTunic,
+    1,
+    leatherworking,
+    [
+      [resilientLeather, 25],
+      [adamantScales, 15],
+    ],
+    10,
+    "Leather Armor",
+    3,
+    40,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", { ShapedLeatherArmor: 0 }],
+      ["Lesser Illustrious Insight", { Chestpieces: 20 }],
+      ["Curing Agent", { ShapedLeatherArmor: 30 }],
+    ]
+  );
+  const pioneersLeatherBootsRecipe = await createRecipe(
+    null,
+    pioneersLeatherBoots,
+    1,
+    leatherworking,
+    [
+      [resilientLeather, 20],
+      [adamantScales, 10],
+    ],
+    5,
+    "Leather Armor",
+    3,
+    40,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", { EmbroideredLeatherArmor: 0 }],
+      ["Lesser Illustrious Insight", { BootsLeather: 20 }],
+      ["Curing Agent", { EmbroideredLeatherArmor: 30 }],
+    ]
+  );
+  const pioneersLeatherWristguardsRecipe = await createRecipe(
+    null,
+    pioneersLeatherWristguards,
+    1,
+    leatherworking,
+    [
+      [resilientLeather, 15],
+      [adamantScales, 5],
+    ],
+    1,
+    "Leather Armor",
+    3,
+    40,
+    null,
+    null,
+    null,
+    null,
+    "Learned by default.",
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", { ShapedLeatherArmor: 0 }],
+      ["Lesser Illustrious Insight", { Wristwraps: 20 }],
+      ["Curing Agent", { ShapedLeatherArmor: 30 }],
+    ]
+  );
+  const flameTouchedChainRecipe = await createRecipe(
+    null,
+    flameTouchedChain,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [crystalspineFur, 4],
+      [earthshineScales, 14],
+      [adamantScales, 150],
+    ],
+    null,
+    "Mail Armor",
+    1,
+    280,
+    null,
+    { BeltsMail: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { MailArmorCrafting: 0 }],
+      ["Embellishment", {}],
+      ["Missive - Combat", { IntricateMail: 0 }],
+      ["Illustrious Insight", { BeltsMail: 20 }],
+      ["Chain Oil", { IntricateMail: 30 }],
+    ]
+  );
+  const flameTouchedChainmailRecipe = await createRecipe(
+    null,
+    flameTouchedChainmail,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [flawlessProtoDragonScale, 4],
+      [stonecrustHide, 15],
+      [adamantScales, 150],
+    ],
+    null,
+    "Mail Armor",
+    1,
+    280,
+    null,
+    { MailShirts: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { MailArmorCrafting: 0 }],
+      ["Embellishment", {}],
+      ["Missive - Combat", { LargeMail: 0 }],
+      ["Illustrious Insight", { MailShirts: 20 }],
+      ["Chain Oil", { LargeMail: 30 }],
+    ]
+  );
+  const flameTouchedCuffsRecipe = await createRecipe(
+    null,
+    flameTouchedCuffs,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 30],
+      [windsongPlumage, 4],
+      [earthshineScales, 10],
+      [adamantScales, 150],
+    ],
+    null,
+    "Mail Armor",
+    1,
+    280,
+    null,
+    { Bracers: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { MailArmorCrafting: 0 }],
+      ["Embellishment", {}],
+      ["Missive - Combat", { LargeMail: 0 }],
+      ["Illustrious Insight", { Bracers: 20 }],
+      ["Chain Oil", { LargeMail: 30 }],
+    ]
+  );
+  const flameTouchedHandguardsRecipe = await createRecipe(
+    null,
+    flameTouchedHandguards,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [rockfangLeather, 4],
+      [earthshineScales, 13],
+      [adamantScales, 150],
+    ],
+    null,
+    "Mail Armor",
+    1,
+    280,
+    null,
+    { Gauntlets: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { MailArmorCrafting: 0 }],
+      ["Embellishment", {}],
+      ["Missive - Combat", { IntricateMail: 0 }],
+      ["Illustrious Insight", { Gauntlets: 20 }],
+      ["Chain Oil", { IntricateMail: 30 }],
+    ]
+  );
+  const flameTouchedHelmetRecipe = await createRecipe(
+    null,
+    flameTouchedHelmet,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [cacophonousThunderscale, 4],
+      [stonecrustHide, 15],
+      [adamantScales, 150],
+    ],
+    null,
+    "Mail Armor",
+    1,
+    280,
+    null,
+    { MailHelms: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { MailArmorCrafting: 0 }],
+      ["Embellishment", {}],
+      ["Missive - Combat", { LargeMail: 0 }],
+      ["Illustrious Insight", { MailHelms: 20 }],
+      ["Chain Oil", { LargeMail: 30 }],
+    ]
+  );
+  const flameTouchedLegguardsRecipe = await createRecipe(
+    null,
+    flameTouchedLegguards,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [cacophonousThunderscale, 4],
+      [stonecrustHide, 15],
+      [adamantScales, 150],
+    ],
+    null,
+    "Mail Armor",
+    1,
+    280,
+    null,
+    { Greaves: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { MailArmorCrafting: 0 }],
+      ["Embellishment", {}],
+      ["Missive - Combat", { IntricateMail: 0 }],
+      ["Illustrious Insight", { Greaves: 20 }],
+      ["Chain Oil", { IntricateMail: 30 }],
+    ]
+  );
+  const flameTouchedSpauldersRecipe = await createRecipe(
+    null,
+    flameTouchedSpaulders,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [windsongPlumage, 4],
+      [earthshineScales, 13],
+      [adamantScales, 150],
+    ],
+    null,
+    "Mail Armor",
+    1,
+    280,
+    null,
+    { Shoulderguards: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { MailArmorCrafting: 0 }],
+      ["Embellishment", {}],
+      ["Missive - Combat", { LargeMail: 0 }],
+      ["Illustrious Insight", { Shoulderguards: 20 }],
+      ["Chain Oil", { LargeMail: 30 }],
+    ]
+  );
+  const flameTouchedTreadsRecipe = await createRecipe(
+    null,
+    flameTouchedTreads,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [crystalspineFur, 4],
+      [earthshineScales, 13],
+      [adamantScales, 150],
+    ],
+    null,
+    "Mail Armor",
+    1,
+    280,
+    null,
+    { BootsMail: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { MailArmorCrafting: 0 }],
+      ["Embellishment", {}],
+      ["Missive - Combat", { IntricateMail: 0 }],
+      ["Illustrious Insight", { BootsMail: 20 }],
+      ["Chain Oil", { IntricateMail: 30 }],
+    ]
+  );
+  const trailblazersToughenedCoifRecipe = await createRecipe(
+    null,
+    trailblazersToughenedCoif,
+    1,
+    leatherworking,
+    [
+      [adamantScales, 10],
+      [lustrousScaledHide, 2],
+    ],
+    50,
+    "Mail Armor",
+    3,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", { LargeMail: 0 }],
+      ["Lesser Illustrious Insight", { MailHelms: 20 }],
+      ["Chain Oil", { LargeMail: 30 }],
+    ]
+  );
+  const trailblazersToughenedLegguardsRecipe = await createRecipe(
+    null,
+    trailblazersToughenedLegguards,
+    1,
+    leatherworking,
+    [
+      [adamantScales, 6],
+      [lustrousScaledHide, 3],
+    ],
+    45,
+    "Mail Armor",
+    3,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", { IntricateMail: 0 }],
+      ["Lesser Illustrious Insight", { Greaves: 20 }],
+      ["Chain Oil", { IntricateMail: 30 }],
+    ]
+  );
+  const trailblazersToughenedSpikesRecipe = await createRecipe(
+    null,
+    trailblazersToughenedSpikes,
+    1,
+    leatherworking,
+    [
+      [adamantScales, 16],
+      [lustrousScaledHide, 2],
+    ],
+    40,
+    "Mail Armor",
+    3,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", { LargeMail: 0 }],
+      ["Lesser Illustrious Insight", { Shoulderguards: 20 }],
+      ["Chain Oil", { LargeMail: 30 }],
+    ]
+  );
+  const trailblazersToughenedGripsRecipe = await createRecipe(
+    null,
+    trailblazersToughenedGrips,
+    1,
+    leatherworking,
+    [
+      [adamantScales, 16],
+      [lustrousScaledHide, 2],
+    ],
+    25,
+    "Mail Armor",
+    3,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", { IntricateMail: 0 }],
+      ["Lesser Illustrious Insight", { Gauntlets: 20 }],
+      ["Chain Oil", { IntricateMail: 30 }],
+    ]
+  );
+  const trailblazersToughenedChainbeltRecipe = await createRecipe(
+    null,
+    trailblazersToughenedChainbelt,
+    1,
+    leatherworking,
+    [
+      [adamantScales, 16],
+      [lustrousScaledHide, 2],
+    ],
+    20,
+    "Mail Armor",
+    3,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", { IntricateMail: 0 }],
+      ["Lesser Illustrious Insight", { BeltsMail: 20 }],
+      ["Chain Oil", { IntricateMail: 30 }],
+    ]
+  );
+  const trailblazersScaleVestRecipe = await createRecipe(
+    null,
+    trailblazersScaleVest,
+    1,
+    leatherworking,
+    [
+      [adamantScales, 25],
+      [resilientLeather, 15],
+    ],
+    10,
+    "Mail Armor",
+    3,
+    40,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", { LargeMail: 0 }],
+      ["Lesser Illustrious Insight", { MailShirts: 20 }],
+      ["Chain Oil", { LargeMail: 30 }],
+    ]
+  );
+  const trailblazersScaleBootsRecipe = await createRecipe(
+    null,
+    trailblazersScaleVest,
+    1,
+    leatherworking,
+    [
+      [adamantScales, 20],
+      [resilientLeather, 10],
+    ],
+    5,
+    "Mail Armor",
+    3,
+    40,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", { IntricateMail: 0 }],
+      ["Lesser Illustrious Insight", { BootsMail: 20 }],
+      ["Chain Oil", { IntricateMail: 30 }],
+    ]
+  );
+  const trailblazersScaleBracersRecipe = await createRecipe(
+    null,
+    trailblazersScaleBracers,
+    1,
+    leatherworking,
+    [
+      [adamantScales, 15],
+      [resilientLeather, 5],
+    ],
+    1,
+    "Mail Armor",
+    3,
+    40,
+    null,
+    null,
+    null,
+    null,
+    "Learned by default.",
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", { LargeMail: 0 }],
+      ["Lesser Illustrious Insight", { Bracers: 20 }],
+      ["Chain Oil", { LargeMail: 30 }],
+    ]
+  );
+  const expertAlchemistsHatRecipe = await createRecipe(
+    null,
+    expertAlchemistsHat,
+    1,
+    leatherworking,
+    [
+      [artisansMettle, 225],
+      [awakenedAir, 12],
+      [frostbiteScales, 8],
+      [resilientLeather, 80],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    275,
+    { MaruukCentaur: 18 },
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [["Illustrious Insight", { BondingAndStitching: 25 }]]
+  );
+  const expertSkinnersCapRecipe = await createRecipe(
+    null,
+    expertSkinnersCap,
+    1,
+    leatherworking,
+    [
+      [artisansMettle, 225],
+      [windsongPlumage, 4],
+      [tuftOfPrimalWool, 2],
+      [earthshineScales, 10],
+      [resilientLeather, 80],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    275,
+    { IskaaraTuskarr: 18 },
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [["Illustrious Insight", { BondingAndStitching: 25 }]]
+  );
+  const flameproofApronRecipe = await createRecipe(
+    null,
+    flameproofApron,
+    1,
+    leatherworking,
+    [
+      [artisansMettle, 225],
+      [flawlessProtoDragonScale, 10],
+      [stonecrustHide, 8],
+      [adamantScales, 80],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    275,
+    { MaruukCentaur: 18 },
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [["Illustrious Insight", { BondingAndStitching: 25 }]]
+  );
+  const lavishFloralPackRecipe = await createRecipe(
+    null,
+    lavishFloralPack,
+    1,
+    leatherworking,
+    [
+      [artisansMettle, 225],
+      [crystalspineFur, 15],
+      [mireslushHide, 10],
+      [resilientLeather, 60],
+      [omniumDraconis, 5],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    275,
+    { IskaaraTuskarr: 18 },
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [["Illustrious Insight", { BondingAndStitching: 25 }]]
+  );
+  const masterworkSmockRecipe = await createRecipe(
+    null,
+    masterworkSmock,
+    1,
+    leatherworking,
+    [
+      [artisansMettle, 225],
+      [crystalspineFur, 15],
+      [mireslushHide, 10],
+      [resilientLeather, 80],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    275,
+    { MaruukCentaur: 18 },
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [["Illustrious Insight", { BondingAndStitching: 25 }]]
+  );
+  const reinforcedPackRecipe = await createRecipe(
+    null,
+    reinforcedPack,
+    1,
+    leatherworking,
+    [
+      [artisansMettle, 225],
+      [pristineVorquinHorn, 15],
+      [earthshineScales, 10],
+      [resilientLeather, 80],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    275,
+    { MaruukCentaur: 18 },
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [["Illustrious Insight", { BondingAndStitching: 25 }]]
+  );
+  const resplendentCoverRecipe = await createRecipe(
+    null,
+    resplendentCover,
+    1,
+    leatherworking,
+    [
+      [artisansMettle, 225],
+      [salamantherScales, 20],
+      [stonecrustHide, 10],
+      [resilientLeather, 80],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    275,
+    { IskaaraTuskarr: 18 },
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [["Illustrious Insight", { BondingAndStitching: 25 }]]
+  );
+  const shockproofGlovesRecipe = await createRecipe(
+    null,
+    shockproofGloves,
+    1,
+    leatherworking,
+    [
+      [artisansMettle, 225],
+      [rockfangLeather, 15],
+      [earthshineScales, 10],
+      [adamantScales, 80],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    275,
+    { IskaaraTuskarr: 18 },
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [["Illustrious Insight", { BondingAndStitching: 25 }]]
+  );
+  const alchemistsHatRecipe = await createRecipe(
+    null,
+    alchemistsHat,
+    1,
+    leatherworking,
+    [
+      [lustrousScaledHide, 2],
+      [resilientLeather, 10],
+    ],
+    35,
+    "Profession Equipment",
+    3,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { BondingAndStitching: 25 }]]
+  );
+  const smithingApronRecipe = await createRecipe(
+    null,
+    smithingApron,
+    1,
+    leatherworking,
+    [
+      [denseHide, 2],
+      [adamantScales, 10],
+    ],
+    35,
+    "Profession Equipment",
+    3,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { BondingAndStitching: 25 }]]
+  );
+  const jewelersCoverRecipe = await createRecipe(
+    null,
+    jewelersCover,
+    1,
+    leatherworking,
+    [
+      [denseHide, 2],
+      [resilientLeather, 10],
+    ],
+    30,
+    "Profession Equipment",
+    3,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { BondingAndStitching: 25 }]]
+  );
+  const protectiveGlovesRecipe = await createRecipe(
+    null,
+    protectiveGloves,
+    1,
+    leatherworking,
+    [
+      [lustrousScaledHide, 2],
+      [adamantScales, 10],
+    ],
+    30,
+    "Profession Equipment",
+    3,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { BondingAndStitching: 25 }]]
+  );
+  const durablePackRecipe = await createRecipe(
+    null,
+    durablePack,
+    1,
+    leatherworking,
+    [
+      [resilientLeather, 20],
+      [denseHide, 1],
+    ],
+    15,
+    "Profession Equipment",
+    3,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { BondingAndStitching: 25 }]]
+  );
+  const floralBasketRecipe = await createRecipe(
+    null,
+    floralBasket,
+    1,
+    leatherworking,
+    [
+      [denseHide, 2],
+      [resilientLeather, 5],
+      [hochenblume, 5],
+    ],
+    10,
+    "Profession Equipment",
+    3,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { BondingAndStitching: 25 }]]
+  );
+  const skinnersCapRecipe = await createRecipe(
+    null,
+    skinnersCap,
+    1,
+    leatherworking,
+    [
+      [resilientLeather, 30],
+      [lustrousScaledHide, 1],
+    ],
+    5,
+    "Profession Equipment",
+    3,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { BondingAndStitching: 25 }]]
+  );
+  const resilientSmockRecipe = await createRecipe(
+    null,
+    resilientSmock,
+    1,
+    leatherworking,
+    [
+      [resilientLeather, 20],
+      [adamantScales, 10],
+    ],
+    1,
+    "Profession Equipment",
+    3,
+    80,
+    null,
+    null,
+    null,
+    null,
+    "Learned by default.",
+    [["Lesser Illustrious Insight", { BondingAndStitching: 25 }]]
+  );
+  const bonewroughtCrossbowRecipe = await createRecipe(
+    null,
+    bonewroughtCrossbow,
+    1,
+    leatherworking,
+    [
+      [pristineVorquinHorn, 2],
+      [runedWrithebark, 1],
+      [resilientLeather, 20],
+    ],
+    35,
+    "Weapons",
+    3,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Training Matrix", {}],
+      ["Missive - Combat", {}],
+      ["Lesser Illustrious Insight", { BondingAndStitching: 25 }],
+    ]
+  );
+  const ancestorsDewDrippersRecipe = await createRecipe(
+    null,
+    ancestorsDewDrippers,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [crystalspineFur, 10],
+      [mireslushHide, 18],
+      [adamantScales, 150],
+    ],
+    null,
+    "Elemental Patterns",
+    1,
+    415,
+    { MaruukCentaur: 13 },
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { MailArmorCrafting: 0 }],
+      ["Illustrious Insight", { Shoulderguards: 20, ElementalMastery: 25 }],
+      ["Chain Oil", { LargeMail: 30, PrimordialLeatherworking: 35 }],
+    ]
+  );
+  const flaringCowlRecipe = await createRecipe(
+    null,
+    flaringCowl,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [fierySoul, 1],
+      [awakenedFire, 10],
+      [earthshineScales, 16],
+      [resilientLeather, 100],
+    ],
+    null,
+    "Elemental Patterns",
+    1,
+    415,
+    null,
+    { ElementalMastery: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Illustrious Insight", { Helms: 20, ElementalMastery: 25 }],
+      [
+        "Curing Agent",
+        { ShapedLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const oldSpiritsWristwrapsRecipe = await createRecipe(
+    null,
+    oldSpiritsWristwraps,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 30],
+      [rockfangLeather, 10],
+      [mireslushHide, 16],
+      [resilientLeather, 150],
+    ],
+    null,
+    "Elemental Patterns",
+    1,
+    415,
+    null,
+    null,
+    "Raid Drop",
+    "Leatherworker's Tool Bench",
+    "Drops from bosses in Vault of the Incarnates.",
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Illustrious Insight", { Wristwraps: 20, ElementalMastery: 25 }],
+      [
+        "Curing Agent",
+        { ShapedLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const scaleReinGripsRecipe = await createRecipe(
+    null,
+    scaleReinGrips,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [salamantherScales, 12],
+      [earthshineScales, 18],
+      [adamantScales, 150],
+    ],
+    null,
+    "Elemental Patterns",
+    1,
+    415,
+    null,
+    null,
+    "Raid Drop",
+    "Leatherworker's Tool Bench",
+    "Drops from bosses in Vault of the Incarnates.",
+    [
+      ["Primal Infusion", { MailArmorCrafting: 0 }],
+      ["Illustrious Insight", { Gauntlets: 20, ElementalMastery: 25 }],
+      ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
+    ]
+  );
+  const snowballMakersRecipe = await createRecipe(
+    null,
+    snowballMakers,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [crystalspineFur, 10],
+      [frostbiteScales, 20],
+      [resilientLeather, 150],
+    ],
+    null,
+    "Elemental Patterns",
+    1,
+    415,
+    { IskaaraTuskarr: 15 },
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Illustrious Insight", { Gloves: 20, ElementalMastery: 25 }],
+      [
+        "Curing Agent",
+        { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const stringOfSpiritualKnickKnacksRecipe = await createRecipe(
+    null,
+    stringOfSpiritualKnickKnacks,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [salamantherScales, 10],
+      [mireslushHide, 20],
+      [resilientLeather, 150],
+    ],
+    null,
+    "Elemental Patterns",
+    1,
+    415,
+    null,
+    null,
+    "Raid Drop",
+    "Leatherworker's Tool Bench",
+    "Drops from bosses in Vault of the Incarnates.",
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Illustrious Insight", { BeltsLeather: 20, ElementalMastery: 25 }],
+      [
+        "Curing Agent",
+        { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const windSpiritsLassoRecipe = await createRecipe(
+    null,
+    windSpiritsLasso,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [awakenedAir, 10],
+      [mireslushHide, 16],
+      [adamantScales, 150],
+    ],
+    null,
+    "Elemental Patterns",
+    1,
+    415,
+    null,
+    null,
+    "Raid Drop",
+    "Leatherworker's Tool Bench",
+    "Drops from bosses in Vault of the Incarnates.",
+    [
+      ["Primal Infusion", { MailArmorCrafting: 0 }],
+      ["Illustrious Insight", { BeltsMail: 20, ElementalMastery: 25 }],
+      ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
+    ]
+  );
+  const alliedHeartwarmingFurCoatRecipe = await createRecipe(
+    null,
+    alliedHeartwarmingFurCoat,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [fireInfusedHide, 10],
+      [tuftOfPrimalWool, 3],
+      [frostbiteScales, 20],
+      [resilientLeather, 150],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    415,
+    { IskaaraTuskarr: 15 },
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Illustrious Insight", { Chestpieces: 20, BestialPrimacy: 25 }],
+      [
+        "Curing Agent",
+        { ShapedLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const alliedLegguardsOfSansokKhanRecipe = await createRecipe(
+    null,
+    alliedLegguardsOfSansokKhan,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [centaursTrophyNecklace, 1],
+      [earthshineScales, 20],
+      [adamantScales, 150],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    450,
+    { MaruukCentaur: 13 },
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", { MailArmorCrafting: 0 }],
+      ["Illustrious Insight", { Greaves: 20, BestialPrimacy: 25 }],
+      ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
+    ]
+  );
+  const bowOfTheDragonHuntersRecipe = await createRecipe(
+    null,
+    bowOfTheDragonHunters,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 2],
+      [primalChaos, 160],
+      [awakenedAir, 6],
+      [tallstriderSinew, 2],
+      [mireslushHide, 10],
+      [runedWrithebark, 2],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    280,
+    null,
+    { BestialPrimacy: 0 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      ["Primal Infusion", {}],
+      ["Missive - Combat", {}],
+      ["Embellishment", {}],
+      ["Illustrious Insight", { BondingAndStitching: 25, BestialPrimacy: 25 }],
+    ]
+  );
+  const infuriousBootsOfReprieveRecipe = await createRecipe(
+    null,
+    infuriousBootsOfReprieve,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [centaursTrophyNecklace, 1],
+      [infuriousHide, 16],
+      [adamantScales, 100],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    415,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Primal Infusion", { MailArmorCrafting: 0 }],
+      ["Illustrious Insight", { BootsMail: 20, BestialPrimacy: 25 }],
+      ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
+    ]
+  );
+  const infuriousChainhelmProtectorRecipe = await createRecipe(
+    null,
+    infuriousChainhelmProtector,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [centaursTrophyNecklace, 1],
+      [infuriousScales, 20],
+      [adamantScales, 100],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    415,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Primal Infusion", { MailArmorCrafting: 0 }],
+      ["Illustrious Insight", { MailHelms: 20, BestialPrimacy: 25 }],
+      ["Chain Oil", { LargeMail: 30, PrimordialLeatherworking: 35 }],
+    ]
+  );
+  const infuriousFootwrapsOfIndemnityRecipe = await createRecipe(
+    null,
+    infuriousFootwrapsOfIndemnity,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [crystalspineFur, 8],
+      [infuriousScales, 16],
+      [resilientLeather, 100],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    415,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Illustrious Insight", { BootsLeather: 20, BestialPrimacy: 25 }],
+      [
+        "Curing Agent",
+        { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const infuriousSpiritsHoodRecipe = await createRecipe(
+    null,
+    infuriousSpiritsHood,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 50],
+      [fireInfusedHide, 8],
+      [infuriousHide, 20],
+      [resilientLeather, 100],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    415,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Illustrious Insight", { Helms: 20, BestialPrimacy: 25 }],
+      [
+        "Curing Agent",
+        { ShapedLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const crimsonCombatantsAdamantChainmailRecipe = await createRecipe(
+    null,
+    crimsonCombatantsAdamantChainmail,
+    1,
+    leatherworking,
+    [
+      [cacophonousThunderscale, 2],
+      [infuriousScales, 1],
+      [adamantScales, 15],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { LargeMail: 0 }],
+      ["Lesser Illustrious Insight", { MailShirts: 20, BestialPrimacy: 25 }],
+      ["Chain Oil", { LargeMail: 30, PrimordialLeatherworking: 35 }],
+    ]
+  );
+  const crimsonCombatantsAdamantCowlRecipe = await createRecipe(
+    null,
+    crimsonCombatantsAdamantCowl,
+    1,
+    leatherworking,
+    [
+      [windsongPlumage, 2],
+      [infuriousScales, 1],
+      [adamantScales, 15],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { LargeMail: 0 }],
+      ["Lesser Illustrious Insight", { MailHelms: 20, BestialPrimacy: 25 }],
+      ["Chain Oil", { LargeMail: 30, PrimordialLeatherworking: 35 }],
+    ]
+  );
+  const crimsonCombatantsAdamantCuffsRecipe = await createRecipe(
+    null,
+    crimsonCombatantsAdamantCuffs,
+    1,
+    leatherworking,
+    [
+      [crystalspineFur, 2],
+      [infuriousScales, 1],
+      [adamantScales, 10],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { LargeMail: 0 }],
+      ["Lesser Illustrious Insight", { Bracers: 20, BestialPrimacy: 25 }],
+      ["Chain Oil", { LargeMail: 30, PrimordialLeatherworking: 35 }],
+    ]
+  );
+  const crimsonCombatantsAdamantEpaulettesRecipe = await createRecipe(
+    null,
+    crimsonCombatantsAdamantEpaulettes,
+    1,
+    leatherworking,
+    [
+      [fireInfusedHide, 2],
+      [infuriousScales, 1],
+      [adamantScales, 12],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { LargeMail: 0 }],
+      [
+        "Lesser Illustrious Insight",
+        { Shoulderguards: 20, BestialPrimacy: 25 },
+      ],
+      ["Chain Oil", { LargeMail: 30, PrimordialLeatherworking: 35 }],
+    ]
+  );
+  const crimsonCombatantsAdamantGauntletsRecipe = await createRecipe(
+    null,
+    crimsonCombatantsAdamantGauntlets,
+    1,
+    leatherworking,
+    [
+      [salamantherScales, 2],
+      [infuriousScales, 1],
+      [adamantScales, 12],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { IntricateMail: 0 }],
+      ["Lesser Illustrious Insight", { Gauntlets: 20, BestialPrimacy: 25 }],
+      ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
+    ]
+  );
+  const crimsonCombatantsAdamantGirdleRecipe = await createRecipe(
+    null,
+    crimsonCombatantsAdamantGirdle,
+    1,
+    leatherworking,
+    [
+      [salamantherScales, 2],
+      [infuriousScales, 1],
+      [adamantScales, 10],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { IntricateMail: 0 }],
+      ["Lesser Illustrious Insight", { BeltsMail: 20, BestialPrimacy: 25 }],
+      ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
+    ]
+  );
+  const crimsonCombatantsAdamantLeggingsRecipe = await createRecipe(
+    null,
+    crimsonCombatantsAdamantLeggings,
+    1,
+    leatherworking,
+    [
+      [rockfangLeather, 2],
+      [infuriousScales, 1],
+      [adamantScales, 15],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { IntricateMail: 0 }],
+      ["Lesser Illustrious Insight", { Greaves: 20, BestialPrimacy: 25 }],
+      ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
+    ]
+  );
+  const crimsonCombatantsAdamantTreadsRecipe = await createRecipe(
+    null,
+    crimsonCombatantsAdamantTreads,
+    1,
+    leatherworking,
+    [
+      [crystalspineFur, 2],
+      [infuriousScales, 1],
+      [adamantScales, 12],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { IntricateMail: 0 }],
+      ["Lesser Illustrious Insight", { BootsMail: 20, BestialPrimacy: 25 }],
+      ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
+    ]
+  );
+  const crimsonCombatantsResilientBeltRecipe = await createRecipe(
+    null,
+    crimsonCombatantsResilientBelt,
+    1,
+    leatherworking,
+    [
+      [salamantherScales, 2],
+      [infuriousHide, 1],
+      [resilientLeather, 10],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { EmbroideredLeatherArmor: 0 }],
+      ["Lesser Illustrious Insight", { BeltsLeather: 20, BestialPrimacy: 25 }],
+      [
+        "Curing Agent",
+        { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const crimsonCombatantsResilientBootsRecipe = await createRecipe(
+    null,
+    crimsonCombatantsResilientBelt,
+    1,
+    leatherworking,
+    [
+      [crystalspineFur, 2],
+      [infuriousHide, 1],
+      [resilientLeather, 12],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { EmbroideredLeatherArmor: 0 }],
+      ["Lesser Illustrious Insight", { BootsLeather: 20, BestialPrimacy: 25 }],
+      [
+        "Curing Agent",
+        { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const crimsonCombatantsResilientChestpieceRecipe = await createRecipe(
+    null,
+    crimsonCombatantsResilientChestpiece,
+    1,
+    leatherworking,
+    [
+      [cacophonousThunderscale, 2],
+      [infuriousHide, 1],
+      [resilientLeather, 15],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { ShapedLeatherArmor: 0 }],
+      ["Lesser Illustrious Insight", { Chestpieces: 20, BestialPrimacy: 25 }],
+      [
+        "Curing Agent",
+        { ShapedLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const crimsonCombatantsResilientGlovesRecipe = await createRecipe(
+    null,
+    crimsonCombatantsResilientGloves,
+    1,
+    leatherworking,
+    [
+      [salamantherScales, 2],
+      [infuriousHide, 1],
+      [resilientLeather, 12],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { EmbroideredLeatherArmor: 0 }],
+      ["Lesser Illustrious Insight", { Gloves: 20, BestialPrimacy: 25 }],
+      [
+        "Curing Agent",
+        { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const crimsonCombatantsResilientMaskRecipe = await createRecipe(
+    null,
+    crimsonCombatantsResilientMask,
+    1,
+    leatherworking,
+    [
+      [windsongPlumage, 2],
+      [infuriousHide, 1],
+      [resilientLeather, 15],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { ShapedLeatherArmor: 0 }],
+      ["Lesser Illustrious Insight", { Helms: 20, BestialPrimacy: 25 }],
+      [
+        "Curing Agent",
+        { ShapedLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const crimsonCombatantsResilientShoulderpadsRecipe = await createRecipe(
+    null,
+    crimsonCombatantsResilientShoulderpads,
+    1,
+    leatherworking,
+    [
+      [fireInfusedHide, 2],
+      [infuriousHide, 1],
+      [resilientLeather, 12],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { ShapedLeatherArmor: 0 }],
+      ["Lesser Illustrious Insight", { Shoulderpads: 20, BestialPrimacy: 25 }],
+      [
+        "Curing Agent",
+        { ShapedLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const crimsonCombatantsResilientTrousersRecipe = await createRecipe(
+    null,
+    crimsonCombatantsResilientTrousers,
+    1,
+    leatherworking,
+    [
+      [rockfangLeather, 2],
+      [infuriousHide, 1],
+      [resilientLeather, 15],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { EmbroideredLeatherArmor: 0 }],
+      ["Lesser Illustrious Insight", { Legguards: 20, BestialPrimacy: 25 }],
+      [
+        "Curing Agent",
+        { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const crimsonCombatantsResilientWristwrapsRecipe = await createRecipe(
+    null,
+    crimsonCombatantsResilientWristwraps,
+    1,
+    leatherworking,
+    [
+      [crystalspineFur, 2],
+      [infuriousHide, 1],
+      [resilientLeather, 10],
+    ],
+    null,
+    "Bestial Patterns",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { ShapedLeatherArmor: 0 }],
+      ["Lesser Illustrious Insight", { Wristwraps: 20, BestialPrimacy: 25 }],
+      [
+        "Curing Agent",
+        { ShapedLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const acidicHailstoneTreadsRecipe = await createRecipe(
+    null,
+    acidicHailstoneTreads,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [rockfangLeather, 12],
+      [frostbiteScales, 18],
+      [adamantScales, 150],
+    ],
+    null,
+    "Decayed Patterns",
+    1,
+    415,
+    null,
+    null,
+    "Dungeon Drop",
+    "Altar of Decay",
+    "Drops from Decayed Creates in Brackenhide Hollow.",
+    [
+      ["Primal Infusion", { MailArmorCrafting: 0 }],
+      ["Illustrious Insight", { BootsMail: 20, DecayingGrasp: 25 }],
+      ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
+    ]
+  );
+  const slimyExpulsionBootsRecipe = await createRecipe(
+    null,
+    slimyExpulsionBoots,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [salamantherScales, 10],
+      [stonecrustHide, 18],
+      [resilientLeather, 150],
+    ],
+    null,
+    "Decayed Patterns",
+    1,
+    415,
+    null,
+    null,
+    "Dungeon Drop",
+    "Altar of Decay",
+    "Drops from Decayed Creates in Brackenhide Hollow.",
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Illustrious Insight", { BootsLeather: 20, DecayingGrasp: 25 }],
+      [
+        "Curing Agent",
+        { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const toxicThornFootwrapsRecipe = await createRecipe(
+    null,
+    toxicThornFootwraps,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [cacophonousThunderscale, 6],
+      [frostbiteScales, 18],
+      [resilientLeather, 150],
+    ],
+    null,
+    "Decayed Patterns",
+    1,
+    415,
+    null,
+    null,
+    "Dungeon Drop",
+    "Altar of Decay",
+    "Drops from Decayed Creates in Brackenhide Hollow.",
+    [
+      ["Primal Infusion", { LeatherArmorCrafting: 0 }],
+      ["Illustrious Insight", { BootsLeather: 20, DecayingGrasp: 25 }],
+      [
+        "Curing Agent",
+        { EmbroideredLeatherArmor: 30, PrimordialLeatherworking: 35 },
+      ],
+    ]
+  );
+  const venomSteepedStompersRecipe = await createRecipe(
+    null,
+    venomSteepedStompers,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [cacophonousThunderscale, 6],
+      [stonecrustHide, 18],
+      [adamantScales, 150],
+    ],
+    null,
+    "Decayed Patterns",
+    1,
+    415,
+    null,
+    null,
+    "Dungeon Drop",
+    "Altar of Decay",
+    "Drops from Decayed Creates in Brackenhide Hollow.",
+    [
+      ["Primal Infusion", { MailArmorCrafting: 0 }],
+      ["Illustrious Insight", { BootsMail: 20, DecayingGrasp: 25 }],
+      ["Chain Oil", { IntricateMail: 30, PrimordialLeatherworking: 35 }],
+    ]
+  );
+  const witherrotTomeRecipe = await createRecipe(
+    null,
+    witherrotTome,
+    1,
+    leatherworking,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [awakenedDecay, 15],
+      [tallstriderSinew, 2],
+      [stonecrustHide, 14],
+      [resilientLeather, 100],
+    ],
+    null,
+    "Decayed Patterns",
+    1,
+    300,
+    null,
+    { DecayingGrasp: 0 },
+    null,
+    "Altar of Decay",
+    null,
+    [
+      ["Primal Infusion", {}],
+      ["Illustrious Insight", { DecayingGrasp: 25 }],
+    ]
+  );
+  const finishedPrototypeExplorersBardingRecipe = await createRecipe(
+    null,
+    finishedPrototypeExplorersBarding,
+    1,
+    leatherworking,
+    [
+      [prototypeExplorersBardingFramework, 1],
+      [tuftOfPrimalWool, 1],
+      [lustrousScaledHide, 6],
+      [resilientLeather, 80],
+    ],
+    null,
+    "Reagents",
+    1,
+    null,
+    { MaruukCentaur: 22 },
+    null,
+    null,
+    "Leatherworker's Tool Bench"
+  );
+  const finishedPrototypeRegalBardingRecipe = await createRecipe(
+    null,
+    finishedPrototypeExplorersBarding,
+    1,
+    leatherworking,
+    [
+      [prototypeRegalBardingFramework, 1],
+      [tuftOfPrimalWool, 1],
+      [lustrousScaledHide, 6],
+      [resilientLeather, 80],
+    ],
+    null,
+    "Reagents",
+    1,
+    null,
+    { IskaaraTuskarr: 29 },
+    null,
+    null,
+    "Leatherworker's Tool Bench"
+  );
+  const earthshineScalesRecipe = await createRecipe(
+    null,
+    earthshineScales,
+    2,
+    leatherworking,
+    [
+      [awakenedEarth, 1],
+      [awakenedFrost, 1],
+      [lustrousScaledHide, 2],
+    ],
+    25,
+    "Reagents",
+    1,
+    375,
+    null,
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      [
+        "Lesser Illustrious Insight",
+        { CuringAndTanning: 25, ElementalMastery: 25 },
+      ],
+    ]
+  );
+  const frostbiteScalesRecipe = await createRecipe(
+    null,
+    frostbiteScales,
+    2,
+    leatherworking,
+    [
+      [awakenedFrost, 1],
+      [awakenedDecay, 1],
+      [lustrousScaledHide, 2],
+    ],
+    25,
+    "Reagents",
+    1,
+    375,
+    null,
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      [
+        "Lesser Illustrious Insight",
+        { CuringAndTanning: 25, DecayingGrasp: 25 },
+      ],
+    ]
+  );
+  const infuriousHideRecipe = await createRecipe(
+    null,
+    infuriousHide,
+    2,
+    leatherworking,
+    [
+      [awakenedIre, 2],
+      [denseHide, 2],
+    ],
+    null,
+    "Reagents",
+    1,
+    375,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      [
+        "Lesser Illustrious Insight",
+        { CuringAndTanning: 25, BestialPrimacy: 25 },
+      ],
+    ]
+  );
+  const infuriousScalesRecipe = await createRecipe(
+    null,
+    infuriousScales,
+    2,
+    leatherworking,
+    [
+      [awakenedIre, 2],
+      [lustrousScaledHide, 2],
+    ],
+    null,
+    "Reagents",
+    1,
+    375,
+    null,
+    null,
+    "PvP Victory",
+    "Leatherworker's Tool Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      [
+        "Lesser Illustrious Insight",
+        { CuringAndTanning: 25, BestialPrimacy: 25 },
+      ],
+    ]
+  );
+  const mireslushHideRecipe = await createRecipe(
+    null,
+    mireslushHide,
+    2,
+    leatherworking,
+    [
+      [awakenedEarth, 1],
+      [awakenedFrost, 1],
+      [denseHide, 2],
+    ],
+    25,
+    "Reagents",
+    1,
+    375,
+    null,
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      [
+        "Lesser Illustrious Insight",
+        { CuringAndTanning: 25, ElementalMastery: 25 },
+      ],
+    ]
+  );
+  const stonecrustHideRecipe = await createRecipe(
+    null,
+    stonecrustHide,
+    2,
+    leatherworking,
+    [
+      [awakenedDecay, 1],
+      [awakenedEarth, 1],
+      [denseHide, 2],
+    ],
+    25,
+    "Reagents",
+    1,
+    375,
+    null,
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [
+      [
+        "Lesser Illustrious Insight",
+        { CuringAndTanning: 25, DecayingGrasp: 25 },
+      ],
+    ]
+  );
+  const fangAdornmentsRecipe = await createRecipe(
+    null,
+    fangAdornments,
+    1,
+    leatherworking,
+    [
+      [rockfangLeather, 2],
+      [pristineVorquinHorn, 2],
+      [aquaticMaw, 1],
+      [mastodonTusk, 1],
+      [earthshineScales, 3],
+      [resilientLeather, 60],
+    ],
+    null,
+    "Optional Reagents",
+    1,
+    350,
+    null,
+    { BestialPrimacy: 20 },
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [["Lesser Illustrious Insight", { BestialPrimacy: 25 }]]
+  );
+  const toxifiedArmorPatchRecipe = await createRecipe(
+    null,
+    toxifiedArmorPatch,
+    1,
+    leatherworking,
+    [
+      [awakenedDecay, 8],
+      [stonecrustHide, 2],
+      [adamantScales, 60],
+    ],
+    null,
+    "Optional Reagents",
+    1,
+    350,
+    null,
+    { DecayingGrasp: 20 },
+    null,
+    "Altar of Decay",
+    null,
+    [["Lesser Illustrious Insight", { DecayingGrasp: 25 }]]
+  );
+  const illustriousInsightRecipeLeatherworking = await createRecipe(
+    "Illustrious Insight",
+    illustriousInsight,
+    1,
+    leatherworking,
+    [[artisansMettle, 50]],
+    null,
+    "Finishing Reagents",
+    1,
+    null,
+    null,
+    null,
+    "Various Specializations",
+    "Leatherworker's Tool Bench"
+  );
+  const fierceArmorKitRecipe = await createRecipe(
+    null,
+    fierceArmorKit,
+    1,
+    leatherworking,
+    [
+      [awakenedEarth, 10],
+      [stonecrustHide, 4],
+      [resilientLeather, 60],
+    ],
+    null,
+    "Armor Kits",
+    1,
+    375,
+    null,
+    null,
+    "World Drop",
+    "Leatherworker's Tool Bench",
+    "Received from Maruuk Centaur Hunts.",
+    [["Illustrious Insight", { CuringAndTanning: 25, BestialPrimacy: 25 }]]
+  );
+  const frostedArmorKitRecipe = await createRecipe(
+    null,
+    frostedArmorKit,
+    1,
+    leatherworking,
+    [
+      [awakenedFrost, 10],
+      [frostbiteScales, 4],
+      [adamantScales, 60],
+    ],
+    null,
+    "Armor Kits",
+    1,
+    375,
+    { CobaltAssembly: "High" },
+    null,
+    null,
+    "Leatherworker's Tool Bench",
+    null,
+    [["Illustrious Insight", { CuringAndTanning: 25, ElementalMastery: 25 }]]
+  );
+  const reinforcedArmorKitRecipe = await createRecipe(
+    null,
+    reinforcedArmorKit,
+    1,
+    leatherworking,
+    [
+      [cacophonousThunderscale, 2],
+      [denseHide, 1],
+      [resilientLeather, 50],
+    ],
+    10,
+    "Armor Kits",
+    1,
+    150,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { CuringAndTanning: 25 }]]
+  );
+  const feralHideDrumsRecipe = await createRecipe(
+    null,
+    feralHideDrums,
+    1,
+    leatherworking,
+    [
+      [denseHide, 1],
+      [resilientLeather, 10],
+    ],
+    15,
+    "Drums",
+    1
+  );
+  const artisansSignRecipe = await createRecipe(
+    null,
+    artisansSign,
+    1,
+    leatherworking,
+    [
+      [pentagoldSeal, 4],
+      [rockfangLeather, 5],
+      [denseHide, 2],
+      [runedWrithebark, 4],
+    ],
+    null,
+    "Toys",
+    1,
+    null,
+    { ArtisansConsortium: "Esteemed" },
+    null,
+    null,
+    "Leatherworker's Tool Bench"
+  );
+  const gnollTentRecipe = await createRecipe(
+    null,
+    gnollTent,
+    1,
+    leatherworking,
+    [
+      [primalBearSpine, 1],
+      [denseHide, 20],
+      [lustrousScaledHide, 15],
+      [resilientLeather, 200],
+    ],
+    null,
+    "Toys",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Leatherworker's Tool Bench",
+    "Drops from Gnolls."
+  );
+  const tuskarrBeanBagRecipe = await createRecipe(
+    null,
+    tuskarrBeanBag,
+    1,
+    leatherworking,
+    [
+      [contouredFowlfeather, 100],
+      [denseHide, 30],
+      [resilientLeather, 200],
+    ],
+    null,
+    "Toys",
+    1,
+    null,
+    { IskaaraTuskarr: 23 },
+    null,
+    null,
+    "Leatherworker's Tool Bench"
+  );
 
   //tailoring recipes - 80 total
   // const dragonIslesUnraveling = await(createRecipe("Dragon Isles Unraveling", spoolOfWilderthread, "1-5", tailoring, [[tatteredWildercloth, 5]], 1, "Tailoring Essentials", 1, 225));
@@ -24802,7 +26627,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", {}],
-      ["Missive", { Embellishments: 0 }],
+      ["Missive - Combat", { Embellishments: 0 }],
       ["Embellishment", {}],
       ["Illustrious Insight", { Belts: 10 }],
       ["Embroidery Thread", { Embellishments: 40 }],
@@ -24830,7 +26655,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", {}],
-      ["Missive", { Outerwear: 0 }],
+      ["Missive - Combat", { Outerwear: 0 }],
       ["Embellishment", {}],
       ["Illustrious Insight", { Gloves: 10 }],
       ["Embroidery Thread", { Outerwear: 50 }],
@@ -24858,7 +26683,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", {}],
-      ["Missive", { Outerwear: 0 }],
+      ["Missive - Combat", { Outerwear: 0 }],
       ["Embellishment", {}],
       ["Illustrious Insight", { Hats: 10 }],
       ["Embroidery Thread", { Outerwear: 50 }],
@@ -24886,7 +26711,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", {}],
-      ["Missive", { Outerwear: 0 }],
+      ["Missive - Combat", { Outerwear: 0 }],
       ["Embellishment", {}],
       ["Illustrious Insight", { Cloaks: 10 }],
       ["Embroidery Thread", { Outerwear: 50 }],
@@ -24914,7 +26739,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", {}],
-      ["Missive", { Embellishments: 0 }],
+      ["Missive - Combat", { Embellishments: 0 }],
       ["Embellishment", {}],
       ["Illustrious Insight", { Mantles: 10 }],
       ["Embroidery Thread", { Embellishments: 40 }],
@@ -24942,7 +26767,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", {}],
-      ["Missive", { Outfits: 0 }],
+      ["Missive - Combat", { Outfits: 0 }],
       ["Embellishment", {}],
       ["Illustrious Insight", { Leggings: 10 }],
       ["Embroidery Thread", { Outfits: 40 }],
@@ -24970,7 +26795,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", {}],
-      ["Missive", { Outerwear: 0 }],
+      ["Missive - Combat", { Outerwear: 0 }],
       ["Embellishment", {}],
       ["Illustrious Insight", { Footwear: 10 }],
       ["Embroidery Thread", { Outerwear: 50 }],
@@ -24998,7 +26823,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", {}],
-      ["Missive", { Outfits: 0 }],
+      ["Missive - Combat", { Outfits: 0 }],
       ["Embellishment", {}],
       ["Illustrious Insight", { Robes: 10 }],
       ["Embroidery Thread", { Outfits: 40 }],
@@ -25026,7 +26851,7 @@ const makeTables = async () => {
     null,
     [
       ["Primal Infusion", {}],
-      ["Missive", { Embellishments: 0 }],
+      ["Missive - Combat", { Embellishments: 0 }],
       ["Embellishment", {}],
       ["Illustrious Insight", { Armbands: 10 }],
       ["Embroidery Thread", { Embellishments: 40 }],
@@ -25052,7 +26877,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Outerwear: 0 }],
+      ["Missive - Combat", { Outerwear: 0 }],
       ["Lesser Illustrious Insight", { Hats: 10 }],
       ["Embroidery Thread", { Outerwear: 50 }],
     ]
@@ -25077,7 +26902,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Outfits: 0 }],
+      ["Missive - Combat", { Outfits: 0 }],
       ["Lesser Illustrious Insight", { Leggings: 10 }],
       ["Embroidery Thread", { Outfits: 40 }],
     ]
@@ -25102,7 +26927,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Embellishments: 0 }],
+      ["Missive - Combat", { Embellishments: 0 }],
       ["Lesser Illustrious Insight", { Mantles: 10 }],
       ["Embroidery Thread", { Embellishments: 40 }],
     ]
@@ -25126,7 +26951,7 @@ const makeTables = async () => {
     "Tailor's Work Table",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { Embellishments: 0 }],
+      ["Missive - Combat", { Embellishments: 0 }],
       ["Lesser Illustrious Insight", { Armbands: 10 }],
       ["Embroidery Thread", { Embellishments: 40 }],
     ]
@@ -25150,7 +26975,7 @@ const makeTables = async () => {
     "Tailor's Work Table",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { Outerwear: 0 }],
+      ["Missive - Combat", { Outerwear: 0 }],
       ["Lesser Illustrious Insight", { Cloaks: 10 }],
       ["Embroidery Thread", { Outerwear: 50 }],
     ]
@@ -25174,7 +26999,7 @@ const makeTables = async () => {
     "Tailor's Work Table",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { Outerwear: 0 }],
+      ["Missive - Combat", { Outerwear: 0 }],
       ["Lesser Illustrious Insight", { Gloves: 10 }],
       ["Embroidery Thread", { Outerwear: 50 }],
     ]
@@ -25198,7 +27023,7 @@ const makeTables = async () => {
     "Tailor's Work Table",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { Outerwear: 0 }],
+      ["Missive - Combat", { Outerwear: 0 }],
       ["Lesser Illustrious Insight", { Hats: 10 }],
       ["Embroidery Thread", { Outerwear: 50 }],
     ]
@@ -25222,7 +27047,7 @@ const makeTables = async () => {
     "Tailor's Work Table",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { Outfits: 0 }],
+      ["Missive - Combat", { Outfits: 0 }],
       ["Lesser Illustrious Insight", { Leggings: 10 }],
       ["Embroidery Thread", { Outfits: 40 }],
     ]
@@ -25246,7 +27071,7 @@ const makeTables = async () => {
     "Tailor's Work Table",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { Embellishments: 0 }],
+      ["Missive - Combat", { Embellishments: 0 }],
       ["Lesser Illustrious Insight", { Belts: 10 }],
       ["Embroidery Thread", { Embellishments: 40 }],
     ]
@@ -25270,7 +27095,7 @@ const makeTables = async () => {
     "Tailor's Work Table",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { Embellishments: 0 }],
+      ["Missive - Combat", { Embellishments: 0 }],
       ["Lesser Illustrious Insight", { Mantles: 10 }],
       ["Embroidery Thread", { Embellishments: 40 }],
     ]
@@ -25294,7 +27119,7 @@ const makeTables = async () => {
     "Tailor's Work Table",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { Outerwear: 0 }],
+      ["Missive - Combat", { Outerwear: 0 }],
       ["Lesser Illustrious Insight", { Footwear: 10 }],
       ["Embroidery Thread", { Outerwear: 50 }],
     ]
@@ -25318,7 +27143,7 @@ const makeTables = async () => {
     "Tailor's Work Table",
     "Received from Arena, BGs, or WM?",
     [
-      ["Missive", { Outfits: 0 }],
+      ["Missive - Combat", { Outfits: 0 }],
       ["Lesser Illustrious Insight", { Robes: 10 }],
       ["Embroidery Thread", { Outfits: 40 }],
     ]
@@ -25343,7 +27168,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Outerwear: 0 }],
+      ["Missive - Combat", { Outerwear: 0 }],
       ["Lesser Illustrious Insight", { Gloves: 10 }],
       ["Embroidery Thread", { Outerwear: 50 }],
     ]
@@ -25368,7 +27193,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Embellishments: 0 }],
+      ["Missive - Combat", { Embellishments: 0 }],
       ["Lesser Illustrious Insight", { Belts: 10 }],
       ["Embroidery Thread", { Embellishments: 40 }],
     ]
@@ -25393,7 +27218,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Outerwear: 0 }],
+      ["Missive - Combat", { Outerwear: 0 }],
       ["Lesser Illustrious Insight", { Cloaks: 10 }],
       ["Embroidery Thread", { Outerwear: 50 }],
     ]
@@ -25418,7 +27243,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Outfits: 0 }],
+      ["Missive - Combat", { Outfits: 0 }],
       ["Lesser Illustrious Insight", { Robes: 10 }],
       ["Embroidery Thread", { Outfits: 40 }],
     ]
@@ -25443,7 +27268,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Outerwear: 0 }],
+      ["Missive - Combat", { Outerwear: 0 }],
       ["Lesser Illustrious Insight", { Footwear: 10 }],
       ["Embroidery Thread", { Outerwear: 50 }],
     ]
@@ -25468,7 +27293,7 @@ const makeTables = async () => {
     null,
     [
       ["Training Matrix", {}],
-      ["Missive", { Embellishments: 0 }],
+      ["Missive - Combat", { Embellishments: 0 }],
       ["Lesser Illustrious Insight", { Armbands: 10 }],
       ["Embroidery Thread", { Embellishments: 40 }],
     ]

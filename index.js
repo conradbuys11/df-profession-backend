@@ -34,7 +34,7 @@ const Item = sequelize.define(
     bindOn: { type: DataTypes.STRING },
     isUniqueEquipped: { type: DataTypes.STRING },
     qualityLevels: { type: DataTypes.INTEGER, defaultValue: 1 },
-    finishingReagentType: { type: DataTypes.STRING },
+    finishingReagentType: { type: DataTypes.ARRAY(DataTypes.STRING) },
     primaryStats: { type: DataTypes.ARRAY(DataTypes.ARRAY(DataTypes.STRING)) },
     secondaryStats: {
       type: DataTypes.ARRAY(DataTypes.ARRAY(DataTypes.STRING)),
