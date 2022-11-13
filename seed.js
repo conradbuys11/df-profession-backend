@@ -432,7 +432,7 @@ const primaryStatArrayEpic = (sizeOfItem) => {
     case "1h-int":
       return [845, "?", "?", "?", 1107];
     case "2h-int":
-      return [1690, "?", "?", "?", 2214];
+      return [1539, "?", "?", 1644, 1690];
     default:
       return ["?", "?", "?", "?", "?"];
   }
@@ -465,7 +465,7 @@ const secondaryStatArrayEpic = (nameOfStat, sizeOfItem) => {
       case "large":
         return [nameOfStat, 313, 317, "?", "?", 332];
       case "1h":
-        return [nameOfStat, 156, 158, "?", "?", 166];
+        return [nameOfStat, 156, 158, "?", 163, 166];
       default:
         return [nameOfStat, "?", "?", "?", "?", "?"];
     }
@@ -488,7 +488,7 @@ const primaryStatArrayRare = (sizeOfItem) => {
     case "1h-int":
       return [651, "?", "?", "?", 701];
     case "2h-int":
-      return [1302, "?", "?", "?", 1402];
+      return [975, "?", "?", "?", 1071];
     default:
       return ["?", "?", "?", "?", "?"];
   }
@@ -595,7 +595,7 @@ const statArrayProfToolAccessory = (
     } else {
       arr = [nameOfStat];
       quality.toLowerCase() === "large"
-        ? arr.push(79, 86, "?", 101, 110)
+        ? arr.push(79, 86, 92, 101, 110)
         : quality.toLowerCase() === "medium"
         ? arr.push(58, 62, 67, 101, 110)
         : arr.push(31, "?", "?", "?", 43);
@@ -1601,7 +1601,16 @@ const makeTables = async () => {
     "Uncommon",
     "Crafting Reagent"
   );
-  // const pentagoldSeal = await createItem("Pentagold Seal", 1000);
+  const pentagoldSeal = await createItem(
+    "Pentagold Seal",
+    "inv_qirajidol_sun",
+    "Pickup",
+    1000,
+    "This stamp marks a scroll with the Artisan's Consortium seal of quality.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
   const rainbowPearl = await createItem(
     "Rainbow Pearl",
     "inv_misc_gem_pearl_13",
@@ -5406,8 +5415,8 @@ const makeTables = async () => {
     null,
     null,
     null,
-    null,
     "Enchanting Tool",
+    null,
     null,
     [346, 352, 358, 365, 372],
     statArrayProfToolAccessory("Skill", "Tool", "large"),
@@ -5426,8 +5435,8 @@ const makeTables = async () => {
     null,
     null,
     null,
-    null,
     "Enchanting Tool",
+    null,
     null,
     [320, 326, 332, 339, 342],
     statArrayProfToolAccessory("Skill", "Tool", "medium"),
@@ -5470,8 +5479,8 @@ const makeTables = async () => {
     null,
     null,
     null,
-    null,
     "Enchanting Tool",
+    null,
     null,
     [270, 276, 282, 289, 296],
     statArrayProfToolAccessory("Skill", "Tool", "small"),
@@ -6430,16 +6439,105 @@ const makeTables = async () => {
   );
 
   // //inscription items
-  // // const dragonIslesMilling = await(createItem("Dragon Isles Milling")); //not a real item
-  // const shimmeringPigment = await createItem("Shimmering Pigment", 1000);
-  // const serenePigment = await createItem("Serene Pigment", 1000);
-  // const flourishingPigment = await createItem("Flourishing Pigment", 1000);
-  // const blazingPigment = await createItem("Blazing Pigment", 1000);
-  // const cosmicInk = await createItem("Cosmic Ink", 1000);
-  // const burnishedInk = await createItem("Burnished Ink", 1000);
-  // const blazingInk = await createItem("Blazing Ink", 1000);
-  // const flourishingInk = await createItem("Flourishing Ink", 1000);
-  // const sereneInk = await createItem("Serene Ink", 1000);
+  const shimmeringPigment = await createItem(
+    "Shimmering Pigment",
+    "inv_10_inscription3_pigments_black",
+    null,
+    1000,
+    "A common pigment radiating with possibilities. Milled by players with the Inscription skill. Can be bought and sold on the auction house.",
+    "Most common pigment, received from milling Hochenblume.",
+    "Common",
+    "Crafting Reagent",
+    3
+  );
+  const serenePigment = await createItem(
+    "Serene Pigment",
+    "inv_10_inscription3_pigments_blue",
+    null,
+    1000,
+    "A relaxing cerulean pigment milled by players with the Inscription skill. Can be bought and sold on the auction house.",
+    "Common pigment, received from milling Bubble Poppy.",
+    "Uncommon",
+    "Crafting Reagent",
+    3
+  );
+  const flourishingPigment = await createItem(
+    "Flourishing Pigment",
+    "inv_10_inscription3_pigments_green",
+    null,
+    1000,
+    "A viridescent pigment milled by players with the Inscription skill. Can be bought and sold on the auction house.",
+    "Common pigment, received from milling Writhebark.",
+    "Uncommon",
+    "Crafting Reagent",
+    3
+  );
+  const blazingPigment = await createItem(
+    "Blazing Pigment",
+    "inv_10_inscription3_pigments_red",
+    null,
+    1000,
+    "A fiery pigment milled by players with the Inscription skill. Can be bought and sold on the auction house.",
+    "Common pigment, received from milling Saxifrage.",
+    "Uncommon",
+    "Crafting Reagent",
+    3
+  );
+  const cosmicInk = await createItem(
+    "Cosmic Ink",
+    "inv_10_inscription_ink_color3",
+    null,
+    1000,
+    "A deep black ink crafted by players with the Inscription skill. Can be bought and sold on the auction house.",
+    "Most complex ink. Requires Frost, Runed Writhebark, Burnished Ink, & Serene Ink to craft.",
+    "Rare",
+    "Crafting Reagent",
+    3
+  );
+  const burnishedInk = await createItem(
+    "Burnished Ink",
+    "inv_10_inscription_ink_color4",
+    null,
+    1000,
+    "A metallic ink crafted by players with the Inscription skill. Can be bought and sold on the auction house.",
+    "A complex ink. Crafted by combining the three basic inks.",
+    "Uncommon",
+    "Crafting Reagent",
+    3
+  );
+  const blazingInk = await createItem(
+    "Blazing Ink",
+    "inv_10_inscription_ink_color5",
+    null,
+    1000,
+    "A fiery ink crafted by players with the Inscription skill. Can be bought and sold on the auction house.",
+    "A basic ink. Made with pigments from Hochenblume & Saxifrage.",
+    "Common",
+    "Crafting Reagent",
+    3
+  );
+  const flourishingInk = await createItem(
+    "Flourishing Ink",
+    "inv_10_inscription_ink_color6",
+    null,
+    1000,
+    "A viridescent ink crafted by players with the Inscription skill. Can be bought and sold on the auction house.",
+    "A basic ink. Made with pigments from Hochenblume & Writhebark.",
+    "Common",
+    "Crafting Reagent",
+    3
+  );
+  const sereneInk = await createItem(
+    "Serene Ink",
+    "inv_10_inscription_ink_color2",
+    null,
+    1000,
+    "A relaxing cerulean ink crafted by players with the Inscription skill. Can be bought and sold on the auction house.",
+    "A basic ink. Made with pigments from Hochenblume & Bubble Poppy.",
+    "Common",
+    "Crafting Reagent",
+    3
+  );
   const runedWrithebark = await createItem(
     "Runed Writhebark",
     "inv_10_inscription_runedwrithebark_color1",
@@ -6451,345 +6549,1351 @@ const makeTables = async () => {
     "Crafting Reagent",
     3
   );
-  // const chilledRune = await createItem("Chilled Rune", 1000);
-  // const draconicMissiveOfTheAurora = await createItem(
-  //   "Draconic Missive of the Aurora",
-  //   1000
-  // );
-  // const draconicMissiveOfTheFeverflare = await createItem(
-  //   "Draconic Missive of the Feverflare",
-  //   1000
-  // );
-  // const draconicMissiveOfTheFireflash = await createItem(
-  //   "Draconic Missive of the Fireflash",
-  //   1000
-  // );
-  // const draconicMissiveOfTheHarmonious = await createItem(
-  //   "Draconic Missive of the Harmonious",
-  //   1000
-  // );
-  // const draconicMissiveOfThePeerless = await createItem(
-  //   "Draconic Missive of the Peerless",
-  //   1000
-  // );
-  // const draconicMissiveOfTheQuickblade = await createItem(
-  //   "Draconic Missive of the Quickblade",
-  //   1000
-  // );
-  // const draconicMissiveOfCraftingSpeed = await createItem(
-  //   "Draconic Missive of Crafting Speed",
-  //   1000
-  // );
-  // const draconicMissiveOfInspiration = await createItem(
-  //   "Draconic Missive of Inspiration",
-  //   1000
-  // );
-  // const draconicMissiveOfMulticraft = await createItem(
-  //   "Draconic Missive of Multicraft",
-  //   1000
-  // );
-  // const draconicMissiveOfResourcefulness = await createItem(
-  //   "Draconic Missive of Resourcefulness",
-  //   1000
-  // );
-  // const draconicMissiveOfDeftness = await createItem(
-  //   "Draconic Missive of Deftness",
-  //   1000
-  // );
-  // const draconicMissiveOfFinesse = await createItem(
-  //   "Draconic Missive of Finesse",
-  //   1000
-  // );
-  // const draconicMissiveOfPerception = await createItem(
-  //   "Draconic Missive of Perception",
-  //   1000
-  // );
-  // const darkmoonDeckDance = await createItem("Darkmoon Deck: Dance", 1, 372);
-  // const darkmoonDeckInferno = await createItem(
-  //   "Darkmoon Deck: Inferno",
-  //   1,
-  //   372
-  // );
-  // const darkmoonDeckRime = await createItem("Darkmoon Deck: Rime", 1, 372);
-  // const darkmoonDeckWatcher = await createItem(
-  //   "Darkmoon Deck: Watcher",
-  //   1,
-  //   372
-  // );
-  // const darkmoonDeckBoxDance = await createItem(
-  //   "Darkmoon Deck Box: Dance",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const darkmoonDeckBoxInferno = await createItem(
-  //   "Darkmoon Deck Box: Inferno",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const darkmoonDeckBoxRime = await createItem(
-  //   "Darkmoon Deck Box: Rime",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const darkmoonDeckBoxWatcher = await createItem(
-  //   "Darkmoon Deck Box: Watcher",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const crackingCodexOfTheIsles = await createItem(
-  //   "Cracking Codex of the Isles",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const illuminatingPillarOfTheIsles = await createItem(
-  //   "Illuminating Pillar of the Isles",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const kineticPillarOfTheIsles = await createItem(
-  //   "Kinetic Pillar of the Isles",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const weatheredExplorersStave = await createItem(
-  //   "Weathered Explorer's Stave",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const coreExplorersCompendium = await createItem(
-  //   "Core Explorer's Compendium",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const overseersWrithebarkStave = await createItem(
-  //   "Overseer's Writhebark Stave",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const pioneersWrithebarkStave = await createItem(
-  //   "Pioneer's Writhebark Stave",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const emberscaleSigil = await createItem("Emberscale Sigil", 1000);
-  // const jetscaleSigil = await createItem("Jetscale Sigil", 1000);
-  // const sagescaleSigil = await createItem("Sagescale Sigil", 1000);
-  // const azurescaleSigil = await createItem("Azurescale Sigil", 1000);
-  // const bronzescaleSigil = await createItem("Bronzescale Sigil", 1000);
-  // const vantusRuneVaultOfTheIncarnates = await createItem(
-  //   "Vantus Rune: Vault of the Incarnates",
-  //   1000
-  // );
-  // const buzzingRune = await createItem("Buzzing Rune", 1000);
-  // const chirpingRune = await createItem("Chirping Rune", 1000);
-  // const howlingRune = await createItem("Howling Rune", 1000);
-  // const alchemistsBrilliantMixingRod = await createItem(
-  //   "Alchemist's Brilliant Mixing Rod",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const chefsSplendidRollingPin = await createItem(
-  //   "Chef's Splendid Rolling Pin",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const scribesResplendentQuill = await createItem(
-  //   "Scribe's Resplendent Quill",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const alchemistsSturdyMixingRod = await createItem(
-  //   "Alchemist's Sturdy Mixing Rod",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const chefsSmoothRollingPin = await createItem(
-  //   "Chef's Smooth Rolling Pin",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const scribesFastenedQuill = await createItem(
-  //   "Scribe's Fastened Quill",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const illusionParchmentWhirlingBreeze = await createItem(
-  //   "Illusion Parchment: Whirling Breeze",
-  //   1000
-  // );
-  // const illusionParchmentAquaTorrent = await createItem(
-  //   "Illusion Parchment: Aqua Torrent",
-  //   1000
-  // );
-  // const illusionParchmentArcaneBurst = await createItem(
-  //   "Illusion Parchment: Arcane Burst",
-  //   1000
-  // );
-  // const illusionParchmentChillingWind = await createItem(
-  //   "Illusion Parchment: Chilling Wind",
-  //   1000
-  // );
-  // const illusionParchmentLoveCharm = await createItem(
-  //   "Illusion Parchment: Love Charm",
-  //   1000
-  // );
-  // const illusionParchmentMagmaMissile = await createItem(
-  //   "Illusion Parchment: Magma Missile",
-  //   1000
-  // );
-  // const illusionParchmentShadowOrb = await createItem(
-  //   "Illusion Parchment: Shadow Orb",
-  //   1000
-  // );
-  // const illusionParchmentSpellShield = await createItem(
-  //   "Illusion Parchment: Spell Shield",
-  //   1000
-  // );
-  // const scrollOfSales = await createItem("Scroll of Sales", 1000);
-  // const bundleOCardsDragonIsles = await createItem(
-  //   "Bundle O' Cards: Dragon Isles"
-  // );
-  // const fatedFortuneCard = await createItem("Fated Fortune Card", 1000);
-  // //4 extractions of awakened elements, but like, they just yield awakened elements...
-  // const contractIskaaraTuskarr = await createItem(
-  //   "Contract: Iskaara Tuskarr",
-  //   1000
-  // );
-  // const contractArtisansConsortium = await createItem(
-  //   "Contract: Artisan's Consortium",
-  //   1000
-  // );
-  // const contractDragonscaleExpedition = await createItem(
-  //   "Contract: Dragonscale Expedition",
-  //   1000
-  // );
-  // const contractMaruukCentaur = await createItem(
-  //   "Contract: Maruuk Centaur",
-  //   1000
-  // );
-  // const contractValdrakkenAccord = await createItem(
-  //   "Contract: Valdrakken Accord",
-  //   1000
-  // );
-  // const draconicTreatiseOnAlchemy = await createItem(
-  //   "Draconic Treatise on Alchemy",
-  //   1000
-  // );
-  // const draconicTreatiseOnBlacksmithing = await createItem(
-  //   "Draconic Treatise on Blacksmithing",
-  //   1000
-  // );
-  // const draconicTreatiseOnEnchanting = await createItem(
-  //   "Draconic Treatise on Enchanting",
-  //   1000
-  // );
-  // const draconicTreatiseOnEngineering = await createItem(
-  //   "Draconic Treatise on Engineering",
-  //   1000
-  // );
-  // const draconicTreatiseOnHerbalism = await createItem(
-  //   "Draconic Treatise on Herbalism",
-  //   1000
-  // );
-  // const draconicTreatiseOnInscription = await createItem(
-  //   "Draconic Treatise on Inscription",
-  //   1000
-  // );
-  // const draconicTreatiseOnJewelcrafting = await createItem(
-  //   "Draconic Treatise on Jewelcrafting",
-  //   1000
-  // );
-  // const draconicTreatiseOnLeatherworking = await createItem(
-  //   "Draconic Treatise on Leatherworking",
-  //   1000
-  // );
-  // const draconicTreatiseOnMining = await createItem(
-  //   "Draconic Treatise on Mining",
-  //   1000
-  // );
-  // const draconicTreatiseOnSkinning = await createItem(
-  //   "Draconic Treatise on Skinning",
-  //   1000
-  // );
-  // const draconicTreatiseOnTailoring = await createItem(
-  //   "Draconic Treatise on Tailoring",
-  //   1000
-  // );
-  // const renewedProtoDrakeSilverAndBlueArmor = await createItem(
-  //   "Renewed Proto-Drake: Silver and Blue Armor"
-  // );
-  // const renewedProtoDrakeSteelAndYellowArmor = await createItem(
-  //   "Renewed Proto-Drake: Steel and Yellow Armor"
-  // );
-  // const renewedProtoDrakeBovineHorns = await createItem(
-  //   "Renewed Proto-Drake: Bovine Horns"
-  // );
-  // const renewedProtoDrakePredatorPattern = await createItem(
-  //   "Renewed Proto-Drake: Predator Pattern"
-  // );
-  // const renewedProtoDrakeSpinedCrest = await createItem(
-  //   "Renewed Proto-Drake: Spined Crest"
-  // );
-  // const windborneVelocidrakeSilverAndBlueArmor = await createItem(
-  //   "Windborne Velocidrake: Silver and Blue Armor"
-  // );
-  // const windborneVelocidrakeSteelAndOrangeArmor = await createItem(
-  //   "Windborne Velocidrake: Steel and Orange Armor"
-  // );
-  // const windborneVelocidrakeBlackFur = await createItem(
-  //   "Windborne Velocidrake: Black Fur"
-  // );
-  // const windborneVelocidrakeSpinedHead = await createItem(
-  //   "Windborne Velocidrake: Spined Head"
-  // );
-  // const windborneVelocidrakeWindsweptPattern = await createItem(
-  //   "Windborne Velocidrake: Windswept Pattern"
-  // );
-  // const highlandDrakeSilverAndBlueArmor = await createItem(
-  //   "Highland Drake: Silver and Blue Armor"
-  // );
-  // const highlandDrakeSteelAndYellowArmor = await createItem(
-  //   "Highland Drake: Steel and Yellow Armor"
-  // );
-  // const highlandDrakeBlackHair = await createItem("Highland Drake: Black Hair");
-  // const highlandDrakeSpinedCrest = await createItem(
-  //   "Highland Drake: Spined Crest"
-  // );
-  // const highlandDrakeSpinedThroat = await createItem(
-  //   "Highland Drake: Spined Throat"
-  // );
-  // const cliffsideWylderdrakeSilverAndBlueArmor = await createItem(
-  //   "Cliffside Wylderdrake: Silver and Blue Armor"
-  // );
-  // const cliffsideWylderdrakeSteelAndYellowArmor = await createItem(
-  //   "Cliffside Wylderdrake: Steel and Yellow Armor"
-  // );
-  // const cliffsideWylderdrakeConicalHead = await createItem(
-  //   "Cliffside Wylderdrake: Conical Head"
-  // );
-  // const cliffsideWylderdrakeRedHair = await createItem(
-  //   "Cliffside Wylderdrake: Red Hair"
-  // );
-  // const cliffsideWylderdrakeTripleHeadHorns = await createItem(
-  //   "Cliffside Wylderdrake: Triple Head Horns"
-  // );
+  const chilledRune = await createItem(
+    "Chilled Rune",
+    "inv_misc_rune_10",
+    null,
+    1000,
+    "A frosted rune crafted by players with the Inscription skill. Can be bought and sold on the auction house.",
+    null,
+    "Uncommon",
+    "Crafting Reagent",
+    3
+  );
+  const draconicMissiveOfTheAurora = await createItem(
+    "Draconic Missive of the Aurora",
+    "inv_10_inscription2_repcontracts_80_scroll_uprez_color2",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Missive",
+    "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Versatility and Haste."
+  );
+  const draconicMissiveOfTheFeverflare = await createItem(
+    "Draconic Missive of the Feverflare",
+    "inv_10_inscription2_repcontracts_80_scroll_uprez",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Missive",
+    "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Mastery and Haste."
+  );
+  const draconicMissiveOfTheFireflash = await createItem(
+    "Draconic Missive of the Fireflash",
+    "inv_10_inscription2_repcontracts_80_scroll_uprez_color3",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Missive",
+    "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Critical Strike and Haste."
+  );
+  const draconicMissiveOfTheHarmonious = await createItem(
+    "Draconic Missive of the Harmonious",
+    "inv_10_inscription2_repcontracts_80_scroll_uprez_color1",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Missive",
+    "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Versatility and Mastery."
+  );
+  const draconicMissiveOfThePeerless = await createItem(
+    "Draconic Missive of the Peerless",
+    "inv_10_inscription2_repcontracts_80_scroll_uprez_color4",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Missive",
+    "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Critical Strike and Mastery."
+  );
+  const draconicMissiveOfTheQuickblade = await createItem(
+    "Draconic Missive of the Quickblade",
+    "inv_10_inscription2_repcontracts_80_scroll_uprez_color5",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Missive",
+    "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Versatility and Critical Strike."
+  );
+  const draconicMissiveOfCraftingSpeed = await createItem(
+    "Draconic Missive of Crafting Speed",
+    "inv_10_inscription2_scroll3_color1",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Missive",
+    "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Crafting Speed."
+  );
+  const draconicMissiveOfInspiration = await createItem(
+    "Draconic Missive of Inspiration",
+    "inv_10_inscription2_scroll3_color5",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Missive",
+    "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Inspiration."
+  );
+  const draconicMissiveOfMulticraft = await createItem(
+    "Draconic Missive of Multicraft",
+    "inv_10_inscription2_scroll3_color4",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Missive",
+    "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Multicraft."
+  );
+  const draconicMissiveOfResourcefulness = await createItem(
+    "Draconic Missive of Resourcefulness",
+    "inv_10_inscription2_scroll3_color3",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Missive",
+    "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Resourcefulness."
+  );
+  const draconicMissiveOfDeftness = await createItem(
+    "Draconic Missive of Deftness",
+    "inv_10_inscription_vellum_color4",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Missive",
+    "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Deftness."
+  );
+  const draconicMissiveOfFinesse = await createItem(
+    "Draconic Missive of Finesse",
+    "inv_10_inscription_vellum_color1",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Missive",
+    "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Finesse."
+  );
+  const draconicMissiveOfPerception = await createItem(
+    "Draconic Missive of Perception",
+    "inv_10_inscription_vellum_color2",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Optional Crafting Reagent",
+    3,
+    "Missive",
+    "+25/20/15 Recipe Difficulty (based on quality). Provides the following property: Guarantee Perception."
+  );
+  const darkmoonDeckDance = await createItem(
+    "Darkmoon Deck: Dance",
+    "inv_10_inscription_darkmooncards_air_blank",
+    "Equip",
+    1,
+    null,
+    "Formed from combining the Ace through 8 of Air.",
+    "Epic",
+    null,
+    1,
+    null,
+    "Periodically shuffle the deck while in combat.",
+    "Call a Refreshing Dance that bounces 5-12 times between friends and foes within 25 yards dealing 10034 Nature damage or 4701 healing. The number of bounces is determined by the top-most card of the deck. (1 Min, 30 Sec Cooldown)",
+    null,
+    "Trinket",
+    "Darkmoon Deck (1)",
+    [372, null, null, null, null],
+    [
+      ["Agility", "Intellect", "Strength", "", ""],
+      ["300", null, null, null, null],
+    ]
+  );
+  const darkmoonDeckInferno = await createItem(
+    "Darkmoon Deck: Inferno",
+    "inv_10_inscription_darkmooncards_fire_blank",
+    "Equip",
+    1,
+    null,
+    "Formed from combining the Ace through 8 of Fire.",
+    "Epic",
+    null,
+    1,
+    null,
+    "Periodically shuffle the deck while in combat.",
+    "Hurl a Smoldering Inferno at the target that deals between 23295-77651 Fire damage. Damage dealt is determined by the top-most card of the deck. (1 Min, 30 Sec Cooldown)",
+    null,
+    "Trinket",
+    "Darkmoon Deck (1)",
+    [372, null, null, null, null],
+    [
+      ["Agility", "Intellect", "Strength", "", ""],
+      ["300", null, null, null, null],
+    ]
+  );
+  const darkmoonDeckRime = await createItem(
+    "Darkmoon Deck: Rime",
+    "inv_10_inscription_darkmooncards_frost_blank",
+    "Equip",
+    1,
+    null,
+    "Formed from combining the Ace through 8 of Frost.",
+    "Epic",
+    null,
+    1,
+    null,
+    "Periodically shuffle the deck while in combat.",
+    "Deal 16711 Frost damage and apply Awakening Rime to your target for 4-12s. If the target dies while Awakening Rime is active, it explodes for 41777 Frost damage split between enemies in a 10 yard radius. Duration is determined by the top-most card of the deck. (1 Min, 30 Sec Cooldown)",
+    null,
+    "Trinket",
+    "Darkmoon Deck (1)",
+    [372, null, null, null, null],
+    [
+      ["Agility", "Intellect", "Strength", "", ""],
+      ["300", null, null, null, null],
+    ]
+  );
+  const darkmoonDeckWatcher = await createItem(
+    "Darkmoon Deck: Watcher",
+    "inv_10_inscription_darkmooncards_earth_blank",
+    "Equip",
+    1,
+    null,
+    "Formed from combining the Ace through 8 of Earth.",
+    "Epic",
+    null,
+    1,
+    null,
+    "Periodically shuffle the deck while in combat.",
+    "Grants the Watcher's Blessing for 5-12s and an absorb shield for 62837 damage. If the shield depletes while Watcher's Blessing is active, gain 1511 Versatility for the same duration. Duration is determined by the top-most card of the deck. (1 Min, 30 Sec Cooldown)",
+    null,
+    "Trinket",
+    "Darkmoon Deck (1)",
+    [372, null, null, null, null],
+    [
+      ["Agility", "Intellect", "Strength", "", ""],
+      ["300", null, null, null, null],
+    ]
+  );
+  const darkmoonDeckBoxDance = await createItem(
+    "Darkmoon Deck Box: Dance",
+    "inv_10_inscription_darkmooncards_air_blank",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Periodically shuffle the deck while in combat.",
+    "Call a Refreshing Dance that bounces 5-12 times between friends and foes within 25 yards dealing 10318/?/?/?/11489 Nature damage (based on quality) or 5207/?/?/?/5767 healing (based on quality). The number of bounces is determined by the top-most card of the deck. (1 Min, 30 Sec Cooldown)",
+    null,
+    "Trinket",
+    "Darkmoon Deck (1)",
+    [382, 384, 386, 389, 392],
+    [
+      ["Agility", "Intellect", "Strength", "", ""],
+      [329, "?", "?", "?", 361],
+    ]
+  );
+  const darkmoonDeckBoxInferno = await createItem(
+    "Darkmoon Deck Box: Inferno",
+    "inv_10_inscription_darkmooncards_fire_blank",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Periodically shuffle the deck while in combat.",
+    "Hurl a Smoldering Inferno at the target that deals between 25803/?/?/?/28580 - 86013/?/?/?/95267 Fire damage (based on quality). Damage dealt is determined by the top-most card of the deck. (1 Min, 30 Sec Cooldown)",
+    null,
+    "Trinket",
+    "Darkmoon Deck (1)",
+    [382, 384, 386, 389, 392],
+    [
+      ["Agility", "Intellect", "Strength", "", ""],
+      [329, "?", "?", "?", 361],
+    ]
+  );
+  const darkmoonDeckBoxRime = await createItem(
+    "Darkmoon Deck Box: Rime",
+    "inv_10_inscription_darkmooncards_frost_blank",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Periodically shuffle the deck while in combat.",
+    "Deal 17184/?/?/?/19134 Frost damage (based on quality) and apply Awakening Rime to your target for 4-12s. If the target dies while Awakening Rime is active, it explodes for 42961/?/?/?/47836 Frost damage (based on quality) split between enemies in a 10 yard radius. Duration is determined by the top-most card of the deck. (1 Min, 30 Sec Cooldown)",
+    null,
+    "Trinket",
+    "Darkmoon Deck (1)",
+    [382, 384, 386, 389, 392],
+    [
+      ["Agility", "Intellect", "Strength", "", ""],
+      [329, "?", "?", "?", 361],
+    ]
+  );
+  const darkmoonDeckBoxWatcher = await createItem(
+    "Darkmoon Deck Box: Watcher",
+    "inv_10_inscription_darkmooncards_earth_blank",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Periodically shuffle the deck while in combat.",
+    "Grants the Watcher's Blessing for 5-12s and an absorb shield for 93651/?/?/?/99355 damage (based on quality). If the shield depletes while Watcher's Blessing is active, gain 1609/?/?/?/1707 Versatility for the same duration. Duration is determined by the top-most card of the deck. (1 Min, 30 Sec Cooldown)",
+    null,
+    "Trinket",
+    "Darkmoon Deck (1)",
+    [382, 384, 386, 389, 392],
+    [
+      ["Agility", "Intellect", "Strength", "", ""],
+      [329, "?", "?", "?", 361],
+    ]
+  );
+  const cracklingCodexOfTheIsles = await createItem(
+    "Crackling Codex of the Isles",
+    "inv_offhand_1h_dragonquest_b_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    null,
+    "Off Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("1h")],
+    [
+      secondaryStatArrayEpic("stamina", "1h"),
+      secondaryStatArrayEpic("Random Stat 1", "1h"),
+      secondaryStatArrayEpic("Random Stat 2", "1h"),
+    ]
+  );
+  const illuminatingPillarOfTheIsles = await createItem(
+    "Illuminating Pillar of the Isles",
+    "inv_staff_2h_inscription_c_01_blue",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Staff",
+    "Two Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("2h-int")],
+    [
+      secondaryStatArrayEpic("stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
+    ]
+  );
+  const kineticPillarOfTheIsles = await createItem(
+    "Kinetic Pillar of the Isles",
+    "inv_staff_2h_inscription_c_01_green",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Staff",
+    "Two-Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Agility", "", "", "", ""], primaryStatArrayEpic("large")],
+    [
+      secondaryStatArrayEpic("stamina", "large"),
+      secondaryStatArrayEpic("Random Stat 1", "large"),
+      secondaryStatArrayEpic("Random Stat 2", "large"),
+    ]
+  );
+  const weatheredExplorersStave = await createItem(
+    "Weathered Explorer's Stave",
+    "inv_staff_2h_inscription_c_01_red",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    "Dealing damage has a chance to fill you with a surge of familiar energy, increasing Haste by ?/?/?/1161/? (based on quality) for 10 sec.",
+    null,
+    null,
+    "Staff",
+    "Two-Hand",
+    null,
+    [382, 384, 386, 389, 392],
+    [["Intellect", "", "", "", ""], primaryStatArrayEpic("2h-int")],
+    [secondaryStatArrayEpic("stamina", "large")]
+  );
+  const coreExplorersCompendium = await createItem(
+    "Core Explorer's Compendium",
+    "inv_10_inscription2_book2_color3",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    null,
+    "Off Hand",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("1h")],
+    [
+      secondaryStatArrayRare("stamina", "1h"),
+      secondaryStatArrayRare("Random Stat 1", "1h"),
+      secondaryStatArrayRare("Random Stat 2", "1h"),
+    ]
+  );
+  const overseersWrithebarkStave = await createItem(
+    "Overseer's Writhebark Stave",
+    "inv_staff_2h_dragonquest_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Staff",
+    "Two-Hand",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Intellect", "", "", "", ""], primaryStatArrayRare("2h-int")],
+    [
+      secondaryStatArrayRare("stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
+    ]
+  );
+  const pioneersWrithebarkStave = await createItem(
+    "Pioneer's Writhebark Stave",
+    "inv_staff_2h_dragonquest_b_02",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Staff",
+    "Two-Hand",
+    null,
+    [333, 335, 337, 340, 343],
+    [["Agility", "", "", "", ""], primaryStatArrayRare("large")],
+    [
+      secondaryStatArrayRare("stamina", "large"),
+      secondaryStatArrayRare("Random Stat 1", "large"),
+      secondaryStatArrayRare("Random Stat 2", "large"),
+    ]
+  );
+  const emberscaleSigil = await createItem(
+    "Emberscale Sigil",
+    "spell_fire_rune",
+    null,
+    1000,
+    null,
+    null,
+    "Rare",
+    "Optional Crafting Reagent",
+    3,
+    "Darkmoon Sigil",
+    "+20/15/10 Recipe Difficulty (based on quality). Provides the following property: Your Darkmoon Deck no longer has Even cards."
+  );
+  const jetscaleSigil = await createItem(
+    "Jetscale Sigil",
+    "spell_shadow_rune",
+    null,
+    1000,
+    null,
+    null,
+    "Rare",
+    "Optional Crafting Reagent",
+    3,
+    "Darkmoon Sigil",
+    "+20/15/10 Recipe Difficulty (based on quality). Provides the following property: Your Darkmoon Deck no longer shuffles when the Ace is drawn."
+  );
+  const sagescaleSigil = await createItem(
+    "Sagescale Sigil",
+    "spell_nature_rune",
+    null,
+    1000,
+    null,
+    null,
+    "Rare",
+    "Optional Crafting Reagent",
+    3,
+    "Darkmoon Sigil",
+    "+20/15/10 Recipe Difficulty (based on quality). Provides the following property: Your Darkmoon Deck only shuffles when you jump."
+  );
+  const azurescaleSigil = await createItem(
+    "Azurescale Sigil",
+    "spell_ice_rune",
+    null,
+    1000,
+    null,
+    null,
+    "Rare",
+    "Optional Crafting Reagent",
+    3,
+    "Darkmoon Sigil",
+    "+20/15/10 Recipe Difficulty (based on quality). Provides the following property: Your Darkmoon Deck now shuffles from greatest to least."
+  );
+  const bronzescaleSigil = await createItem(
+    "Bronzescale Sigil",
+    "spell_holy_rune",
+    null,
+    1000,
+    null,
+    null,
+    "Rare",
+    "Optional Crafting Reagent",
+    3,
+    "Darkmoon Sigil",
+    "+20/15/10 Recipe Difficulty (based on quality). Provides the following property: Your Darkmoon Deck shuffles faster."
+  );
+  const vantusRuneVaultOfTheIncarnates = await createItem(
+    "Vantus Rune: Vault of the Incarnates",
+    "inv_10_inscription_vantusrune_color4",
+    null,
+    20,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Attune yourself to the energies of the targeted Vault of the Incarnates raid boss, increasing your Versatility by ?/359/399 (based on quality) when fighting that boss. This effect lasts for an entire week. You can only use one Vantus Rune per week."
+  );
+  const buzzingRune = await createItem(
+    "Buzzing Rune",
+    "inv_misc_rune_08",
+    null,
+    20,
+    "A droning sound emanates from the carving.",
+    "Might be the new weapon oil?",
+    "Uncommon",
+    "Crafting Reagent",
+    3,
+    null,
+    null,
+    "Imbue your weapon with the energy of a Dragonfly, increasing Critical Strike Rating by 579/707/827 (based on quality) for 2 hours."
+  );
+  const chirpingRune = await createItem(
+    "Chirping Rune",
+    "inv_misc_rune_09",
+    null,
+    20,
+    "You hear a faint chirping.",
+    "Might be the new weapon oil?",
+    "Uncommon",
+    "Crafting Reagent",
+    3,
+    null,
+    null,
+    "Imbue your weapon with the energy of an Ohuna. Your healing spells have a high chance to heal your target for an additional 5025/6125/7987 healing (based on quality) for 2 hours."
+  );
+  const howlingRune = await createItem(
+    "Howling Rune",
+    "inv_misc_rune_05",
+    null,
+    20,
+    "You hear a Bakar howl in the distance.",
+    "Might be the new weapon oil?",
+    "Uncommon",
+    "Crafting Reagent",
+    3,
+    null,
+    null,
+    "Imbue your weapon with the energy of a Bakar, increasing Haste by 579/707/827 (based on quality) for 2 hours."
+  );
+  const alchemistsBrilliantMixingRod = await createItem(
+    "Alchemist's Brilliant Mixing Rod",
+    "inv_staff_2h_alchemy_b_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Alchemy Tool",
+    null,
+    null,
+    [346, 352, 358, 365, 372],
+    statArrayProfToolAccessory("Skill", "Tool", "large"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "large")]
+  );
+  const chefsSplendidRollingPin = await createItem(
+    "Chef's Splendid Rolling Pin",
+    "inv_misc_1h_rollingpin_b_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Cooking Tool",
+    null,
+    null,
+    [346, 352, 358, 365, 372],
+    statArrayProfToolAccessory("Skill", "Tool", "medium"),
+    [
+      ["Resourcefulness", 32, "?", "?", 40, 44],
+      ["Crafting Speed", 48, "?", "?", 60, 66],
+    ]
+  );
+  const scribesResplendentQuill = await createItem(
+    "Scribe's Resplendent Quill",
+    "inv_misc_1h_scribesquill_b_01_gold",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Inscription Tool",
+    null,
+    null,
+    [346, 352, 358, 365, 372],
+    statArrayProfToolAccessory("Skill", "Tool", "large"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "large")]
+  );
+  const alchemistsSturdyMixingRod = await createItem(
+    "Alchemist's Sturdy Mixing Rod",
+    "inv_staff_2h_alchemy_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Alchemy Tool",
+    null,
+    null,
+    [320, 326, 332, 339, 346],
+    statArrayProfToolAccessory("Skill", "Tool", "medium"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "medium")]
+  );
+  const chefsSmoothRollingPin = await createItem(
+    "Chef's Smooth Rolling Pin",
+    "inv_misc_1h_rollingpin_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Cooking Tool",
+    null,
+    null,
+    [320, 326, 332, 339, 346],
+    statArrayProfToolAccessory("Skill", "Tool", "small"),
+    [
+      ["Resourcefulness", 23, "?", "?", "?", 32],
+      ["Crafting Speed", 35, "?", "?", "?", 48],
+    ]
+  );
+  const scribesFastenedQuill = await createItem(
+    "Scribe's Fastened Quill",
+    "inv_misc_1h_scribesquill_b_01_gold",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Inscription Tool",
+    null,
+    null,
+    [320, 326, 332, 339, 346],
+    statArrayProfToolAccessory("Skill", "Tool", "medium"),
+    [statArrayProfToolAccessory("Random Stat 1", "Tool", "medium")]
+  );
+  const illusionParchmentWhirlingBreeze = await createItem(
+    "Illusion Parchment: Whirling Breeze",
+    "inv_10_inscription_illusoryspellscrolls_color1",
+    null,
+    1000,
+    null,
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Cast a Whirling Breeze Illusion at another player! Cannot be used in Arenas, Battlegrounds, or while in combat."
+  );
+  const illusionParchmentAquaTorrent = await createItem(
+    "Illusion Parchment: Aqua Torrent",
+    "inv_10_inscription_illusoryspellscrolls_color2",
+    null,
+    1000,
+    null,
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Cast an Aqua Torrent Illusion at another player! Cannot be used in Arenas, Battlegrounds, or while in combat."
+  );
+  const illusionParchmentArcaneBurst = await createItem(
+    "Illusion Parchment: Arcane Burst",
+    "inv_10_inscription_illusoryspellscrolls_color5",
+    null,
+    1000,
+    null,
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Cast an Arcane Burst Illusion at another player! Cannot be used in Arenas, Battlegrounds, or while in combat."
+  );
+  const illusionParchmentChillingWind = await createItem(
+    "Illusion Parchment: Chilling Wind",
+    "inv_10_inscription_illusoryspellscrolls_color8",
+    null,
+    1000,
+    null,
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Cast a Chilling Wind Illusion at another player! Cannot be used in Arenas, Battlegrounds, or while in combat."
+  );
+  const illusionParchmentLoveCharm = await createItem(
+    "Illusion Parchment: Love Charm",
+    "inv_10_inscription_illusoryspellscrolls_color4",
+    null,
+    1000,
+    null,
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Cast a Love Charm Illusion at another player in your party! Cannot be used in Arenas, Battlegrounds, or while in combat."
+  );
+  const illusionParchmentMagmaMissile = await createItem(
+    "Illusion Parchment: Magma Missile",
+    "inv_10_inscription_illusoryspellscrolls_color10",
+    null,
+    1000,
+    null,
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Cast a Magma Missile Illusion at another player! Cannot be used in Arenas, Battlegrounds, or while in combat."
+  );
+  const illusionParchmentShadowOrb = await createItem(
+    "Illusion Parchment: Shadow Orb",
+    "inv_10_inscription_illusoryspellscrolls_color3",
+    null,
+    1000,
+    null,
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Cast a Shadow Orb Illusion at another player! Cannot be used in Arenas, Battlegrounds, or while in combat."
+  );
+  const illusionParchmentSpellShield = await createItem(
+    "Illusion Parchment: Spell Shield",
+    "inv_10_inscription_illusoryspellscrolls_color6",
+    null,
+    1000,
+    null,
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Prevent all Illusory Parchment spells from being cast on you for 30 min."
+  );
+  const scrollOfSales = await createItem(
+    "Scroll of Sales",
+    "inv_enchant_formulaepic_01",
+    "Pickup",
+    200,
+    "Contractually demands the presence of an independent merchant.",
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Summons a vendor of general goods for 5 min. Supplies vary with the scroll's quality. (6 Hrs Cooldown)"
+  );
+  const bundleOCardsDragonIsles = await createItem(
+    "Bundle O' Cards: Dragon Isles",
+    "inv_10_inscription_darkmooncards2_darkmoonboosterpack_color1",
+    null,
+    1000,
+    null,
+    null,
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Tear open for some Darkmoon Cards! Contains cards only native to the Dragon Isles."
+  );
+  const fatedFortuneCard = await createItem(
+    "Fated Fortune Card",
+    "inv_10_specialization_inscription_fortunecard_front_color1",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    1,
+    null,
+    null,
+    "Flip a card to see your fortune."
+  );
+  //4 extractions of awakened elements, but like, they just yield awakened elements...
+  const contractIskaaraTuskarr = await createItem(
+    "Contract: Iskaara Tuskarr",
+    "inv_10_inscription2_repcontracts_70_professions_scroll_02_uprez_color1",
+    null,
+    20,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Enter a contract with the Iskaara Tuskarr that allows you to gain 10/12/15 reputation (based on quality) with them every time you complete a world quest in the Dragon Isles."
+  );
+  const contractArtisansConsortium = await createItem(
+    "Contract: Artisan's Consortium",
+    "inv_10_inscription2_repcontracts_70_professions_scroll_02_uprez",
+    null,
+    20,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Enter a contract with the Artisan's Consortium that allows you to gain 10/12/15 reputation (based on quality) with them every time you complete a world quest in the Dragon Isles."
+  );
+  const contractDragonscaleExpedition = await createItem(
+    "Contract: Dragonscale Expedition",
+    "inv_10_inscription2_repcontracts_70_professions_scroll_02_uprez_color4",
+    null,
+    20,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Enter a contract with the Dragonscale Expedition that allows you to gain 10/12/15 reputation (based on quality) with them every time you complete a world quest in the Dragon Isles."
+  );
+  const contractMaruukCentaur = await createItem(
+    "Contract: Maruuk Centaur",
+    "inv_10_inscription2_repcontracts_70_professions_scroll_02_uprez_color3",
+    null,
+    20,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Enter a contract with the Maruuk Centaur that allows you to gain 10/12/15 reputation (based on quality) with them every time you complete a world quest in the Dragon Isles."
+  );
+  const contractValdrakkenAccord = await createItem(
+    "Contract: Valdrakken Accord",
+    "inv_10_inscription2_repcontracts_70_professions_scroll_02_uprez_color2",
+    null,
+    20,
+    null,
+    null,
+    "Common",
+    null,
+    3,
+    null,
+    null,
+    "Enter a contract with the Valdrakken Accord that allows you to gain 10/12/15 reputation (based on quality) with them every time you complete a world quest in the Dragon Isles."
+  );
+  const draconicTreatiseOnAlchemy = await createItem(
+    "Draconic Treatise on Alchemy",
+    "inv_misc_profession_book_alchemy",
+    "Pickup",
+    200,
+    "Contains notes on various tricks of the trade used by Alchemists. Can only be studied once a week.",
+    "'Once a week' resets on your weekly reset day.",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Study to increase your Dragon Isles Alchemy Knowledge by 1.",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    { Alchemy: 25 }
+  );
+  const draconicTreatiseOnBlacksmithing = await createItem(
+    "Draconic Treatise on Blacksmithing",
+    "inv_misc_profession_book_blacksmithing",
+    "Pickup",
+    200,
+    "Contains notes on various tricks of the trade used by Blacksmiths. Can only be studied once a week.",
+    "'Once a week' resets on your weekly reset day.",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Study to increase your Dragon Isles Blacksmithing Knowledge by 1.",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    { Blacksmithing: 25 }
+  );
+  const draconicTreatiseOnEnchanting = await createItem(
+    "Draconic Treatise on Enchanting",
+    "inv_misc_profession_book_enchanting",
+    "Pickup",
+    200,
+    "Contains notes on various tricks of the trade used by Enchanters. Can only be studied once a week.",
+    "'Once a week' resets on your weekly reset day.",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Study to increase your Dragon Isles Enchanting Knowledge by 1.",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    { Enchanting: 25 }
+  );
+  const draconicTreatiseOnEngineering = await createItem(
+    "Draconic Treatise on Engineering",
+    "inv_misc_profession_book_engineering_color1",
+    "Pickup",
+    200,
+    "Contains notes on various tricks of the trade used by Engineers. Can only be studied once a week.",
+    "'Once a week' resets on your weekly reset day.",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Study to increase your Dragon Isles Engineering Knowledge by 1.",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    { Engineering: 25 }
+  );
+  const draconicTreatiseOnHerbalism = await createItem(
+    "Draconic Treatise on Herbalism",
+    "inv_misc_profession_book_herbalism",
+    "Pickup",
+    200,
+    "Contains notes on various tricks of the trade used by Herbalists. Can only be studied once a week.",
+    "'Once a week' resets on your weekly reset day.",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Study to increase your Dragon Isles Herbalism Knowledge by 1.",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    { Herbalism: 25 }
+  );
+  const draconicTreatiseOnInscription = await createItem(
+    "Draconic Treatise on Inscription",
+    "inv_misc_profession_book_inscription",
+    "Pickup",
+    200,
+    "Contains notes on various tricks of the trade used by Scribes. Can only be studied once a week.",
+    "'Once a week' resets on your weekly reset day.",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Study to increase your Dragon Isles Inscription Knowledge by 1.",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    { Inscription: 25 }
+  );
+  const draconicTreatiseOnJewelcrafting = await createItem(
+    "Draconic Treatise on Jewelcrafting",
+    "inv_misc_profession_book_jewelcrafting",
+    "Pickup",
+    200,
+    "Contains notes on various tricks of the trade used by Jewelcrafters. Can only be studied once a week.",
+    "'Once a week' resets on your weekly reset day.",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Study to increase your Dragon Isles Jewelcrafting Knowledge by 1.",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    { Jewelcrafting: 25 }
+  );
+  const draconicTreatiseOnLeatherworking = await createItem(
+    "Draconic Treatise on Leatherworking",
+    "inv_misc_profession_book_leatherworking",
+    "Pickup",
+    200,
+    "Contains notes on various tricks of the trade used by Leatherworkers. Can only be studied once a week.",
+    "'Once a week' resets on your weekly reset day.",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Study to increase your Dragon Isles Leatherworking Knowledge by 1.",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    { Leatherworking: 25 }
+  );
+  const draconicTreatiseOnMining = await createItem(
+    "Draconic Treatise on Mining",
+    "inv_misc_profession_book_mining",
+    "Pickup",
+    200,
+    "Contains notes on various tricks of the trade used by Miners. Can only be studied once a week.",
+    "'Once a week' resets on your weekly reset day.",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Study to increase your Dragon Isles Mining Knowledge by 1.",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    { Mining: 25 }
+  );
+  const draconicTreatiseOnSkinning = await createItem(
+    "Draconic Treatise on Skinning",
+    "inv_misc_profession_book_skinning_color1",
+    "Pickup",
+    200,
+    "Contains notes on various tricks of the trade used by Skinners. Can only be studied once a week.",
+    "'Once a week' resets on your weekly reset day.",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Study to increase your Dragon Isles Skinning Knowledge by 1.",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    { Skinning: 25 }
+  );
+  const draconicTreatiseOnTailoring = await createItem(
+    "Draconic Treatise on Tailoring",
+    "inv_misc_profession_book_tailoring",
+    "Pickup",
+    200,
+    "Contains notes on various tricks of the trade used by Tailors. Can only be studied once a week.",
+    "'Once a week' resets on your weekly reset day.",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Study to increase your Dragon Isles Tailoring Knowledge by 1.",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    { Tailoring: 25 }
+  );
+
+  const makeDragonInscriptionItem = async (
+    drakeName,
+    customizationName,
+    iconName
+  ) => {
+    return await createItem(
+      `${drakeName}: ${customizationName}`,
+      iconName,
+      "Pickup",
+      1,
+      null,
+      null,
+      "Rare",
+      "Drakewatcher Manuscript",
+      1,
+      null,
+      null,
+      `Unlocks this customization option for the ${drakeName} at the Rostrum of Transformation.`
+    );
+  };
+
+  const renewedProtoDrakeSilverAndBlueArmor = makeDragonInscriptionItem(
+    "Renewed Proto-Drake",
+    "Silver and Blue Armor",
+    "inv_glyph_majordeathknight"
+  );
+  const renewedProtoDrakeSteelAndYellowArmor = makeDragonInscriptionItem(
+    "Renewed Proto-Drake",
+    "Steel and Yellow Armor",
+    "inv_glyph_majordeathknight"
+  );
+  const renewedProtoDrakeBovineHorns = makeDragonInscriptionItem(
+    "Renewed Proto-Drake",
+    "Bovine Horns",
+    "inv_glyph_minordeathknight"
+  );
+  const renewedProtoDrakePredatorPattern = makeDragonInscriptionItem(
+    "Renewed Proto-Drake",
+    "Predator Pattern",
+    "inv_glyph_majordeathknight"
+  );
+  const renewedProtoDrakeSpinedCrest = makeDragonInscriptionItem(
+    "Renewed Proto-Drake",
+    "Spined Crest",
+    "inv_glyph_minordeathknight"
+  );
+  const windborneVelocidrakeSilverAndBlueArmor = makeDragonInscriptionItem(
+    "Windborne Velocidrake",
+    "Silver and Blue Armor",
+    "inv_glyph_majorhunter"
+  );
+  const windborneVelocidrakeSteelAndOrangeArmor = makeDragonInscriptionItem(
+    "Windborne Velocidrake",
+    "Steel and Orange Armor",
+    "inv_glyph_majorhunter"
+  );
+  const windborneVelocidrakeBlackFur = makeDragonInscriptionItem(
+    "Windborne Velocidrake",
+    "Black Fur",
+    "inv_glyph_minorhunter"
+  );
+  const windborneVelocidrakeSpinedHead = makeDragonInscriptionItem(
+    "Windborne Velocidrake",
+    "Spined Head",
+    "inv_glyph_minorhunter"
+  );
+  const windborneVelocidrakeWindsweptPattern = makeDragonInscriptionItem(
+    "Windborne Velocidrake",
+    "Windswept Pattern",
+    "inv_glyph_majorhunter"
+  );
+  const highlandDrakeSilverAndBlueArmor = makeDragonInscriptionItem(
+    "Highland Drake",
+    "Silver and Blue Armor",
+    "inv_glyph_majormage"
+  );
+  const highlandDrakeSteelAndYellowArmor = makeDragonInscriptionItem(
+    "Highland Drake",
+    "Steel and Yellow Armor",
+    "inv_glyph_majormage"
+  );
+  const highlandDrakeBlackHair = makeDragonInscriptionItem(
+    "Highland Drake",
+    "Black Hair",
+    "inv_glyph_minormage"
+  );
+  const highlandDrakeSpinedCrest = makeDragonInscriptionItem(
+    "Highland Drake",
+    "Spined Crest",
+    "inv_glyph_minormage"
+  );
+  const highlandDrakeSpinedThroat = makeDragonInscriptionItem(
+    "Highland Drake",
+    "Spined Throat",
+    "inv_glyph_minormage"
+  );
+  const cliffsideWylderdrakeSilverAndBlueArmor = makeDragonInscriptionItem(
+    "Cliffside Wylderdrake",
+    "Silver and Blue Armor",
+    "inv_glyph_majordruid"
+  );
+  const cliffsideWylderdrakeSteelAndYellowArmor = makeDragonInscriptionItem(
+    "Cliffside Wylderdrake",
+    "Steel and Yellow Armor",
+    "inv_glyph_majordruid"
+  );
+  const cliffsideWylderdrakeConicalHead = makeDragonInscriptionItem(
+    "Cliffside Wylderdrake",
+    "Conical Head",
+    "inv_glyph_minordruid"
+  );
+  const cliffsideWylderdrakeRedHair = makeDragonInscriptionItem(
+    "Cliffside Wylderdrake",
+    "Red Hair",
+    "inv_glyph_minordruid"
+  );
+  const cliffsideWylderdrakeTripleHeadHorns = makeDragonInscriptionItem(
+    "Cliffside Wylderdrake",
+    "Triple Head Horns",
+    "inv_glyph_minordruid"
+  );
 
   // //jewelcrafting items
   const silkenGemdust = await createItem(
@@ -9419,12 +10523,26 @@ const makeTables = async () => {
   //   392
   // );
   // const witherrotTome = await createItem("Witherrot Tome", 1, 382, 392);
-  // const finishedPrototypeExplorersBarding = await createItem(
-  //   "Finished Prototype Explorer's Barding"
-  // );
-  // const finishedPrototypeRegalBarding = await createItem(
-  //   "Finished Prototype Regal Barding"
-  // );
+  const finishedPrototypeExplorersBarding = await createItem(
+    "Finished Prototype Explorer's Barding",
+    "inv_belt_41b",
+    null,
+    1000,
+    "Crafted by players with the Leatherworking skill. Can be acquired through Crafting Orders.",
+    null,
+    "Epic",
+    "Crafting Reagent"
+  );
+  const finishedPrototypeRegalBarding = await createItem(
+    "Finished Prototype Regal Barding",
+    "inv_belt_41c",
+    null,
+    1000,
+    "Crafted by players with the Leatherworking skill. Can be acquired through Crafting Orders.",
+    null,
+    "Epic",
+    "Crafting Reagent"
+  );
   // const earthshineScales = await createItem("Earthshine Scales", 1000);
   const frostbiteScales = await createItem(
     "Frostbite Scales",
@@ -14376,9 +15494,7 @@ const makeTables = async () => {
     { PrimalExtraction: 10 },
     null,
     null,
-    "Shatter an Awakened element to gain its power (an amount of secondary stat, or primary w/ Order) for 10-20 min. Can only be performed in the Dragon Isles",
-    null,
-    "inv_10_enchanting2_elementalswirl_color1"
+    "Shatter an Awakened element to gain its power (an amount of secondary stat, or primary w/ Order) for 10-20 min. Can only be performed in the Dragon Isles"
   );
 
   const elementalShatterAirRecipe = await createRecipe(
@@ -14395,9 +15511,7 @@ const makeTables = async () => {
     { PrimalExtraction: 10 },
     null,
     null,
-    "Shatter an Awakened element to gain its power (an amount of secondary stat, or primary w/ Order) for 10-20 min. Can only be performed in the Dragon Isles",
-    null,
-    "inv_10_enchanting2_elementalswirl_color1"
+    "Shatter an Awakened element to gain its power (an amount of secondary stat, or primary w/ Order) for 10-20 min. Can only be performed in the Dragon Isles"
   );
 
   const elementalShatterOrderRecipe = await createRecipe(
@@ -14414,9 +15528,7 @@ const makeTables = async () => {
     { PrimalExtraction: 10 },
     null,
     null,
-    "Shatter an Awakened element to gain its power (an amount of secondary stat, or primary w/ Order) for 10-20 min. Can only be performed in the Dragon Isles",
-    null,
-    "inv_10_enchanting2_elementalswirl_color1"
+    "Shatter an Awakened element to gain its power (an amount of secondary stat, or primary w/ Order) for 10-20 min. Can only be performed in the Dragon Isles"
   );
   const elementalShatterFireRecipe = await createRecipe(
     null,
@@ -14432,9 +15544,7 @@ const makeTables = async () => {
     { PrimalExtraction: 10 },
     null,
     null,
-    "Shatter an Awakened element to gain its power (an amount of secondary stat, or primary w/ Order) for 10-20 min. Can only be performed in the Dragon Isles",
-    null,
-    "inv_10_enchanting2_elementalswirl_color1"
+    "Shatter an Awakened element to gain its power (an amount of secondary stat, or primary w/ Order) for 10-20 min. Can only be performed in the Dragon Isles"
   );
   const elementalShatterEarthRecipe = await createRecipe(
     null,
@@ -14450,9 +15560,7 @@ const makeTables = async () => {
     { PrimalExtraction: 10 },
     null,
     null,
-    "Shatter an Awakened element to gain its power (an amount of secondary stat, or primary w/ Order) for 10-20 min. Can only be performed in the Dragon Isles",
-    null,
-    "inv_10_enchanting2_elementalswirl_color1"
+    "Shatter an Awakened element to gain its power (an amount of secondary stat, or primary w/ Order) for 10-20 min. Can only be performed in the Dragon Isles"
   );
   const sophicAmalgamationRecipe = await createRecipe(
     "Sophic Amalgamation",
@@ -16697,2185 +17805,2185 @@ const makeTables = async () => {
   );
 
   // //inscription recipes - 100 total
-  // // const dragonIslesMilling = await(createRecipe("Dragon Isles Milling", shimmeringPigment, 5, inscription, [[hochenblume, 5]], 1, "Inscription Essentials", 1, 250));
-  // const cosmicInkRecipe = await createRecipe(
-  //   null,
-  //   cosmicInk,
-  //   2,
-  //   inscription,
-  //   [
-  //     [iridescentWater, 1],
-  //     [awakenedFrost, 1],
-  //     [sereneInk, 1],
-  //     [burnishedInk, 2],
-  //     [runedWrithebark, 1],
-  //   ],
-  //   35,
-  //   "Inks",
-  //   2,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, FlawlessInks: 20 }],
-  //     ["Blotting Sand", { FlawlessInks: 0 }],
-  //   ]
-  // );
-  // const burnishedInkRecipe = await createRecipe(
-  //   null,
-  //   burnishedInk,
-  //   2,
-  //   inscription,
-  //   [
-  //     [iridescentWater, 1],
-  //     [blazingInk, 2],
-  //     [flourishingInk, 2],
-  //     [sereneInk, 2],
-  //   ],
-  //   20,
-  //   "Inks",
-  //   2,
-  //   260,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, FlawlessInks: 20 }],
-  //     ["Blotting Sand", { FlawlessInks: 0 }],
-  //   ]
-  // );
-  // const blazingInkRecipe = await createRecipe(
-  //   null,
-  //   blazingInk,
-  //   2,
-  //   inscription,
-  //   [
-  //     [iridescentWater, 1],
-  //     [shimmeringPigment, 2],
-  //     [blazingPigment, 1],
-  //     [draconicVial, 1],
-  //   ],
-  //   1,
-  //   "Inks",
-  //   1,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Learned by default.",
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, FlawlessInks: 20 }],
-  //     ["Blotting Sand", { FlawlessInks: 0 }],
-  //   ]
-  // );
-  // const flourishingInkRecipe = await createRecipe(
-  //   null,
-  //   flourishingInk,
-  //   2,
-  //   inscription,
-  //   [
-  //     [iridescentWater, 1],
-  //     [shimmeringPigment, 2],
-  //     [flourishingPigment, 1],
-  //     [draconicVial, 1],
-  //   ],
-  //   1,
-  //   "Inks",
-  //   1,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Learned by default.",
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, FlawlessInks: 20 }],
-  //     ["Blotting Sand", { FlawlessInks: 0 }],
-  //   ]
-  // );
-  // const sereneInkRecipe = await createRecipe(
-  //   null,
-  //   sereneInk,
-  //   2,
-  //   inscription,
-  //   [
-  //     [iridescentWater, 1],
-  //     [shimmeringPigment, 2],
-  //     [serenePigment, 1],
-  //     [draconicVial, 1],
-  //   ],
-  //   1,
-  //   "Inks",
-  //   1,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Learned by default.",
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, FlawlessInks: 20 }],
-  //     ["Blotting Sand", { FlawlessInks: 0 }],
-  //   ]
-  // );
-  // const illustriousInsightRecipeInscription = await createRecipe(
-  //   "Illustrious Insight",
-  //   illustriousInsight,
-  //   1,
-  //   inscription,
-  //   [[artisansMettle, 50]],
-  //   null,
-  //   "Reagents",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Various Specializations",
-  //   "Scribe's Drafting Table"
-  // );
-  // const runedWrithebarkRecipe = await createRecipe(
-  //   null,
-  //   runedWrithebark,
-  //   1,
-  //   inscription,
-  //   [
-  //     [rousingAir, 5],
-  //     [writhebark, 5],
-  //     [flourishingInk, 1],
-  //     [chilledRune, 1],
-  //   ],
-  //   15,
-  //   "Reagents",
-  //   1,
-  //   260,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Lesser Illustrious Insight", { RuneMastery: 40 }]]
-  // );
-  // const chilledRuneRecipe = await createRecipe(
-  //   null,
-  //   chilledRune,
-  //   1,
-  //   inscription,
-  //   [
-  //     [rousingFrost, 5],
-  //     [sereneInk, 1],
-  //   ],
-  //   1,
-  //   "Reagents",
-  //   1,
-  //   260,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Learned by default.",
-  //   [["Lesser Illustrious Insight", { RuneMastery: 40 }]]
-  // );
-  // const draconicMissiveOfTheAuroraRecipe = await createRecipe(
-  //   null,
-  //   draconicMissiveOfTheAurora,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [chilledRune, 1],
-  //     [sereneInk, 1],
-  //   ],
-  //   45,
-  //   "Missives",
-  //   1,
-  //   275,
-  //   null,
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const draconicMissiveOfTheFeverflareRecipe = await createRecipe(
-  //   null,
-  //   draconicMissiveOfTheFeverflare,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [chilledRune, 1],
-  //     [blazingInk, 1],
-  //   ],
-  //   45,
-  //   "Missives",
-  //   1,
-  //   275,
-  //   null,
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const draconicMissiveOfTheFireflashRecipe = await createRecipe(
-  //   null,
-  //   draconicMissiveOfTheFireflash,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [chilledRune, 1],
-  //     [blazingInk, 1],
-  //   ],
-  //   45,
-  //   "Missives",
-  //   1,
-  //   275,
-  //   null,
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const draconicMissiveOfTheHarmoniousRecipe = await createRecipe(
-  //   null,
-  //   draconicMissiveOfTheHarmonious,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [chilledRune, 1],
-  //     [sereneInk, 1],
-  //   ],
-  //   45,
-  //   "Missives",
-  //   1,
-  //   275,
-  //   null,
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const draconicMissiveOfThePeerlessRecipe = await createRecipe(
-  //   null,
-  //   draconicMissiveOfThePeerless,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [chilledRune, 1],
-  //     [flourishingInk, 1],
-  //   ],
-  //   45,
-  //   "Missives",
-  //   1,
-  //   275,
-  //   null,
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const draconicMissiveOfTheQuickbladeRecipe = await createRecipe(
-  //   null,
-  //   draconicMissiveOfTheQuickblade,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [chilledRune, 1],
-  //     [flourishingInk, 1],
-  //   ],
-  //   45,
-  //   "Missives",
-  //   1,
-  //   275,
-  //   null,
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const draconicMissiveOfCraftingSpeedRecipe = await createRecipe(
-  //   null,
-  //   draconicMissiveOfCraftingSpeed,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [chilledRune, 1],
-  //     [flourishingInk, 1],
-  //   ],
-  //   null,
-  //   "Crafting Tool Missives",
-  //   1,
-  //   275,
-  //   { ArtisansConsortium: "Preferred" },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const draconicMissiveOfInspirationRecipe = await createRecipe(
-  //   null,
-  //   draconicMissiveOfInspiration,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [chilledRune, 1],
-  //     [blazingInk, 1],
-  //   ],
-  //   null,
-  //   "Crafting Tool Missives",
-  //   1,
-  //   275,
-  //   { ArtisansConsortium: "Preferred" },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const draconicMissiveOfMulticraftRecipe = await createRecipe(
-  //   null,
-  //   draconicMissiveOfMulticraft,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [chilledRune, 1],
-  //     [flourishingInk, 1],
-  //   ],
-  //   null,
-  //   "Crafting Tool Missives",
-  //   1,
-  //   275,
-  //   { ArtisansConsortium: "Preferred" },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const draconicMissiveOfResourcefulnessRecipe = await createRecipe(
-  //   null,
-  //   draconicMissiveOfResourcefulness,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [chilledRune, 1],
-  //     [blazingInk, 1],
-  //   ],
-  //   null,
-  //   "Crafting Tool Missives",
-  //   1,
-  //   275,
-  //   { ArtisansConsortium: "Preferred" },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const draconicMissiveOfDeftnessRecipe = await createRecipe(
-  //   null,
-  //   draconicMissiveOfDeftness,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [chilledRune, 1],
-  //     [sereneInk, 1],
-  //   ],
-  //   null,
-  //   "Gathering Tool Missives",
-  //   1,
-  //   275,
-  //   { ArtisansConsortium: "Preferred" },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const draconicMissiveOfFinesseRecipe = await createRecipe(
-  //   null,
-  //   draconicMissiveOfFinesse,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [chilledRune, 1],
-  //     [flourishingInk, 1],
-  //   ],
-  //   null,
-  //   "Gathering Tool Missives",
-  //   1,
-  //   275,
-  //   { ArtisansConsortium: "Preferred" },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const draconicMissiveOfPerceptionRecipe = await createRecipe(
-  //   null,
-  //   draconicMissiveOfPerception,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [chilledRune, 1],
-  //     [sereneInk, 1],
-  //   ],
-  //   null,
-  //   "Gathering Tool Missives",
-  //   1,
-  //   275,
-  //   { ArtisansConsortium: "Preferred" },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const darkmoonDeckBoxDanceRecipe = await createRecipe(
-  //   null,
-  //   darkmoonDeckBoxDance,
-  //   1,
-  //   inscription,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 60],
-  //     [darkmoonDeckDance, 1],
-  //     [awakenedAir, 10],
-  //     [writhebark, 10],
-  //     [cosmicInk, 12],
-  //   ],
-  //   null,
-  //   "Trinkets",
-  //   3,
-  //   360,
-  //   null,
-  //   { Air: 0 },
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Archiving: 0 }],
-  //     ["Darkmoon Sigil", { Air: 10 }],
-  //     ["Illustrious Insight", { RuneMastery: 40, Air: 30 }],
-  //     ["Blotting Sand", { Archiving: 30, DarkmoonMysteries: 35 }],
-  //   ]
-  // );
-  // const darkmoonDeckBoxInfernoRecipe = await createRecipe(
-  //   null,
-  //   darkmoonDeckBoxInferno,
-  //   1,
-  //   inscription,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 60],
-  //     [darkmoonDeckInferno, 1],
-  //     [awakenedFire, 10],
-  //     [writhebark, 10],
-  //     [cosmicInk, 12],
-  //   ],
-  //   null,
-  //   "Trinkets",
-  //   3,
-  //   360,
-  //   null,
-  //   { Fire: 0 },
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Archiving: 0 }],
-  //     ["Darkmoon Sigil", { Fire: 10 }],
-  //     ["Illustrious Insight", { RuneMastery: 40, Fire: 30 }],
-  //     ["Blotting Sand", { Archiving: 30, DarkmoonMysteries: 35 }],
-  //   ]
-  // );
-  // const darkmoonDeckBoxRimeRecipe = await createRecipe(
-  //   null,
-  //   darkmoonDeckBoxRime,
-  //   1,
-  //   inscription,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 60],
-  //     [darkmoonDeckRime, 1],
-  //     [awakenedFrost, 10],
-  //     [writhebark, 10],
-  //     [cosmicInk, 12],
-  //   ],
-  //   null,
-  //   "Trinkets",
-  //   3,
-  //   360,
-  //   null,
-  //   { Frost: 0 },
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Archiving: 0 }],
-  //     ["Darkmoon Sigil", { Frost: 10 }],
-  //     ["Illustrious Insight", { RuneMastery: 40, Frost: 30 }],
-  //     ["Blotting Sand", { Archiving: 30, DarkmoonMysteries: 35 }],
-  //   ]
-  // );
-  // const darkmoonDeckBoxWatcherRecipe = await createRecipe(
-  //   null,
-  //   darkmoonDeckBoxWatcher,
-  //   1,
-  //   inscription,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 60],
-  //     [darkmoonDeckWatcher, 1],
-  //     [awakenedEarth, 10],
-  //     [writhebark, 10],
-  //     [cosmicInk, 12],
-  //   ],
-  //   null,
-  //   "Trinkets",
-  //   3,
-  //   360,
-  //   null,
-  //   { Earth: 0 },
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Archiving: 0 }],
-  //     ["Darkmoon Sigil", { Earth: 10 }],
-  //     ["Illustrious Insight", { RuneMastery: 40, Earth: 30 }],
-  //     ["Blotting Sand", { Archiving: 30, DarkmoonMysteries: 35 }],
-  //   ]
-  // );
-  // const crackingCodexOfTheIslesRecipe = await createRecipe(
-  //   null,
-  //   crackingCodexOfTheIsles,
-  //   1,
-  //   inscription,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 40],
-  //     [awakenedAir, 10],
-  //     [glitteringParchment, 20],
-  //     [cosmicInk, 12],
-  //     [runedWrithebark, 5],
-  //     [chilledRune, 4],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   2,
-  //   300,
-  //   null,
-  //   { Codexes: 0 },
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Runebinding: 0 }],
-  //     ["Missive", { RunicScripture: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Illustrious Insight", { RuneMastery: 40, Codexes: 25 }],
-  //     ["Blotting Sand", { Ruenbinding: 30 }],
-  //   ]
-  // );
-  // const illuminatingPillarOfTheIslesRecipe = await createRecipe(
-  //   null,
-  //   illuminatingPillarOfTheIsles,
-  //   1,
-  //   inscription,
-  //   [
-  //     [sparkOfIngenuity, 2],
-  //     [primalChaos, 160],
-  //     [cosmicInk, 6],
-  //     [runedWrithebark, 10],
-  //     [chilledRune, 8],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   2,
-  //   300,
-  //   null,
-  //   { Staves: 5 },
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Runebinding: 0 }],
-  //     ["Missive", { Woodcarving: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Illustrious Insight", { RuneMastery: 40, Staves: 25 }],
-  //     ["Blotting Sand", { Ruenbinding: 30 }],
-  //   ]
-  // );
-  // const kineticPillarOfTheIslesRecipe = await createRecipe(
-  //   null,
-  //   kineticPillarOfTheIsles,
-  //   1,
-  //   inscription,
-  //   [
-  //     [sparkOfIngenuity, 2],
-  //     [primalChaos, 160],
-  //     [cosmicInk, 6],
-  //     [runedWrithebark, 10],
-  //     [chilledRune, 8],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   2,
-  //   300,
-  //   null,
-  //   { Staves: 0 },
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Runebinding: 0 }],
-  //     ["Missive", { Woodcarving: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Illustrious Insight", { RuneMastery: 40, Staves: 25 }],
-  //     ["Blotting Sand", { Ruenbinding: 30 }],
-  //   ]
-  // );
-  // const weatheredExplorersStaveRecipe = await createRecipe(
-  //   null,
-  //   weatheredExplorersStave,
-  //   1,
-  //   inscription,
-  //   [
-  //     [sparkOfIngenuity, 2],
-  //     [primalChaos, 160],
-  //     [awakenedDecay, 8],
-  //     [cosmicInk, 12],
-  //     [runedWrithebark, 8],
-  //     [chilledRune, 5],
-  //   ],
-  //   null,
-  //   "Weapons",
-  //   2,
-  //   350,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Scribe's Drafting Table",
-  //   "Dropped from creatures, probably Decayed ones?",
-  //   [
-  //     ["Primal Infusion", { Runebinding: 0 }],
-  //     ["Illustrious Insight", { RuneMastery: 40, Staves: 25 }],
-  //     ["Blotting Sand", { Ruenbinding: 30 }],
-  //   ]
-  // );
-  // const coreExplorersCompendiumRecipe = await createRecipe(
-  //   null,
-  //   coreExplorersCompendium,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 20],
-  //     [rousingEarth, 5],
-  //     [blazingInk, 1],
-  //     [chilledRune, 1],
-  //   ],
-  //   15,
-  //   "Weapons",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Missive", { RunicScripture: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, Codexes: 25 }],
-  //     ["Blotting Sand", { Runebinding: 30 }],
-  //   ]
-  // );
-  // const overseersWrithebarkStaveRecipe = await createRecipe(
-  //   null,
-  //   overseersWrithebarkStave,
-  //   1,
-  //   inscription,
-  //   [
-  //     [blazingInk, 1],
-  //     [runedWrithebark, 1],
-  //   ],
-  //   15,
-  //   "Weapons",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Missive", { Woodcarving: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, Staves: 25 }],
-  //     ["Blotting Sand", { Runebinding: 30 }],
-  //   ]
-  // );
-  // const pioneersWrithebarkStaveRecipe = await createRecipe(
-  //   null,
-  //   pioneersWrithebarkStave,
-  //   1,
-  //   inscription,
-  //   [
-  //     [sereneInk, 1],
-  //     [runedWrithebark, 1],
-  //   ],
-  //   15,
-  //   "Weapons",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Missive", { Woodcarving: 0 }],
-  //     ["Embellishment", {}],
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, Staves: 25 }],
-  //     ["Blotting Sand", { Runebinding: 30 }],
-  //   ]
-  // );
-  // const emberscaleSigilRecipe = await createRecipe(
-  //   null,
-  //   emberscaleSigil,
-  //   1,
-  //   inscription,
-  //   [
-  //     [awakenedFire, 1],
-  //     [blazingInk, 1],
-  //     [burnishedInk, 2],
-  //   ],
-  //   null,
-  //   "Runes and Sigils",
-  //   2,
-  //   300,
-  //   null,
-  //   { EmberscaleSigil: 0 },
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, ScaleSigils: 20 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const jetscaleSigilRecipe = await createRecipe(
-  //   null,
-  //   jetscaleSigil,
-  //   1,
-  //   inscription,
-  //   [
-  //     [awakenedIre, 1],
-  //     [cosmicInk, 1],
-  //   ],
-  //   null,
-  //   "Runes and Sigils",
-  //   2,
-  //   300,
-  //   null,
-  //   { JetscaleSigil: 0 },
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, ScaleSigils: 20 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const sagescaleSigilRecipe = await createRecipe(
-  //   null,
-  //   sagescaleSigil,
-  //   1,
-  //   inscription,
-  //   [
-  //     [awakenedEarth, 1],
-  //     [flourishingInk, 1],
-  //     [burnishedInk, 2],
-  //   ],
-  //   null,
-  //   "Runes and Sigils",
-  //   2,
-  //   300,
-  //   null,
-  //   { SagescaleSigil: 0 },
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, ScaleSigils: 20 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const azurescaleSigilRecipe = await createRecipe(
-  //   null,
-  //   azurescaleSigil,
-  //   1,
-  //   inscription,
-  //   [
-  //     [awakenedFrost, 1],
-  //     [sereneInk, 1],
-  //     [burnishedInk, 2],
-  //   ],
-  //   null,
-  //   "Runes and Sigils",
-  //   2,
-  //   300,
-  //   null,
-  //   { AzurescaleSigil: 0 },
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, ScaleSigils: 20 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const bronzescaleSigilRecipe = await createRecipe(
-  //   null,
-  //   bronzescaleSigil,
-  //   1,
-  //   inscription,
-  //   [
-  //     [awakenedOrder, 1],
-  //     [burnishedInk, 2],
-  //   ],
-  //   null,
-  //   "Runes and Sigils",
-  //   2,
-  //   300,
-  //   null,
-  //   { BronzescaleSigil: 0 },
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, ScaleSigils: 20 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const vantusRuneVaultOfTheIncarnatesRecipe = await createRecipe(
-  //   null,
-  //   vantusRuneVaultOfTheIncarnates,
-  //   1,
-  //   inscription,
-  //   [
-  //     [burnishedInk, 2],
-  //     [chilledRune, 1],
-  //   ],
-  //   50,
-  //   "Runes and Sigils",
-  //   1,
-  //   360,
-  //   null,
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, VantusRunes: 20 }],
-  //     ["Blotting Sand", { Runebinding: 30 }],
-  //   ]
-  // );
-  // const buzzingRuneRecipe = await createRecipe(
-  //   null,
-  //   buzzingRune,
-  //   2,
-  //   inscription,
-  //   [[chilledRune, 1]],
-  //   25,
-  //   "Runes and Sigils",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, FaunaRunes: 20 }],
-  //     ["Blotting Sand", { Runebinding: 30 }],
-  //   ]
-  // );
-  // const chirpingRuneRecipe = await createRecipe(
-  //   null,
-  //   chirpingRune,
-  //   2,
-  //   inscription,
-  //   [[chilledRune, 1]],
-  //   25,
-  //   "Runes and Sigils",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, FaunaRunes: 20 }],
-  //     ["Blotting Sand", { Runebinding: 30 }],
-  //   ]
-  // );
-  // const howlingRuneRecipe = await createRecipe(
-  //   null,
-  //   howlingRune,
-  //   2,
-  //   inscription,
-  //   [[chilledRune, 1]],
-  //   25,
-  //   "Runes and Sigils",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, FaunaRunes: 20 }],
-  //     ["Blotting Sand", { Runebinding: 30 }],
-  //   ]
-  // );
-  // const alchemistsBrilliantMixingRodRecipe = await createRecipe(
-  //   null,
-  //   alchemistsBrilliantMixingRod,
-  //   1,
-  //   inscription,
-  //   [
-  //     [artisansMettle, 300],
-  //     [runedWrithebark, 12],
-  //     [draconiumOre, 30],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   375,
-  //   { ArtisansConsortium: "Valued" },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Illustrious Insight", { RuneMastery: 40, ProfessionTools: 20 }],
-  //     ["Blotting Sand", { Runebinding: 30 }],
-  //   ]
-  // );
-  // const chefsSplendidRollingPinRecipe = await createRecipe(
-  //   null,
-  //   chefsSplendidRollingPin,
-  //   1,
-  //   inscription,
-  //   [
-  //     [runedWrithebark, 12],
-  //     [draconiumOre, 30],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   375,
-  //   { ArtisansConsortium: "Valued" },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Illustrious Insight", { RuneMastery: 40, ProfessionTools: 20 }],
-  //     ["Blotting Sand", { Runebinding: 30 }],
-  //   ]
-  // );
-  // const scribesResplendentQuillRecipe = await createRecipe(
-  //   null,
-  //   scribesResplendentQuill,
-  //   1,
-  //   inscription,
-  //   [
-  //     [artisansMettle, 300],
-  //     [contouredFowlfeather, 1],
-  //     [runedWrithebark, 12],
-  //     [cosmicInk, 4],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   375,
-  //   null,
-  //   { ProfessionTools: 10 },
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Illustrious Insight", { RuneMastery: 40, ProfessionTools: 20 }],
-  //     ["Blotting Sand", { Runebinding: 30 }],
-  //   ]
-  // );
-  // const alchemistsSturdyMixingRodRecipe = await createRecipe(
-  //   null,
-  //   alchemistsSturdyMixingRod,
-  //   1,
-  //   inscription,
-  //   [
-  //     [runedWrithebark, 1],
-  //     [sereneInk, 1],
-  //   ],
-  //   25,
-  //   "Profession Equipment",
-  //   2,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, ProfessionTools: 20 }],
-  //     ["Blotting Sand", { Runebinding: 30 }],
-  //   ]
-  // );
-  // const chefsSmoothRollingPinRecipe = await createRecipe(
-  //   null,
-  //   chefsSmoothRollingPin,
-  //   1,
-  //   inscription,
-  //   [
-  //     [runedWrithebark, 1],
-  //     [blazingInk, 1],
-  //   ],
-  //   25,
-  //   "Profession Equipment",
-  //   2,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, ProfessionTools: 20 }],
-  //     ["Blotting Sand", { Runebinding: 30 }],
-  //   ]
-  // );
-  // const scribesFastenedQuillRecipe = await createRecipe(
-  //   null,
-  //   scribesFastenedQuill,
-  //   1,
-  //   inscription,
-  //   [
-  //     [contouredFowlfeather, 1],
-  //     [runedWrithebark, 1],
-  //     [sereneInk, 1],
-  //   ],
-  //   25,
-  //   "Profession Equipment",
-  //   2,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Missive", {}],
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, ProfessionTools: 20 }],
-  //     ["Blotting Sand", { Runebinding: 30 }],
-  //   ]
-  // );
-  // const illusionParchmentWhirlingBreezeRecipe = await createRecipe(
-  //   null,
-  //   illusionParchmentWhirlingBreeze,
-  //   5,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 3],
-  //     [iridescentWater, 3],
-  //     [awakenedAir, 1],
-  //     [flourishingInk, 1],
-  //   ],
-  //   null,
-  //   "Scrolls",
-  //   1,
-  //   null,
-  //   { ValdrakkenAccord: 28 }
-  // );
-  // const illusionParchmentAquaTorrentRecipe = await createRecipe(
-  //   null,
-  //   illusionParchmentAquaTorrent,
-  //   5,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 3],
-  //     [iridescentWater, 3],
-  //     [awakenedFrost, 1],
-  //     [sereneInk, 1],
-  //   ],
-  //   null,
-  //   "Scrolls",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   null,
-  //   "Drops from Draconic Message in a Bottle."
-  // );
-  // const illusionParchmentArcaneBurstRecipe = await createRecipe(
-  //   null,
-  //   illusionParchmentArcaneBurst,
-  //   5,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 3],
-  //     [iridescentWater, 3],
-  //     [awakenedOrder, 1],
-  //     [burnishedInk, 1],
-  //   ],
-  //   null,
-  //   "Scrolls",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   null,
-  //   "Drops from creatures in Thaldraszus."
-  // );
-  // const illusionParchmentChillingWindRecipe = await createRecipe(
-  //   null,
-  //   illusionParchmentChillingWind,
-  //   5,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 3],
-  //     [iridescentWater, 3],
-  //     [awakenedFrost, 1],
-  //     [sereneInk, 1],
-  //   ],
-  //   null,
-  //   "Scrolls",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   null,
-  //   "Drops from creatures in The Azure Span."
-  // );
-  // const illusionParchmentLoveCharmRecipe = await createRecipe(
-  //   null,
-  //   illusionParchmentLoveCharm,
-  //   5,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 3],
-  //     [iridescentWater, 3],
-  //     [awakenedIre, 1],
-  //   ],
-  //   null,
-  //   "Scrolls",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Dungeon Drop",
-  //   null,
-  //   "Drops from 'Deliberately Delinquent Notes' in Algeth'ar Academy."
-  // );
-  // const illusionParchmentMagmaMissileRecipe = await createRecipe(
-  //   null,
-  //   illusionParchmentMagmaMissile,
-  //   5,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 3],
-  //     [iridescentWater, 3],
-  //     [awakenedFire, 1],
-  //     [blazingInk, 1],
-  //   ],
-  //   null,
-  //   "Scrolls",
-  //   1,
-  //   null,
-  //   { DragonscaleExpedition: 21 }
-  // );
-  // const illusionParchmentShadowOrbRecipe = await createRecipe(
-  //   null,
-  //   illusionParchmentShadowOrb,
-  //   5,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 3],
-  //     [iridescentWater, 3],
-  //     [awakenedDecay, 1],
-  //     [sereneInk, 1],
-  //   ],
-  //   null,
-  //   "Scrolls",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Dungeon Drop",
-  //   null,
-  //   "Drops from last boss in Algeth'ar Academy."
-  // );
-  // const illusionParchmentSpellShieldRecipe = await createRecipe(
-  //   null,
-  //   illusionParchmentSpellShield,
-  //   5,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 3],
-  //     [iridescentWater, 3],
-  //     [awakenedOrder, 1],
-  //     [burnishedInk, 1],
-  //   ],
-  //   15,
-  //   "Scrolls",
-  //   1
-  // );
-  // const scrollOfSalesRecipe = await createRecipe(
-  //   null,
-  //   scrollOfSales,
-  //   2,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [pentagoldSeal, 1],
-  //     [sereneInk, 1],
-  //   ],
-  //   null,
-  //   "Scrolls",
-  //   1,
-  //   150,
-  //   { ArtisansConsortium: "Esteemed" }
-  // );
-  // const bundleOCardsDragonIslesRecipe = await createRecipe(
-  //   null,
-  //   bundleOCardsDragonIsles,
-  //   1,
-  //   inscription,
-  //   [
-  //     [awakenedOrder, 3],
-  //     [awakenedAir, 3],
-  //     [awakenedEarth, 3],
-  //     [awakenedFire, 3],
-  //     [awakenedFrost, 3],
-  //     [glitteringParchment, 3],
-  //   ],
-  //   null,
-  //   "Mysteries",
-  //   1,
-  //   null,
-  //   null,
-  //   { DarkmoonMysteries: 0 }
-  // );
-  // const blazingFortuneRecipe = await createRecipe(
-  //   "Blazing Fortune",
-  //   fatedFortuneCard,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [blazingInk, 1],
-  //   ],
-  //   10,
-  //   "Mysteries",
-  //   1
-  // );
-  // const flourishingFortuneRecipe = await createRecipe(
-  //   "Flourishing Fortune",
-  //   fatedFortuneCard,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [flourishingInk, 1],
-  //   ],
-  //   10,
-  //   "Mysteries",
-  //   1
-  // );
-  // const sereneFortuneRecipe = await createRecipe(
-  //   "Serene Fortune",
-  //   fatedFortuneCard,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [sereneInk, 1],
-  //   ],
-  //   10,
-  //   "Mysteries",
-  //   1
-  // );
-  // // const extractionAwakenedAir = await(createRecipe("Extraction: Awakened Air", awakenedAir, 1, inscription, [[insert ace through eight of air here, 1]], null, "Mysteries", 1, null, null, {Air: 20}));
-  // // const extractionAwakenedEarth = await(createRecipe("Extraction: Awakened Earth", awakenedEarth, 1, inscription, [[insert ace through eight of earth here, 1]], null, "Mysteries", 1, null, null, {Earth: 20}));
-  // // const extractionAwakenedFire = await(createRecipe("Extraction: Awakened Fire", awakenedFire, 1, inscription, [[insert ace through eight of fire here, 1]], null, "Mysteries", 1, null, null, {Fire: 20}));
-  // // const extractionAwakenedFrost = await(createRecipe("Extraction: Awakened Frost", awakenedFrost, 1, inscription, [[insert ace through eight of frost here, 1]], null, "Mysteries", 1, null, null, {Frost: 20}));
-  // const contractArtisansConsortiumRecipe = await createRecipe(
-  //   null,
-  //   contractArtisansConsortium,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [burnishedInk, 3],
-  //   ],
-  //   null,
-  //   "Contracts",
-  //   1,
-  //   300,
-  //   { ArtisansConsortium: "Valued" },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const contractDragonscaleExpeditionRecipe = await createRecipe(
-  //   null,
-  //   contractDragonscaleExpedition,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [blazingInk, 1],
-  //     [chilledRune, 1],
-  //   ],
-  //   null,
-  //   "Contracts",
-  //   1,
-  //   300,
-  //   { DragonscaleExpedition: 19 },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const contractIskaaraTuskarrRecipe = await createRecipe(
-  //   null,
-  //   contractIskaaraTuskarr,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [sereneInk, 1],
-  //     [chilledRune, 1],
-  //   ],
-  //   null,
-  //   "Contracts",
-  //   1,
-  //   300,
-  //   { IskaaraTuskarr: 25 },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const contractMaruukCentaurRecipe = await createRecipe(
-  //   null,
-  //   contractMaruukCentaur,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [flourishingInk, 1],
-  //     [chilledRune, 1],
-  //   ],
-  //   null,
-  //   "Contracts",
-  //   1,
-  //   300,
-  //   { MaruukCentaur: 22 },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const contractValdrakkenAccordRecipe = await createRecipe(
-  //   null,
-  //   contractValdrakkenAccord,
-  //   1,
-  //   inscription,
-  //   [
-  //     [glitteringParchment, 1],
-  //     [burnishedInk, 2],
-  //   ],
-  //   null,
-  //   "Contracts",
-  //   1,
-  //   300,
-  //   { ValdrakkenAccord: 23 },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
-  //     ["Blotting Sand", { Archiving: 30 }],
-  //   ]
-  // );
-  // const draconicTreatiseOnAlchemyRecipe = await createRecipe(
-  //   null,
-  //   draconicTreatiseOnAlchemy,
-  //   1,
-  //   inscription,
-  //   [
-  //     [artisansMettle, 10],
-  //     [rockfangLeather, 1],
-  //     [glitteringParchment, 5],
-  //     [awakenedAir, 1],
-  //     [burnishedInk, 1],
-  //   ],
-  //   null,
-  //   "Profession Specialization",
-  //   2,
-  //   null,
-  //   null,
-  //   null,
-  //   "Crafting Other Treatises",
-  //   "Scribe's Drafting Table",
-  //   "Can be learned when crafting other Draconic Treatises."
-  // );
-  // const draconicTreatiseOnBlacksmithingRecipe = await createRecipe(
-  //   null,
-  //   draconicTreatiseOnBlacksmithing,
-  //   1,
-  //   inscription,
-  //   [
-  //     [artisansMettle, 10],
-  //     [rockfangLeather, 1],
-  //     [glitteringParchment, 5],
-  //     [awakenedFire, 1],
-  //     [burnishedInk, 1],
-  //   ],
-  //   null,
-  //   "Profession Specialization",
-  //   2,
-  //   null,
-  //   null,
-  //   null,
-  //   "Crafting Other Treatises",
-  //   "Scribe's Drafting Table",
-  //   "Can be learned when crafting other Draconic Treatises."
-  // );
-  // const draconicTreatiseOnEnchantingRecipe = await createRecipe(
-  //   null,
-  //   draconicTreatiseOnEnchanting,
-  //   1,
-  //   inscription,
-  //   [
-  //     [artisansMettle, 10],
-  //     [rockfangLeather, 1],
-  //     [glitteringParchment, 5],
-  //     [awakenedFrost, 1],
-  //     [burnishedInk, 1],
-  //   ],
-  //   null,
-  //   "Profession Specialization",
-  //   2,
-  //   null,
-  //   null,
-  //   null,
-  //   "Crafting Other Treatises",
-  //   "Scribe's Drafting Table",
-  //   "Can be learned when crafting other Draconic Treatises."
-  // );
-  // const draconicTreatiseOnEngineeringRecipe = await createRecipe(
-  //   null,
-  //   draconicTreatiseOnEngineering,
-  //   1,
-  //   inscription,
-  //   [
-  //     [artisansMettle, 10],
-  //     [rockfangLeather, 1],
-  //     [glitteringParchment, 5],
-  //     [awakenedFire, 1],
-  //     [burnishedInk, 1],
-  //   ],
-  //   null,
-  //   "Profession Specialization",
-  //   2,
-  //   null,
-  //   null,
-  //   null,
-  //   "Crafting Other Treatises",
-  //   "Scribe's Drafting Table",
-  //   "Can be learned when crafting other Draconic Treatises."
-  // );
-  // const draconicTreatiseOnHerbalismRecipe = await createRecipe(
-  //   null,
-  //   draconicTreatiseOnHerbalism,
-  //   1,
-  //   inscription,
-  //   [
-  //     [artisansMettle, 10],
-  //     [rockfangLeather, 1],
-  //     [glitteringParchment, 5],
-  //     [awakenedEarth, 1],
-  //     [burnishedInk, 1],
-  //   ],
-  //   null,
-  //   "Profession Specialization",
-  //   2,
-  //   null,
-  //   null,
-  //   null,
-  //   "Crafting Other Treatises",
-  //   "Scribe's Drafting Table",
-  //   "Can be learned when crafting other Draconic Treatises."
-  // );
-  // const draconicTreatiseOnInscriptionRecipe = await createRecipe(
-  //   null,
-  //   draconicTreatiseOnInscription,
-  //   1,
-  //   inscription,
-  //   [
-  //     [artisansMettle, 10],
-  //     [rockfangLeather, 1],
-  //     [glitteringParchment, 5],
-  //     [awakenedFrost, 1],
-  //     [burnishedInk, 1],
-  //   ],
-  //   null,
-  //   "Profession Specialization",
-  //   2,
-  //   null,
-  //   null,
-  //   { DraconicTreatises: 0 },
-  //   null,
-  //   "Scribe's Drafting Table"
-  // );
-  // const draconicTreatiseOnJewelcraftingRecipe = await createRecipe(
-  //   null,
-  //   draconicTreatiseOnJewelcrafting,
-  //   1,
-  //   inscription,
-  //   [
-  //     [artisansMettle, 10],
-  //     [rockfangLeather, 1],
-  //     [glitteringParchment, 5],
-  //     [awakenedFire, 1],
-  //     [burnishedInk, 1],
-  //   ],
-  //   null,
-  //   "Profession Specialization",
-  //   2,
-  //   null,
-  //   null,
-  //   null,
-  //   "Crafting Other Treatises",
-  //   "Scribe's Drafting Table",
-  //   "Can be learned when crafting other Draconic Treatises."
-  // );
-  // const draconicTreatiseOnLeatherworkingRecipe = await createRecipe(
-  //   null,
-  //   draconicTreatiseOnLeatherworking,
-  //   1,
-  //   inscription,
-  //   [
-  //     [artisansMettle, 10],
-  //     [rockfangLeather, 1],
-  //     [glitteringParchment, 5],
-  //     [awakenedAir, 1],
-  //     [burnishedInk, 1],
-  //   ],
-  //   null,
-  //   "Profession Specialization",
-  //   2,
-  //   null,
-  //   null,
-  //   null,
-  //   "Crafting Other Treatises",
-  //   "Scribe's Drafting Table",
-  //   "Can be learned when crafting other Draconic Treatises."
-  // );
-  // const draconicTreatiseOnMiningRecipe = await createRecipe(
-  //   null,
-  //   draconicTreatiseOnMining,
-  //   1,
-  //   inscription,
-  //   [
-  //     [artisansMettle, 10],
-  //     [rockfangLeather, 1],
-  //     [glitteringParchment, 5],
-  //     [awakenedEarth, 1],
-  //     [burnishedInk, 1],
-  //   ],
-  //   null,
-  //   "Profession Specialization",
-  //   2,
-  //   null,
-  //   null,
-  //   null,
-  //   "Crafting Other Treatises",
-  //   "Scribe's Drafting Table",
-  //   "Can be learned when crafting other Draconic Treatises."
-  // );
-  // const draconicTreatiseOnSkinningRecipe = await createRecipe(
-  //   null,
-  //   draconicTreatiseOnSkinning,
-  //   1,
-  //   inscription,
-  //   [
-  //     [artisansMettle, 10],
-  //     [rockfangLeather, 1],
-  //     [glitteringParchment, 5],
-  //     [awakenedEarth, 1],
-  //     [burnishedInk, 1],
-  //   ],
-  //   null,
-  //   "Profession Specialization",
-  //   2,
-  //   null,
-  //   null,
-  //   null,
-  //   "Crafting Other Treatises",
-  //   "Scribe's Drafting Table",
-  //   "Can be learned when crafting other Draconic Treatises."
-  // );
-  // const draconicTreatiseOnTailoringRecipe = await createRecipe(
-  //   null,
-  //   draconicTreatiseOnTailoring,
-  //   1,
-  //   inscription,
-  //   [
-  //     [artisansMettle, 10],
-  //     [rockfangLeather, 1],
-  //     [glitteringParchment, 5],
-  //     [awakenedFrost, 1],
-  //     [burnishedInk, 1],
-  //   ],
-  //   null,
-  //   "Profession Specialization",
-  //   2,
-  //   null,
-  //   null,
-  //   null,
-  //   "Crafting Other Treatises",
-  //   "Scribe's Drafting Table",
-  //   "Can be learned when crafting other Draconic Treatises."
-  // );
-  // const renewedProtoDrakeSilverAndBlueArmorRecipe = await createRecipe(
-  //   null,
-  //   renewedProtoDrakeSilverAndBlueArmor,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 20],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 8],
-  //     [finishedPrototypeRegalBarding, 1],
-  //     [rockfangLeather, 10],
-  //   ],
-  //   null,
-  //   "Dragonriding - Renewed Proto-Drake",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Dungeon Drop",
-  //   "Scribe's Drafting Table",
-  //   "Drops from Ruby Life Pools last boss."
-  // );
-  // const renewedProtoDrakeSteelAndYellowArmorRecipe = await createRecipe(
-  //   null,
-  //   renewedProtoDrakeSteelAndYellowArmor,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 20],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 8],
-  //     [finishedPrototypeExplorersBarding, 1],
-  //     [rockfangLeather, 10],
-  //   ],
-  //   null,
-  //   "Dragonriding - Renewed Proto-Drake",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Scribe's Drafting Table",
-  //   "Drops from Draconic Recipe in a Bottle."
-  // );
-  // const renewedProtoDrakeBovineHornsRecipe = await createRecipe(
-  //   null,
-  //   renewedProtoDrakeBovineHorns,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 15],
-  //     [glitteringParchment, 5],
-  //     [iridescentWater, 8],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 4],
-  //   ],
-  //   null,
-  //   "Dragonriding - Renewed Proto-Drake",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Scribe's Drafting Table",
-  //   "Drops from creatures on The Waking Shores."
-  // );
-  // const renewedProtoDrakePredatorPatternRecipe = await createRecipe(
-  //   null,
-  //   renewedProtoDrakePredatorPattern,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 15],
-  //     [glitteringParchment, 5],
-  //     [iridescentWater, 8],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 4],
-  //   ],
-  //   null,
-  //   "Dragonriding - Renewed Proto-Drake",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Scribe's Drafting Table",
-  //   "Drops from Draconic Recipe in a Bottle."
-  // );
-  // const renewedProtoDrakeSpinedCrestRecipe = await createRecipe(
-  //   null,
-  //   renewedProtoDrakeSpinedCrest,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 15],
-  //     [glitteringParchment, 5],
-  //     [iridescentWater, 8],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 4],
-  //   ],
-  //   null,
-  //   "Dragonriding - Renewed Proto-Drake",
-  //   1,
-  //   null,
-  //   { DragonscaleExpedition: 15 },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table"
-  // );
-  // const windborneVelocidrakeSilverAndBlueArmorRecipe = await createRecipe(
-  //   null,
-  //   windborneVelocidrakeSilverAndBlueArmor,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 20],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 8],
-  //     [finishedPrototypeRegalBarding, 1],
-  //     [rockfangLeather, 10],
-  //   ],
-  //   null,
-  //   "Dragonriding - Windborne Velocidrake",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Dungeon Drop",
-  //   "Scribe's Drafting Table",
-  //   "Drops from The Nokhud Offensive last boss."
-  // );
-  // const windborneVelocidrakeSteelAndOrangeArmorRecipe = await createRecipe(
-  //   null,
-  //   windborneVelocidrakeSteelAndOrangeArmor,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 20],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 8],
-  //     [finishedPrototypeExplorersBarding, 1],
-  //     [rockfangLeather, 10],
-  //   ],
-  //   null,
-  //   "Dragonriding - Windborne Velocidrake",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Scribe's Drafting Table",
-  //   "Purchasable from The Great Swog?"
-  // );
-  // const windborneVelocidrakeBlackFurRecipe = await createRecipe(
-  //   null,
-  //   windborneVelocidrakeBlackFur,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 15],
-  //     [glitteringParchment, 5],
-  //     [iridescentWater, 8],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 4],
-  //   ],
-  //   null,
-  //   "Dragonriding - Windborne Velocidrake",
-  //   1,
-  //   null,
-  //   { MaruukCentaur: 15 },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table"
-  // );
-  // const windborneVelocidrakeSpinedHeadRecipe = await createRecipe(
-  //   null,
-  //   windborneVelocidrakeSpinedHead,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 15],
-  //     [glitteringParchment, 5],
-  //     [iridescentWater, 8],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 4],
-  //   ],
-  //   null,
-  //   "Dragonriding - Windborne Velocidrake",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Scribe's Drafting Table",
-  //   "Drops from Draconic Recipe in a Bottle."
-  // );
-  // const windborneVelocidrakeWindsweptPatternRecipe = await createRecipe(
-  //   null,
-  //   windborneVelocidrakeWindsweptPattern,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 15],
-  //     [glitteringParchment, 5],
-  //     [iridescentWater, 8],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 4],
-  //   ],
-  //   null,
-  //   "Dragonriding - Windborne Velocidrake",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Scribe's Drafting Table",
-  //   "Drops from creatures in the Ohn'ahran Plains."
-  // );
-  // const highlandDrakeSilverAndBlueArmorRecipe = await createRecipe(
-  //   null,
-  //   highlandDrakeSilverAndBlueArmor,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 20],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 8],
-  //     [finishedPrototypeRegalBarding, 1],
-  //     [rockfangLeather, 10],
-  //   ],
-  //   null,
-  //   "Dragonriding - Highland Drake",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Scribe's Drafting Table",
-  //   "Drops from creatures in The Azure Span."
-  // );
-  // const highlandDrakeSteelAndYellowArmorRecipe = await createRecipe(
-  //   null,
-  //   highlandDrakeSteelAndYellowArmor,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 20],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 8],
-  //     [finishedPrototypeRegalBarding, 1],
-  //     [rockfangLeather, 10],
-  //   ],
-  //   null,
-  //   "Dragonriding - Highland Drake",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Scribe's Drafting Table",
-  //   "Purchasable from The Great Swog?"
-  // );
-  // const highlandDrakeBlackHairRecipe = await createRecipe(
-  //   null,
-  //   highlandDrakeBlackHair,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 15],
-  //     [glitteringParchment, 5],
-  //     [iridescentWater, 8],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 4],
-  //   ],
-  //   null,
-  //   "Dragonriding - Highland Drake",
-  //   1,
-  //   null,
-  //   { IskaaraTuskarr: 13 },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table"
-  // );
-  // const highlandDrakeSpinedCrestRecipe = await createRecipe(
-  //   null,
-  //   highlandDrakeSpinedCrest,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 15],
-  //     [glitteringParchment, 5],
-  //     [iridescentWater, 8],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 4],
-  //   ],
-  //   null,
-  //   "Dragonriding - Highland Drake",
-  //   1,
-  //   null,
-  //   { CobaltAssembly: "High" },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table"
-  // );
-  // const highlandDrakeSpinedThroatRecipe = await createRecipe(
-  //   null,
-  //   highlandDrakeSpinedThroat,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 15],
-  //     [glitteringParchment, 5],
-  //     [iridescentWater, 8],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 4],
-  //   ],
-  //   null,
-  //   "Dragonriding - Highland Drake",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Scribe's Drafting Table",
-  //   "Drops from Draconic Recipe in a Bottle."
-  // );
-  // const cliffsideWylderdrakeSilverAndBlueArmorRecipe = await createRecipe(
-  //   null,
-  //   cliffsideWylderdrakeSilverAndBlueArmor,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 20],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 8],
-  //     [finishedPrototypeRegalBarding, 1],
-  //     [rockfangLeather, 10],
-  //   ],
-  //   null,
-  //   "Dragonriding - Cliffside Wylderdrake",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Scribe's Drafting Table",
-  //   "Drops from creatures in Thaldraszus."
-  // );
-  // const cliffsideWylderdrakeSteelAndYellowArmorRecipe = await createRecipe(
-  //   null,
-  //   cliffsideWylderdrakeSteelAndYellowArmor,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 20],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 8],
-  //     [finishedPrototypeRegalBarding, 1],
-  //     [rockfangLeather, 10],
-  //   ],
-  //   null,
-  //   "Dragonriding - Cliffside Wylderdrake",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Scribe's Drafting Table",
-  //   "Purchasable from The Great Swog?"
-  // );
-  // const cliffsideWylderdrakeConicalHeadRecipe = await createRecipe(
-  //   null,
-  //   cliffsideWylderdrakeConicalHead,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 15],
-  //     [glitteringParchment, 5],
-  //     [iridescentWater, 8],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 4],
-  //   ],
-  //   null,
-  //   "Dragonriding - Cliffside Wylderdrake",
-  //   3,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Scribe's Drafting Table",
-  //   "Drops from Draconic Recipe in a Bottle."
-  // );
-  // const cliffsideWylderdrakeRedHairRecipe = await createRecipe(
-  //   null,
-  //   cliffsideWylderdrakeRedHair,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 15],
-  //     [glitteringParchment, 5],
-  //     [iridescentWater, 8],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 4],
-  //   ],
-  //   null,
-  //   "Dragonriding - Cliffside Wylderdrake",
-  //   3,
-  //   null,
-  //   { ValdrakkenAccord: 15 },
-  //   null,
-  //   null,
-  //   "Scribe's Drafting Table"
-  // );
-  // const cliffsideWylderdrakeTripleHeadHornsRecipe = await createRecipe(
-  //   null,
-  //   cliffsideWylderdrakeTripleHeadHorns,
-  //   1,
-  //   inscription,
-  //   [
-  //     [wildercloth, 15],
-  //     [glitteringParchment, 5],
-  //     [iridescentWater, 8],
-  //     [flawlessProtoDragonScale, 10],
-  //     [awakenedOrder, 4],
-  //   ],
-  //   null,
-  //   "Dragonriding - Cliffside Wylderdrake",
-  //   3,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Scribe's Drafting Table",
-  //   "Drops from creatures in Thaldraszus."
-  // );
+  // const dragonIslesMilling = await(createRecipe("Dragon Isles Milling", shimmeringPigment, 5, inscription, [[hochenblume, 5]], 1, "Inscription Essentials", 1, 250));
+  const cosmicInkRecipe = await createRecipe(
+    null,
+    cosmicInk,
+    2,
+    inscription,
+    [
+      [iridescentWater, 1],
+      [awakenedFrost, 1],
+      [sereneInk, 1],
+      [burnishedInk, 2],
+      [runedWrithebark, 1],
+    ],
+    35,
+    "Inks",
+    2,
+    300,
+    null,
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, FlawlessInks: 20 }],
+      ["Blotting Sand", { FlawlessInks: 0 }],
+    ]
+  );
+  const burnishedInkRecipe = await createRecipe(
+    null,
+    burnishedInk,
+    2,
+    inscription,
+    [
+      [iridescentWater, 1],
+      [blazingInk, 2],
+      [flourishingInk, 2],
+      [sereneInk, 2],
+    ],
+    20,
+    "Inks",
+    2,
+    260,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, FlawlessInks: 20 }],
+      ["Blotting Sand", { FlawlessInks: 0 }],
+    ]
+  );
+  const blazingInkRecipe = await createRecipe(
+    null,
+    blazingInk,
+    2,
+    inscription,
+    [
+      [iridescentWater, 1],
+      [shimmeringPigment, 2],
+      [blazingPigment, 1],
+      [draconicVial, 1],
+    ],
+    1,
+    "Inks",
+    1,
+    80,
+    null,
+    null,
+    null,
+    null,
+    "Learned by default.",
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, FlawlessInks: 20 }],
+      ["Blotting Sand", { FlawlessInks: 0 }],
+    ]
+  );
+  const flourishingInkRecipe = await createRecipe(
+    null,
+    flourishingInk,
+    2,
+    inscription,
+    [
+      [iridescentWater, 1],
+      [shimmeringPigment, 2],
+      [flourishingPigment, 1],
+      [draconicVial, 1],
+    ],
+    1,
+    "Inks",
+    1,
+    80,
+    null,
+    null,
+    null,
+    null,
+    "Learned by default.",
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, FlawlessInks: 20 }],
+      ["Blotting Sand", { FlawlessInks: 0 }],
+    ]
+  );
+  const sereneInkRecipe = await createRecipe(
+    null,
+    sereneInk,
+    2,
+    inscription,
+    [
+      [iridescentWater, 1],
+      [shimmeringPigment, 2],
+      [serenePigment, 1],
+      [draconicVial, 1],
+    ],
+    1,
+    "Inks",
+    1,
+    80,
+    null,
+    null,
+    null,
+    null,
+    "Learned by default.",
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, FlawlessInks: 20 }],
+      ["Blotting Sand", { FlawlessInks: 0 }],
+    ]
+  );
+  const illustriousInsightRecipeInscription = await createRecipe(
+    "Illustrious Insight",
+    illustriousInsight,
+    1,
+    inscription,
+    [[artisansMettle, 50]],
+    null,
+    "Reagents",
+    1,
+    null,
+    null,
+    null,
+    "Various Specializations",
+    "Scribe's Drafting Table"
+  );
+  const runedWrithebarkRecipe = await createRecipe(
+    null,
+    runedWrithebark,
+    1,
+    inscription,
+    [
+      [rousingAir, 5],
+      [writhebark, 5],
+      [flourishingInk, 1],
+      [chilledRune, 1],
+    ],
+    15,
+    "Reagents",
+    1,
+    260,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Lesser Illustrious Insight", { RuneMastery: 40 }]]
+  );
+  const chilledRuneRecipe = await createRecipe(
+    null,
+    chilledRune,
+    1,
+    inscription,
+    [
+      [rousingFrost, 5],
+      [sereneInk, 1],
+    ],
+    1,
+    "Reagents",
+    1,
+    260,
+    null,
+    null,
+    null,
+    null,
+    "Learned by default.",
+    [["Lesser Illustrious Insight", { RuneMastery: 40 }]]
+  );
+  const draconicMissiveOfTheAuroraRecipe = await createRecipe(
+    null,
+    draconicMissiveOfTheAurora,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [chilledRune, 1],
+      [sereneInk, 1],
+    ],
+    45,
+    "Missives",
+    1,
+    275,
+    null,
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const draconicMissiveOfTheFeverflareRecipe = await createRecipe(
+    null,
+    draconicMissiveOfTheFeverflare,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [chilledRune, 1],
+      [blazingInk, 1],
+    ],
+    45,
+    "Missives",
+    1,
+    275,
+    null,
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const draconicMissiveOfTheFireflashRecipe = await createRecipe(
+    null,
+    draconicMissiveOfTheFireflash,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [chilledRune, 1],
+      [blazingInk, 1],
+    ],
+    45,
+    "Missives",
+    1,
+    275,
+    null,
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const draconicMissiveOfTheHarmoniousRecipe = await createRecipe(
+    null,
+    draconicMissiveOfTheHarmonious,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [chilledRune, 1],
+      [sereneInk, 1],
+    ],
+    45,
+    "Missives",
+    1,
+    275,
+    null,
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const draconicMissiveOfThePeerlessRecipe = await createRecipe(
+    null,
+    draconicMissiveOfThePeerless,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [chilledRune, 1],
+      [flourishingInk, 1],
+    ],
+    45,
+    "Missives",
+    1,
+    275,
+    null,
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const draconicMissiveOfTheQuickbladeRecipe = await createRecipe(
+    null,
+    draconicMissiveOfTheQuickblade,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [chilledRune, 1],
+      [flourishingInk, 1],
+    ],
+    45,
+    "Missives",
+    1,
+    275,
+    null,
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const draconicMissiveOfCraftingSpeedRecipe = await createRecipe(
+    null,
+    draconicMissiveOfCraftingSpeed,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [chilledRune, 1],
+      [flourishingInk, 1],
+    ],
+    null,
+    "Crafting Tool Missives",
+    1,
+    275,
+    { ArtisansConsortium: "Preferred" },
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const draconicMissiveOfInspirationRecipe = await createRecipe(
+    null,
+    draconicMissiveOfInspiration,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [chilledRune, 1],
+      [blazingInk, 1],
+    ],
+    null,
+    "Crafting Tool Missives",
+    1,
+    275,
+    { ArtisansConsortium: "Preferred" },
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const draconicMissiveOfMulticraftRecipe = await createRecipe(
+    null,
+    draconicMissiveOfMulticraft,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [chilledRune, 1],
+      [flourishingInk, 1],
+    ],
+    null,
+    "Crafting Tool Missives",
+    1,
+    275,
+    { ArtisansConsortium: "Preferred" },
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const draconicMissiveOfResourcefulnessRecipe = await createRecipe(
+    null,
+    draconicMissiveOfResourcefulness,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [chilledRune, 1],
+      [blazingInk, 1],
+    ],
+    null,
+    "Crafting Tool Missives",
+    1,
+    275,
+    { ArtisansConsortium: "Preferred" },
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const draconicMissiveOfDeftnessRecipe = await createRecipe(
+    null,
+    draconicMissiveOfDeftness,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [chilledRune, 1],
+      [sereneInk, 1],
+    ],
+    null,
+    "Gathering Tool Missives",
+    1,
+    275,
+    { ArtisansConsortium: "Preferred" },
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const draconicMissiveOfFinesseRecipe = await createRecipe(
+    null,
+    draconicMissiveOfFinesse,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [chilledRune, 1],
+      [flourishingInk, 1],
+    ],
+    null,
+    "Gathering Tool Missives",
+    1,
+    275,
+    { ArtisansConsortium: "Preferred" },
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const draconicMissiveOfPerceptionRecipe = await createRecipe(
+    null,
+    draconicMissiveOfPerception,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [chilledRune, 1],
+      [sereneInk, 1],
+    ],
+    null,
+    "Gathering Tool Missives",
+    1,
+    275,
+    { ArtisansConsortium: "Preferred" },
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const darkmoonDeckBoxDanceRecipe = await createRecipe(
+    null,
+    darkmoonDeckBoxDance,
+    1,
+    inscription,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 60],
+      [darkmoonDeckDance, 1],
+      [awakenedAir, 10],
+      [writhebark, 10],
+      [cosmicInk, 12],
+    ],
+    null,
+    "Trinkets",
+    3,
+    360,
+    null,
+    { Air: 0 },
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Primal Infusion", { Archiving: 0 }],
+      ["Darkmoon Sigil", { Air: 10 }],
+      ["Illustrious Insight", { RuneMastery: 40, Air: 30 }],
+      ["Blotting Sand", { Archiving: 30, DarkmoonMysteries: 35 }],
+    ]
+  );
+  const darkmoonDeckBoxInfernoRecipe = await createRecipe(
+    null,
+    darkmoonDeckBoxInferno,
+    1,
+    inscription,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 60],
+      [darkmoonDeckInferno, 1],
+      [awakenedFire, 10],
+      [writhebark, 10],
+      [cosmicInk, 12],
+    ],
+    null,
+    "Trinkets",
+    3,
+    360,
+    null,
+    { Fire: 0 },
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Primal Infusion", { Archiving: 0 }],
+      ["Darkmoon Sigil", { Fire: 10 }],
+      ["Illustrious Insight", { RuneMastery: 40, Fire: 30 }],
+      ["Blotting Sand", { Archiving: 30, DarkmoonMysteries: 35 }],
+    ]
+  );
+  const darkmoonDeckBoxRimeRecipe = await createRecipe(
+    null,
+    darkmoonDeckBoxRime,
+    1,
+    inscription,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 60],
+      [darkmoonDeckRime, 1],
+      [awakenedFrost, 10],
+      [writhebark, 10],
+      [cosmicInk, 12],
+    ],
+    null,
+    "Trinkets",
+    3,
+    360,
+    null,
+    { Frost: 0 },
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Primal Infusion", { Archiving: 0 }],
+      ["Darkmoon Sigil", { Frost: 10 }],
+      ["Illustrious Insight", { RuneMastery: 40, Frost: 30 }],
+      ["Blotting Sand", { Archiving: 30, DarkmoonMysteries: 35 }],
+    ]
+  );
+  const darkmoonDeckBoxWatcherRecipe = await createRecipe(
+    null,
+    darkmoonDeckBoxWatcher,
+    1,
+    inscription,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 60],
+      [darkmoonDeckWatcher, 1],
+      [awakenedEarth, 10],
+      [writhebark, 10],
+      [cosmicInk, 12],
+    ],
+    null,
+    "Trinkets",
+    3,
+    360,
+    null,
+    { Earth: 0 },
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Primal Infusion", { Archiving: 0 }],
+      ["Darkmoon Sigil", { Earth: 10 }],
+      ["Illustrious Insight", { RuneMastery: 40, Earth: 30 }],
+      ["Blotting Sand", { Archiving: 30, DarkmoonMysteries: 35 }],
+    ]
+  );
+  const cracklingCodexOfTheIslesRecipe = await createRecipe(
+    null,
+    cracklingCodexOfTheIsles,
+    1,
+    inscription,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 40],
+      [awakenedAir, 10],
+      [glitteringParchment, 20],
+      [cosmicInk, 12],
+      [runedWrithebark, 5],
+      [chilledRune, 4],
+    ],
+    null,
+    "Weapons",
+    2,
+    300,
+    null,
+    { Codexes: 0 },
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Primal Infusion", { Runebinding: 0 }],
+      ["Missive", { RunicScripture: 0 }],
+      ["Embellishment", {}],
+      ["Illustrious Insight", { RuneMastery: 40, Codexes: 25 }],
+      ["Blotting Sand", { Ruenbinding: 30 }],
+    ]
+  );
+  const illuminatingPillarOfTheIslesRecipe = await createRecipe(
+    null,
+    illuminatingPillarOfTheIsles,
+    1,
+    inscription,
+    [
+      [sparkOfIngenuity, 2],
+      [primalChaos, 160],
+      [cosmicInk, 6],
+      [runedWrithebark, 10],
+      [chilledRune, 8],
+    ],
+    null,
+    "Weapons",
+    2,
+    300,
+    null,
+    { Staves: 5 },
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Primal Infusion", { Runebinding: 0 }],
+      ["Missive", { Woodcarving: 0 }],
+      ["Embellishment", {}],
+      ["Illustrious Insight", { RuneMastery: 40, Staves: 25 }],
+      ["Blotting Sand", { Ruenbinding: 30 }],
+    ]
+  );
+  const kineticPillarOfTheIslesRecipe = await createRecipe(
+    null,
+    kineticPillarOfTheIsles,
+    1,
+    inscription,
+    [
+      [sparkOfIngenuity, 2],
+      [primalChaos, 160],
+      [cosmicInk, 6],
+      [runedWrithebark, 10],
+      [chilledRune, 8],
+    ],
+    null,
+    "Weapons",
+    2,
+    300,
+    null,
+    { Staves: 0 },
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Primal Infusion", { Runebinding: 0 }],
+      ["Missive", { Woodcarving: 0 }],
+      ["Embellishment", {}],
+      ["Illustrious Insight", { RuneMastery: 40, Staves: 25 }],
+      ["Blotting Sand", { Ruenbinding: 30 }],
+    ]
+  );
+  const weatheredExplorersStaveRecipe = await createRecipe(
+    null,
+    weatheredExplorersStave,
+    1,
+    inscription,
+    [
+      [sparkOfIngenuity, 2],
+      [primalChaos, 160],
+      [awakenedDecay, 8],
+      [cosmicInk, 12],
+      [runedWrithebark, 8],
+      [chilledRune, 5],
+    ],
+    null,
+    "Weapons",
+    2,
+    350,
+    null,
+    null,
+    "World Drop",
+    "Scribe's Drafting Table",
+    "Dropped from creatures, probably Decayed ones?",
+    [
+      ["Primal Infusion", { Runebinding: 0 }],
+      ["Illustrious Insight", { RuneMastery: 40, Staves: 25 }],
+      ["Blotting Sand", { Ruenbinding: 30 }],
+    ]
+  );
+  const coreExplorersCompendiumRecipe = await createRecipe(
+    null,
+    coreExplorersCompendium,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 20],
+      [rousingEarth, 5],
+      [blazingInk, 1],
+      [chilledRune, 1],
+    ],
+    15,
+    "Weapons",
+    2,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Missive", { RunicScripture: 0 }],
+      ["Embellishment", {}],
+      ["Lesser Illustrious Insight", { RuneMastery: 40, Codexes: 25 }],
+      ["Blotting Sand", { Runebinding: 30 }],
+    ]
+  );
+  const overseersWrithebarkStaveRecipe = await createRecipe(
+    null,
+    overseersWrithebarkStave,
+    1,
+    inscription,
+    [
+      [blazingInk, 1],
+      [runedWrithebark, 1],
+    ],
+    15,
+    "Weapons",
+    2,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Missive", { Woodcarving: 0 }],
+      ["Embellishment", {}],
+      ["Lesser Illustrious Insight", { RuneMastery: 40, Staves: 25 }],
+      ["Blotting Sand", { Runebinding: 30 }],
+    ]
+  );
+  const pioneersWrithebarkStaveRecipe = await createRecipe(
+    null,
+    pioneersWrithebarkStave,
+    1,
+    inscription,
+    [
+      [sereneInk, 1],
+      [runedWrithebark, 1],
+    ],
+    15,
+    "Weapons",
+    2,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Missive", { Woodcarving: 0 }],
+      ["Embellishment", {}],
+      ["Lesser Illustrious Insight", { RuneMastery: 40, Staves: 25 }],
+      ["Blotting Sand", { Runebinding: 30 }],
+    ]
+  );
+  const emberscaleSigilRecipe = await createRecipe(
+    null,
+    emberscaleSigil,
+    1,
+    inscription,
+    [
+      [awakenedFire, 1],
+      [blazingInk, 1],
+      [burnishedInk, 2],
+    ],
+    null,
+    "Runes and Sigils",
+    2,
+    300,
+    null,
+    { EmberscaleSigil: 0 },
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, ScaleSigils: 20 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const jetscaleSigilRecipe = await createRecipe(
+    null,
+    jetscaleSigil,
+    1,
+    inscription,
+    [
+      [awakenedIre, 1],
+      [cosmicInk, 1],
+    ],
+    null,
+    "Runes and Sigils",
+    2,
+    300,
+    null,
+    { JetscaleSigil: 0 },
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, ScaleSigils: 20 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const sagescaleSigilRecipe = await createRecipe(
+    null,
+    sagescaleSigil,
+    1,
+    inscription,
+    [
+      [awakenedEarth, 1],
+      [flourishingInk, 1],
+      [burnishedInk, 2],
+    ],
+    null,
+    "Runes and Sigils",
+    2,
+    300,
+    null,
+    { SagescaleSigil: 0 },
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, ScaleSigils: 20 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const azurescaleSigilRecipe = await createRecipe(
+    null,
+    azurescaleSigil,
+    1,
+    inscription,
+    [
+      [awakenedFrost, 1],
+      [sereneInk, 1],
+      [burnishedInk, 2],
+    ],
+    null,
+    "Runes and Sigils",
+    2,
+    300,
+    null,
+    { AzurescaleSigil: 0 },
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, ScaleSigils: 20 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const bronzescaleSigilRecipe = await createRecipe(
+    null,
+    bronzescaleSigil,
+    1,
+    inscription,
+    [
+      [awakenedOrder, 1],
+      [burnishedInk, 2],
+    ],
+    null,
+    "Runes and Sigils",
+    2,
+    300,
+    null,
+    { BronzescaleSigil: 0 },
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, ScaleSigils: 20 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const vantusRuneVaultOfTheIncarnatesRecipe = await createRecipe(
+    null,
+    vantusRuneVaultOfTheIncarnates,
+    1,
+    inscription,
+    [
+      [burnishedInk, 2],
+      [chilledRune, 1],
+    ],
+    50,
+    "Runes and Sigils",
+    1,
+    360,
+    null,
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, VantusRunes: 20 }],
+      ["Blotting Sand", { Runebinding: 30 }],
+    ]
+  );
+  const buzzingRuneRecipe = await createRecipe(
+    null,
+    buzzingRune,
+    2,
+    inscription,
+    [[chilledRune, 1]],
+    25,
+    "Runes and Sigils",
+    1,
+    300,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, FaunaRunes: 20 }],
+      ["Blotting Sand", { Runebinding: 30 }],
+    ]
+  );
+  const chirpingRuneRecipe = await createRecipe(
+    null,
+    chirpingRune,
+    2,
+    inscription,
+    [[chilledRune, 1]],
+    25,
+    "Runes and Sigils",
+    1,
+    300,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, FaunaRunes: 20 }],
+      ["Blotting Sand", { Runebinding: 30 }],
+    ]
+  );
+  const howlingRuneRecipe = await createRecipe(
+    null,
+    howlingRune,
+    2,
+    inscription,
+    [[chilledRune, 1]],
+    25,
+    "Runes and Sigils",
+    1,
+    300,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, FaunaRunes: 20 }],
+      ["Blotting Sand", { Runebinding: 30 }],
+    ]
+  );
+  const alchemistsBrilliantMixingRodRecipe = await createRecipe(
+    null,
+    alchemistsBrilliantMixingRod,
+    1,
+    inscription,
+    [
+      [artisansMettle, 300],
+      [runedWrithebark, 12],
+      [draconiumOre, 30],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    375,
+    { ArtisansConsortium: "Valued" },
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Missive", {}],
+      ["Illustrious Insight", { RuneMastery: 40, ProfessionTools: 20 }],
+      ["Blotting Sand", { Runebinding: 30 }],
+    ]
+  );
+  const chefsSplendidRollingPinRecipe = await createRecipe(
+    null,
+    chefsSplendidRollingPin,
+    1,
+    inscription,
+    [
+      [runedWrithebark, 12],
+      [draconiumOre, 30],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    375,
+    { ArtisansConsortium: "Valued" },
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Illustrious Insight", { RuneMastery: 40, ProfessionTools: 20 }],
+      ["Blotting Sand", { Runebinding: 30 }],
+    ]
+  );
+  const scribesResplendentQuillRecipe = await createRecipe(
+    null,
+    scribesResplendentQuill,
+    1,
+    inscription,
+    [
+      [artisansMettle, 300],
+      [contouredFowlfeather, 1],
+      [runedWrithebark, 12],
+      [cosmicInk, 4],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    375,
+    null,
+    { ProfessionTools: 10 },
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Missive", {}],
+      ["Illustrious Insight", { RuneMastery: 40, ProfessionTools: 20 }],
+      ["Blotting Sand", { Runebinding: 30 }],
+    ]
+  );
+  const alchemistsSturdyMixingRodRecipe = await createRecipe(
+    null,
+    alchemistsSturdyMixingRod,
+    1,
+    inscription,
+    [
+      [runedWrithebark, 1],
+      [sereneInk, 1],
+    ],
+    25,
+    "Profession Equipment",
+    2,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Missive", {}],
+      ["Lesser Illustrious Insight", { RuneMastery: 40, ProfessionTools: 20 }],
+      ["Blotting Sand", { Runebinding: 30 }],
+    ]
+  );
+  const chefsSmoothRollingPinRecipe = await createRecipe(
+    null,
+    chefsSmoothRollingPin,
+    1,
+    inscription,
+    [
+      [runedWrithebark, 1],
+      [blazingInk, 1],
+    ],
+    25,
+    "Profession Equipment",
+    2,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, ProfessionTools: 20 }],
+      ["Blotting Sand", { Runebinding: 30 }],
+    ]
+  );
+  const scribesFastenedQuillRecipe = await createRecipe(
+    null,
+    scribesFastenedQuill,
+    1,
+    inscription,
+    [
+      [contouredFowlfeather, 1],
+      [runedWrithebark, 1],
+      [sereneInk, 1],
+    ],
+    25,
+    "Profession Equipment",
+    2,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Missive", {}],
+      ["Lesser Illustrious Insight", { RuneMastery: 40, ProfessionTools: 20 }],
+      ["Blotting Sand", { Runebinding: 30 }],
+    ]
+  );
+  const illusionParchmentWhirlingBreezeRecipe = await createRecipe(
+    null,
+    illusionParchmentWhirlingBreeze,
+    5,
+    inscription,
+    [
+      [glitteringParchment, 3],
+      [iridescentWater, 3],
+      [awakenedAir, 1],
+      [flourishingInk, 1],
+    ],
+    null,
+    "Scrolls",
+    1,
+    null,
+    { ValdrakkenAccord: 28 }
+  );
+  const illusionParchmentAquaTorrentRecipe = await createRecipe(
+    null,
+    illusionParchmentAquaTorrent,
+    5,
+    inscription,
+    [
+      [glitteringParchment, 3],
+      [iridescentWater, 3],
+      [awakenedFrost, 1],
+      [sereneInk, 1],
+    ],
+    null,
+    "Scrolls",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    null,
+    "Drops from Draconic Message in a Bottle."
+  );
+  const illusionParchmentArcaneBurstRecipe = await createRecipe(
+    null,
+    illusionParchmentArcaneBurst,
+    5,
+    inscription,
+    [
+      [glitteringParchment, 3],
+      [iridescentWater, 3],
+      [awakenedOrder, 1],
+      [burnishedInk, 1],
+    ],
+    null,
+    "Scrolls",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    null,
+    "Drops from creatures in Thaldraszus."
+  );
+  const illusionParchmentChillingWindRecipe = await createRecipe(
+    null,
+    illusionParchmentChillingWind,
+    5,
+    inscription,
+    [
+      [glitteringParchment, 3],
+      [iridescentWater, 3],
+      [awakenedFrost, 1],
+      [sereneInk, 1],
+    ],
+    null,
+    "Scrolls",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    null,
+    "Drops from creatures in The Azure Span."
+  );
+  const illusionParchmentLoveCharmRecipe = await createRecipe(
+    null,
+    illusionParchmentLoveCharm,
+    5,
+    inscription,
+    [
+      [glitteringParchment, 3],
+      [iridescentWater, 3],
+      [awakenedIre, 1],
+    ],
+    null,
+    "Scrolls",
+    1,
+    null,
+    null,
+    null,
+    "Dungeon Drop",
+    null,
+    "Drops from 'Deliberately Delinquent Notes' in Algeth'ar Academy."
+  );
+  const illusionParchmentMagmaMissileRecipe = await createRecipe(
+    null,
+    illusionParchmentMagmaMissile,
+    5,
+    inscription,
+    [
+      [glitteringParchment, 3],
+      [iridescentWater, 3],
+      [awakenedFire, 1],
+      [blazingInk, 1],
+    ],
+    null,
+    "Scrolls",
+    1,
+    null,
+    { DragonscaleExpedition: 21 }
+  );
+  const illusionParchmentShadowOrbRecipe = await createRecipe(
+    null,
+    illusionParchmentShadowOrb,
+    5,
+    inscription,
+    [
+      [glitteringParchment, 3],
+      [iridescentWater, 3],
+      [awakenedDecay, 1],
+      [sereneInk, 1],
+    ],
+    null,
+    "Scrolls",
+    1,
+    null,
+    null,
+    null,
+    "Dungeon Drop",
+    null,
+    "Drops from last boss in Algeth'ar Academy."
+  );
+  const illusionParchmentSpellShieldRecipe = await createRecipe(
+    null,
+    illusionParchmentSpellShield,
+    5,
+    inscription,
+    [
+      [glitteringParchment, 3],
+      [iridescentWater, 3],
+      [awakenedOrder, 1],
+      [burnishedInk, 1],
+    ],
+    15,
+    "Scrolls",
+    1
+  );
+  const scrollOfSalesRecipe = await createRecipe(
+    null,
+    scrollOfSales,
+    2,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [pentagoldSeal, 1],
+      [sereneInk, 1],
+    ],
+    null,
+    "Scrolls",
+    1,
+    150,
+    { ArtisansConsortium: "Esteemed" }
+  );
+  const bundleOCardsDragonIslesRecipe = await createRecipe(
+    null,
+    bundleOCardsDragonIsles,
+    1,
+    inscription,
+    [
+      [awakenedOrder, 3],
+      [awakenedAir, 3],
+      [awakenedEarth, 3],
+      [awakenedFire, 3],
+      [awakenedFrost, 3],
+      [glitteringParchment, 3],
+    ],
+    null,
+    "Mysteries",
+    1,
+    null,
+    null,
+    { DarkmoonMysteries: 0 }
+  );
+  const blazingFortuneRecipe = await createRecipe(
+    "Blazing Fortune",
+    fatedFortuneCard,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [blazingInk, 1],
+    ],
+    10,
+    "Mysteries",
+    1
+  );
+  const flourishingFortuneRecipe = await createRecipe(
+    "Flourishing Fortune",
+    fatedFortuneCard,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [flourishingInk, 1],
+    ],
+    10,
+    "Mysteries",
+    1
+  );
+  const sereneFortuneRecipe = await createRecipe(
+    "Serene Fortune",
+    fatedFortuneCard,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [sereneInk, 1],
+    ],
+    10,
+    "Mysteries",
+    1
+  );
+  // const extractionAwakenedAir = await(createRecipe("Extraction: Awakened Air", awakenedAir, 1, inscription, [[insert ace through eight of air here, 1]], null, "Mysteries", 1, null, null, {Air: 20}));
+  // const extractionAwakenedEarth = await(createRecipe("Extraction: Awakened Earth", awakenedEarth, 1, inscription, [[insert ace through eight of earth here, 1]], null, "Mysteries", 1, null, null, {Earth: 20}));
+  // const extractionAwakenedFire = await(createRecipe("Extraction: Awakened Fire", awakenedFire, 1, inscription, [[insert ace through eight of fire here, 1]], null, "Mysteries", 1, null, null, {Fire: 20}));
+  // const extractionAwakenedFrost = await(createRecipe("Extraction: Awakened Frost", awakenedFrost, 1, inscription, [[insert ace through eight of frost here, 1]], null, "Mysteries", 1, null, null, {Frost: 20}));
+  const contractArtisansConsortiumRecipe = await createRecipe(
+    null,
+    contractArtisansConsortium,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [burnishedInk, 3],
+    ],
+    null,
+    "Contracts",
+    1,
+    300,
+    { ArtisansConsortium: "Valued" },
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const contractDragonscaleExpeditionRecipe = await createRecipe(
+    null,
+    contractDragonscaleExpedition,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [blazingInk, 1],
+      [chilledRune, 1],
+    ],
+    null,
+    "Contracts",
+    1,
+    300,
+    { DragonscaleExpedition: 19 },
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const contractIskaaraTuskarrRecipe = await createRecipe(
+    null,
+    contractIskaaraTuskarr,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [sereneInk, 1],
+      [chilledRune, 1],
+    ],
+    null,
+    "Contracts",
+    1,
+    300,
+    { IskaaraTuskarr: 25 },
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const contractMaruukCentaurRecipe = await createRecipe(
+    null,
+    contractMaruukCentaur,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [flourishingInk, 1],
+      [chilledRune, 1],
+    ],
+    null,
+    "Contracts",
+    1,
+    300,
+    { MaruukCentaur: 22 },
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const contractValdrakkenAccordRecipe = await createRecipe(
+    null,
+    contractValdrakkenAccord,
+    1,
+    inscription,
+    [
+      [glitteringParchment, 1],
+      [burnishedInk, 2],
+    ],
+    null,
+    "Contracts",
+    1,
+    300,
+    { ValdrakkenAccord: 23 },
+    null,
+    null,
+    "Scribe's Drafting Table",
+    null,
+    [
+      ["Lesser Illustrious Insight", { RuneMastery: 40, SharedKnowledge: 25 }],
+      ["Blotting Sand", { Archiving: 30 }],
+    ]
+  );
+  const draconicTreatiseOnAlchemyRecipe = await createRecipe(
+    null,
+    draconicTreatiseOnAlchemy,
+    1,
+    inscription,
+    [
+      [artisansMettle, 10],
+      [rockfangLeather, 1],
+      [glitteringParchment, 5],
+      [awakenedAir, 1],
+      [burnishedInk, 1],
+    ],
+    null,
+    "Profession Specialization",
+    2,
+    null,
+    null,
+    null,
+    "Crafting Other Treatises",
+    "Scribe's Drafting Table",
+    "Can be learned when crafting other Draconic Treatises."
+  );
+  const draconicTreatiseOnBlacksmithingRecipe = await createRecipe(
+    null,
+    draconicTreatiseOnBlacksmithing,
+    1,
+    inscription,
+    [
+      [artisansMettle, 10],
+      [rockfangLeather, 1],
+      [glitteringParchment, 5],
+      [awakenedFire, 1],
+      [burnishedInk, 1],
+    ],
+    null,
+    "Profession Specialization",
+    2,
+    null,
+    null,
+    null,
+    "Crafting Other Treatises",
+    "Scribe's Drafting Table",
+    "Can be learned when crafting other Draconic Treatises."
+  );
+  const draconicTreatiseOnEnchantingRecipe = await createRecipe(
+    null,
+    draconicTreatiseOnEnchanting,
+    1,
+    inscription,
+    [
+      [artisansMettle, 10],
+      [rockfangLeather, 1],
+      [glitteringParchment, 5],
+      [awakenedFrost, 1],
+      [burnishedInk, 1],
+    ],
+    null,
+    "Profession Specialization",
+    2,
+    null,
+    null,
+    null,
+    "Crafting Other Treatises",
+    "Scribe's Drafting Table",
+    "Can be learned when crafting other Draconic Treatises."
+  );
+  const draconicTreatiseOnEngineeringRecipe = await createRecipe(
+    null,
+    draconicTreatiseOnEngineering,
+    1,
+    inscription,
+    [
+      [artisansMettle, 10],
+      [rockfangLeather, 1],
+      [glitteringParchment, 5],
+      [awakenedFire, 1],
+      [burnishedInk, 1],
+    ],
+    null,
+    "Profession Specialization",
+    2,
+    null,
+    null,
+    null,
+    "Crafting Other Treatises",
+    "Scribe's Drafting Table",
+    "Can be learned when crafting other Draconic Treatises."
+  );
+  const draconicTreatiseOnHerbalismRecipe = await createRecipe(
+    null,
+    draconicTreatiseOnHerbalism,
+    1,
+    inscription,
+    [
+      [artisansMettle, 10],
+      [rockfangLeather, 1],
+      [glitteringParchment, 5],
+      [awakenedEarth, 1],
+      [burnishedInk, 1],
+    ],
+    null,
+    "Profession Specialization",
+    2,
+    null,
+    null,
+    null,
+    "Crafting Other Treatises",
+    "Scribe's Drafting Table",
+    "Can be learned when crafting other Draconic Treatises."
+  );
+  const draconicTreatiseOnInscriptionRecipe = await createRecipe(
+    null,
+    draconicTreatiseOnInscription,
+    1,
+    inscription,
+    [
+      [artisansMettle, 10],
+      [rockfangLeather, 1],
+      [glitteringParchment, 5],
+      [awakenedFrost, 1],
+      [burnishedInk, 1],
+    ],
+    null,
+    "Profession Specialization",
+    2,
+    null,
+    null,
+    { DraconicTreatises: 0 },
+    null,
+    "Scribe's Drafting Table"
+  );
+  const draconicTreatiseOnJewelcraftingRecipe = await createRecipe(
+    null,
+    draconicTreatiseOnJewelcrafting,
+    1,
+    inscription,
+    [
+      [artisansMettle, 10],
+      [rockfangLeather, 1],
+      [glitteringParchment, 5],
+      [awakenedFire, 1],
+      [burnishedInk, 1],
+    ],
+    null,
+    "Profession Specialization",
+    2,
+    null,
+    null,
+    null,
+    "Crafting Other Treatises",
+    "Scribe's Drafting Table",
+    "Can be learned when crafting other Draconic Treatises."
+  );
+  const draconicTreatiseOnLeatherworkingRecipe = await createRecipe(
+    null,
+    draconicTreatiseOnLeatherworking,
+    1,
+    inscription,
+    [
+      [artisansMettle, 10],
+      [rockfangLeather, 1],
+      [glitteringParchment, 5],
+      [awakenedAir, 1],
+      [burnishedInk, 1],
+    ],
+    null,
+    "Profession Specialization",
+    2,
+    null,
+    null,
+    null,
+    "Crafting Other Treatises",
+    "Scribe's Drafting Table",
+    "Can be learned when crafting other Draconic Treatises."
+  );
+  const draconicTreatiseOnMiningRecipe = await createRecipe(
+    null,
+    draconicTreatiseOnMining,
+    1,
+    inscription,
+    [
+      [artisansMettle, 10],
+      [rockfangLeather, 1],
+      [glitteringParchment, 5],
+      [awakenedEarth, 1],
+      [burnishedInk, 1],
+    ],
+    null,
+    "Profession Specialization",
+    2,
+    null,
+    null,
+    null,
+    "Crafting Other Treatises",
+    "Scribe's Drafting Table",
+    "Can be learned when crafting other Draconic Treatises."
+  );
+  const draconicTreatiseOnSkinningRecipe = await createRecipe(
+    null,
+    draconicTreatiseOnSkinning,
+    1,
+    inscription,
+    [
+      [artisansMettle, 10],
+      [rockfangLeather, 1],
+      [glitteringParchment, 5],
+      [awakenedEarth, 1],
+      [burnishedInk, 1],
+    ],
+    null,
+    "Profession Specialization",
+    2,
+    null,
+    null,
+    null,
+    "Crafting Other Treatises",
+    "Scribe's Drafting Table",
+    "Can be learned when crafting other Draconic Treatises."
+  );
+  const draconicTreatiseOnTailoringRecipe = await createRecipe(
+    null,
+    draconicTreatiseOnTailoring,
+    1,
+    inscription,
+    [
+      [artisansMettle, 10],
+      [rockfangLeather, 1],
+      [glitteringParchment, 5],
+      [awakenedFrost, 1],
+      [burnishedInk, 1],
+    ],
+    null,
+    "Profession Specialization",
+    2,
+    null,
+    null,
+    null,
+    "Crafting Other Treatises",
+    "Scribe's Drafting Table",
+    "Can be learned when crafting other Draconic Treatises."
+  );
+  const renewedProtoDrakeSilverAndBlueArmorRecipe = await createRecipe(
+    null,
+    renewedProtoDrakeSilverAndBlueArmor,
+    1,
+    inscription,
+    [
+      [wildercloth, 20],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 8],
+      [finishedPrototypeRegalBarding, 1],
+      [rockfangLeather, 10],
+    ],
+    null,
+    "Dragonriding - Renewed Proto-Drake",
+    1,
+    null,
+    null,
+    null,
+    "Dungeon Drop",
+    "Scribe's Drafting Table",
+    "Drops from Ruby Life Pools last boss."
+  );
+  const renewedProtoDrakeSteelAndYellowArmorRecipe = await createRecipe(
+    null,
+    renewedProtoDrakeSteelAndYellowArmor,
+    1,
+    inscription,
+    [
+      [wildercloth, 20],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 8],
+      [finishedPrototypeExplorersBarding, 1],
+      [rockfangLeather, 10],
+    ],
+    null,
+    "Dragonriding - Renewed Proto-Drake",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Scribe's Drafting Table",
+    "Drops from Draconic Recipe in a Bottle."
+  );
+  const renewedProtoDrakeBovineHornsRecipe = await createRecipe(
+    null,
+    renewedProtoDrakeBovineHorns,
+    1,
+    inscription,
+    [
+      [wildercloth, 15],
+      [glitteringParchment, 5],
+      [iridescentWater, 8],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 4],
+    ],
+    null,
+    "Dragonriding - Renewed Proto-Drake",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Scribe's Drafting Table",
+    "Drops from creatures on The Waking Shores."
+  );
+  const renewedProtoDrakePredatorPatternRecipe = await createRecipe(
+    null,
+    renewedProtoDrakePredatorPattern,
+    1,
+    inscription,
+    [
+      [wildercloth, 15],
+      [glitteringParchment, 5],
+      [iridescentWater, 8],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 4],
+    ],
+    null,
+    "Dragonriding - Renewed Proto-Drake",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Scribe's Drafting Table",
+    "Drops from Draconic Recipe in a Bottle."
+  );
+  const renewedProtoDrakeSpinedCrestRecipe = await createRecipe(
+    null,
+    renewedProtoDrakeSpinedCrest,
+    1,
+    inscription,
+    [
+      [wildercloth, 15],
+      [glitteringParchment, 5],
+      [iridescentWater, 8],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 4],
+    ],
+    null,
+    "Dragonriding - Renewed Proto-Drake",
+    1,
+    null,
+    { DragonscaleExpedition: 15 },
+    null,
+    null,
+    "Scribe's Drafting Table"
+  );
+  const windborneVelocidrakeSilverAndBlueArmorRecipe = await createRecipe(
+    null,
+    windborneVelocidrakeSilverAndBlueArmor,
+    1,
+    inscription,
+    [
+      [wildercloth, 20],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 8],
+      [finishedPrototypeRegalBarding, 1],
+      [rockfangLeather, 10],
+    ],
+    null,
+    "Dragonriding - Windborne Velocidrake",
+    1,
+    null,
+    null,
+    null,
+    "Dungeon Drop",
+    "Scribe's Drafting Table",
+    "Drops from The Nokhud Offensive last boss."
+  );
+  const windborneVelocidrakeSteelAndOrangeArmorRecipe = await createRecipe(
+    null,
+    windborneVelocidrakeSteelAndOrangeArmor,
+    1,
+    inscription,
+    [
+      [wildercloth, 20],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 8],
+      [finishedPrototypeExplorersBarding, 1],
+      [rockfangLeather, 10],
+    ],
+    null,
+    "Dragonriding - Windborne Velocidrake",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Scribe's Drafting Table",
+    "Purchasable from The Great Swog?"
+  );
+  const windborneVelocidrakeBlackFurRecipe = await createRecipe(
+    null,
+    windborneVelocidrakeBlackFur,
+    1,
+    inscription,
+    [
+      [wildercloth, 15],
+      [glitteringParchment, 5],
+      [iridescentWater, 8],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 4],
+    ],
+    null,
+    "Dragonriding - Windborne Velocidrake",
+    1,
+    null,
+    { MaruukCentaur: 15 },
+    null,
+    null,
+    "Scribe's Drafting Table"
+  );
+  const windborneVelocidrakeSpinedHeadRecipe = await createRecipe(
+    null,
+    windborneVelocidrakeSpinedHead,
+    1,
+    inscription,
+    [
+      [wildercloth, 15],
+      [glitteringParchment, 5],
+      [iridescentWater, 8],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 4],
+    ],
+    null,
+    "Dragonriding - Windborne Velocidrake",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Scribe's Drafting Table",
+    "Drops from Draconic Recipe in a Bottle."
+  );
+  const windborneVelocidrakeWindsweptPatternRecipe = await createRecipe(
+    null,
+    windborneVelocidrakeWindsweptPattern,
+    1,
+    inscription,
+    [
+      [wildercloth, 15],
+      [glitteringParchment, 5],
+      [iridescentWater, 8],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 4],
+    ],
+    null,
+    "Dragonriding - Windborne Velocidrake",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Scribe's Drafting Table",
+    "Drops from creatures in the Ohn'ahran Plains."
+  );
+  const highlandDrakeSilverAndBlueArmorRecipe = await createRecipe(
+    null,
+    highlandDrakeSilverAndBlueArmor,
+    1,
+    inscription,
+    [
+      [wildercloth, 20],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 8],
+      [finishedPrototypeRegalBarding, 1],
+      [rockfangLeather, 10],
+    ],
+    null,
+    "Dragonriding - Highland Drake",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Scribe's Drafting Table",
+    "Drops from creatures in The Azure Span."
+  );
+  const highlandDrakeSteelAndYellowArmorRecipe = await createRecipe(
+    null,
+    highlandDrakeSteelAndYellowArmor,
+    1,
+    inscription,
+    [
+      [wildercloth, 20],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 8],
+      [finishedPrototypeRegalBarding, 1],
+      [rockfangLeather, 10],
+    ],
+    null,
+    "Dragonriding - Highland Drake",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Scribe's Drafting Table",
+    "Purchasable from The Great Swog?"
+  );
+  const highlandDrakeBlackHairRecipe = await createRecipe(
+    null,
+    highlandDrakeBlackHair,
+    1,
+    inscription,
+    [
+      [wildercloth, 15],
+      [glitteringParchment, 5],
+      [iridescentWater, 8],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 4],
+    ],
+    null,
+    "Dragonriding - Highland Drake",
+    1,
+    null,
+    { IskaaraTuskarr: 13 },
+    null,
+    null,
+    "Scribe's Drafting Table"
+  );
+  const highlandDrakeSpinedCrestRecipe = await createRecipe(
+    null,
+    highlandDrakeSpinedCrest,
+    1,
+    inscription,
+    [
+      [wildercloth, 15],
+      [glitteringParchment, 5],
+      [iridescentWater, 8],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 4],
+    ],
+    null,
+    "Dragonriding - Highland Drake",
+    1,
+    null,
+    { CobaltAssembly: "High" },
+    null,
+    null,
+    "Scribe's Drafting Table"
+  );
+  const highlandDrakeSpinedThroatRecipe = await createRecipe(
+    null,
+    highlandDrakeSpinedThroat,
+    1,
+    inscription,
+    [
+      [wildercloth, 15],
+      [glitteringParchment, 5],
+      [iridescentWater, 8],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 4],
+    ],
+    null,
+    "Dragonriding - Highland Drake",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Scribe's Drafting Table",
+    "Drops from Draconic Recipe in a Bottle."
+  );
+  const cliffsideWylderdrakeSilverAndBlueArmorRecipe = await createRecipe(
+    null,
+    cliffsideWylderdrakeSilverAndBlueArmor,
+    1,
+    inscription,
+    [
+      [wildercloth, 20],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 8],
+      [finishedPrototypeRegalBarding, 1],
+      [rockfangLeather, 10],
+    ],
+    null,
+    "Dragonriding - Cliffside Wylderdrake",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Scribe's Drafting Table",
+    "Drops from creatures in Thaldraszus."
+  );
+  const cliffsideWylderdrakeSteelAndYellowArmorRecipe = await createRecipe(
+    null,
+    cliffsideWylderdrakeSteelAndYellowArmor,
+    1,
+    inscription,
+    [
+      [wildercloth, 20],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 8],
+      [finishedPrototypeRegalBarding, 1],
+      [rockfangLeather, 10],
+    ],
+    null,
+    "Dragonriding - Cliffside Wylderdrake",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Scribe's Drafting Table",
+    "Purchasable from The Great Swog?"
+  );
+  const cliffsideWylderdrakeConicalHeadRecipe = await createRecipe(
+    null,
+    cliffsideWylderdrakeConicalHead,
+    1,
+    inscription,
+    [
+      [wildercloth, 15],
+      [glitteringParchment, 5],
+      [iridescentWater, 8],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 4],
+    ],
+    null,
+    "Dragonriding - Cliffside Wylderdrake",
+    3,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Scribe's Drafting Table",
+    "Drops from Draconic Recipe in a Bottle."
+  );
+  const cliffsideWylderdrakeRedHairRecipe = await createRecipe(
+    null,
+    cliffsideWylderdrakeRedHair,
+    1,
+    inscription,
+    [
+      [wildercloth, 15],
+      [glitteringParchment, 5],
+      [iridescentWater, 8],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 4],
+    ],
+    null,
+    "Dragonriding - Cliffside Wylderdrake",
+    3,
+    null,
+    { ValdrakkenAccord: 15 },
+    null,
+    null,
+    "Scribe's Drafting Table"
+  );
+  const cliffsideWylderdrakeTripleHeadHornsRecipe = await createRecipe(
+    null,
+    cliffsideWylderdrakeTripleHeadHorns,
+    1,
+    inscription,
+    [
+      [wildercloth, 15],
+      [glitteringParchment, 5],
+      [iridescentWater, 8],
+      [flawlessProtoDragonScale, 10],
+      [awakenedOrder, 4],
+    ],
+    null,
+    "Dragonriding - Cliffside Wylderdrake",
+    3,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Scribe's Drafting Table",
+    "Drops from creatures in Thaldraszus."
+  );
 
   // //jewelcrafting recipes - 82 total
   // // const dragonIslesCrushing = await(createRecipe());

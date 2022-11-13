@@ -190,42 +190,42 @@ app.get("/getAllInfo", async (req, res) => {
     //ie, don't need item.materials, since we can just look for all materials where item.id = item.id
     (
       await Item.findAll({
-        include: [
-          {
-            model: Material,
-            attributes: ["id"],
-          },
-          {
-            model: Recipe,
-            attributes: ["id"],
-          },
-        ],
+        // include: [
+        //   {
+        //     model: Material,
+        //     attributes: ["id"],
+        //   },
+        //   {
+        //     model: Recipe,
+        //     attributes: ["id"],
+        //   },
+        // ],
       })
     ).map((item) => item.toJSON());
 
   let recipes = (
     await Recipe.findAll({
-      include: [
-        {
-          model: Material,
-          attributes: ["id"],
-        },
-        {
-          model: FinishingReagent,
-          attributes: ["id"],
-        },
-      ],
+      // include: [
+      //   {
+      //     model: Material,
+      //     attributes: ["id"],
+      //   },
+      //   {
+      //     model: FinishingReagent,
+      //     attributes: ["id"],
+      //   },
+      // ],
     })
   ).map((recipe) => recipe.toJSON());
 
   let professions = (
     await Profession.findAll({
-      include: [
-        {
-          model: Recipe,
-          attributes: ["id"],
-        },
-      ],
+      // include: [
+      //   {
+      //     model: Recipe,
+      //     attributes: ["id"],
+      //   },
+      // ],
     })
   ).map((profession) => profession.toJSON());
 
