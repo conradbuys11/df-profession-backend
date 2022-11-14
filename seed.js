@@ -61,6 +61,8 @@ const Profession = sequelize.define(
   {
     name: { type: DataTypes.STRING, allowNull: false },
     icon: { type: DataTypes.STRING },
+    isPrimaryProfession: { type: DataTypes.BOOLEAN, defaultValue: true },
+    isCraftingProfession: { type: DataTypes.BOOLEAN, defaultValue: true },
     //has many Recipes, Specializations, Tools (Items), FirstAccessories (Items), SecondAccessories (Items)
   },
   {
@@ -177,10 +179,21 @@ const makeIcon = (fileName) => {
   return `https://wow.zamimg.com/images/wow/icons/large/${fileName}.jpg`;
 };
 
-async function createProfession(name, icon) {
+async function createProfession(
+  name,
+  icon,
+  isPrimaryProfession,
+  isCraftingProfession
+) {
   let profession = Profession.build({ name: name });
   if (isNotNullAndUndefined(icon)) {
     profession.icon = makeIcon(icon);
+  }
+  if (isNotNullAndUndefined(isPrimaryProfession)) {
+    profession.isPrimaryProfession = isPrimaryProfession;
+  }
+  if (isNotNullAndUndefined(isCraftingProfession)) {
+    profession.isCraftingProfession = isCraftingProfession;
   }
   await profession.save();
   return profession;
@@ -281,7 +294,9 @@ async function createItem(
     //which will become "Requires Dragon Isles Engineering (1)" on the front end
     item.requiresProfession = requiresProfession;
   }
-  await item.save();
+  await item.save().catch((e) => {
+    throw new Error("The item in question is " + item.name);
+  });
   return item;
 }
 
@@ -443,16 +458,20 @@ const secondaryStatArrayEpic = (nameOfStat, sizeOfItem) => {
   // if it's stamina, we do something different
   // small (back & wrist), large (head, chest, legs), or medium (everything else)
   // also, 1h for a one handed weapon!
+  // jewelry for jewelry
   if (nameOfStat.toLowerCase() === "stamina") {
     switch (sizeOfItem) {
       case "small":
-        return ["Stamina", 446, 458, "?", 490, 509];
+        return ["Stamina", 446, 458, 470, 490, 509];
       case "medium":
         return ["Stamina", 594, 610, "?", 653, 679];
       case "large":
         return ["Stamina", 793, 814, "?", 871, 905];
       case "1h":
         return ["Stamina", 396, 407, "?", 436, 453];
+      case "jewelry":
+        //same as small
+        return ["Stamina", 446, 458, 470, 490, 509];
       default:
         return ["Stamina", "?", "?", "?", "?", "?"];
     }
@@ -466,6 +485,8 @@ const secondaryStatArrayEpic = (nameOfStat, sizeOfItem) => {
         return [nameOfStat, 313, 317, "?", "?", 332];
       case "1h":
         return [nameOfStat, 156, 158, "?", 163, 166];
+      case "jewelry":
+        return [nameOfStat, 438, "?", 455, 468, 481];
       default:
         return [nameOfStat, "?", "?", "?", "?", "?"];
     }
@@ -499,6 +520,7 @@ const secondaryStatArrayRare = (nameOfStat, sizeOfItem) => {
   // if it's stamina, we do something different
   // small (back & wrist), large (head, chest, legs), or medium (everything else)
   // also, 1h for a one handed weapon!
+  // jewelry for jewelry
   if (nameOfStat.toLowerCase() === "stamina") {
     switch (sizeOfItem) {
       case "small":
@@ -509,6 +531,9 @@ const secondaryStatArrayRare = (nameOfStat, sizeOfItem) => {
         return ["Stamina", 483, 486, "?", "?", 498];
       case "1h":
         return ["Stamina", 241, 243, "?", "?", 249];
+      case "jewelry":
+        //same as small
+        return ["Stamina", 271, 273, "?", "?", 280];
       default:
         return ["Stamina", "?", "?", "?", "?", "?"];
     }
@@ -522,6 +547,8 @@ const secondaryStatArrayRare = (nameOfStat, sizeOfItem) => {
         return [nameOfStat, 184, 195, "?", "?", 239];
       case "1h":
         return [nameOfStat, 92, 97, "?", "?", 119];
+      case "jewelry":
+        return [nameOfStat, "?", "?", "?", "?", 271];
       default:
         return [nameOfStat, "?", "?", "?", "?", "?"];
     }
@@ -547,6 +574,7 @@ const secondaryStatArrayBaby = (nameOfStat, sizeOfItem) => {
   // this function is for 306-316 pieces
   // if it's stamina, we do something different
   // small (back & wrist), large (head, chest, legs), or medium (everything else)
+  // jewelry for jewelry
   if (nameOfStat.toLowerCase() === "stamina") {
     switch (sizeOfItem) {
       case "small":
@@ -555,6 +583,9 @@ const secondaryStatArrayBaby = (nameOfStat, sizeOfItem) => {
         return ["Stamina", 319, 327, "?", "?", 342];
       case "large":
         return ["Stamina", 426, 435, "?", "?", 456];
+      case "jewelry":
+        //same as small
+        return ["Stamina", 240, 245, "?", "?", 257];
       default:
         return ["Stamina", "?", "?", "?", "?", "?"];
     }
@@ -566,6 +597,8 @@ const secondaryStatArrayBaby = (nameOfStat, sizeOfItem) => {
         return [nameOfStat, 74, 74, "?", "?", 86];
       case "large":
         return [nameOfStat, 98, 99, "?", "?", 115];
+      case "jewelry":
+        return [nameOfStat, 172, "?", "?", "?", 189];
       default:
         return [nameOfStat, "?", "?", "?", "?", "?"];
     }
@@ -636,44 +669,87 @@ const makeTables = async () => {
   // const worldDropAndGathering = await(createProfession('World Drop & Gathering'));
   const tailoring = await createProfession(
     "Tailoring",
-    "ui_profession_tailoring"
+    "ui_profession_tailoring",
+    true,
+    true
   );
   const enchanting = await createProfession(
     "Enchanting",
-    "ui_profession_enchanting"
+    "ui_profession_enchanting",
+    true,
+    true
   );
   const engineering = await createProfession(
     "Engineering",
-    "ui_profession_engineering"
+    "ui_profession_engineering",
+    true,
+    true
   );
-  const alchemy = await createProfession("Alchemy", "ui_profession_alchemy");
+  const alchemy = await createProfession(
+    "Alchemy",
+    "ui_profession_alchemy",
+    true,
+    true
+  );
   const inscription = await createProfession(
     "Inscription",
-    "ui_profession_inscription"
+    "ui_profession_inscription",
+    true,
+    true
   );
   const jewelcrafting = await createProfession(
     "Jewelcrafting",
-    "ui_profession_jewelcrafting"
+    "ui_profession_jewelcrafting",
+    true,
+    true
   );
   const blacksmithing = await createProfession(
     "Blacksmithing",
-    "ui_profession_blacksmithing"
+    "ui_profession_blacksmithing",
+    true,
+    true
   );
   const leatherworking = await createProfession(
     "Leatherworking",
-    "ui_profession_leatherworking"
+    "ui_profession_leatherworking",
+    true,
+    true
   );
   const herbalism = await createProfession(
     "Herbalism",
-    "ui_profession_herbalism"
+    "ui_profession_herbalism",
+    true,
+    false
   );
-  const mining = await createProfession("Mining", "ui_profession_mining");
-  const skinning = await createProfession("Skinning", "ui_profession_skinning");
-  const cooking = await createProfession("Cooking", "ui_profession_cooking");
-  const fishing = await createProfession("Fishing", "ui_profession_fishing");
+  const mining = await createProfession(
+    "Mining",
+    "ui_profession_mining",
+    true,
+    false
+  );
+  const skinning = await createProfession(
+    "Skinning",
+    "ui_profession_skinning",
+    true,
+    false
+  );
+  const cooking = await createProfession(
+    "Cooking",
+    "ui_profession_cooking",
+    false,
+    true
+  );
+  const fishing = await createProfession(
+    "Fishing",
+    "ui_profession_fishing",
+    false,
+    false
+  );
   const archaeology = await createProfession(
     "Archaeology",
-    "ui_profession_archaeology"
+    "ui_profession_archaeology",
+    false,
+    false
   );
 
   //
@@ -1529,39 +1605,295 @@ const makeTables = async () => {
   );
 
   //cooking & fishing drops & items
-  // const maybeMeat = await createItem("Maybe Meat", 1000);
-  // const ribbedMolluskMeat = await createItem("Ribbed Mollusk Meat", 1000);
-  // const waterfowlFilet = await createItem("Waterfowl Filet", 1000);
-  // const hornswogHunk = await createItem("Hornswog Hunk", 1000);
-  // const basiliskEggs = await createItem("Basilisk Eggs", 1000);
-  // const bruffalonFlank = await createItem("Bruffalon Flank", 1000);
-  // const mightyMammothRibs = await createItem("Mighty Mammoth Ribs", 1000);
-  // const burlyBearHaunch = await createItem("Burly Bear Haunch", 1000);
-  // const saltDeposit = await createItem("Salt Deposit", 1000);
-  // const lavaBeetle = await createItem("Lava Beetle", 1000);
-  // const scalebellyMackerel = await createItem("Scalebelly Mackerel", 1000);
-  // const thousandbitePiranha = await createItem("Thousandbite Piranha", 1000);
-  // const aileronSeamoth = await createItem("Aileron Seamoth", 1000);
-  // const ceruleanSpinefish = await createItem("Cerulean Spinefish", 1000);
-  // const temporalDragonhead = await createItem("Temporal Dragonhead", 1000);
-  // const islefinDorado = await createItem("Islefin Dorado", 1000);
-  // const magmaThresher = await createItem("Magma Thresher", 1000);
-  // const prismaticLeaper = await createItem("Prismatic Leaper", 1000);
-  // const rimefinTuna = await createItem("Rimefin Tuna", 1000);
-  // const snowball = await createItem("Snowball", 1000);
-  // const hornOMead = await createItem("Horn O' Mead", 1000);
-  // const buttermilk = await createItem("Buttermilk", 1000);
-  // const ohnahranPotato = await createItem("Ohn'ahran Potato", 1000);
-  // const threeCheeseBlend = await createItem("Three-Cheese Blend", 1000);
-  // const pastryPackets = await createItem("Pastry Packets", 1000);
-  // const convenientlyPackagedIngredients = await createItem(
-  //   "Conveniently Packaged Ingredients",
-  //   1000
-  // );
-  // const thaldraszianCocoaPowder = await createItem(
-  //   "Thaldraszian Cocoa Powder",
-  //   1000
-  // );
+  const maybeMeat = await createItem(
+    "Maybe Meat",
+    "inv_misc_food_132_meat",
+    null,
+    1000,
+    "A meat from various creatures on the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const ribbedMolluskMeat = await createItem(
+    "Ribbed Mollusk Meat",
+    "inv_misc_food_52",
+    null,
+    1000,
+    "Meat commonly found within clams fished up on the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const waterfowlFilet = await createItem(
+    "Waterfowl Filet",
+    "inv_cooking_100_duckmeat",
+    null,
+    1000,
+    "A meat from ducks, which are commonly found across the Dragon Isles near rivers and ponds. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const hornswogHunk = await createItem(
+    "Hornswog Hunk",
+    "inv_misc_food_134_meat",
+    null,
+    1000,
+    "A meat from hornswog, which are commonly found across the Dragon Isles near water, caves, or areas with volcanic activity. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const basiliskEggs = await createItem(
+    "Basilisk Eggs",
+    "inv_falcosauregg_purple",
+    null,
+    1000,
+    "An ingredient from basilisks, which are commonly found in the Waking Shores. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const bruffalonFlank = await createItem(
+    "Bruffalon Flank",
+    "inv_misc_food_98_talbuk",
+    null,
+    1000,
+    "A meat from bruffalon, which are commonly found in the Azure Span. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const mightyMammothRibs = await createItem(
+    "Mighty Mammoth Ribs",
+    "inv_misc_food_meat_oxribs_color02",
+    null,
+    1000,
+    "A meat from mammoths, which are commonly found in the Ohn'ahran Plains. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const burlyBearHaunch = await createItem(
+    "Burly Bear Haunch",
+    "inv_misc_food_133_meat",
+    null,
+    1000,
+    "A meat from bears, which are commonly found in the Azure Span and Thaldraszus. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const saltDeposit = await createItem(
+    "Salt Deposit",
+    "inv_ore_platinum_01",
+    null,
+    1000,
+    "A common reagent acquired by miners and often refined for use by chefs in Dragon Isles cuisine. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const lavaBeetle = await createItem(
+    "Lava Beetle",
+    "inv_inscription_pigment_bug04",
+    null,
+    1000,
+    "A common reagent acquired by herbalists and often refined for use by chefs in Dragon Isles cuisine. Can be bought and sold on the auction house.",
+    null,
+    "Uncommon",
+    "Crafting Reagent"
+  );
+  const scalebellyMackerel = await createItem(
+    "Scalebelly Mackerel",
+    "inv_fish_silvermackerelred",
+    null,
+    1000,
+    "A common fish found across the dragon isles. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent",
+    1,
+    null,
+    null,
+    "Throw the fish back into the water to gain 5 Fishing for 30 sec. Throwing multiple fish can extend this buff up to 5 min."
+  );
+  const thousandbitePiranha = await createItem(
+    "Thousandbite Piranha",
+    "inv_10_fishing_fishdragon_bronze",
+    null,
+    1000,
+    "A common fish native to freshwater around the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const aileronSeamoth = await createItem(
+    "Aileron Seamoth",
+    "inv_fishpterois_orange",
+    null,
+    1000,
+    "A common fish native to saltwater around the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const ceruleanSpinefish = await createItem(
+    "Cerulean Spinefish",
+    "inv_fishpterois_blue",
+    null,
+    1000,
+    "A common fish native to saltwater around the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const temporalDragonhead = await createItem(
+    "Temporal Dragonhead",
+    "inv_10_fishing_fishdragon_blue",
+    null,
+    1000,
+    "A common fish native to freshwater around the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const islefinDorado = await createItem(
+    "Islefin Dorado",
+    "inv_10_fishing_fishice_color2",
+    null,
+    1000,
+    "An elusive fish native to the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Uncommon",
+    "Crafting Reagent"
+  );
+  const magmaThresher = await createItem(
+    "Magma Thresher",
+    "inv_10_fishing_fishlava_color1",
+    null,
+    1000,
+    "The outer shell consists of hardened magma. Aside from its Cooking properties, this fish looks to be Prospectable.",
+    "You can literally prospect this fish w/ Jewelcrafting.",
+    "Rare",
+    "Crafting Reagent"
+  );
+  const prismaticLeaper = await createItem(
+    "Prismatic Leaper",
+    "inv_misc_fish_92",
+    null,
+    200,
+    "The scales shimmer in multiple colors. Aside from its Cooking properties, this fish looks to be Millable.",
+    "You can literally mill this fish w/ Inscription.",
+    "Rare",
+    "Crafting Reagent"
+  );
+  const rimefinTuna = await createItem(
+    "Rimefin Tuna",
+    "inv_10_fishing_fishice_color3",
+    "Pickup",
+    1,
+    "The protective frosted shell has been brushed off. Don't let it spoil!",
+    "Received from dusting off a Frosted Rimefin Tuna.",
+    "Rare",
+    "Crafting Reagent",
+    null,
+    null,
+    "Duration: 1 hour (real time)"
+  );
+  const snowball = await createItem(
+    "Snowball",
+    "inv_ammo_snowball",
+    null,
+    20,
+    null,
+    null,
+    "Common",
+    null,
+    null,
+    null,
+    null,
+    "Throw me!"
+  );
+  const hornOMead = await createItem(
+    "Horn O' Mead",
+    "inv_misc_archaeology_vrykuldrinkinghorn",
+    null,
+    20,
+    null,
+    null,
+    "Common",
+    null,
+    null,
+    null,
+    null,
+    "Restores 62500 mana over 20 sec. Must remain seated while drinking."
+  );
+  const buttermilk = await createItem(
+    "Buttermilk",
+    "inv_drink_milk_04",
+    null,
+    20,
+    null,
+    null,
+    "Common",
+    null,
+    null,
+    null,
+    null,
+    "Restores 225,000 mana over 20 sec. Must remain seated while drinking."
+  );
+  const ohnahranPotato = await createItem(
+    "Ohn'ahran Potato",
+    "inv_cooking_80_brownpotato",
+    null,
+    1000,
+    "A common ingredient often sold by cooking vendors on the Dragon Isles. Can be bought and sold on the auction house.",
+    "Cooking reagent bought from most vendors.",
+    "Common",
+    "Crafting Reagent"
+  );
+  const threeCheeseBlend = await createItem(
+    "Three-Cheese Blend",
+    "inv_misc_food_100_hardcheese",
+    null,
+    1000,
+    "A common ingredient often sold by cooking vendors on the Dragon Isles. Can be bought and sold on the auction house.",
+    "Cooking reagent bought from most vendors.",
+    "Common",
+    "Crafting Reagent"
+  );
+  const pastryPackets = await createItem(
+    "Pastry Packets",
+    "inv_misc_food_cooked_springrolls",
+    null,
+    1000,
+    "A common ingredient often sold by cooking vendors on the Dragon Isles. Can be bought and sold on the auction house.",
+    "Cooking reagent bought from most vendors.",
+    "Common",
+    "Crafting Reagent"
+  );
+  const convenientlyPackagedIngredients = await createItem(
+    "Conveniently Packaged Ingredients",
+    "inv_misc_food_cooked_greatpabanquet_steamer",
+    null,
+    1000,
+    "A common ingredient often sold by cooking vendors on the Dragon Isles. Can be bought and sold on the auction house.",
+    "Cooking reagent bought from most vendors.",
+    "Common",
+    "Crafting Reagent"
+  );
+  const thaldraszianCocoaPowder = await createItem(
+    "Thaldraszian Cocoa Powder",
+    "inv_holiday_tow_spicebowl",
+    null,
+    1000,
+    "A common ingredient often sold by cooking vendors on the Dragon Isles. Can be bought and sold on the auction house.",
+    "Cooking reagent bought from most vendors.",
+    "Common",
+    "Crafting Reagent"
+  );
 
   //other?
   const tuftOfPrimalWool = await createItem(
@@ -1674,11 +2006,34 @@ const makeTables = async () => {
     "Rare",
     "Crafting Reagent"
   );
-  // const artisanalBerryJuice = await createItem("Artisanal Berry Juice", 1000);
-  // const refreshingSpringWater = await createItem(
-  //   "Refreshing Spring Water",
-  //   1000
-  // );
+  const artisanalBerryJuice = await createItem(
+    "Artisanal Berry Juice",
+    "inv_drink_33_bloodredale",
+    null,
+    20,
+    null,
+    "Bought in some random spots in Thaldraszus, Azure Span, & Waking Shores.",
+    "Common",
+    null,
+    null,
+    null,
+    null,
+    "Restores 62500 mana over 20 sec. Must remain seated while drinking."
+  );
+  const refreshingSpringWater = await createItem(
+    "Refreshing Spring Water",
+    "inv_drink_07",
+    null,
+    20,
+    null,
+    null,
+    "Common",
+    null,
+    null,
+    null,
+    null,
+    "Restores 180 mana over 20 sec. Must remain seated while drinking."
+  );
 
   // MADE WITH PROFESSIONS
 
@@ -6308,14 +6663,6 @@ const makeTables = async () => {
     null,
     "Increases your Versatility by 631/688/745 (based on quality). Lasts 30 min and through death. Consuming an identical phial will add another 30 min. (1 Sec Cooldown)"
   );
-  //next 2 aren't really items
-  // const transmuteDecayToElements = await createItem(
-  //   "Transmute: Decay to Elements"
-  // );
-  // const transmuteOrderToElements = await createItem(
-  //   "Transmute: Order to Elements"
-  // );
-  //back to actual items
   const potionAbsorptionInhibitor = await createItem(
     "Potion Absorption Inhibitor",
     "inv_misc_food_legion_gooamber_drop",
@@ -7044,8 +7391,8 @@ const makeTables = async () => {
     "Epic",
     null,
     5,
-    "Dealing damage has a chance to fill you with a surge of familiar energy, increasing Haste by ?/?/?/1161/? (based on quality) for 10 sec.",
     null,
+    "Dealing damage has a chance to fill you with a surge of familiar energy, increasing Haste by ?/?/?/1161/? (based on quality) for 10 sec.",
     null,
     "Staff",
     "Two-Hand",
@@ -8078,7 +8425,17 @@ const makeTables = async () => {
     "Crafting Reagent",
     3
   );
-  // const illimitedDiamond = await createItem("Illimited Diamond", 1000);
+  const illimitedDiamond = await createItem(
+    "Illimited Diamond",
+    "inv_10_jewelcrafting_gem3primal_uncut_transparent",
+    null,
+    1000,
+    "This highly desirable diamond is acquired by Jewelcrafters when prospecting ore from the Dragon Isles. Can be bought and sold on the auction house.",
+    null,
+    "Epic",
+    "Crafting Reagent",
+    3
+  );
   const elementalHarmony = await createItem(
     "Elemental Harmony",
     "inv_10_elementalcombinedfoozles_primordial",
@@ -8090,9 +8447,41 @@ const makeTables = async () => {
     "Crafting Reagent",
     3
   );
-  // const blottingSand = await createItem("Blotting Sand", 1000);
-  // const pounce = await createItem("Pounce", 1000);
-  // const emptySoulCage = await createItem("Empty Soul Cage", 1000);
+  const blottingSand = await createItem(
+    "Blotting Sand",
+    "inv_10_jewelcrafting_blottedsand_color2",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Finishing Crafting Reagent",
+    3,
+    ["Blotting Sand"],
+    "When crafting: You are 9/12/15% (based on quality) more likely to improve at Inscription, but Recipe Difficulty is increased by 18/24/30 (based on quality.)"
+  );
+  const pounce = await createItem(
+    "Pounce",
+    "inv_10_jewelcrafting_blottedsand_color4",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Finishing Crafting Reagent",
+    3,
+    ["Blotting Sand"],
+    "When crafting: Increases bonus Skill from Inspiration by 7%/10%/12% (based on quality) and Inspiration by 30/40/50 (based on quality.)"
+  );
+  const emptySoulCage = await createItem(
+    "Empty Soul Cage",
+    "inv_10_jewelcrafting3_soulcage_empty",
+    null,
+    1000,
+    "Crafted by Jewelcrafters to be used with the Zapthrottle Soul Inhaler, created by Engineers. Elemental souls can be captured with this for use in many powerful crafts, or shattered as a cruel way to acquire awakened essences.",
+    "'Ammo' for the Zapthrottle Soul Inhaler. Needed to get Elemental Souls.",
+    "Rare"
+  );
   const draconicVial = await createItem(
     "Draconic Vial",
     "inv_10_alchemy_bottle_shape1_empty",
@@ -8126,198 +8515,1273 @@ const makeTables = async () => {
     "Crafting Reagent",
     3
   );
-  // const shimmeringClasp = await createItem("Shimmering Clasp", 1000);
-  // const energizedVibrantEmerald = await createItem(
-  //   "Energized Vibrant Emerald",
-  //   1000
-  // );
-  // const zenMysticSapphire = await createItem("Zen Mystic Sapphire", 1000);
-  // const craftyQueensRuby = await createItem("Crafy Queen's Ruby", 1000);
-  // const senseisSunderedOnyx = await createItem("Sensei's Sundered Onyx", 1000);
-  // const solidEternityAmber = await createItem("Solid Eternity Amber", 1000);
-  // const quickYsemerald = await createItem("Quick Ysemerald", 1000);
-  // const craftyAlexstraszite = await createItem("Crafty Alexstraszite", 1000);
-  // const energizedMalygite = await createItem("Energized Malygite", 1000);
-  // const forcefulNozdorite = await createItem("Forceful Nozdorite", 1000);
-  // const keenNeltharite = await createItem("Keen Neltharite", 1000);
-  // const puissantNozdorite = await createItem("Puissant Nozdorite", 1000);
-  // const fracturedNeltharite = await createItem("Fractured Neltharite", 1000);
-  // const keenYsemerald = await createItem("Keen Ysemerald", 1000);
-  // const senseisAlexstraszite = await createItem("Sensei's Alexstraszite", 1000);
-  // const zenMalygite = await createItem("Zen Malygite", 1000);
-  // const radiantMalygite = await createItem("Radiant Malygite", 1000);
-  // const craftyYsemerald = await createItem("Crafty Ysemerald", 1000);
-  // const deadlyAlexstraszite = await createItem("Deadly Alexstraszite", 1000);
-  // const jaggedNozdorite = await createItem("Jagged Nozdorite", 1000);
-  // const senseisNeltharite = await createItem("Sensei's Neltharite", 1000);
-  // const energizedYsemerald = await createItem("Energized Ysemerald", 1000);
-  // const radiantAlexstraszite = await createItem("Radiant Alexstraszite", 1000);
-  // const steadyNozdorite = await createItem("Steady Nozdorite", 1000);
-  // const stormyMalygite = await createItem("Stormy Malygite", 1000);
-  // const zenNeltharite = await createItem("Zen Neltharite", 1000);
-  // const fierceIllimitedDiamond = await createItem(
-  //   "Fierce Illimited Diamond",
-  //   1000
-  // );
-  // const inscribedIllimitedDiamond = await createItem(
-  //   "Inscribed Illimited Diamond",
-  //   1000
-  // );
-  // const resplendentIllimitedDiamond = await createItem(
-  //   "Resplendent Illimited Diamond",
-  //   1000
-  // );
-  // const skillfulIllimitedDiamond = await createItem(
-  //   "Skillful Illimited Diamond",
-  //   1000
-  // );
-  // const tieredMedallionSetting = await createItem(
-  //   "Tiered Medallion Setting",
-  //   1000
-  // );
-  // const idolOfTheDreamer = await createItem("Idol of the Dreamer", 1, 382, 392);
-  // const idolOfTheEarthWarder = await createItem(
-  //   "Idol of the Earth Warder",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const idolOfTheLifebinder = await createItem(
-  //   "Idol of the Lifebinder",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const idolOfTheSpellWeaver = await createItem(
-  //   "Idol of the Spell-Weaver",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const chokerOfShielding = await createItem(
-  //   "Choker of Shielding",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const elementalLariat = await createItem("Elemental Lariat", 1, 382, 392);
-  // const ringBoundHourglass = await createItem(
-  //   "Ring-Bound Hourglass",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const signetOfTitanicInsight = await createItem(
-  //   "Signet of Titanic Insight",
-  //   1,
-  //   382,
-  //   392
-  // );
-  // const torcOfPassedTime = await createItem("Torc of Passed Time", 1, 382, 392);
-  // //next 2 need pvp ilvls
-  // const crimsonCombatantsJeweledAmulet = await createItem(
-  //   "Crimson Combatant's Jeweled Amulet",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const crimsonCombatantsJeweledSignet = await createItem(
-  //   "Crimson Combatant's Jeweled Signet",
-  //   1,
-  //   333,
-  //   343
-  // );
-  // const bandOfNewBeginnings = await createItem(
-  //   "Band of New Beginnings",
-  //   1,
-  //   306,
-  //   316
-  // );
-  // const pendantOfImpendingPerils = await createItem(
-  //   "Pendant of Impending Perils",
-  //   1,
-  //   306,
-  //   316
-  // );
-  // const djaradinsPinata = await createItem(`Djaradin's "Pinata"`, 1000);
-  // const narcissistsSculpture = await createItem("Narcissist's Sculpture", 1000);
-  // const kaluakFigurine = await createItem("Kalu'ak Figurine", 1000);
-  // const statueOfTyrsHerald = await createItem("Statue of Tyr's Herald", 1000);
-  // const revitalizingRedCarving = await createItem(
-  //   "Revitalizing Red Carving",
-  //   1000
-  // );
-  // const jeweledAmberWhelpling = await createItem("Jeweled Amber Whelpling");
-  // const jeweledEmeraldWhelpling = await createItem("Jeweled Emerald Whelpling");
-  // const jeweledOnyxWhelpling = await createItem("Jeweled Onyx Whelpling");
-  // const jeweledRubyWhelpling = await createItem("Jeweled Ruby Whelpling");
-  // const jeweledSapphireWhelpling = await createItem(
-  //   "Jeweled Sapphire Whelpling"
-  // );
-  // const convergentPrism = await createItem("Convergent Prism");
-  // const jeweledOffering = await createItem("Jeweled Offering");
-  // const projectionPrism = await createItem("Projection Prism", 1000);
-  // const rhinestoneSunglasses = await createItem('"Rhinestone" Sunglasses');
-  // const splitLensSpecs = await createItem("Split-Lens Specs");
-  // const alexstrasziteLoupes = await createItem(
-  //   "Alexstraszite Loupes",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const finePrintTrifocals = await createItem(
-  //   "Fine-Print Trifocals",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const magnificentMarginMagnifier = await createItem(
-  //   "Magnificent Margin Magnifier",
-  //   1,
-  //   356,
-  //   371
-  // );
-  // const resonantFocus = await createItem("Resonant Focus", 1, 356, 371);
-  // const boldPrintBifocals = await createItem(
-  //   "Bold-Print Bifocals",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const chromaticFocus = await createItem("Chromatic Focus", 1, 317, 332);
-  // const leftHandedMagnifyingGlass = await createItem(
-  //   "Left-Handed Magnifying Glass",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const sunderedOnyxLoupes = await createItem(
-  //   "Sundered Onyx Loupes",
-  //   1,
-  //   317,
-  //   332
-  // );
-  // const jeweledDragonsHeart = await createItem("Jeweled Dragon's Heart");
-  // const dreamersVision = await createItem("Dreamer's Vision");
-  // const earthwardensPrize = await createItem("Earthwarden's Prize");
-  // const keepersGlory = await createItem("Keeper's Glory");
-  // const queensGift = await createItem("Queen's Gift");
-  // const timewatchersPatience = await createItem("Timewatcher's Patience");
-  // const glimmeringNozdoriteCluster = await createItem(
-  //   "Glimmering Nozdorite Cluster"
-  // );
-  // const glimmeringYsemeraldCluster = await createItem(
-  //   "Glimmering Ysemerald Cluster"
-  // );
-  // const glimmeringNelthariteCluster = await createItem(
-  //   "Glimmering Neltharite Cluster"
-  // );
-  // const glimmeringAlexstrasziteCluster = await createItem(
-  //   "Glimmering Alexstraszite Cluster"
-  // );
-  // const glimmeringMalygiteCluster = await createItem(
-  //   "Glimmering Malygite Cluster"
-  // );
+  const shimmeringClasp = await createItem(
+    "Shimmering Clasp",
+    "inv_10_jewelcrafting2_gemsetting_color1",
+    null,
+    1000,
+    "A basic reagent that Jewelcrafters make. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent",
+    3
+  );
+  const energizedVibrantEmerald = await createItem(
+    "Energized Vibrant Emerald",
+    "inv_10_jewelcrafting_gem1leveling_cut_green",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    "+48/59/69 Haste (based on quality) & +48/59/69 Versatility (based on quality)"
+  );
+  const zenMysticSapphire = await createItem(
+    "Zen Mystic Sapphire",
+    "inv_10_jewelcrafting_gem1leveling_cut_blue",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    "+48/59/69 Versatility (based on quality) & +48/59/69 Mastery (based on quality)"
+  );
+  const craftyQueensRuby = await createItem(
+    "Crafy Queen's Ruby",
+    "inv_10_jewelcrafting_gem1leveling_cut_red",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    "+48/59/69 Critical Strike (based on quality) & +48/59/69 Haste (based on quality)"
+  );
+  const senseisSunderedOnyx = await createItem(
+    "Sensei's Sundered Onyx",
+    "inv_10_jewelcrafting_gem1leveling_cut_black",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    "+48/59/69 Mastery (based on quality) & +48/59/69 Critical Strike (based on quality)"
+  );
+  const solidEternityAmber = await createItem(
+    "Solid Eternity Amber",
+    "inv_10_jewelcrafting_gem1leveling_cut_green",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    "+61/?/88 Stamina (based on quality)"
+  );
+  const quickYsemerald = await createItem(
+    "Quick Ysemerald",
+    "inv_10_jewelcrafting_gem2standard_air_cut_green",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Air Emerald",
+    3,
+    null,
+    "+165/200/235 Haste (based on quality)"
+  );
+  const craftyAlexstraszite = await createItem(
+    "Crafty Alexstraszite",
+    "inv_10_jewelcrafting_gem2standard_air_cut_red",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Air Ruby",
+    3,
+    null,
+    "+131/163/187 Critical Strike (based on quality) & +61/75/88 Haste (based on quality)"
+  );
+  const energizedMalygite = await createItem(
+    "Energized Malygite",
+    "inv_10_jewelcrafting_gem2standard_air_cut_blue",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Air Sapphire",
+    3,
+    null,
+    "+131/163/187 Versatility (based on quality) & +61/75/88 Haste (based on quality)"
+  );
+  const forcefulNozdorite = await createItem(
+    "Forceful Nozdorite",
+    "inv_10_jewelcrafting_gem2standard_air_cut_bronze",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Air Amber",
+    3,
+    null,
+    "+141/171/200 Stamina (based on quality) & +123/149/176 Haste (based on quality)"
+  );
+  const keenNeltharite = await createItem(
+    "Keen Neltharite",
+    "inv_10_jewelcrafting_gem2standard_air_cut_black",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Air Onyx",
+    3,
+    null,
+    "+131/163/187 Mastery (based on quality) & +61/75/88 Haste (based on quality)"
+  );
+  const puissantNozdorite = await createItem(
+    "Puissant Nozdorite",
+    "inv_10_jewelcrafting_gem2standard_earth_cut_bronze",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Earth Amber",
+    3,
+    null,
+    "+141/171/200 Stamina (based on quality) & +123/149/176 Mastery (based on quality)"
+  );
+  const fracturedNeltharite = await createItem(
+    "Fractured Neltharite",
+    "inv_10_jewelcrafting_gem2standard_earth_cut_black",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Earth Onyx",
+    3,
+    null,
+    "+165/200/235 Mastery (based on quality)"
+  );
+  const keenYsemerald = await createItem(
+    "Keen Ysemerald",
+    "inv_10_jewelcrafting_gem2standard_earth_cut_green",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Earth Emerald",
+    3,
+    null,
+    "+131/163/187 Haste (based on quality) & +61/75/88 Mastery (based on quality)"
+  );
+  const senseisAlexstraszite = await createItem(
+    "Sensei's Alexstraszite",
+    "inv_10_jewelcrafting_gem2standard_earth_cut_red",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Earth Ruby",
+    3,
+    null,
+    "+131/163/187 Critical Strike (based on quality) & +61/75/88 Mastery (based on quality)"
+  );
+  const zenMalygite = await createItem(
+    "Zen Malygite",
+    "inv_10_jewelcrafting_gem2standard_earth_cut_blue",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Earth Sapphire",
+    3,
+    null,
+    "+131/163/187 Versatility (based on quality) & +61/75/88 Mastery (based on quality)"
+  );
+  const radiantMalygite = await createItem(
+    "Radiant Malygite",
+    "inv_10_jewelcrafting_gem2standard_fire_cut_blue",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Fire Sapphire",
+    3,
+    null,
+    "+131/163/187 Versatility (based on quality) & +61/75/88 Critical Strike (based on quality)"
+  );
+  const craftyYsemerald = await createItem(
+    "Crafty Ysemerald",
+    "inv_10_jewelcrafting_gem2standard_fire_cut_green",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Fire Emerald",
+    3,
+    null,
+    "+131/163/187 Haste (based on quality) & +61/75/88 Critical Strike (based on quality)"
+  );
+  const deadlyAlexstraszite = await createItem(
+    "Deadly Alexstraszite",
+    "inv_10_jewelcrafting_gem2standard_fire_cut_red",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Fire Ruby",
+    3,
+    null,
+    "+165/200/235 Critical Strike (based on quality)"
+  );
+  const jaggedNozdorite = await createItem(
+    "Jagged Nozdorite",
+    "inv_10_jewelcrafting_gem2standard_fire_cut_bronze",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Fire Amber",
+    3,
+    null,
+    "+141/171/200 Stamina (based on quality) & +123/149/176 Critical Strike (based on quality)"
+  );
+  const senseisNeltharite = await createItem(
+    "Sensei's Neltharite",
+    "inv_10_jewelcrafting_gem2standard_fire_cut_black",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Fire Onyx",
+    3,
+    null,
+    "+131/163/187 Mastery (based on quality) & +61/75/88 Critical Strike (based on quality)"
+  );
+  const energizedYsemerald = await createItem(
+    "Energized Ysemerald",
+    "inv_10_jewelcrafting_gem2standard_frost_cut_green",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Frost Emerald",
+    3,
+    null,
+    "+131/163/187 Haste (based on quality) & +61/75/88 Versatility (based on quality)"
+  );
+  const radiantAlexstraszite = await createItem(
+    "Radiant Alexstraszite",
+    "inv_10_jewelcrafting_gem2standard_frost_cut_red",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Frost Ruby",
+    3,
+    null,
+    "+131/163/187 Critical Strike (based on quality) & +61/75/88 Versatility (based on quality)"
+  );
+  const steadyNozdorite = await createItem(
+    "Steady Nozdorite",
+    "inv_10_jewelcrafting_gem2standard_frost_cut_bronze",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Frost Amber",
+    3,
+    null,
+    "+141/171/200 Stamina (based on quality) & +123/149/176 Versatility (based on quality)"
+  );
+  const stormyMalygite = await createItem(
+    "Stormy Malygite",
+    "inv_10_jewelcrafting_gem2standard_frost_cut_blue",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Frost Sapphire",
+    3,
+    null,
+    "+165/200/235 Versatility (based on quality)"
+  );
+  const zenNeltharite = await createItem(
+    "Zen Neltharite",
+    "inv_10_jewelcrafting_gem2standard_frost_cut_black",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    "Frost Onyx",
+    3,
+    null,
+    "+131/163/187 Mastery (based on quality) & +61/75/88 Versatility (based on quality)"
+  );
+  const fierceIllimitedDiamond = await createItem(
+    "Fierce Illimited Diamond",
+    "inv_10_jewelcrafting_gem3primal_cut_green",
+    "Pickup",
+    200,
+    null,
+    null,
+    "Epic",
+    null,
+    3,
+    null,
+    "+141/171/200 Primary Stat (based on quality) & +123/149/176 Haste (based on quality)",
+    null,
+    null,
+    null,
+    "Primalist Gem (1)"
+  );
+  const inscribedIllimitedDiamond = await createItem(
+    "Inscribed Illimited Diamond",
+    "inv_10_jewelcrafting_gem3primal_cut_red",
+    "Pickup",
+    200,
+    null,
+    null,
+    "Epic",
+    null,
+    3,
+    null,
+    "+141/171/200 Primary Stat (based on quality) & +123/149/176 Critical Strike (based on quality)",
+    null,
+    null,
+    null,
+    "Primalist Gem (1)"
+  );
+  const resplendentIllimitedDiamond = await createItem(
+    "Resplendent Illimited Diamond",
+    "inv_10_jewelcrafting_gem3primal_cut_blue",
+    "Pickup",
+    200,
+    null,
+    null,
+    "Epic",
+    null,
+    3,
+    null,
+    "+141/171/200 Primary Stat (based on quality) & +123/149/176 Versatility (based on quality)",
+    null,
+    null,
+    null,
+    "Primalist Gem (1)"
+  );
+  const skillfulIllimitedDiamond = await createItem(
+    "Skillful Illimited Diamond",
+    "inv_10_jewelcrafting_gem3primal_cut_black",
+    "Pickup",
+    200,
+    null,
+    null,
+    "Epic",
+    null,
+    3,
+    null,
+    "+141/171/200 Primary Stat (based on quality) & +123/149/176 Mastery (based on quality)",
+    null,
+    null,
+    null,
+    "Primalist Gem (1)"
+  );
+  const tieredMedallionSetting = await createItem(
+    "Tiered Medallion Setting",
+    "inv_jewelcrafting_thoriumsetting",
+    null,
+    200,
+    null,
+    "Up to three sockets per neck? Yes please.",
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Add one socket to an end-game Dragonflight Necklace. A necklace can have up to three sockets. The quality of this item determines up to how many sockets it can add."
+  );
+  const idolOfTheDreamer = await createItem(
+    "Idol of the Dreamer",
+    "inv_10_jewelcrafting_trinket_stonedragon1_color2",
+    "Pickup",
+    1,
+    "Whatever comes, I know you will face it with courage.",
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Your spells and abilities have a chance to grant 14/14/14/?/15 Haste (based on quality) per Ysemerald you have equipped. Upon reaching 15 stacks, all stacks are consumed and you gain 242/?/245/?/270 secondary stats (based on quality), split evenly for 15 sec.",
+    null,
+    null,
+    "Trinket",
+    "Idol of the Aspects (1)",
+    [382, 384, 386, 389, 392],
+    [
+      ["Agility", "Intellect", "Strength", "", ""],
+      ["?", "?", "?", "?", 361],
+    ]
+  );
+  const idolOfTheEarthWarder = await createItem(
+    "Idol of the Earth Warder",
+    "inv_10_jewelcrafting_statue_color5",
+    "Pickup",
+    1,
+    "It is done. All have given that which must be given. I now seal the Dragon Soul forever.",
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Your spells and abilities have a chance to grant 14/14/14/?/15 Mastery (based on quality) per Neltharite you have equipped. Upon reaching 15 stacks, all stacks are consumed and you gain 242/?/245/?/270 secondary stats (based on quality), split evenly for 15 sec.",
+    null,
+    null,
+    "Trinket",
+    "Idol of the Aspects (1)",
+    [382, 384, 386, 389, 392],
+    [
+      ["Agility", "Intellect", "Strength", "", ""],
+      ["?", "?", "?", "?", 361],
+    ]
+  );
+  const idolOfTheLifebinder = await createItem(
+    "Idol of the Lifebinder",
+    "inv_10_jewelcrafting_trinket_stonedragon2_color2",
+    "Pickup",
+    1,
+    "Tomorrow will bring you new challenges, and you must be ready to face them.",
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Your spells and abilities have a chance to grant 14/14/14/?/15 Critical Strike (based on quality) per Alexstraszite you have equipped. Upon reaching 15 stacks, all stacks are consumed and you gain 242/?/245/?/270 secondary stats (based on quality), split evenly for 15 sec.",
+    null,
+    null,
+    "Trinket",
+    "Idol of the Aspects (1)",
+    [382, 384, 386, 389, 392],
+    [
+      ["Agility", "Intellect", "Strength", "", ""],
+      ["?", "?", "?", "?", 361],
+    ]
+  );
+  const idolOfTheSpellWeaver = await createItem(
+    "Idol of the Spell-Weaver",
+    "inv_10_jewelcrafting_trinket_stonedragon3_color1",
+    "Pickup",
+    1,
+    "I have lost much in my time, mortal, too much in fact.",
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    "Your spells and abilities have a chance to grant 14/14/14/?/15 Versatility (based on quality) per Malygite you have equipped. Upon reaching 15 stacks, all stacks are consumed and you gain 242/?/245/?/270 secondary stats (based on quality), split evenly for 15 sec.",
+    null,
+    null,
+    "Trinket",
+    "Idol of the Aspects (1)",
+    [382, 384, 386, 389, 392],
+    [
+      ["Agility", "Intellect", "Strength", "", ""],
+      ["?", "?", "?", "?", 361],
+    ]
+  );
+  const chokerOfShielding = await createItem(
+    "Choker of Shielding",
+    "inv_10_jewelcrafting_necklace_necklace1_color1",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    "Drain the elemental energies from you and your gems, sacrificing 40/41/42/43/44 (based on quality) from each of their associated stats to shield yourself for 14478/?/15082/?/16036 (based on quality) per gem socketed for 10 sec. These stats are returned to you when the shield is broken or expires. (3 Min Cooldown)",
+    null,
+    "Neck",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    null,
+    [
+      secondaryStatArrayEpic("stamina", "jewelry"),
+      secondaryStatArrayEpic("Random Stat 1", "jewelry"),
+      secondaryStatArrayEpic("Random Stat 2", "jewelry"),
+      ["Prismatic Socket", null, null, null, null, null],
+    ]
+  );
+  const elementalLariat = await createItem(
+    "Elemental Lariat",
+    "inv_10_jewelcrafting_necklace_necklace1_color3",
+    "Pickup",
+    1,
+    null,
+    "Unsure if the associated stat is based on the gem type (ie, Alexstraszite = Crit) or element type (ie, Air = Haste)",
+    "Epic",
+    null,
+    5,
+    null,
+    "Your spells and abilities have a chance to empower one of your socketed elemental gems, granting 429/?/445/?/471 of their associated stat (based on quality) for 12 sec.",
+    null,
+    null,
+    "Neck",
+    "Embellished (2)",
+    [382, 384, 386, 389, 392],
+    null,
+    [
+      secondaryStatArrayEpic("stamina", "jewelry"),
+      secondaryStatArrayEpic("Random Stat 1", "jewelry"),
+      secondaryStatArrayEpic("Random Stat 2", "jewelry"),
+      ["Prismatic Socket", null, null, null, null, null],
+    ]
+  );
+  const ringBoundHourglass = await createItem(
+    "Ring-Bound Hourglass",
+    "inv_10_jewelcrafting_rings_ring2_color1",
+    "Pickup",
+    1,
+    null,
+    "WHERE DOES IT GO??",
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    "Visit a place you may have long since forgotten. (20 Hr Cooldown)",
+    null,
+    "Ring",
+    "Ring-Bound Hourglass",
+    [382, 384, 386, 389, 392],
+    null,
+    [
+      secondaryStatArrayEpic("stamina", "jewelry"),
+      secondaryStatArrayEpic("Random Stat 1", "jewelry"),
+      secondaryStatArrayEpic("Random Stat 2", "jewelry"),
+      ["Prismatic Socket", null, null, null, null, null],
+    ]
+  );
+  const signetOfTitanicInsight = await createItem(
+    "Signet of Titanic Insight",
+    "inv_10_jewelcrafting_rings_ring2_color3",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    null,
+    "Ring",
+    "Signet of Titanic Insight",
+    [382, 384, 386, 389, 392],
+    null,
+    [
+      secondaryStatArrayEpic("stamina", "jewelry"),
+      secondaryStatArrayEpic("Random Stat 1", "jewelry"),
+      secondaryStatArrayEpic("Random Stat 2", "jewelry"),
+      ["Prismatic Socket", null, null, null, null, null],
+    ]
+  );
+  const torcOfPassedTime = await createItem(
+    "Torc of Passed Time",
+    "inv_10_jewelcrafting_necklace_necklace1_color2",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Epic",
+    null,
+    5,
+    null,
+    null,
+    null,
+    null,
+    "Neck",
+    null,
+    [382, 384, 386, 389, 392],
+    null,
+    [
+      secondaryStatArrayEpic("stamina", "jewelry"),
+      secondaryStatArrayEpic("Random Stat 1", "jewelry"),
+      secondaryStatArrayEpic("Random Stat 2", "jewelry"),
+      ["Prismatic Socket", null, null, null, null, null],
+    ]
+  );
+  const crimsonCombatantsJeweledAmulet = await createItem(
+    "Crimson Combatant's Jeweled Amulet",
+    "inv_10_jewelcrafting_necklace_necklace2_color3",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    null,
+    "Neck",
+    null,
+    [333, 335, 337, 340, 343],
+    null,
+    [
+      secondaryStatArrayRare("stamina", "jewelry"),
+      secondaryStatArrayRare("Versatility", "jewelry"),
+      secondaryStatArrayRare("Random Stat 2", "jewelry"),
+      ["Prismatic Socket", null, null, null, null, null],
+    ]
+  );
+  const crimsonCombatantsJeweledSignet = await createItem(
+    "Crimson Combatant's Jeweled Signet",
+    "inv_10_jewelcrafting_rings_ring3_color2",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    "Increases item level to 398 in Arenas and Battlegrounds.",
+    null,
+    null,
+    "Ring",
+    "Crimson Combatant's Jeweled Signet",
+    [333, 335, 337, 340, 343],
+    null,
+    [
+      secondaryStatArrayRare("stamina", "jewelry"),
+      secondaryStatArrayRare("Versatility", "jewelry"),
+      secondaryStatArrayRare("Random Stat 2", "jewelry"),
+      ["Prismatic Socket", null, null, null, null, null],
+    ]
+  );
+  const bandOfNewBeginnings = await createItem(
+    "Band of New Beginnings",
+    "inv_10_jewelcrafting_rings_ring1_color1",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    null,
+    "Ring",
+    "Band of New Beginnings",
+    [306, 308, 310, 313, 316],
+    null,
+    [
+      secondaryStatArrayBaby("stamina", "jewelry"),
+      secondaryStatArrayBaby("Random Stat 1", "jewelry"),
+      secondaryStatArrayBaby("Random Stat 2", "jewelry"),
+      ["Prismatic Socket", null, null, null, null, null],
+    ]
+  );
+  const pendantOfImpendingPerils = await createItem(
+    "Pendant of Impending Perils",
+    "inv_10_jewelcrafting_necklace_necklace3_color1",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    null,
+    "Neck",
+    null,
+    [306, 308, 310, 313, 316],
+    null,
+    [
+      secondaryStatArrayBaby("stamina", "jewelry"),
+      secondaryStatArrayBaby("Random Stat 1", "jewelry"),
+      secondaryStatArrayBaby("Random Stat 2", "jewelry"),
+      ["Prismatic Socket", null, null, null, null, null],
+    ]
+  );
+  const djaradinsPinata = await createItem(
+    `Djaradin's "Pinata"`,
+    "inv_komododragon_stone",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Place an intimidating statue of a decapitated dragon onto the battlefield nearby which can be attacked by players of either faction. Once destroyed, it will drop a random battleground buff that anyone can claim. Can only be used in War Mode on the Dragon Isles and in unrated battlegrounds. (15 Min Cooldown)"
+  );
+  const narcissistsSculpture = await createItem(
+    "Narcissist's Sculpture",
+    "achievement_pvp_legion01",
+    "Pickup",
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Place a luxurious statue of yourself nearby which increases your size and Primary Stat while you admire your glorious self. Try not to let it go to your head. Can only be used on the Dragon Isles. (3 Min Cooldown)"
+  );
+  const kaluakFigurine = await createItem(
+    "Kalu'ak Figurine",
+    "trade_archaeology_tuskarr_stele",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Place a pristine figurine inspired by the tuskarr culture which grants +15 Fishing Skill to everyone who stands near it for 1.5/5/10 min (based on quality). (3/5/10 Min Cooldown)"
+  );
+  const statueOfTyrsHerald = await createItem(
+    "Statue of Tyr's Herald",
+    "achievement_boss_maidenofgrief",
+    "Pickup",
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Place a remarkable statue of a Titan Keeper nearby for 2 min. Players who /kneel before the statue will have their worthiness judged. A player's worthiness can only be judged once every 1 hour. Can only be used on the Dragon Isles. (3 Min Cooldown)"
+  );
+  const revitalizingRedCarving = await createItem(
+    "Revitalizing Red Carving",
+    "inv_10_jewelcrafting_statue_color4",
+    "Pickup",
+    200,
+    null,
+    null,
+    "Uncommon",
+    null,
+    3,
+    null,
+    null,
+    "Place a glorious draconic statue on the ground nearby where it will heal you for a short time before its power fades. Can only be used on the Dragon Isles. (3 Min Cooldown)"
+  );
+  const jeweledAmberWhelpling = await createItem(
+    "Jeweled Amber Whelpling",
+    "inv_dragonwhelp3_gemmed_bronze",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    "Pet",
+    1,
+    null,
+    null,
+    "Teaches you how to summon and dismiss this companion."
+  );
+  const jeweledEmeraldWhelpling = await createItem(
+    "Jeweled Emerald Whelpling",
+    "inv_dragonwhelp3_gemmed_green",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    "Pet",
+    1,
+    null,
+    null,
+    "Teaches you how to summon and dismiss this companion."
+  );
+  const jeweledOnyxWhelpling = await createItem(
+    "Jeweled Onyx Whelpling",
+    "inv_dragonwhelp3_gemmed_black",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    "Pet",
+    1,
+    null,
+    null,
+    "Teaches you how to summon and dismiss this companion."
+  );
+  const jeweledRubyWhelpling = await createItem(
+    "Jeweled Ruby Whelpling",
+    "inv_dragonwhelp3_gemmed_red",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    "Pet",
+    1,
+    null,
+    null,
+    "Teaches you how to summon and dismiss this companion."
+  );
+  const jeweledSapphireWhelpling = await createItem(
+    "Jeweled Sapphire Whelpling",
+    "inv_dragonwhelp3_gemmed_blue",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    "Pet",
+    1,
+    null,
+    null,
+    "Teaches you how to summon and dismiss this companion."
+  );
+  const convergentPrism = await createItem(
+    "Convergent Prism",
+    "inv_10_jewelcrafting3_rainbowprism_color1",
+    null,
+    1,
+    null,
+    null,
+    "Rare",
+    "Toy",
+    1,
+    null,
+    null,
+    "Adds this toy to your Toy Box. Clutch the enchanted prism in your hand to guide a beam of light to very precise locations. The beam is only visible to members of your party or raid. (5 Sec Cooldown)"
+  );
+  const jeweledOffering = await createItem(
+    "Jeweled Offering",
+    "inv_jewelry_necklace_15",
+    null,
+    1,
+    null,
+    null,
+    "Rare",
+    "Toy",
+    1,
+    null,
+    null,
+    "Adds this toy to your Toy Box. Humbly offer your most prized possession to whomever considers you worthy enough to accept it. (1 Day Cooldown)"
+  );
+  const projectionPrism = await createItem(
+    "Projection Prism",
+    "inv_10_jewelcrafting_prism_blue",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Crafting Reagent",
+    3,
+    null,
+    null,
+    "Copy the appearance of a targeted party or raid member."
+  );
+  const rhinestoneSunglasses = await createItem(
+    '"Rhinestone" Sunglasses',
+    "inv_helmet_176",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    "Cosmetic",
+    1,
+    null,
+    null,
+    "Add this appearance to your collection.",
+    null,
+    "Head"
+  );
+  const splitLensSpecs = await createItem(
+    "Split-Lens Specs",
+    "inv_helm_glasses_b_04_gold_black",
+    "Equip",
+    1,
+    null,
+    null,
+    "Rare",
+    "Cosmetic",
+    1,
+    null,
+    null,
+    "Add this appearance to your collection.",
+    null,
+    "Head"
+  );
+  const alexstrasziteLoupes = await createItem(
+    "Alexstraszite Loupes",
+    "inv_helm_armor_jewelersspecs_b_01",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Jewelcrafting Accessory",
+    "Head",
+    "Head (1)",
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [
+      ["Inspiration", 38, "?", 44, 48, "?"],
+      ["Multicraft", 25, "?", 30, 32, "?"],
+    ]
+  );
+  const finePrintTrifocals = await createItem(
+    "Fine-Print Trifocals",
+    "inv_helm_armor_scribesspecs_b_01_silver",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Inscription Accessory",
+    "Head",
+    "Head (1)",
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [
+      ["Inspiration", 38, "?", 44, 48, "?"],
+      ["Multicraft", 25, "?", 30, 32, "?"],
+    ]
+  );
+  const magnificentMarginMagnifier = await createItem(
+    "Magnificent Margin Magnifier",
+    "inv_professions_inscription_scribesmagnifyingglass_gold",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Inscription Accessory",
+    "Magnifying Glass",
+    "Magnifying Glass (1)",
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [["Resourcefulness", 25, "?", 30, 32, "?"]]
+  );
+  const resonantFocus = await createItem(
+    "Resonant Focus",
+    "inv_offhand_draenei_a_02",
+    "Pickup",
+    1,
+    null,
+    null,
+    "Rare",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Enchanting Accessory",
+    "Focus",
+    "Focus (1)",
+    [346, 352, 358, 365, 372],
+    [
+      ["Skill", "", "", "", ""],
+      [6, 6, 6, 6, 6],
+    ],
+    [
+      ["Resourcefulness", 19, 21, 22, "?", "?"],
+      ["Crafting Speed", 45, 48, 52, "?", "?"],
+    ]
+  );
+  const boldPrintBifocals = await createItem(
+    "Bold-Print Bifocals",
+    "inv_helm_armor_scribesspecs_b_01_gold",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Inscription Accessory",
+    "Head",
+    "Head (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [
+      ["Inspiration", 28, "?", 32, "?", 38],
+      ["Multicraft", 18, "?", 21, "?", 25],
+    ]
+  );
+  const chromaticFocus = await createItem(
+    "Chromatic Focus",
+    "inv_offhand_draenei_a_02",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Enchanting Accessory",
+    "Focus",
+    "Focus (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [
+      ["Resourcefulness", 14, "?", 16, 17, 19],
+      ["Crafting Speed", 32, "?", 37, 41, 45],
+    ]
+  );
+  const leftHandedMagnifyingGlass = await createItem(
+    "Left-Handed Magnifying Glass",
+    "inv_professions_inscription_scribesmagnifyingglass_silver",
+    "Equip",
+    1,
+    "In the jeweler's quest to make the mundane seem luxurious, they somehow designed a magnifying glass that can only be held by the left hand.",
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Inscription Accessory",
+    "Magnifying Glass",
+    "Magnifying Glass (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [
+      ["Resourcefulness", 18, "?", "?", "?", 25],
+      ["Crafting Speed", 28, "?", "?", "?", 38],
+    ]
+  );
+  const sunderedOnyxLoupes = await createItem(
+    "Sundered Onyx Loupes",
+    "inv_helm_armor_jewelersspecs_b_01",
+    "Equip",
+    1,
+    null,
+    null,
+    "Uncommon",
+    null,
+    5,
+    null,
+    null,
+    null,
+    "Jewelcrafting Accessory",
+    "Head",
+    "Head (1)",
+    [320, 326, 332, 339, 346],
+    null,
+    [
+      ["Inspiration", 28, "?", 32, 35, 38],
+      ["Multicraft", 18, "?", 21, 23, 25],
+    ]
+  );
+  const jeweledDragonsHeart = await createItem(
+    "Jeweled Dragon's Heart",
+    "inv_10_jewelcrafting3_rainbowgemstone_color1",
+    "Pickup",
+    1,
+    "A marvelous although fragile gemstone, it can be cracked to reveal a small hoard of gems found across the Dragon Isles.",
+    "uhhh lemme get back to you on this one",
+    "Rare",
+    "Crafting Reagent",
+    1,
+    null,
+    null,
+    "Right Click to Open"
+  );
+  const dreamersVision = await createItem(
+    "Dreamer's Vision",
+    "inv_jewelcrafting_immactaladite_green",
+    "Pickup",
+    1,
+    "A marvelous although fragile gemstone, it can be cracked to reveal a small hoard of ysemeralds.",
+    "Basically, convert common green gems & a few other mats into rare green gems!",
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Right Click to Open"
+  );
+  const earthwardensPrize = await createItem(
+    "Earthwarden's Prize",
+    "inv_jewelcrafting_immactaladite_purple",
+    "Pickup",
+    1,
+    "A marvelous although fragile gemstone, it can be cracked to reveal a small hoard of neltharite.",
+    "Basically, convert common black gems & a few other mats into rare black gems!",
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Right Click to Open"
+  );
+  const keepersGlory = await createItem(
+    "Keeper's Glory",
+    "inv_jewelcrafting_immactaladite_blue",
+    "Pickup",
+    1,
+    "A marvelous although fragile gemstone, it can be cracked to reveal a small hoard of malygite.",
+    "Basically, convert common blue gems & a few other mats into rare blue gems!",
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Right Click to Open"
+  );
+  const queensGift = await createItem(
+    "Queen's Gift",
+    "inv_jewelcrafting_immactaladite_red",
+    "Pickup",
+    1,
+    "A marvelous although fragile gemstone, it can be cracked to reveal a small hoard of alexstraszite.",
+    "Basically, convert common red gems & a few other mats into rare red gems!",
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Right Click to Open"
+  );
+  const timewatchersPatience = await createItem(
+    "Timewatcher's Patience",
+    "inv_jewelcrafting_immactaladite_orange",
+    "Pickup",
+    1,
+    "A marvelous although fragile gemstone, it can be cracked to reveal a small hoard of nozdorite.",
+    "Basically, convert common bronze gems & a few other mats into rare bronze gems!",
+    "Rare",
+    null,
+    3,
+    null,
+    null,
+    "Right Click to Open"
+  );
+  const glimmeringNozdoriteCluster = await createItem(
+    "Glimmering Nozdorite Cluster",
+    "inv_10_jewelcrafting_gem3primal_uncut_bronze",
+    "Pickup",
+    1000,
+    "A truly remarkable collection of magical gemstones. This is a crucial component for Jewelcrafters to create a Jeweled Amber Whelpling.",
+    null,
+    "Rare"
+  );
+  const glimmeringYsemeraldCluster = await createItem(
+    "Glimmering Ysemerald Cluster",
+    "inv_10_jewelcrafting_gem3primal_uncut_green",
+    "Pickup",
+    1000,
+    "A truly remarkable collection of magical gemstones. This is a crucial component for Jewelcrafters to create a Jeweled Emerald Whelpling.",
+    null,
+    "Rare"
+  );
+  const glimmeringNelthariteCluster = await createItem(
+    "Glimmering Neltharite Cluster",
+    "inv_10_jewelcrafting_gem3primal_uncut_black",
+    "Pickup",
+    1000,
+    "A truly remarkable collection of magical gemstones. This is a crucial component for Jewelcrafters to create a Jeweled Onyx Whelpling.",
+    null,
+    "Rare"
+  );
+  const glimmeringAlexstrasziteCluster = await createItem(
+    "Glimmering Alexstraszite Cluster",
+    "inv_10_jewelcrafting_gem3primal_uncut_red",
+    "Pickup",
+    1000,
+    "A truly remarkable collection of magical gemstones. This is a crucial component for Jewelcrafters to create a Jeweled Ruby Whelpling.",
+    null,
+    "Rare"
+  );
+  const glimmeringMalygiteCluster = await createItem(
+    "Glimmering Malygite Cluster",
+    "inv_10_jewelcrafting_gem3primal_uncut_blue",
+    "Pickup",
+    1000,
+    "A truly remarkable collection of magical gemstones. This is a crucial component for Jewelcrafters to create a Jeweled Sapphire Whelpling.",
+    null,
+    "Rare"
+  );
 
   // //blacksmithing items
   const obsidianSearedAlloy = await createItem(
@@ -12416,100 +13880,558 @@ const makeTables = async () => {
   );
 
   // //cooking items
-  // const ooeyGooeyChocolate = await createItem("Ooey-Gooey Chocolate", 1000);
-  // const impossiblySharpCuttingKnife = await createItem(
-  //   "Impossibly Sharp Cutting Knife",
-  //   1000
-  // );
-  // const saladOnTheSide = await createItem("Salad on the Side", 1000);
-  // const assortedExoticSpices = await createItem("Assorted Exotic Spices", 1000);
-  // const pebbledRockSalts = await createItem("Pebbled Rock Salts", 1000);
-  // const breakfastOfDraconicChampions = await createItem(
-  //   "Breakfast of Draconic Champions",
-  //   1000
-  // );
-  // const sweetAndSourClamChowder = await createItem(
-  //   "Sweet and Sour Clam Chowder",
-  //   1000
-  // );
-  // const probablyProtein = await createItem("Probably Protein", 1000);
-  // const cheeseAndQuackers = await createItem("Cheese and Quackers", 1000);
-  // const mackerelSnackerel = await createItem("Mackerel Snackerel", 1000);
-  // const twiceBakedPotato = await createItem("Twice-Baked Potato", 1000);
-  // const deliciousDragonSpittle = await createItem(
-  //   "Delicious Dragon Spittle",
-  //   1000
-  // );
-  // const churnbellyTea = await createItem("Churnbelly Tea", 1000);
-  // const zestyWater = await createItem("Zesty Water", 1000);
-  // const fatedFortuneCookie = await createItem("Fated Fortune Cookie", 1000);
-  // const blubberyMuffin = await createItem("Blubbery Muffin", 1000);
-  // const celebratoryCake = await createItem("Celebratory Cake", 1000);
-  // const snowInACone = await createItem("Snow in a Cone", 1000);
-  // const tastyHatchlingsTreat = await createItem(
-  //   "Tasty Hatchling's Treat",
-  //   1000
-  // );
-  // const braisedBruffalonBrisket = await createItem(
-  //   "Braised Bruffalon Brisket",
-  //   1000
-  // );
-  // const charredHornswogSteaks = await createItem(
-  //   "Charred Hornswog Steaks",
-  //   1000
-  // );
-  // const hopefullyHealthy = await createItem("Hopefully Healthy", 1000);
-  // const riversidePicnic = await createItem("Riverside Picnic", 1000);
-  // const roastDuckDelight = await createItem("Roast Duck Delight", 1000);
-  // const saltedMeatMash = await createItem("Salted Meat Mash", 1000);
-  // const scrambledBasiliskEggs = await createItem(
-  //   "Scrambled Basilisk Eggs",
-  //   1000
-  // );
-  // const thriceSpicedMammothKabob = await createItem(
-  //   "Thrice-Spiced Mammoth Kabob",
-  //   1000
-  // );
-  // const filetOfFangs = await createItem("Filet of Fangs", 1000);
-  // const saltBakedFishcake = await createItem("Salt-Baked Fishcake", 1000);
-  // const seamothSurprise = await createItem("Seamoth Surprise", 1000);
-  // const timelyDemise = await createItem("Timely Demise", 1000);
-  // const aromaticSeafoodPlatter = await createItem(
-  //   "Aromatic Seafood Platter",
-  //   1000
-  // );
-  // const feistyFishSticks = await createItem("Feisty Fish Sticks", 1000);
-  // const greatCeruleanSea = await createItem("Great Cerulean Sea", 1000);
-  // const revengeServedCold = await createItem("Revenge, Served Cold", 1000);
-  // const sizzlingSeafoodMedley = await createItem(
-  //   "Sizzling Seafood Medley",
-  //   1000
-  // );
-  // const thousandboneTongueslicer = await createItem(
-  //   "Thousandbone Tongueslicer",
-  //   1000
-  // );
-  // const grandBanquetOfTheKaluak = await createItem(
-  //   "Grand Banquet of the Kalu'ak",
-  //   1000
-  // );
-  // const hoardOfDraconicDelicacies = await createItem(
-  //   "Hoard of Draconic Delicacies",
-  //   1000
-  // );
-  // const yusasHeartyStew = await createItem("Yusa's Hearty Stew", 1000);
+  const ooeyGooeyChocolate = await createItem(
+    "Ooey-Gooey Chocolate",
+    "inv_misc_food_legion_goochoco_bottle",
+    "Pickup",
+    1,
+    "Duration: 1 day",
+    null,
+    "Rare",
+    "Finishing Crafting Reagent",
+    1,
+    ["Secret Ingredient"],
+    "When crafting: Stuff your recipe with this delicious secret ingredient to increase the number of servings produced."
+  );
+  const impossiblySharpCuttingKnife = await createItem(
+    "Impossibly Sharp Cutting Knife",
+    "inv_knife_1h_garrison_a_01",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Finishing Crafting Reagent",
+    1,
+    ["Finishing Touches"],
+    "When crafting: Precise cuts ensure perfect portions with nothing going to waste, gain 110 Resourcefulness to this recipe."
+  );
+  const saladOnTheSide = await createItem(
+    "Salad on the Side",
+    "inv_cooking_100_sidesalad",
+    null,
+    200,
+    null,
+    null,
+    "Uncommon",
+    "Finishing Crafting Reagent",
+    1,
+    ["Finishing Touches"],
+    "When crafting: A healthy and filling salad ensures there will be some leftovers, gain 90 Multicraft to a dish."
+  );
+  const assortedExoticSpices = await createItem(
+    "Assorted Exotic Spices",
+    "inv_misc_food_vendor_blackpepper",
+    null,
+    1000,
+    "A common ingredient originally sourced from herbalists. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const pebbledRockSalts = await createItem(
+    "Pebbled Rock Salts",
+    "inv_ore_ghostironnugget",
+    null,
+    1000,
+    "A common ingredient originally sourced from miners. Can be bought and sold on the auction house.",
+    null,
+    "Common",
+    "Crafting Reagent"
+  );
+  const breakfastOfDraconicChampions = await createItem(
+    "Breakfast of Draconic Champions",
+    "inv_cooking_81_sanguinatedfeast",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health and 257,142 mana over 20 sec. Must remain seated while eating."
+  );
+  const sweetAndSourClamChowder = await createItem(
+    "Sweet and Sour Clam Chowder",
+    "inv_misc_food_draenor_whiptailchowder",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health and 257,142 mana over 20 sec. Must remain seated while eating."
+  );
+  const probablyProtein = await createItem(
+    "Probably Protein",
+    "inv_misc_food_meat_rawtigersteak_color04",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 112,500 health over 20 sec. Must remain seated while eating."
+  );
+  const cheeseAndQuackers = await createItem(
+    "Cheese and Quackers",
+    "inv_misc_food_draenor_saltedskulker_color03",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 112,500 health over 20 sec. Must remain seated while eating."
+  );
+  const mackerelSnackerel = await createItem(
+    "Mackerel Snackerel",
+    "inv_cooking_80_sailorspie",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 112,500 health over 20 sec. Must remain seated while eating."
+  );
+  const twiceBakedPotato = await createItem(
+    "Twice-Baked Potato",
+    "inv_thanksgiving_sweetpotato-",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 112,500 health over 20 sec. Must remain seated while eating."
+  );
+  const deliciousDragonSpittle = await createItem(
+    "Delicious Dragon Spittle",
+    "inv_drink_32_disgustingrotgut_color01",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 257,142 mana over 20 sec. Must remain seated while drinking."
+  );
+  const churnbellyTea = await createItem(
+    "Churnbelly Tea",
+    "inv_drink_19",
+    null,
+    200,
+    "They're still swimming...",
+    "Will make you vomit after a bit.",
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 257,142 mana over 20 sec. Must remain seated while drinking. If you spend at least 10 seconds eating you will become regrettably well fed and gain increased swim speed and the ability to breathe underwater for 20 min... or as long as you can stomach it."
+  );
+  const zestyWater = await createItem(
+    "Zesty Water",
+    "inv_drink_21_color02",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 150,000 mana over 20 sec. Must remain seated while drinking."
+  );
+  const fatedFortuneCookie = await createItem(
+    "Fated Fortune Cookie",
+    "inv_misc_fortunecookie_color03",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 75 Primary Stat for 1 hour. Good fortune to you!"
+  );
+  const blubberyMuffin = await createItem(
+    "Blubbery Muffin",
+    "inv_misc_food_148_cupcake",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Yum...?"
+  );
+  const celebratoryCake = await createItem(
+    "Celebratory Cake",
+    "inv_misc_food_145_cake",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Set out a delightful cake to celebrate a momentous occasion! (2 Min Cooldown)"
+  );
+  const snowInACone = await createItem(
+    "Snow in a Cone",
+    "inv_misc_food_31",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Yum!"
+  );
+  const tastyHatchlingsTreat = await createItem(
+    "inv_misc_food_145_cake",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Lure a friendly whelpling out of hiding with an uncomfortably squishy but nonetheless appealing treat."
+  );
+  const braisedBruffalonBrisket = await createItem(
+    "Braised Bruffalon Brisket",
+    "inv_misc_food_meat_cooked_06",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 32 Stamina and 39 Strength for 1 hour."
+  );
+  const charredHornswogSteaks = await createItem(
+    "Charred Hornswog Steaks",
+    "inv_cooking_81_paleosteakandpotatoes_color02",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 112,500 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 22 Stamina and 26 Strength for 1 hour."
+  );
+  const hopefullyHealthy = await createItem(
+    "Hopefully Healthy",
+    "inv_misc_food_meat_cooked_04",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 112,500 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 40 Stamina for 1 hour."
+  );
+  const riversidePicnic = await createItem(
+    "Riverside Picnic",
+    "inv_misc_food_99",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 32 Stamina and 39 Agility for 1 hour."
+  );
+  const roastDuckDelight = await createItem(
+    "Roast Duck Delight",
+    "inv_cooking_100_roastduck_color02",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 32 Stamina and 39 Intellect for 1 hour."
+  );
+  const saltedMeatMash = await createItem(
+    "Salted Meat Mash",
+    "inv_misc_food_meat_raw_01_color02",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 60 Stamina for 1 hour."
+  );
+  const scrambledBasiliskEggs = await createItem(
+    "Scrambled Basilisk Eggs",
+    "inv_thanksgiving_stuffing",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 112,500 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 22 Stamina and 26 Agility for 1 hour."
+  );
+  const thriceSpicedMammothKabob = await createItem(
+    "Thrice-Spiced Mammoth Kabob",
+    "inv_misc_food_legion_spicedribroast",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 112,500 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 22 Stamina and 26 Intellect for 1 hour."
+  );
+  const filetOfFangs = await createItem(
+    "Filet of Fangs",
+    "inv_misc_food_cooked_eternalblossomfish",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 105 Critical Strike for 1 hour."
+  );
+  const saltBakedFishcake = await createItem(
+    "Salt-Baked Fishcake",
+    "inv_misc_food_legion_deepfriedmossgill",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 105 Mastery for 1 hour."
+  );
+  const seamothSurprise = await createItem(
+    "Seamoth Surprise",
+    "inv_misc_food_159_fish_82",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 105 Versatility for 1 hour."
+  );
+  const timelyDemise = await createItem(
+    "Timely Demise",
+    "inv_misc_food_legion_seedbatteredfishplate",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 105 Haste for 1 hour."
+  );
+  const aromaticSeafoodPlatter = await createItem(
+    "Aromatic Seafood Platter",
+    "inv_misc_food_legion_drogbarstylesalmon",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 67 Haste and Versatility for 1 hour."
+  );
+  const feistyFishSticks = await createItem(
+    "Feisty Fish Sticks",
+    "inv_misc_food_164_fish_seadog",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 67 Haste and Critical Strike for 1 hour."
+  );
+  const greatCeruleanSea = await createItem(
+    "Great Cerulean Sea",
+    "inv_misc_food_159_fish_white",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 67 Versatility and Mastery for 1 hour."
+  );
+  const revengeServedCold = await createItem(
+    "Revenge, Served Cold",
+    "inv_cooking_100_revengeservedcold_color02",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 67 Critical Strike and Versatility for 1 hour."
+  );
+  const sizzlingSeafoodMedley = await createItem(
+    "Sizzling Seafood Medley",
+    "inv_misc_food_draenor_sturgeonstew",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 67 Haste and Mastery for 1 hour."
+  );
+  const thousandboneTongueslicer = await createItem(
+    "Thousandbone Tongueslicer",
+    "inv_misc_food_154_fish_77",
+    null,
+    200,
+    null,
+    null,
+    "Common",
+    null,
+    1,
+    null,
+    null,
+    "Restores 192,857 health over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 67 Critical Strike and Mastery for 1 hour."
+  );
+  const grandBanquetOfTheKaluak = await createItem(
+    "Grand Banquet of the Kalu'ak",
+    "inv_cooking_10_grandbanquet",
+    null,
+    200,
+    null,
+    null,
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Set out a traditional tuskarr feast that all players can partake in. Restores 50000 health and 66666 mana over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 75 primary stat for 1 hour."
+  );
+  const hoardOfDraconicDelicacies = await createItem(
+    "Hoard of Draconic Delicacies",
+    "inv_cooking_10_draconicdelicacies",
+    null,
+    200,
+    null,
+    "Everyone needs to throw stuff in to make it work? Like the pot from Shadowlands?",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Set out a Growing Hoard of Draconic Delicacies, ready to fill with delicious prepared meals and excess ingredients. Finish it to provide a great feast for everyone to enjoy! Once complete, restores 50000 health and 66666 mana over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 75 primary stat for 1 hour. (3 Min Cooldown)"
+  );
+  const yusasHeartyStew = await createItem(
+    "Yusa's Hearty Stew",
+    "inv_cooking_10_heartystew",
+    null,
+    200,
+    null,
+    "The budget feast.",
+    "Rare",
+    null,
+    1,
+    null,
+    null,
+    "Set out a fresh batch of Yusa's Hearty Stew for all players to partake in. Restores 50000 health and 66666 mana over 20 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 70 to your lowest secondary stat for 1 hour."
+  );
 
   //
   // SEEDING RECIPES
   //
-
-  /*base recipe method to copy/paste, and an example:
-        await(createRecipe("Name", itemName, amountMade, profession, material array, profSkill, "Category", skillUpAmount, difficulty, requiredRenown, requiredSpecialization, notes, finishing reagent array)
-        material array: [ [item, amount needed], [item, amount needed], etc. ]
-        required renown (if not null): {NameOfRep: "Renown Needed"}
-        required specialization (if not null): {NameOfSpecialization: Level}
-        finishing reagent array: [ [item, {SpecializationNeeded: Level}], [item, {SpecializationNeeded: Level}], etc. ]
-        */
 
   //alchemy recipes - 56 total
   //advancedPhialExperimentation
@@ -21813,1943 +23735,1943 @@ const makeTables = async () => {
   // //jewelcrafting recipes - 82 total
   // // const dragonIslesCrushing = await(createRecipe());
   // // const dragonIslesProspecting = await(createRecipe());
-  // const elementalHarmonyRecipe = await createRecipe(
-  //   null,
-  //   elementalHarmony,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [alexstraszite, 1],
-  //     [malygite, 1],
-  //     [ysemerald, 1],
-  //     [neltharite, 1],
-  //     [nozdorite, 1],
-  //     [primalConvergent, 1],
-  //   ],
-  //   40,
-  //   "Reagents",
-  //   1,
-  //   275,
-  //   null,
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Enterprising: 20 }],
-  //     ["Polishing Cloth", { Enterprising: 10 }],
-  //   ]
-  // );
-  // const illustriousInsightRecipeJewelcrafting = await createRecipe(
-  //   "Illustrious Insight",
-  //   illustriousInsight,
-  //   1,
-  //   jewelcrafting,
-  //   [[artisansMettle, 50]],
-  //   null,
-  //   "Finishing Reagents",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Various Specializations",
-  //   "Jeweler's Bench"
-  // );
-  // const blottingSandRecipe = await createRecipe(
-  //   null,
-  //   blottingSand,
-  //   2,
-  //   jewelcrafting,
-  //   [
-  //     [rousingFire, 1],
-  //     [wildercloth, 1],
-  //     [silkenGemdust, 1],
-  //   ],
-  //   null,
-  //   "Reagents",
-  //   1,
-  //   225,
-  //   null,
-  //   { Enterprising: 0 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Enterprising: 20 }],
-  //     ["Polishing Cloth", { Enterprising: 10 }],
-  //   ]
-  // );
-  // const pounceRecipe = await createRecipe(
-  //   null,
-  //   pounce,
-  //   2,
-  //   jewelcrafting,
-  //   [
-  //     [rousingEarth, 2],
-  //     [wildercloth, 1],
-  //     [silkenGemdust, 2],
-  //   ],
-  //   null,
-  //   "Reagents",
-  //   1,
-  //   275,
-  //   null,
-  //   { Extravagancies: 0 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Enterprising: 20 }],
-  //     ["Polishing Cloth", { Enterprising: 10 }],
-  //   ]
-  // );
-  // const emptySoulCageRecipe = await createRecipe(
-  //   null,
-  //   emptySoulCage,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [fracturedGlass, 3],
-  //     [rousingAir, 2],
-  //     [rousingEarth, 2],
-  //     [rousingFire, 2],
-  //     [rousingFrost, 2],
-  //   ],
-  //   null,
-  //   "Reagents",
-  //   1,
-  //   null,
-  //   null,
-  //   { Enterprising: 15 },
-  //   null,
-  //   "Jeweler's Bench"
-  // );
-  // const draconicVialRecipe = await createRecipe(
-  //   null,
-  //   draconicVial,
-  //   5,
-  //   jewelcrafting,
-  //   [
-  //     [rousingFire, 1],
-  //     [fracturedGlass, 5],
-  //     [draconicStopper, 5],
-  //     [silkenGemdust, 1],
-  //   ],
-  //   20,
-  //   "Reagents",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Enterprising: 20, Glassware: 10 }],
-  //     ["Polishing Cloth", { Enterprising: 10 }],
-  //   ]
-  // );
-  // const framelessLensRecipe = await createRecipe(
-  //   null,
-  //   framelessLens,
-  //   2,
-  //   jewelcrafting,
-  //   [
-  //     [rousingEarth, 1],
-  //     [fracturedGlass, 3],
-  //     [silkenGemdust, 2],
-  //   ],
-  //   10,
-  //   "Reagents",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Enterprising: 20, Glassware: 10 }],
-  //     ["Polishing Cloth", { Enterprising: 10 }],
-  //   ]
-  // );
-  // const glossyStoneRecipe = await createRecipe(
-  //   null,
-  //   glossyStone,
-  //   2,
-  //   jewelcrafting,
-  //   [
-  //     [crumbledStone, 4],
-  //     [rousingEarth, 2],
-  //     [eternityAmber, 1],
-  //   ],
-  //   5,
-  //   "Reagents",
-  //   1,
-  //   200,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Enterprising: 20 }],
-  //     ["Polishing Cloth", { Enterprising: 10 }],
-  //   ]
-  // );
-  // const shimmeringClaspRecipe = await createRecipe(
-  //   null,
-  //   shimmeringClasp,
-  //   2,
-  //   jewelcrafting,
-  //   [
-  //     [misshapenFiligree, 1],
-  //     [mysticSapphire, 1],
-  //   ],
-  //   5,
-  //   "Reagents",
-  //   1,
-  //   200,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Enterprising: 20 }],
-  //     ["Polishing Cloth", { Enterprising: 10 }],
-  //   ]
-  // );
-  // const craftyQueensRubyRecipe = await createRecipe(
-  //   null,
-  //   craftyQueensRuby,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [rousingAir, 2],
-  //     [queensRuby, 2],
-  //   ],
-  //   15,
-  //   "Rudimentary Gems",
-  //   1,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Polishing Cloth", { Faceting: 0 }]]
-  // );
-  // const energizedVibrantEmeraldRecipe = await createRecipe(
-  //   null,
-  //   energizedVibrantEmerald,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [rousingFrost, 2],
-  //     [vibrantEmerald, 2],
-  //   ],
-  //   10,
-  //   "Rudimentary Gems",
-  //   1,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Polishing Cloth", { Faceting: 0 }]]
-  // );
-  // const senseisSunderedOnyxRecipe = await createRecipe(
-  //   null,
-  //   senseisSunderedOnyx,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [rousingFire, 2],
-  //     [sunderedOnyx, 2],
-  //   ],
-  //   15,
-  //   "Rudimentary Gems",
-  //   1,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Polishing Cloth", { Faceting: 0 }]]
-  // );
-  // const zenMysticSapphireRecipe = await createRecipe(
-  //   null,
-  //   zenMysticSapphire,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [rousingEarth, 2],
-  //     [mysticSapphire, 2],
-  //   ],
-  //   10,
-  //   "Rudimentary Gems",
-  //   1,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [["Polishing Cloth", { Faceting: 0 }]]
-  // );
-  // const solidEternityAmberRecipe = await createRecipe(
-  //   null,
-  //   solidEternityAmber,
-  //   1,
-  //   jewelcrafting,
-  //   [[eternityAmber, 2]],
-  //   1,
-  //   "Rudimentary Gems",
-  //   1,
-  //   150,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Learned by default.",
-  //   [["Polishing Cloth", { Faceting: 0 }]]
-  // );
-  // const craftyAlexstrasziteRecipe = await createRecipe(
-  //   null,
-  //   craftyAlexstraszite,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedAir, 2],
-  //     [awakenedFire, 1],
-  //     [awakenedOrder, 1],
-  //     [alexstraszite, 1],
-  //   ],
-  //   null,
-  //   "Air Gems",
-  //   1,
-  //   325,
-  //   null,
-  //   { Air: 10 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Air: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const energizedMalygiteRecipe = await createRecipe(
-  //   null,
-  //   energizedMalygite,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedAir, 2],
-  //     [awakenedFrost, 1],
-  //     [awakenedOrder, 1],
-  //     [malygite, 1],
-  //   ],
-  //   null,
-  //   "Air Gems",
-  //   1,
-  //   325,
-  //   { DragonscaleExpedition: 9 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Air: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const forcefulNozdoriteRecipe = await createRecipe(
-  //   null,
-  //   forcefulNozdorite,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedAir, 1],
-  //     [nozdorite, 1],
-  //   ],
-  //   30,
-  //   "Air Gems",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Air: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const keenNelthariteRecipe = await createRecipe(
-  //   null,
-  //   keenNeltharite,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedAir, 2],
-  //     [awakenedEarth, 1],
-  //     [awakenedOrder, 1],
-  //     [neltharite, 1],
-  //   ],
-  //   null,
-  //   "Air Gems",
-  //   1,
-  //   325,
-  //   { DragonscaleExpedition: 9 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Air: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const quickYsemeraldRecipe = await createRecipe(
-  //   null,
-  //   quickYsemerald,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedAir, 3],
-  //     [awakenedOrder, 1],
-  //     [ysemerald, 1],
-  //   ],
-  //   null,
-  //   "Air Gems",
-  //   1,
-  //   325,
-  //   null,
-  //   { Air: 20 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Air: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const fracturedNelthariteRecipe = await createRecipe(
-  //   null,
-  //   fracturedNeltharite,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedEarth, 3],
-  //     [awakenedOrder, 1],
-  //     [neltharite, 1],
-  //   ],
-  //   null,
-  //   "Earth Gems",
-  //   1,
-  //   325,
-  //   null,
-  //   { Earth: 20 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Earth: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const keenYsemeraldRecipe = await createRecipe(
-  //   null,
-  //   keenYsemerald,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedEarth, 2],
-  //     [awakenedAir, 1],
-  //     [awakenedOrder, 1],
-  //     [ysemerald, 1],
-  //   ],
-  //   null,
-  //   "Earth Gems",
-  //   1,
-  //   325,
-  //   { IskaaraTuskarr: 10 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Earth: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const puissantNozdoriteRecipe = await createRecipe(
-  //   null,
-  //   puissantNozdorite,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedEarth, 1],
-  //     [nozdorite, 1],
-  //   ],
-  //   30,
-  //   "Earth Gems",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Earth: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const senseisAlexstrasziteRecipe = await createRecipe(
-  //   null,
-  //   senseisAlexstraszite,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedEarth, 2],
-  //     [awakenedFire, 1],
-  //     [awakenedOrder, 1],
-  //     [alexstraszite, 1],
-  //   ],
-  //   null,
-  //   "Earth Gems",
-  //   1,
-  //   325,
-  //   { IskaaraTuskarr: 10 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Earth: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const zenMalygiteRecipe = await createRecipe(
-  //   null,
-  //   zenMalygite,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedEarth, 2],
-  //     [awakenedFrost, 1],
-  //     [awakenedOrder, 1],
-  //     [malygite, 1],
-  //   ],
-  //   null,
-  //   "Earth Gems",
-  //   1,
-  //   325,
-  //   null,
-  //   { Earth: 10 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Earth: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const craftyYsemeraldRecipe = await createRecipe(
-  //   null,
-  //   craftyYsemerald,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedFire, 2],
-  //     [awakenedAir, 1],
-  //     [awakenedOrder, 1],
-  //     [ysemerald, 1],
-  //   ],
-  //   null,
-  //   "Fire Gems",
-  //   1,
-  //   325,
-  //   null,
-  //   { Fire: 10 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Fire: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const deadlyAlexstrasziteRecipe = await createRecipe(
-  //   null,
-  //   deadlyAlexstraszite,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedFire, 3],
-  //     [awakenedOrder, 1],
-  //     [alexstraszite, 1],
-  //   ],
-  //   null,
-  //   "Fire Gems",
-  //   1,
-  //   325,
-  //   null,
-  //   { Fire: 20 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Fire: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const jaggedNozdoriteRecipe = await createRecipe(
-  //   null,
-  //   jaggedNozdorite,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedFire, 1],
-  //     [nozdorite, 1],
-  //   ],
-  //   30,
-  //   "Fire Gems",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Fire: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const radiantMalygiteRecipe = await createRecipe(
-  //   null,
-  //   radiantMalygite,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedFire, 2],
-  //     [awakenedFrost, 1],
-  //     [awakenedOrder, 1],
-  //     [malygite, 1],
-  //   ],
-  //   null,
-  //   "Fire Gems",
-  //   1,
-  //   325,
-  //   { DragonscaleExpedition: 9 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Fire: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const senseisNelthariteRecipe = await createRecipe(
-  //   null,
-  //   senseisNeltharite,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedFire, 2],
-  //     [awakenedEarth, 1],
-  //     [awakenedOrder, 1],
-  //     [neltharite, 1],
-  //   ],
-  //   null,
-  //   "Fire Gems",
-  //   1,
-  //   325,
-  //   { DragonscaleExpedition: 9 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Fire: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const energizedYsemeraldRecipe = await createRecipe(
-  //   null,
-  //   energizedYsemerald,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedFrost, 2],
-  //     [awakenedAir, 1],
-  //     [awakenedOrder, 1],
-  //     [ysemerald, 1],
-  //   ],
-  //   null,
-  //   "Frost Gems",
-  //   1,
-  //   325,
-  //   { IskaaraTuskarr: 10 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Frost: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const radiantAlexstrasziteRecipe = await createRecipe(
-  //   null,
-  //   radiantAlexstraszite,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedFrost, 2],
-  //     [awakenedFire, 1],
-  //     [awakenedOrder, 1],
-  //     [alexstraszite, 1],
-  //   ],
-  //   null,
-  //   "Frost Gems",
-  //   1,
-  //   325,
-  //   { IskaaraTuskarr: 10 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Frost: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const steadyNozdoriteRecipe = await createRecipe(
-  //   null,
-  //   steadyNozdorite,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedFrost, 1],
-  //     [nozdorite, 1],
-  //   ],
-  //   30,
-  //   "Frost Gems",
-  //   1,
-  //   300,
-  //   null,
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Frost: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const stormyMalygiteRecipe = await createRecipe(
-  //   null,
-  //   stormyMalygite,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedFrost, 3],
-  //     [awakenedOrder, 1],
-  //     [malygite, 1],
-  //   ],
-  //   null,
-  //   "Frost Gems",
-  //   1,
-  //   325,
-  //   null,
-  //   { Frost: 20 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Frost: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const zenNelthariteRecipe = await createRecipe(
-  //   null,
-  //   zenNeltharite,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedFrost, 2],
-  //     [awakenedEarth, 1],
-  //     [awakenedOrder, 1],
-  //     [neltharite, 1],
-  //   ],
-  //   null,
-  //   "Frost Gems",
-  //   1,
-  //   325,
-  //   null,
-  //   { Frost: 10 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Frost: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const fierceIllimitedDiamondRecipe = await createRecipe(
-  //   null,
-  //   fierceIllimitedDiamond,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedAir, 1],
-  //     [awakenedOrder, 1],
-  //     [primalChaos, 20],
-  //     [illimitedDiamond, 1],
-  //     [ysemerald, 1],
-  //   ],
-  //   null,
-  //   "Primalist Gems",
-  //   1,
-  //   375,
-  //   null,
-  //   { Air: 40 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Illustrious Insight", { Air: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const inscribedIllimitedDiamondRecipe = await createRecipe(
-  //   null,
-  //   inscribedIllimitedDiamond,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedFire, 1],
-  //     [awakenedOrder, 1],
-  //     [primalChaos, 20],
-  //     [illimitedDiamond, 1],
-  //     [alexstraszite, 1],
-  //   ],
-  //   null,
-  //   "Primalist Gems",
-  //   1,
-  //   375,
-  //   null,
-  //   { Fire: 40 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Illustrious Insight", { Fire: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const resplendentIllimitedDiamondRecipe = await createRecipe(
-  //   null,
-  //   resplendentIllimitedDiamond,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedFrost, 1],
-  //     [awakenedOrder, 1],
-  //     [primalChaos, 20],
-  //     [illimitedDiamond, 1],
-  //     [malygite, 1],
-  //   ],
-  //   null,
-  //   "Primalist Gems",
-  //   1,
-  //   375,
-  //   null,
-  //   { Frost: 40 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Illustrious Insight", { Frost: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const skillfulIllimitedDiamondRecipe = await createRecipe(
-  //   null,
-  //   skillfulIllimitedDiamond,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedEarth, 1],
-  //     [awakenedOrder, 1],
-  //     [primalChaos, 20],
-  //     [illimitedDiamond, 1],
-  //     [neltharite, 1],
-  //   ],
-  //   null,
-  //   "Primalist Gems",
-  //   1,
-  //   375,
-  //   null,
-  //   { Earth: 40 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Illustrious Insight", { Earth: 30 }],
-  //     ["Polishing Cloth", { Faceting: 0 }],
-  //   ]
-  // );
-  // const tieredMedallionSettingRecipe = await createRecipe(
-  //   null,
-  //   tieredMedallionSetting,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedOrder, 1],
-  //     [illimitedDiamond, 1],
-  //     [shimmeringClasp, 1],
-  //   ],
-  //   null,
-  //   "Miscellaneous",
-  //   1,
-  //   275,
-  //   null,
-  //   { Setting: 30 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", {}],
-  //     ["Polishing Cloth", {}],
-  //   ]
-  // );
-  // const idolOfTheDreamerRecipe = await createRecipe(
-  //   null,
-  //   idolOfTheDreamer,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 60],
-  //     [airySoul, 1],
-  //     [ysemerald, 1],
-  //     [illimitedDiamond, 1],
-  //     [glossyStone, 10],
-  //   ],
-  //   null,
-  //   "Trinkets",
-  //   1,
-  //   325,
-  //   { IskaaraTuskarr: 15 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Idols: 0 }],
-  //     ["Illustrious Insight", { Idols: 30 }],
-  //     ["Polishing Cloth", { Carving: 30 }],
-  //   ]
-  // );
-  // const idolOfTheEarthWarderRecipe = await createRecipe(
-  //   null,
-  //   idolOfTheEarthWarder,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 60],
-  //     [earthenSoul, 1],
-  //     [neltharite, 1],
-  //     [illimitedDiamond, 1],
-  //     [glossyStone, 10],
-  //   ],
-  //   null,
-  //   "Trinkets",
-  //   1,
-  //   325,
-  //   { DragonscaleExpedition: 13 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Idols: 0 }],
-  //     ["Illustrious Insight", { Idols: 30 }],
-  //     ["Polishing Cloth", { Carving: 30 }],
-  //   ]
-  // );
-  // const idolOfTheLifebinderRecipe = await createRecipe(
-  //   null,
-  //   idolOfTheLifebinder,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 60],
-  //     [fierySoul, 1],
-  //     [alexstraszite, 1],
-  //     [illimitedDiamond, 1],
-  //     [glossyStone, 10],
-  //   ],
-  //   null,
-  //   "Trinkets",
-  //   1,
-  //   325,
-  //   { DragonscaleExpedition: 13 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Idols: 0 }],
-  //     ["Illustrious Insight", { Idols: 30 }],
-  //     ["Polishing Cloth", { Carving: 30 }],
-  //   ]
-  // );
-  // const idolOfTheSpellWeaverRecipe = await createRecipe(
-  //   null,
-  //   idolOfTheSpellWeaver,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 60],
-  //     [frostySoul, 1],
-  //     [malygite, 1],
-  //     [illimitedDiamond, 1],
-  //     [glossyStone, 10],
-  //   ],
-  //   null,
-  //   "Trinkets",
-  //   1,
-  //   325,
-  //   { IskaaraTuskarr: 15 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Primal Infusion", { Idols: 0 }],
-  //     ["Illustrious Insight", { Idols: 30 }],
-  //     ["Polishing Cloth", { Carving: 30 }],
-  //   ]
-  // );
-  // const chokerOfShieldingRecipe = await createRecipe(
-  //   null,
-  //   chokerOfShielding,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 30],
-  //     [shimmeringClasp, 2],
-  //     [illimitedDiamond, 1],
-  //     [elementalHarmony, 1],
-  //   ],
-  //   null,
-  //   "Jewelry",
-  //   1,
-  //   315,
-  //   null,
-  //   null,
-  //   "Raid Drop",
-  //   "Jeweler's Bench",
-  //   "Drops from bosses in Vault of the Incarnates.",
-  //   [
-  //     ["Missive - Combat", { Jewelry: 15 }],
-  //     ["Primal Infusion", { Jewelry: 25 }],
-  //     ["Illustrious Insight", { Necklaces: 30 }],
-  //     ["Polishing Cloth", { Jewelry: 30 }],
-  //   ]
-  // );
-  // const elementalLariatRecipe = await createRecipe(
-  //   null,
-  //   elementalLariat,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 30],
-  //     [shimmeringClasp, 2],
-  //     [illimitedDiamond, 1],
-  //     [elementalHarmony, 1],
-  //   ],
-  //   null,
-  //   "Jewelry",
-  //   1,
-  //   315,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Jeweler's Bench",
-  //   "Drops from 'powerful creatures' in Primal Storms.",
-  //   [
-  //     ["Missive - Combat", { Jewelry: 15 }],
-  //     ["Primal Infusion", { Jewelry: 25 }],
-  //     ["Illustrious Insight", { Necklaces: 30 }],
-  //     ["Polishing Cloth", { Jewelry: 30 }],
-  //   ]
-  // );
-  // const ringBoundHourglassRecipe = await createRecipe(
-  //   null,
-  //   ringBoundHourglass,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 30],
-  //     [shimmeringClasp, 2],
-  //     [illimitedDiamond, 1],
-  //     [elementalHarmony, 1],
-  //     [silkenGemdust, 3],
-  //   ],
-  //   null,
-  //   "Jewelry",
-  //   1,
-  //   315,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Jeweler's Bench",
-  //   "Drops from 'Chest of the Elements' in the Primalist Tomorrow zone.",
-  //   [
-  //     ["Missive - Combat", { Jewelry: 15 }],
-  //     ["Primal Infusion", { Jewelry: 25 }],
-  //     ["Illustrious Insight", { Rings: 30 }],
-  //     ["Polishing Cloth", { Jewelry: 30 }],
-  //   ]
-  // );
-  // const signetOfTitanicInsightRecipe = await createRecipe(
-  //   null,
-  //   signetOfTitanicInsight,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 30],
-  //     [shimmeringClasp, 2],
-  //     [elementalHarmony, 1],
-  //     [ysemerald, 1],
-  //   ],
-  //   null,
-  //   "Jewelry",
-  //   1,
-  //   280,
-  //   null,
-  //   { Rings: 0 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Missive - Combat", { Jewelry: 15 }],
-  //     ["Primal Infusion", { Jewelry: 25 }],
-  //     ["Embellishment", { Rings: 15 }],
-  //     ["Illustrious Insight", { Rings: 30 }],
-  //     ["Polishing Cloth", { Jewelry: 30 }],
-  //   ]
-  // );
-  // const torcOfPassedTimeRecipe = await createRecipe(
-  //   null,
-  //   torcOfPassedTime,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [sparkOfIngenuity, 1],
-  //     [primalChaos, 30],
-  //     [shimmeringClasp, 2],
-  //     [elementalHarmony, 1],
-  //     [malygite, 1],
-  //   ],
-  //   null,
-  //   "Jewelry",
-  //   1,
-  //   280,
-  //   null,
-  //   { Necklaces: 0 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Missive - Combat", { Jewelry: 15 }],
-  //     ["Primal Infusion", { Jewelry: 25 }],
-  //     ["Embellishment", { Necklaces: 15 }],
-  //     ["Illustrious Insight", { Necklaces: 30 }],
-  //     ["Polishing Cloth", { Jewelry: 30 }],
-  //   ]
-  // );
-  // const crimsonCombatantsJeweledAmuletRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsJeweledAmulet,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [rousingIre, 2],
-  //     [shimmeringClasp, 1],
-  //     [mysticSapphire, 2],
-  //   ],
-  //   null,
-  //   "Jewelry",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Jeweler's Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive - Combat", { Jewelry: 15 }],
-  //     ["Lesser Illustrious Insight", { Necklaces: 30 }],
-  //     ["Polishing Cloth", { Jewelry: 30 }],
-  //   ]
-  // );
-  // const crimsonCombatantsJeweledSignetRecipe = await createRecipe(
-  //   null,
-  //   crimsonCombatantsJeweledSignet,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [rousingIre, 2],
-  //     [shimmeringClasp, 1],
-  //     [mysticSapphire, 2],
-  //   ],
-  //   null,
-  //   "Jewelry",
-  //   1,
-  //   120,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Jeweler's Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Missive - Combat", { Jewelry: 15 }],
-  //     ["Lesser Illustrious Insight", { Rings: 30 }],
-  //     ["Polishing Cloth", { Jewelry: 30 }],
-  //   ]
-  // );
-  // const bandOfNewBeginningsRecipe = await createRecipe(
-  //   null,
-  //   bandOfNewBeginnings,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [rousingFire, 5],
-  //     [shimmeringClasp, 1],
-  //     [eternityAmber, 2],
-  //   ],
-  //   15,
-  //   "Jewelry",
-  //   2,
-  //   60,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Missive - Combat", { Jewelry: 15 }],
-  //     ["Training Matrix", {}],
-  //     ["Lesser Illustrious Insight", { Rings: 30 }],
-  //     ["Polishing Cloth", { Jewelry: 30 }],
-  //   ]
-  // );
-  // const pendantOfImpendingPerilsRecipe = await createRecipe(
-  //   null,
-  //   pendantOfImpendingPerils,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [shimmeringClasp, 1],
-  //     [sunderedOnyx, 1],
-  //   ],
-  //   15,
-  //   "Jewelry",
-  //   2,
-  //   40,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Missive - Combat", { Jewelry: 15 }],
-  //     ["Training Matrix", {}],
-  //     ["Lesser Illustrious Insight", { Necklaces: 30 }],
-  //     ["Polishing Cloth", { Jewelry: 30 }],
-  //   ]
-  // );
-  // const djaradinsPinataRecipe = await createRecipe(
-  //   null,
-  //   djaradinsPinata,
-  //   3,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedIre, 1],
-  //     [markOfHonor, 2],
-  //     [glossyStone, 9],
-  //     [sunderedOnyx, 6],
-  //     [silkenGemdust, 2],
-  //     [shimmeringClasp, 3],
-  //   ],
-  //   null,
-  //   "Statues & Carvings",
-  //   1,
-  //   375,
-  //   null,
-  //   null,
-  //   "PvP Victory",
-  //   "Jeweler's Bench",
-  //   "Received from Arena, BGs, or WM?",
-  //   [
-  //     ["Lesser Illustrious Insight", { Stone: 30 }],
-  //     ["Polishing Cloth", { Carving: 30 }],
-  //   ]
-  // );
-  // const narcissistsSculptureRecipe = await createRecipe(
-  //   null,
-  //   narcissistsSculpture,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [awakenedFire, 1],
-  //     [glossyStone, 2],
-  //     [vibrantEmerald, 1],
-  //     [silkenGemdust, 1],
-  //     [shimmeringClasp, 1],
-  //   ],
-  //   null,
-  //   "Statues & Carvings",
-  //   1,
-  //   300,
-  //   null,
-  //   { Setting: 0 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Stone: 30 }],
-  //     ["Polishing Cloth", { Carving: 30 }],
-  //   ]
-  // );
-  // const kaluakFigurineRecipe = await createRecipe(
-  //   null,
-  //   kaluakFigurine,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [scalebellyMackerel, 1],
-  //     [glossyStone, 1],
-  //     [silkenGemdust, 1],
-  //   ],
-  //   null,
-  //   "Statues & Carvings",
-  //   1,
-  //   250,
-  //   { IskaaraTuskarr: 10 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Stone: 30 }],
-  //     ["Polishing Cloth", { Carving: 30 }],
-  //   ]
-  // );
-  // const statueOfTyrsHeraldRecipe = await createRecipe(
-  //   null,
-  //   statueOfTyrsHerald,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [glowingTitanOrb, 1],
-  //     [glossyStone, 2],
-  //     [mysticSapphire, 1],
-  //     [silkenGemdust, 1],
-  //     [shimmeringClasp, 1],
-  //   ],
-  //   null,
-  //   "Statues & Carvings",
-  //   1,
-  //   300,
-  //   null,
-  //   { Setting: 15 },
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Stone: 30 }],
-  //     ["Polishing Cloth", { Carving: 30 }],
-  //   ]
-  // );
-  // const revitalizingRedCarvingRecipe = await createRecipe(
-  //   null,
-  //   revitalizingRedCarving,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [glossyStone, 2],
-  //     [queensRuby, 1],
-  //     [silkenGemdust, 1],
-  //     [shimmeringClasp, 1],
-  //   ],
-  //   25,
-  //   "Statues & Carvings",
-  //   1,
-  //   250,
-  //   null,
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Stone: 30 }],
-  //     ["Polishing Cloth", { Carving: 30 }],
-  //   ]
-  // );
-  // const jeweledAmberWhelplingRecipe = await createRecipe(
-  //   null,
-  //   jeweledAmberWhelpling,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [jeweledDragonsHeart, 1],
-  //     [glimmeringNozdoriteCluster, 1],
-  //     [glossyStone, 1],
-  //     [nozdorite, 1],
-  //     [elementalHarmony, 2],
-  //     [illimitedDiamond, 1],
-  //   ],
-  //   null,
-  //   "Battle Pets",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Jeweler's Bench",
-  //   "Drops from 'Treasures of the Dragon Isles.'"
-  // );
-  // const jeweledEmeraldWhelplingRecipe = await createRecipe(
-  //   null,
-  //   jeweledEmeraldWhelpling,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [jeweledDragonsHeart, 1],
-  //     [glimmeringYsemeraldCluster, 1],
-  //     [glossyStone, 1],
-  //     [ysemerald, 1],
-  //     [elementalHarmony, 2],
-  //     [illimitedDiamond, 1],
-  //   ],
-  //   null,
-  //   "Battle Pets",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Jeweler's Bench",
-  //   "Drops from 'Treasures of the Dragon Isles.'"
-  // );
-  // const jeweledOnyxWhelplingRecipe = await createRecipe(
-  //   null,
-  //   jeweledOnyxWhelpling,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [jeweledDragonsHeart, 1],
-  //     [glimmeringNelthariteCluster, 1],
-  //     [glossyStone, 1],
-  //     [neltharite, 1],
-  //     [elementalHarmony, 2],
-  //     [illimitedDiamond, 1],
-  //   ],
-  //   null,
-  //   "Battle Pets",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Jeweler's Bench",
-  //   "Drops from 'Treasures of the Dragon Isles.'"
-  // );
-  // const jeweledRubyWhelplingRecipe = await createRecipe(
-  //   null,
-  //   jeweledRubyWhelpling,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [jeweledDragonsHeart, 1],
-  //     [glimmeringAlexstrasziteCluster, 1],
-  //     [glossyStone, 1],
-  //     [alexstraszite, 1],
-  //     [elementalHarmony, 2],
-  //     [illimitedDiamond, 1],
-  //   ],
-  //   null,
-  //   "Battle Pets",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Jeweler's Bench",
-  //   "Drops from 'Treasures of the Dragon Isles.'"
-  // );
-  // const jeweledSapphireWhelplingRecipe = await createRecipe(
-  //   null,
-  //   jeweledSapphireWhelpling,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [jeweledDragonsHeart, 1],
-  //     [glimmeringMalygiteCluster, 1],
-  //     [glossyStone, 1],
-  //     [malygite, 1],
-  //     [elementalHarmony, 2],
-  //     [illimitedDiamond, 1],
-  //   ],
-  //   null,
-  //   "Battle Pets",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Jeweler's Bench",
-  //   "Drops from 'Treasures of the Dragon Isles.'"
-  // );
-  // const convergentPrismRecipe = await createRecipe(
-  //   null,
-  //   convergentPrism,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [glowingTitanOrb, 1],
-  //     [illimitedDiamond, 1],
-  //     [projectionPrism, 1],
-  //     [elementalHarmony, 1],
-  //   ],
-  //   null,
-  //   "Novelties",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Jeweler's Bench",
-  //   "Drops from 'Inconspicuous Bookmark' in Thaldraszus."
-  // );
-  // const jeweledOfferingRecipe = await createRecipe(
-  //   null,
-  //   convergentPrism,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [contouredFowlfeather, 75],
-  //     [tuftOfPrimalWool, 2],
-  //     [alexstraszite, 1],
-  //     [silkenGemdust, 15],
-  //     [vibrantWilderclothBolt, 10],
-  //   ],
-  //   null,
-  //   "Novelties",
-  //   1,
-  //   null,
-  //   { Enterprising: 30 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench"
-  // );
-  // const projectionPrismRecipe = await createRecipe(
-  //   null,
-  //   projectionPrism,
-  //   "1-2",
-  //   jewelcrafting,
-  //   [
-  //     [fracturedGlass, 7],
-  //     [framelessLens, 1],
-  //     [silkenGemdust, 1],
-  //   ],
-  //   null,
-  //   "Novelties",
-  //   1,
-  //   225,
-  //   { Glassware: 0 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Enterprising: 20, Glassware: 10 }],
-  //     ["Polishing Cloth", { Enterprising: 10 }],
-  //   ]
-  // );
-  // const rhinestoneSunglassesRecipe = await createRecipe(
-  //   null,
-  //   rhinestoneSunglasses,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [ysemerald, 2],
-  //     [framelessLens, 2],
-  //     [illimitedDiamond, 1],
-  //     [elementalHarmony, 1],
-  //   ],
-  //   null,
-  //   "Novelties",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Jeweler's Bench",
-  //   "Drops from Draconic Recipe in a Bottle."
-  // );
-  // const splitLensSpecsRecipe = await createRecipe(
-  //   null,
-  //   splitLensSpecs,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [neltharite, 1],
-  //     [framelessLens, 1],
-  //     [elementalHarmony, 1],
-  //   ],
-  //   null,
-  //   "Novelties",
-  //   1,
-  //   null,
-  //   { Glassware: 25 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench"
-  // );
-  // const alexstrasziteLoupesRecipe = await createRecipe(
-  //   null,
-  //   alexstrasziteLoupes,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [artisansMettle, 225],
-  //     [vibrantShard, 2],
-  //     [framelessLens, 2],
-  //     [shimmeringClasp, 5],
-  //     [alexstraszite, 2],
-  //   ],
-  //   1,
-  //   "Profession Equipment",
-  //   null,
-  //   325,
-  //   { ArtisansConsortium: "Valued" },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Illustrious Insight", { Enterprising: 20 }],
-  //     ["Polishing Cloth", { Enterprising: 10 }],
-  //   ]
-  // );
-  // const finePrintTrifocalsRecipe = await createRecipe(
-  //   null,
-  //   finePrintTrifocals,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [artisansMettle, 225],
-  //     [vibrantShard, 2],
-  //     [framelessLens, 2],
-  //     [shimmeringClasp, 5],
-  //     [nozdorite, 2],
-  //   ],
-  //   1,
-  //   "Profession Equipment",
-  //   null,
-  //   325,
-  //   { IskaaraTuskarr: 18 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Illustrious Insight", { Enterprising: 20 }],
-  //     ["Polishing Cloth", { Enterprising: 10 }],
-  //   ]
-  // );
-  // const magnificentMarginMagnifierRecipe = await createRecipe(
-  //   null,
-  //   magnificentMarginMagnifier,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [artisansMettle, 225],
-  //     [framelessLens, 2],
-  //     [shimmeringClasp, 2],
-  //     [nozdorite, 4],
-  //   ],
-  //   1,
-  //   "Profession Equipment",
-  //   null,
-  //   325,
-  //   { DragonscaleExpedition: 15 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Illustrious Insight", { Enterprising: 20 }],
-  //     ["Polishing Cloth", { Enterprising: 10 }],
-  //   ]
-  // );
-  // const resonantFocusRecipe = await createRecipe(
-  //   null,
-  //   resonantFocus,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [artisansMettle, 225],
-  //     [resonantCrystal, 2],
-  //     [vibrantShard, 2],
-  //     [shimmeringClasp, 2],
-  //   ],
-  //   null,
-  //   "Profession Equipment",
-  //   1,
-  //   325,
-  //   { IskaaraTuskarr: 18 },
-  //   null,
-  //   null,
-  //   "Jeweler's Bench",
-  //   null,
-  //   [
-  //     ["Illustrious Insight", { Enterprising: 20 }],
-  //     ["Polishing Cloth", { Enterprising: 10 }],
-  //   ]
-  // );
-  // const boldPrintBifocalsRecipe = await createRecipe(
-  //   null,
-  //   boldPrintBifocals,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [framelessLens, 2],
-  //     [sereviteOre, 2],
-  //   ],
-  //   20,
-  //   "Profession Equipment",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Enterprising: 20 }],
-  //     ["Polishing Cloth", { Enterprising: 10 }],
-  //   ]
-  // );
-  // const chromaticFocusRecipe = await createRecipe(
-  //   null,
-  //   chromaticFocus,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [chromaticDust, 4],
-  //     [shimmeringClasp, 1],
-  //   ],
-  //   20,
-  //   "Profession Equipment",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Enterprising: 20 }],
-  //     ["Polishing Cloth", { Enterprising: 10 }],
-  //   ]
-  // );
-  // const leftHandedMagnifyingGlassRecipe = await createRecipe(
-  //   null,
-  //   leftHandedMagnifyingGlass,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [framelessLens, 1],
-  //     [draconiumOre, 3],
-  //   ],
-  //   20,
-  //   "Profession Equipment",
-  //   3,
-  //   80,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Enterprising: 20 }],
-  //     ["Polishing Cloth", { Enterprising: 10 }],
-  //   ]
-  // );
-  // const sunderedOnyxLoupesRecipe = await createRecipe(
-  //   null,
-  //   sunderedOnyxLoupes,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [framelessLens, 2],
-  //     [sereviteOre, 2],
-  //     [sunderedOnyx, 1],
-  //   ],
-  //   20,
-  //   "Profession Equipment",
-  //   3,
-  //   275,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Lesser Illustrious Insight", { Enterprising: 20 }],
-  //     ["Polishing Cloth", { Enterprising: 10 }],
-  //   ]
-  // );
-  // const jeweledDragonsHeartRecipe = await createRecipe(
-  //   null,
-  //   jeweledDragonsHeart,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [queensRuby, 1],
-  //     [mysticSapphire, 1],
-  //     [vibrantEmerald, 1],
-  //     [sunderedOnyx, 1],
-  //     [eternityAmber, 2],
-  //     [silkenGemdust, 3],
-  //   ],
-  //   null,
-  //   "Extravagent Glasswares",
-  //   1,
-  //   null,
-  //   null,
-  //   { Glassware: 35 },
-  //   null,
-  //   "Jeweler's Bench"
-  // );
-  // const dreamersVisionRecipe = await createRecipe(
-  //   null,
-  //   dreamersVision,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [fracturedGlass, 3],
-  //     [vibrantEmerald, 2],
-  //     [silkenGemdust, 1],
-  //   ],
-  //   null,
-  //   "Extravagent Glassware",
-  //   1,
-  //   250,
-  //   null,
-  //   { Air: 0 },
-  //   null,
-  //   "Jeweler's Bench"
-  // );
-  // const earthwardensPrizeRecipe = await createRecipe(
-  //   null,
-  //   earthwardensPrize,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [fracturedGlass, 3],
-  //     [sunderedOnyx, 2],
-  //     [silkenGemdust, 1],
-  //   ],
-  //   null,
-  //   "Extravagent Glassware",
-  //   1,
-  //   250,
-  //   null,
-  //   { Earth: 0 },
-  //   null,
-  //   "Jeweler's Bench"
-  // );
-  // const keepersGloryRecipe = await createRecipe(
-  //   null,
-  //   keepersGlory,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [fracturedGlass, 3],
-  //     [mysticSapphire, 2],
-  //     [silkenGemdust, 1],
-  //   ],
-  //   null,
-  //   "Extravagent Glassware",
-  //   1,
-  //   250,
-  //   null,
-  //   { Frost: 0 },
-  //   null,
-  //   "Jeweler's Bench"
-  // );
-  // const queensGiftRecipe = await createRecipe(
-  //   null,
-  //   queensGift,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [fracturedGlass, 3],
-  //     [queensGift, 2],
-  //     [silkenGemdust, 1],
-  //   ],
-  //   null,
-  //   "Extravagent Glassware",
-  //   1,
-  //   250,
-  //   null,
-  //   { Fire: 0 },
-  //   null,
-  //   "Jeweler's Bench"
-  // );
-  // const timewatchersPatienceRecipe = await createRecipe(
-  //   null,
-  //   timewatchersPatience,
-  //   1,
-  //   jewelcrafting,
-  //   [
-  //     [fracturedGlass, 3],
-  //     [eternityAmber, 4],
-  //     [silkenGemdust, 1],
-  //   ],
-  //   25,
-  //   "Extravagent Glassware",
-  //   1,
-  //   250,
-  //   null,
-  //   null,
-  //   null,
-  //   "Jeweler's Bench"
-  // );
+  const elementalHarmonyRecipe = await createRecipe(
+    null,
+    elementalHarmony,
+    1,
+    jewelcrafting,
+    [
+      [alexstraszite, 1],
+      [malygite, 1],
+      [ysemerald, 1],
+      [neltharite, 1],
+      [nozdorite, 1],
+      [primalConvergent, 1],
+    ],
+    40,
+    "Reagents",
+    1,
+    275,
+    null,
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Enterprising: 20 }],
+      ["Polishing Cloth", { Enterprising: 10 }],
+    ]
+  );
+  const illustriousInsightRecipeJewelcrafting = await createRecipe(
+    "Illustrious Insight",
+    illustriousInsight,
+    1,
+    jewelcrafting,
+    [[artisansMettle, 50]],
+    null,
+    "Finishing Reagents",
+    1,
+    null,
+    null,
+    null,
+    "Various Specializations",
+    "Jeweler's Bench"
+  );
+  const blottingSandRecipe = await createRecipe(
+    null,
+    blottingSand,
+    2,
+    jewelcrafting,
+    [
+      [rousingFire, 1],
+      [wildercloth, 1],
+      [silkenGemdust, 1],
+    ],
+    null,
+    "Reagents",
+    1,
+    225,
+    null,
+    { Enterprising: 0 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Enterprising: 20 }],
+      ["Polishing Cloth", { Enterprising: 10 }],
+    ]
+  );
+  const pounceRecipe = await createRecipe(
+    null,
+    pounce,
+    2,
+    jewelcrafting,
+    [
+      [rousingEarth, 2],
+      [wildercloth, 1],
+      [silkenGemdust, 2],
+    ],
+    null,
+    "Reagents",
+    1,
+    275,
+    null,
+    { Extravagancies: 0 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Enterprising: 20 }],
+      ["Polishing Cloth", { Enterprising: 10 }],
+    ]
+  );
+  const emptySoulCageRecipe = await createRecipe(
+    null,
+    emptySoulCage,
+    1,
+    jewelcrafting,
+    [
+      [fracturedGlass, 3],
+      [rousingAir, 2],
+      [rousingEarth, 2],
+      [rousingFire, 2],
+      [rousingFrost, 2],
+    ],
+    null,
+    "Reagents",
+    1,
+    null,
+    null,
+    { Enterprising: 15 },
+    null,
+    "Jeweler's Bench"
+  );
+  const draconicVialRecipe = await createRecipe(
+    null,
+    draconicVial,
+    5,
+    jewelcrafting,
+    [
+      [rousingFire, 1],
+      [fracturedGlass, 5],
+      [draconicStopper, 5],
+      [silkenGemdust, 1],
+    ],
+    20,
+    "Reagents",
+    1,
+    300,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { Enterprising: 20, Glassware: 10 }],
+      ["Polishing Cloth", { Enterprising: 10 }],
+    ]
+  );
+  const framelessLensRecipe = await createRecipe(
+    null,
+    framelessLens,
+    2,
+    jewelcrafting,
+    [
+      [rousingEarth, 1],
+      [fracturedGlass, 3],
+      [silkenGemdust, 2],
+    ],
+    10,
+    "Reagents",
+    1,
+    300,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { Enterprising: 20, Glassware: 10 }],
+      ["Polishing Cloth", { Enterprising: 10 }],
+    ]
+  );
+  const glossyStoneRecipe = await createRecipe(
+    null,
+    glossyStone,
+    2,
+    jewelcrafting,
+    [
+      [crumbledStone, 4],
+      [rousingEarth, 2],
+      [eternityAmber, 1],
+    ],
+    5,
+    "Reagents",
+    1,
+    200,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { Enterprising: 20 }],
+      ["Polishing Cloth", { Enterprising: 10 }],
+    ]
+  );
+  const shimmeringClaspRecipe = await createRecipe(
+    null,
+    shimmeringClasp,
+    2,
+    jewelcrafting,
+    [
+      [misshapenFiligree, 1],
+      [mysticSapphire, 1],
+    ],
+    5,
+    "Reagents",
+    1,
+    200,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { Enterprising: 20 }],
+      ["Polishing Cloth", { Enterprising: 10 }],
+    ]
+  );
+  const craftyQueensRubyRecipe = await createRecipe(
+    null,
+    craftyQueensRuby,
+    1,
+    jewelcrafting,
+    [
+      [rousingAir, 2],
+      [queensRuby, 2],
+    ],
+    15,
+    "Rudimentary Gems",
+    1,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Polishing Cloth", { Faceting: 0 }]]
+  );
+  const energizedVibrantEmeraldRecipe = await createRecipe(
+    null,
+    energizedVibrantEmerald,
+    1,
+    jewelcrafting,
+    [
+      [rousingFrost, 2],
+      [vibrantEmerald, 2],
+    ],
+    10,
+    "Rudimentary Gems",
+    1,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Polishing Cloth", { Faceting: 0 }]]
+  );
+  const senseisSunderedOnyxRecipe = await createRecipe(
+    null,
+    senseisSunderedOnyx,
+    1,
+    jewelcrafting,
+    [
+      [rousingFire, 2],
+      [sunderedOnyx, 2],
+    ],
+    15,
+    "Rudimentary Gems",
+    1,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Polishing Cloth", { Faceting: 0 }]]
+  );
+  const zenMysticSapphireRecipe = await createRecipe(
+    null,
+    zenMysticSapphire,
+    1,
+    jewelcrafting,
+    [
+      [rousingEarth, 2],
+      [mysticSapphire, 2],
+    ],
+    10,
+    "Rudimentary Gems",
+    1,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [["Polishing Cloth", { Faceting: 0 }]]
+  );
+  const solidEternityAmberRecipe = await createRecipe(
+    null,
+    solidEternityAmber,
+    1,
+    jewelcrafting,
+    [[eternityAmber, 2]],
+    1,
+    "Rudimentary Gems",
+    1,
+    150,
+    null,
+    null,
+    null,
+    null,
+    "Learned by default.",
+    [["Polishing Cloth", { Faceting: 0 }]]
+  );
+  const craftyAlexstrasziteRecipe = await createRecipe(
+    null,
+    craftyAlexstraszite,
+    1,
+    jewelcrafting,
+    [
+      [awakenedAir, 2],
+      [awakenedFire, 1],
+      [awakenedOrder, 1],
+      [alexstraszite, 1],
+    ],
+    null,
+    "Air Gems",
+    1,
+    325,
+    null,
+    { Air: 10 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Air: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const energizedMalygiteRecipe = await createRecipe(
+    null,
+    energizedMalygite,
+    1,
+    jewelcrafting,
+    [
+      [awakenedAir, 2],
+      [awakenedFrost, 1],
+      [awakenedOrder, 1],
+      [malygite, 1],
+    ],
+    null,
+    "Air Gems",
+    1,
+    325,
+    { DragonscaleExpedition: 9 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Air: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const forcefulNozdoriteRecipe = await createRecipe(
+    null,
+    forcefulNozdorite,
+    1,
+    jewelcrafting,
+    [
+      [awakenedAir, 1],
+      [nozdorite, 1],
+    ],
+    30,
+    "Air Gems",
+    1,
+    300,
+    null,
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Air: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const keenNelthariteRecipe = await createRecipe(
+    null,
+    keenNeltharite,
+    1,
+    jewelcrafting,
+    [
+      [awakenedAir, 2],
+      [awakenedEarth, 1],
+      [awakenedOrder, 1],
+      [neltharite, 1],
+    ],
+    null,
+    "Air Gems",
+    1,
+    325,
+    { DragonscaleExpedition: 9 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Air: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const quickYsemeraldRecipe = await createRecipe(
+    null,
+    quickYsemerald,
+    1,
+    jewelcrafting,
+    [
+      [awakenedAir, 3],
+      [awakenedOrder, 1],
+      [ysemerald, 1],
+    ],
+    null,
+    "Air Gems",
+    1,
+    325,
+    null,
+    { Air: 20 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Air: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const fracturedNelthariteRecipe = await createRecipe(
+    null,
+    fracturedNeltharite,
+    1,
+    jewelcrafting,
+    [
+      [awakenedEarth, 3],
+      [awakenedOrder, 1],
+      [neltharite, 1],
+    ],
+    null,
+    "Earth Gems",
+    1,
+    325,
+    null,
+    { Earth: 20 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Earth: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const keenYsemeraldRecipe = await createRecipe(
+    null,
+    keenYsemerald,
+    1,
+    jewelcrafting,
+    [
+      [awakenedEarth, 2],
+      [awakenedAir, 1],
+      [awakenedOrder, 1],
+      [ysemerald, 1],
+    ],
+    null,
+    "Earth Gems",
+    1,
+    325,
+    { IskaaraTuskarr: 10 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Earth: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const puissantNozdoriteRecipe = await createRecipe(
+    null,
+    puissantNozdorite,
+    1,
+    jewelcrafting,
+    [
+      [awakenedEarth, 1],
+      [nozdorite, 1],
+    ],
+    30,
+    "Earth Gems",
+    1,
+    300,
+    null,
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Earth: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const senseisAlexstrasziteRecipe = await createRecipe(
+    null,
+    senseisAlexstraszite,
+    1,
+    jewelcrafting,
+    [
+      [awakenedEarth, 2],
+      [awakenedFire, 1],
+      [awakenedOrder, 1],
+      [alexstraszite, 1],
+    ],
+    null,
+    "Earth Gems",
+    1,
+    325,
+    { IskaaraTuskarr: 10 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Earth: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const zenMalygiteRecipe = await createRecipe(
+    null,
+    zenMalygite,
+    1,
+    jewelcrafting,
+    [
+      [awakenedEarth, 2],
+      [awakenedFrost, 1],
+      [awakenedOrder, 1],
+      [malygite, 1],
+    ],
+    null,
+    "Earth Gems",
+    1,
+    325,
+    null,
+    { Earth: 10 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Earth: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const craftyYsemeraldRecipe = await createRecipe(
+    null,
+    craftyYsemerald,
+    1,
+    jewelcrafting,
+    [
+      [awakenedFire, 2],
+      [awakenedAir, 1],
+      [awakenedOrder, 1],
+      [ysemerald, 1],
+    ],
+    null,
+    "Fire Gems",
+    1,
+    325,
+    null,
+    { Fire: 10 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Fire: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const deadlyAlexstrasziteRecipe = await createRecipe(
+    null,
+    deadlyAlexstraszite,
+    1,
+    jewelcrafting,
+    [
+      [awakenedFire, 3],
+      [awakenedOrder, 1],
+      [alexstraszite, 1],
+    ],
+    null,
+    "Fire Gems",
+    1,
+    325,
+    null,
+    { Fire: 20 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Fire: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const jaggedNozdoriteRecipe = await createRecipe(
+    null,
+    jaggedNozdorite,
+    1,
+    jewelcrafting,
+    [
+      [awakenedFire, 1],
+      [nozdorite, 1],
+    ],
+    30,
+    "Fire Gems",
+    1,
+    300,
+    null,
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Fire: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const radiantMalygiteRecipe = await createRecipe(
+    null,
+    radiantMalygite,
+    1,
+    jewelcrafting,
+    [
+      [awakenedFire, 2],
+      [awakenedFrost, 1],
+      [awakenedOrder, 1],
+      [malygite, 1],
+    ],
+    null,
+    "Fire Gems",
+    1,
+    325,
+    { DragonscaleExpedition: 9 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Fire: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const senseisNelthariteRecipe = await createRecipe(
+    null,
+    senseisNeltharite,
+    1,
+    jewelcrafting,
+    [
+      [awakenedFire, 2],
+      [awakenedEarth, 1],
+      [awakenedOrder, 1],
+      [neltharite, 1],
+    ],
+    null,
+    "Fire Gems",
+    1,
+    325,
+    { DragonscaleExpedition: 9 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Fire: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const energizedYsemeraldRecipe = await createRecipe(
+    null,
+    energizedYsemerald,
+    1,
+    jewelcrafting,
+    [
+      [awakenedFrost, 2],
+      [awakenedAir, 1],
+      [awakenedOrder, 1],
+      [ysemerald, 1],
+    ],
+    null,
+    "Frost Gems",
+    1,
+    325,
+    { IskaaraTuskarr: 10 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Frost: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const radiantAlexstrasziteRecipe = await createRecipe(
+    null,
+    radiantAlexstraszite,
+    1,
+    jewelcrafting,
+    [
+      [awakenedFrost, 2],
+      [awakenedFire, 1],
+      [awakenedOrder, 1],
+      [alexstraszite, 1],
+    ],
+    null,
+    "Frost Gems",
+    1,
+    325,
+    { IskaaraTuskarr: 10 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Frost: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const steadyNozdoriteRecipe = await createRecipe(
+    null,
+    steadyNozdorite,
+    1,
+    jewelcrafting,
+    [
+      [awakenedFrost, 1],
+      [nozdorite, 1],
+    ],
+    30,
+    "Frost Gems",
+    1,
+    300,
+    null,
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Frost: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const stormyMalygiteRecipe = await createRecipe(
+    null,
+    stormyMalygite,
+    1,
+    jewelcrafting,
+    [
+      [awakenedFrost, 3],
+      [awakenedOrder, 1],
+      [malygite, 1],
+    ],
+    null,
+    "Frost Gems",
+    1,
+    325,
+    null,
+    { Frost: 20 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Frost: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const zenNelthariteRecipe = await createRecipe(
+    null,
+    zenNeltharite,
+    1,
+    jewelcrafting,
+    [
+      [awakenedFrost, 2],
+      [awakenedEarth, 1],
+      [awakenedOrder, 1],
+      [neltharite, 1],
+    ],
+    null,
+    "Frost Gems",
+    1,
+    325,
+    null,
+    { Frost: 10 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Frost: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const fierceIllimitedDiamondRecipe = await createRecipe(
+    null,
+    fierceIllimitedDiamond,
+    1,
+    jewelcrafting,
+    [
+      [awakenedAir, 1],
+      [awakenedOrder, 1],
+      [primalChaos, 20],
+      [illimitedDiamond, 1],
+      [ysemerald, 1],
+    ],
+    null,
+    "Primalist Gems",
+    1,
+    375,
+    null,
+    { Air: 40 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Illustrious Insight", { Air: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const inscribedIllimitedDiamondRecipe = await createRecipe(
+    null,
+    inscribedIllimitedDiamond,
+    1,
+    jewelcrafting,
+    [
+      [awakenedFire, 1],
+      [awakenedOrder, 1],
+      [primalChaos, 20],
+      [illimitedDiamond, 1],
+      [alexstraszite, 1],
+    ],
+    null,
+    "Primalist Gems",
+    1,
+    375,
+    null,
+    { Fire: 40 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Illustrious Insight", { Fire: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const resplendentIllimitedDiamondRecipe = await createRecipe(
+    null,
+    resplendentIllimitedDiamond,
+    1,
+    jewelcrafting,
+    [
+      [awakenedFrost, 1],
+      [awakenedOrder, 1],
+      [primalChaos, 20],
+      [illimitedDiamond, 1],
+      [malygite, 1],
+    ],
+    null,
+    "Primalist Gems",
+    1,
+    375,
+    null,
+    { Frost: 40 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Illustrious Insight", { Frost: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const skillfulIllimitedDiamondRecipe = await createRecipe(
+    null,
+    skillfulIllimitedDiamond,
+    1,
+    jewelcrafting,
+    [
+      [awakenedEarth, 1],
+      [awakenedOrder, 1],
+      [primalChaos, 20],
+      [illimitedDiamond, 1],
+      [neltharite, 1],
+    ],
+    null,
+    "Primalist Gems",
+    1,
+    375,
+    null,
+    { Earth: 40 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Illustrious Insight", { Earth: 30 }],
+      ["Polishing Cloth", { Faceting: 0 }],
+    ]
+  );
+  const tieredMedallionSettingRecipe = await createRecipe(
+    null,
+    tieredMedallionSetting,
+    1,
+    jewelcrafting,
+    [
+      [awakenedOrder, 1],
+      [illimitedDiamond, 1],
+      [shimmeringClasp, 1],
+    ],
+    null,
+    "Miscellaneous",
+    1,
+    275,
+    null,
+    { Setting: 30 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", {}],
+      ["Polishing Cloth", {}],
+    ]
+  );
+  const idolOfTheDreamerRecipe = await createRecipe(
+    null,
+    idolOfTheDreamer,
+    1,
+    jewelcrafting,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 60],
+      [airySoul, 1],
+      [ysemerald, 1],
+      [illimitedDiamond, 1],
+      [glossyStone, 10],
+    ],
+    null,
+    "Trinkets",
+    1,
+    325,
+    { IskaaraTuskarr: 15 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Primal Infusion", { Idols: 0 }],
+      ["Illustrious Insight", { Idols: 30 }],
+      ["Polishing Cloth", { Carving: 30 }],
+    ]
+  );
+  const idolOfTheEarthWarderRecipe = await createRecipe(
+    null,
+    idolOfTheEarthWarder,
+    1,
+    jewelcrafting,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 60],
+      [earthenSoul, 1],
+      [neltharite, 1],
+      [illimitedDiamond, 1],
+      [glossyStone, 10],
+    ],
+    null,
+    "Trinkets",
+    1,
+    325,
+    { DragonscaleExpedition: 13 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Primal Infusion", { Idols: 0 }],
+      ["Illustrious Insight", { Idols: 30 }],
+      ["Polishing Cloth", { Carving: 30 }],
+    ]
+  );
+  const idolOfTheLifebinderRecipe = await createRecipe(
+    null,
+    idolOfTheLifebinder,
+    1,
+    jewelcrafting,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 60],
+      [fierySoul, 1],
+      [alexstraszite, 1],
+      [illimitedDiamond, 1],
+      [glossyStone, 10],
+    ],
+    null,
+    "Trinkets",
+    1,
+    325,
+    { DragonscaleExpedition: 13 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Primal Infusion", { Idols: 0 }],
+      ["Illustrious Insight", { Idols: 30 }],
+      ["Polishing Cloth", { Carving: 30 }],
+    ]
+  );
+  const idolOfTheSpellWeaverRecipe = await createRecipe(
+    null,
+    idolOfTheSpellWeaver,
+    1,
+    jewelcrafting,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 60],
+      [frostySoul, 1],
+      [malygite, 1],
+      [illimitedDiamond, 1],
+      [glossyStone, 10],
+    ],
+    null,
+    "Trinkets",
+    1,
+    325,
+    { IskaaraTuskarr: 15 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Primal Infusion", { Idols: 0 }],
+      ["Illustrious Insight", { Idols: 30 }],
+      ["Polishing Cloth", { Carving: 30 }],
+    ]
+  );
+  const chokerOfShieldingRecipe = await createRecipe(
+    null,
+    chokerOfShielding,
+    1,
+    jewelcrafting,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 30],
+      [shimmeringClasp, 2],
+      [illimitedDiamond, 1],
+      [elementalHarmony, 1],
+    ],
+    null,
+    "Jewelry",
+    1,
+    315,
+    null,
+    null,
+    "Raid Drop",
+    "Jeweler's Bench",
+    "Drops from bosses in Vault of the Incarnates.",
+    [
+      ["Missive - Combat", { Jewelry: 15 }],
+      ["Primal Infusion", { Jewelry: 25 }],
+      ["Illustrious Insight", { Necklaces: 30 }],
+      ["Polishing Cloth", { Jewelry: 30 }],
+    ]
+  );
+  const elementalLariatRecipe = await createRecipe(
+    null,
+    elementalLariat,
+    1,
+    jewelcrafting,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 30],
+      [shimmeringClasp, 2],
+      [illimitedDiamond, 1],
+      [elementalHarmony, 1],
+    ],
+    null,
+    "Jewelry",
+    1,
+    315,
+    null,
+    null,
+    "World Drop",
+    "Jeweler's Bench",
+    "Drops from 'powerful creatures' in Primal Storms.",
+    [
+      ["Missive - Combat", { Jewelry: 15 }],
+      ["Primal Infusion", { Jewelry: 25 }],
+      ["Illustrious Insight", { Necklaces: 30 }],
+      ["Polishing Cloth", { Jewelry: 30 }],
+    ]
+  );
+  const ringBoundHourglassRecipe = await createRecipe(
+    null,
+    ringBoundHourglass,
+    1,
+    jewelcrafting,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 30],
+      [shimmeringClasp, 2],
+      [illimitedDiamond, 1],
+      [elementalHarmony, 1],
+      [silkenGemdust, 3],
+    ],
+    null,
+    "Jewelry",
+    1,
+    315,
+    null,
+    null,
+    "World Drop",
+    "Jeweler's Bench",
+    "Drops from 'Chest of the Elements' in the Primalist Tomorrow zone.",
+    [
+      ["Missive - Combat", { Jewelry: 15 }],
+      ["Primal Infusion", { Jewelry: 25 }],
+      ["Illustrious Insight", { Rings: 30 }],
+      ["Polishing Cloth", { Jewelry: 30 }],
+    ]
+  );
+  const signetOfTitanicInsightRecipe = await createRecipe(
+    null,
+    signetOfTitanicInsight,
+    1,
+    jewelcrafting,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 30],
+      [shimmeringClasp, 2],
+      [elementalHarmony, 1],
+      [ysemerald, 1],
+    ],
+    null,
+    "Jewelry",
+    1,
+    280,
+    null,
+    { Rings: 0 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Missive - Combat", { Jewelry: 15 }],
+      ["Primal Infusion", { Jewelry: 25 }],
+      ["Embellishment", { Rings: 15 }],
+      ["Illustrious Insight", { Rings: 30 }],
+      ["Polishing Cloth", { Jewelry: 30 }],
+    ]
+  );
+  const torcOfPassedTimeRecipe = await createRecipe(
+    null,
+    torcOfPassedTime,
+    1,
+    jewelcrafting,
+    [
+      [sparkOfIngenuity, 1],
+      [primalChaos, 30],
+      [shimmeringClasp, 2],
+      [elementalHarmony, 1],
+      [malygite, 1],
+    ],
+    null,
+    "Jewelry",
+    1,
+    280,
+    null,
+    { Necklaces: 0 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Missive - Combat", { Jewelry: 15 }],
+      ["Primal Infusion", { Jewelry: 25 }],
+      ["Embellishment", { Necklaces: 15 }],
+      ["Illustrious Insight", { Necklaces: 30 }],
+      ["Polishing Cloth", { Jewelry: 30 }],
+    ]
+  );
+  const crimsonCombatantsJeweledAmuletRecipe = await createRecipe(
+    null,
+    crimsonCombatantsJeweledAmulet,
+    1,
+    jewelcrafting,
+    [
+      [rousingIre, 2],
+      [shimmeringClasp, 1],
+      [mysticSapphire, 2],
+    ],
+    null,
+    "Jewelry",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Jeweler's Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { Jewelry: 15 }],
+      ["Lesser Illustrious Insight", { Necklaces: 30 }],
+      ["Polishing Cloth", { Jewelry: 30 }],
+    ]
+  );
+  const crimsonCombatantsJeweledSignetRecipe = await createRecipe(
+    null,
+    crimsonCombatantsJeweledSignet,
+    1,
+    jewelcrafting,
+    [
+      [rousingIre, 2],
+      [shimmeringClasp, 1],
+      [mysticSapphire, 2],
+    ],
+    null,
+    "Jewelry",
+    1,
+    120,
+    null,
+    null,
+    "PvP Victory",
+    "Jeweler's Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Missive - Combat", { Jewelry: 15 }],
+      ["Lesser Illustrious Insight", { Rings: 30 }],
+      ["Polishing Cloth", { Jewelry: 30 }],
+    ]
+  );
+  const bandOfNewBeginningsRecipe = await createRecipe(
+    null,
+    bandOfNewBeginnings,
+    1,
+    jewelcrafting,
+    [
+      [rousingFire, 5],
+      [shimmeringClasp, 1],
+      [eternityAmber, 2],
+    ],
+    15,
+    "Jewelry",
+    2,
+    60,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Missive - Combat", { Jewelry: 15 }],
+      ["Training Matrix", {}],
+      ["Lesser Illustrious Insight", { Rings: 30 }],
+      ["Polishing Cloth", { Jewelry: 30 }],
+    ]
+  );
+  const pendantOfImpendingPerilsRecipe = await createRecipe(
+    null,
+    pendantOfImpendingPerils,
+    1,
+    jewelcrafting,
+    [
+      [shimmeringClasp, 1],
+      [sunderedOnyx, 1],
+    ],
+    15,
+    "Jewelry",
+    2,
+    40,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Missive - Combat", { Jewelry: 15 }],
+      ["Training Matrix", {}],
+      ["Lesser Illustrious Insight", { Necklaces: 30 }],
+      ["Polishing Cloth", { Jewelry: 30 }],
+    ]
+  );
+  const djaradinsPinataRecipe = await createRecipe(
+    null,
+    djaradinsPinata,
+    3,
+    jewelcrafting,
+    [
+      [awakenedIre, 1],
+      [markOfHonor, 2],
+      [glossyStone, 9],
+      [sunderedOnyx, 6],
+      [silkenGemdust, 2],
+      [shimmeringClasp, 3],
+    ],
+    null,
+    "Statues & Carvings",
+    1,
+    375,
+    null,
+    null,
+    "PvP Victory",
+    "Jeweler's Bench",
+    "Received from Arena, BGs, or WM?",
+    [
+      ["Lesser Illustrious Insight", { Stone: 30 }],
+      ["Polishing Cloth", { Carving: 30 }],
+    ]
+  );
+  const narcissistsSculptureRecipe = await createRecipe(
+    null,
+    narcissistsSculpture,
+    1,
+    jewelcrafting,
+    [
+      [awakenedFire, 1],
+      [glossyStone, 2],
+      [vibrantEmerald, 1],
+      [silkenGemdust, 1],
+      [shimmeringClasp, 1],
+    ],
+    null,
+    "Statues & Carvings",
+    1,
+    300,
+    null,
+    { Setting: 0 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Stone: 30 }],
+      ["Polishing Cloth", { Carving: 30 }],
+    ]
+  );
+  const kaluakFigurineRecipe = await createRecipe(
+    null,
+    kaluakFigurine,
+    1,
+    jewelcrafting,
+    [
+      [scalebellyMackerel, 1],
+      [glossyStone, 1],
+      [silkenGemdust, 1],
+    ],
+    null,
+    "Statues & Carvings",
+    1,
+    250,
+    { IskaaraTuskarr: 10 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Stone: 30 }],
+      ["Polishing Cloth", { Carving: 30 }],
+    ]
+  );
+  const statueOfTyrsHeraldRecipe = await createRecipe(
+    null,
+    statueOfTyrsHerald,
+    1,
+    jewelcrafting,
+    [
+      [glowingTitanOrb, 1],
+      [glossyStone, 2],
+      [mysticSapphire, 1],
+      [silkenGemdust, 1],
+      [shimmeringClasp, 1],
+    ],
+    null,
+    "Statues & Carvings",
+    1,
+    300,
+    null,
+    { Setting: 15 },
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Stone: 30 }],
+      ["Polishing Cloth", { Carving: 30 }],
+    ]
+  );
+  const revitalizingRedCarvingRecipe = await createRecipe(
+    null,
+    revitalizingRedCarving,
+    1,
+    jewelcrafting,
+    [
+      [glossyStone, 2],
+      [queensRuby, 1],
+      [silkenGemdust, 1],
+      [shimmeringClasp, 1],
+    ],
+    25,
+    "Statues & Carvings",
+    1,
+    250,
+    null,
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Stone: 30 }],
+      ["Polishing Cloth", { Carving: 30 }],
+    ]
+  );
+  const jeweledAmberWhelplingRecipe = await createRecipe(
+    null,
+    jeweledAmberWhelpling,
+    1,
+    jewelcrafting,
+    [
+      [jeweledDragonsHeart, 1],
+      [glimmeringNozdoriteCluster, 1],
+      [glossyStone, 1],
+      [nozdorite, 1],
+      [elementalHarmony, 2],
+      [illimitedDiamond, 1],
+    ],
+    null,
+    "Battle Pets",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Jeweler's Bench",
+    "Drops from 'Treasures of the Dragon Isles.'"
+  );
+  const jeweledEmeraldWhelplingRecipe = await createRecipe(
+    null,
+    jeweledEmeraldWhelpling,
+    1,
+    jewelcrafting,
+    [
+      [jeweledDragonsHeart, 1],
+      [glimmeringYsemeraldCluster, 1],
+      [glossyStone, 1],
+      [ysemerald, 1],
+      [elementalHarmony, 2],
+      [illimitedDiamond, 1],
+    ],
+    null,
+    "Battle Pets",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Jeweler's Bench",
+    "Drops from 'Treasures of the Dragon Isles.'"
+  );
+  const jeweledOnyxWhelplingRecipe = await createRecipe(
+    null,
+    jeweledOnyxWhelpling,
+    1,
+    jewelcrafting,
+    [
+      [jeweledDragonsHeart, 1],
+      [glimmeringNelthariteCluster, 1],
+      [glossyStone, 1],
+      [neltharite, 1],
+      [elementalHarmony, 2],
+      [illimitedDiamond, 1],
+    ],
+    null,
+    "Battle Pets",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Jeweler's Bench",
+    "Drops from 'Treasures of the Dragon Isles.'"
+  );
+  const jeweledRubyWhelplingRecipe = await createRecipe(
+    null,
+    jeweledRubyWhelpling,
+    1,
+    jewelcrafting,
+    [
+      [jeweledDragonsHeart, 1],
+      [glimmeringAlexstrasziteCluster, 1],
+      [glossyStone, 1],
+      [alexstraszite, 1],
+      [elementalHarmony, 2],
+      [illimitedDiamond, 1],
+    ],
+    null,
+    "Battle Pets",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Jeweler's Bench",
+    "Drops from 'Treasures of the Dragon Isles.'"
+  );
+  const jeweledSapphireWhelplingRecipe = await createRecipe(
+    null,
+    jeweledSapphireWhelpling,
+    1,
+    jewelcrafting,
+    [
+      [jeweledDragonsHeart, 1],
+      [glimmeringMalygiteCluster, 1],
+      [glossyStone, 1],
+      [malygite, 1],
+      [elementalHarmony, 2],
+      [illimitedDiamond, 1],
+    ],
+    null,
+    "Battle Pets",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Jeweler's Bench",
+    "Drops from 'Treasures of the Dragon Isles.'"
+  );
+  const convergentPrismRecipe = await createRecipe(
+    null,
+    convergentPrism,
+    1,
+    jewelcrafting,
+    [
+      [glowingTitanOrb, 1],
+      [illimitedDiamond, 1],
+      [projectionPrism, 1],
+      [elementalHarmony, 1],
+    ],
+    null,
+    "Novelties",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Jeweler's Bench",
+    "Drops from 'Inconspicuous Bookmark' in Thaldraszus."
+  );
+  const jeweledOfferingRecipe = await createRecipe(
+    null,
+    convergentPrism,
+    1,
+    jewelcrafting,
+    [
+      [contouredFowlfeather, 75],
+      [tuftOfPrimalWool, 2],
+      [alexstraszite, 1],
+      [silkenGemdust, 15],
+      [vibrantWilderclothBolt, 10],
+    ],
+    null,
+    "Novelties",
+    1,
+    null,
+    { Enterprising: 30 },
+    null,
+    null,
+    "Jeweler's Bench"
+  );
+  const projectionPrismRecipe = await createRecipe(
+    null,
+    projectionPrism,
+    "1-2",
+    jewelcrafting,
+    [
+      [fracturedGlass, 7],
+      [framelessLens, 1],
+      [silkenGemdust, 1],
+    ],
+    null,
+    "Novelties",
+    1,
+    225,
+    { Glassware: 0 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Lesser Illustrious Insight", { Enterprising: 20, Glassware: 10 }],
+      ["Polishing Cloth", { Enterprising: 10 }],
+    ]
+  );
+  const rhinestoneSunglassesRecipe = await createRecipe(
+    null,
+    rhinestoneSunglasses,
+    1,
+    jewelcrafting,
+    [
+      [ysemerald, 2],
+      [framelessLens, 2],
+      [illimitedDiamond, 1],
+      [elementalHarmony, 1],
+    ],
+    null,
+    "Novelties",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Jeweler's Bench",
+    "Drops from Draconic Recipe in a Bottle."
+  );
+  const splitLensSpecsRecipe = await createRecipe(
+    null,
+    splitLensSpecs,
+    1,
+    jewelcrafting,
+    [
+      [neltharite, 1],
+      [framelessLens, 1],
+      [elementalHarmony, 1],
+    ],
+    null,
+    "Novelties",
+    1,
+    null,
+    { Glassware: 25 },
+    null,
+    null,
+    "Jeweler's Bench"
+  );
+  const alexstrasziteLoupesRecipe = await createRecipe(
+    null,
+    alexstrasziteLoupes,
+    1,
+    jewelcrafting,
+    [
+      [artisansMettle, 225],
+      [vibrantShard, 2],
+      [framelessLens, 2],
+      [shimmeringClasp, 5],
+      [alexstraszite, 2],
+    ],
+    1,
+    "Profession Equipment",
+    null,
+    325,
+    { ArtisansConsortium: "Valued" },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Illustrious Insight", { Enterprising: 20 }],
+      ["Polishing Cloth", { Enterprising: 10 }],
+    ]
+  );
+  const finePrintTrifocalsRecipe = await createRecipe(
+    null,
+    finePrintTrifocals,
+    1,
+    jewelcrafting,
+    [
+      [artisansMettle, 225],
+      [vibrantShard, 2],
+      [framelessLens, 2],
+      [shimmeringClasp, 5],
+      [nozdorite, 2],
+    ],
+    1,
+    "Profession Equipment",
+    null,
+    325,
+    { IskaaraTuskarr: 18 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Illustrious Insight", { Enterprising: 20 }],
+      ["Polishing Cloth", { Enterprising: 10 }],
+    ]
+  );
+  const magnificentMarginMagnifierRecipe = await createRecipe(
+    null,
+    magnificentMarginMagnifier,
+    1,
+    jewelcrafting,
+    [
+      [artisansMettle, 225],
+      [framelessLens, 2],
+      [shimmeringClasp, 2],
+      [nozdorite, 4],
+    ],
+    1,
+    "Profession Equipment",
+    null,
+    325,
+    { DragonscaleExpedition: 15 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Illustrious Insight", { Enterprising: 20 }],
+      ["Polishing Cloth", { Enterprising: 10 }],
+    ]
+  );
+  const resonantFocusRecipe = await createRecipe(
+    null,
+    resonantFocus,
+    1,
+    jewelcrafting,
+    [
+      [artisansMettle, 225],
+      [resonantCrystal, 2],
+      [vibrantShard, 2],
+      [shimmeringClasp, 2],
+    ],
+    null,
+    "Profession Equipment",
+    1,
+    325,
+    { IskaaraTuskarr: 18 },
+    null,
+    null,
+    "Jeweler's Bench",
+    null,
+    [
+      ["Illustrious Insight", { Enterprising: 20 }],
+      ["Polishing Cloth", { Enterprising: 10 }],
+    ]
+  );
+  const boldPrintBifocalsRecipe = await createRecipe(
+    null,
+    boldPrintBifocals,
+    1,
+    jewelcrafting,
+    [
+      [framelessLens, 2],
+      [sereviteOre, 2],
+    ],
+    20,
+    "Profession Equipment",
+    3,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { Enterprising: 20 }],
+      ["Polishing Cloth", { Enterprising: 10 }],
+    ]
+  );
+  const chromaticFocusRecipe = await createRecipe(
+    null,
+    chromaticFocus,
+    1,
+    jewelcrafting,
+    [
+      [chromaticDust, 4],
+      [shimmeringClasp, 1],
+    ],
+    20,
+    "Profession Equipment",
+    3,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { Enterprising: 20 }],
+      ["Polishing Cloth", { Enterprising: 10 }],
+    ]
+  );
+  const leftHandedMagnifyingGlassRecipe = await createRecipe(
+    null,
+    leftHandedMagnifyingGlass,
+    1,
+    jewelcrafting,
+    [
+      [framelessLens, 1],
+      [draconiumOre, 3],
+    ],
+    20,
+    "Profession Equipment",
+    3,
+    80,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { Enterprising: 20 }],
+      ["Polishing Cloth", { Enterprising: 10 }],
+    ]
+  );
+  const sunderedOnyxLoupesRecipe = await createRecipe(
+    null,
+    sunderedOnyxLoupes,
+    1,
+    jewelcrafting,
+    [
+      [framelessLens, 2],
+      [sereviteOre, 2],
+      [sunderedOnyx, 1],
+    ],
+    20,
+    "Profession Equipment",
+    3,
+    275,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Lesser Illustrious Insight", { Enterprising: 20 }],
+      ["Polishing Cloth", { Enterprising: 10 }],
+    ]
+  );
+  const jeweledDragonsHeartRecipe = await createRecipe(
+    null,
+    jeweledDragonsHeart,
+    1,
+    jewelcrafting,
+    [
+      [queensRuby, 1],
+      [mysticSapphire, 1],
+      [vibrantEmerald, 1],
+      [sunderedOnyx, 1],
+      [eternityAmber, 2],
+      [silkenGemdust, 3],
+    ],
+    null,
+    "Extravagent Glasswares",
+    1,
+    null,
+    null,
+    { Glassware: 35 },
+    null,
+    "Jeweler's Bench"
+  );
+  const dreamersVisionRecipe = await createRecipe(
+    null,
+    dreamersVision,
+    1,
+    jewelcrafting,
+    [
+      [fracturedGlass, 3],
+      [vibrantEmerald, 2],
+      [silkenGemdust, 1],
+    ],
+    null,
+    "Extravagent Glassware",
+    1,
+    250,
+    null,
+    { Air: 0 },
+    null,
+    "Jeweler's Bench"
+  );
+  const earthwardensPrizeRecipe = await createRecipe(
+    null,
+    earthwardensPrize,
+    1,
+    jewelcrafting,
+    [
+      [fracturedGlass, 3],
+      [sunderedOnyx, 2],
+      [silkenGemdust, 1],
+    ],
+    null,
+    "Extravagent Glassware",
+    1,
+    250,
+    null,
+    { Earth: 0 },
+    null,
+    "Jeweler's Bench"
+  );
+  const keepersGloryRecipe = await createRecipe(
+    null,
+    keepersGlory,
+    1,
+    jewelcrafting,
+    [
+      [fracturedGlass, 3],
+      [mysticSapphire, 2],
+      [silkenGemdust, 1],
+    ],
+    null,
+    "Extravagent Glassware",
+    1,
+    250,
+    null,
+    { Frost: 0 },
+    null,
+    "Jeweler's Bench"
+  );
+  const queensGiftRecipe = await createRecipe(
+    null,
+    queensGift,
+    1,
+    jewelcrafting,
+    [
+      [fracturedGlass, 3],
+      [queensGift, 2],
+      [silkenGemdust, 1],
+    ],
+    null,
+    "Extravagent Glassware",
+    1,
+    250,
+    null,
+    { Fire: 0 },
+    null,
+    "Jeweler's Bench"
+  );
+  const timewatchersPatienceRecipe = await createRecipe(
+    null,
+    timewatchersPatience,
+    1,
+    jewelcrafting,
+    [
+      [fracturedGlass, 3],
+      [eternityAmber, 4],
+      [silkenGemdust, 1],
+    ],
+    25,
+    "Extravagent Glassware",
+    1,
+    250,
+    null,
+    null,
+    null,
+    "Jeweler's Bench"
+  );
 
   // //leatherworking recipes - 101 total
   const lifeBoundBeltRecipe = await createRecipe(
@@ -28235,981 +30157,976 @@ const makeTables = async () => {
   );
 
   //cooking recipes - 41 total
-  // const ooeyGooeyChocolateRecipe = await createRecipe(
-  //   null,
-  //   ooeyGooeyChocolate,
-  //   1,
-  //   cooking,
-  //   [
-  //     [convenientlyPackagedIngredients, 3],
-  //     [thaldraszianCocoaPowder, 6],
-  //     [pastryPackets, 4],
-  //   ],
-  //   null,
-  //   "Ingredients",
-  //   1,
-  //   null,
-  //   { ArtisansConsortium: "Esteemed" },
-  //   null,
-  //   null,
-  //   "Cooking Fire"
-  // );
-  // const impossiblySharpCuttingKnifeRecipe = await createRecipe(
-  //   null,
-  //   impossiblySharpCuttingKnife,
-  //   2,
-  //   cooking,
-  //   [
-  //     [saltDeposit, 2],
-  //     [sereviteOre, 2],
-  //   ],
-  //   null,
-  //   "Ingredients",
-  //   1,
-  //   null,
-  //   { IskaaraTuskarr: 15 },
-  //   null,
-  //   null,
-  //   "Anvil"
-  // );
-  // const saladOnTheSideRecipe = await createRecipe(
-  //   null,
-  //   saladOnTheSide,
-  //   2,
-  //   cooking,
-  //   [
-  //     [lavaBeetle, 2],
-  //     [hochenblume, 1],
-  //     [saxifrage, 1],
-  //   ],
-  //   null,
-  //   "Ingredients",
-  //   1,
-  //   null,
-  //   { DragonscaleExpedition: 13 },
-  //   null,
-  //   null,
-  //   "Anvil"
-  // );
-  // const assortedExoticSpicesRecipe = await createRecipe(
-  //   null,
-  //   assortedExoticSpices,
-  //   "2-3",
-  //   cooking,
-  //   [
-  //     [lavaBeetle, 2],
-  //     [convenientlyPackagedIngredients, 1],
-  //   ],
-  //   1,
-  //   "Ingredients",
-  //   1
-  // );
-  // const pebbledRockSaltsRecipe = await createRecipe(
-  //   null,
-  //   pebbledRockSalts,
-  //   "2-3",
-  //   cooking,
-  //   [
-  //     [saltDeposit, 2],
-  //     [convenientlyPackagedIngredients, 1],
-  //   ],
-  //   1,
-  //   "Ingredients",
-  //   1
-  // );
-  // const breakfastOfDraconicChampionsRecipe = await createRecipe(
-  //   null,
-  //   breakfastOfDraconicChampions,
-  //   4,
-  //   cooking,
-  //   [
-  //     [waterfowlFilet, 2],
-  //     [hornswogHunk, 2],
-  //     [bruffalonFlank, 2],
-  //     [basiliskEggs, 2],
-  //     [mightyMammothRibs, 2],
-  //     [burlyBearHaunch, 2],
-  //   ],
-  //   45,
-  //   "Snacks",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Fire",
-  //   null,
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const mackerelSnackerelRecipe = await createRecipe(
-  //   null,
-  //   mackerelSnackerel,
-  //   4,
-  //   cooking,
-  //   [[scalebellyMackerel, 4]],
-  //   15,
-  //   "Snacks",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Fire",
-  //   null,
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const cheeseAndQuackersRecipe = await createRecipe(
-  //   null,
-  //   cheeseAndQuackers,
-  //   4,
-  //   cooking,
-  //   [
-  //     [waterfowlFilet, 2],
-  //     [threeCheeseBlend, 1],
-  //   ],
-  //   10,
-  //   "Snacks",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Fire",
-  //   null,
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const probablyProteinRecipe = await createRecipe(
-  //   null,
-  //   probablyProtein,
-  //   4,
-  //   cooking,
-  //   [
-  //     [maybeMeat, 2],
-  //     [convenientlyPackagedIngredients, 2],
-  //   ],
-  //   5,
-  //   "Snacks",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Fire",
-  //   null,
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const sweetAndSourClamChowderRecipe = await createRecipe(
-  //   null,
-  //   sweetAndSourClamChowder,
-  //   4,
-  //   cooking,
-  //   [
-  //     [ribbedMolluskMeat, 2],
-  //     [convenientlyPackagedIngredients, 2],
-  //     [ohnahranPotato, 5],
-  //   ],
-  //   35,
-  //   "Snacks",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Fire",
-  //   null,
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const twiceBakedPotatoRecipe = await createRecipe(
-  //   null,
-  //   twiceBakedPotato,
-  //   4,
-  //   cooking,
-  //   [
-  //     [ohnahranPotato, 4],
-  //     [threeCheeseBlend, 2],
-  //   ],
-  //   1,
-  //   "Snacks",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Fire",
-  //   "Learned by default.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const deliciousDragonSpittleRecipe = await createRecipe(
-  //   null,
-  //   deliciousDragonSpittle,
-  //   4,
-  //   cooking,
-  //   [
-  //     [artisanalBerryJuice, 1],
-  //     [ribbedMolluskMeat, 1],
-  //   ],
-  //   25,
-  //   "Snacks",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Fire",
-  //   null,
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const churnbellyTeaRecipe = await createRecipe(
-  //   null,
-  //   churnbellyTea,
-  //   1,
-  //   cooking,
-  //   [
-  //     [scalebellyMackerel, 1],
-  //     [islefinDorado, 1],
-  //     [zestyWater, 1],
-  //   ],
-  //   null,
-  //   "Snacks",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   null,
-  //   "Received from Draconic Recipe in a Bottle.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const zestyWaterRecipe = await createRecipe(
-  //   null,
-  //   zestyWater,
-  //   4,
-  //   cooking,
-  //   [
-  //     [ribbedMolluskMeat, 1],
-  //     [refreshingSpringWater, 1],
-  //   ],
-  //   10,
-  //   "Snacks",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const fatedFortuneCookieRecipe = await createRecipe(
-  //   null,
-  //   fatedFortuneCookie,
-  //   1,
-  //   cooking,
-  //   [
-  //     [fatedFortuneCard, 1],
-  //     [thaldraszianCocoaPowder, 3],
-  //     [pastryPackets, 5],
-  //     [silkenGemdust, 2],
-  //   ],
-  //   null,
-  //   "Desserts",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Fated Fortune Card",
-  //   "Cooking Fire",
-  //   "Chance to get from a Fated Fortune Card.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const blubberyMuffinRecipe = await createRecipe(
-  //   null,
-  //   blubberyMuffin,
-  //   3,
-  //   cooking,
-  //   [
-  //     [buttermilk, 1],
-  //     [basiliskEggs, 2],
-  //     [pastryPackets, 3],
-  //     [threeCheeseBlend, 1],
-  //   ],
-  //   null,
-  //   "Desserts",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Fishing Vendor",
-  //   "Cooking Fire",
-  //   "Purchased with some wacky currency from Jinkutuk in The Azure Span.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const celebratoryCakeRecipe = await createRecipe(
-  //   null,
-  //   celebratoryCake,
-  //   1,
-  //   cooking,
-  //   [
-  //     [basiliskEggs, 5],
-  //     [pastryPackets, 3],
-  //     [thaldraszianCocoaPowder, 10],
-  //     [convenientlyPackagedIngredients, 3],
-  //   ],
-  //   null,
-  //   "Desserts",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Quest",
-  //   "Cooking Fire",
-  //   "Received from the After My Own Heart questline in Ohn'ahran Plains.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const snowInAConeRecipe = await createRecipe(
-  //   null,
-  //   snowInACone,
-  //   4,
-  //   cooking,
-  //   [
-  //     [snowball, 3],
-  //     [pastryPackets, 1],
-  //     [thaldraszianCocoaPowder, 2],
-  //   ],
-  //   5,
-  //   "Desserts",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   null,
-  //   "Snow Covered Scroll in The Azure Span.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const tastyHatchlingsTreatRecipe = await createRecipe(
-  //   null,
-  //   tastyHatchlingsTreat,
-  //   2,
-  //   cooking,
-  //   [
-  //     [maybeMeat, 10],
-  //     [basiliskEggs, 3],
-  //     [pastryPackets, 2],
-  //     [thaldraszianCocoaPowder, 1],
-  //   ],
-  //   null,
-  //   "Desserts",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Cooking Fire",
-  //   "Drops from Barrel of Confiscated Treats in Valdrakken.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const braisedBruffalonBrisketRecipe = await createRecipe(
-  //   null,
-  //   braisedBruffalonBrisket,
-  //   4,
-  //   cooking,
-  //   [
-  //     [aileronSeamoth, 1],
-  //     [bruffalonFlank, 4],
-  //     [assortedExoticSpices, 1],
-  //   ],
-  //   null,
-  //   "Meat Meals",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Other Food",
-  //   "Cooking Fire",
-  //   "Can be learned when cooking Charred Hornswog Steaks.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const charredHornswogSteaksRecipe = await createRecipe(
-  //   null,
-  //   charredHornswogSteaks,
-  //   4,
-  //   cooking,
-  //   [
-  //     [maybeMeat, 4],
-  //     [hornswogHunk, 4],
-  //     [ohnahranPotato, 2],
-  //   ],
-  //   null,
-  //   "Meat Meals",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Cooking Fire",
-  //   "Drops from Searing Flame Harchek in The Waking Shores.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const riversidePicnicRecipe = await createRecipe(
-  //   null,
-  //   riversidePicnic,
-  //   4,
-  //   cooking,
-  //   [
-  //     [ceruleanSpinefish, 1],
-  //     [burlyBearHaunch, 4],
-  //     [assortedExoticSpices, 1],
-  //   ],
-  //   null,
-  //   "Meat Meals",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Other Food",
-  //   "Cooking Fire",
-  //   "Can be learned when cooking Scrambled Basilisk Eggs.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const roastDuckDelightRecipe = await createRecipe(
-  //   null,
-  //   roastDuckDelight,
-  //   4,
-  //   cooking,
-  //   [
-  //     [temporalDragonhead, 1],
-  //     [waterfowlFilet, 4],
-  //     [assortedExoticSpices, 1],
-  //   ],
-  //   null,
-  //   "Meat Meals",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Other Food",
-  //   "Cooking Fire",
-  //   "Can be learned when cooking Thrice-Spiced Mammoth Kabob.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const saltedMeatMashRecipe = await createRecipe(
-  //   null,
-  //   saltedMeatMash,
-  //   4,
-  //   cooking,
-  //   [
-  //     [scalebellyMackerel, 1],
-  //     [maybeMeat, 6],
-  //     [pebbledRockSalts, 1],
-  //   ],
-  //   40,
-  //   "Meat Meals",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Fire",
-  //   null,
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const scrambledBasiliskEggsRecipe = await createRecipe(
-  //   null,
-  //   scrambledBasiliskEggs,
-  //   4,
-  //   cooking,
-  //   [
-  //     [maybeMeat, 2],
-  //     [basiliskEggs, 3],
-  //     [threeCheeseBlend, 2],
-  //   ],
-  //   30,
-  //   "Meat Meals",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Fire",
-  //   null,
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const thriceSpicedMammothKabobRecipe = await createRecipe(
-  //   null,
-  //   thriceSpicedMammothKabob,
-  //   4,
-  //   cooking,
-  //   [
-  //     [maybeMeat, 4],
-  //     [mightyMammothRibs, 4],
-  //   ],
-  //   null,
-  //   "Meat Meals",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Quest",
-  //   "Cooking Fire",
-  //   "Received from the Honoring Our Ancestors questline in Ohn'ahran Plains.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const hopefullyHealthyRecipe = await createRecipe(
-  //   null,
-  //   hopefullyHealthy,
-  //   4,
-  //   cooking,
-  //   [
-  //     [maybeMeat, 3],
-  //     [convenientlyPackagedIngredients, 4],
-  //   ],
-  //   20,
-  //   "Meat Meals",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Fire",
-  //   null,
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const filetOfFangsRecipe = await createRecipe(
-  //   null,
-  //   filetOfFangs,
-  //   4,
-  //   cooking,
-  //   [
-  //     [thousandbitePiranha, 2],
-  //     [ribbedMolluskMeat, 2],
-  //     [assortedExoticSpices, 2],
-  //   ],
-  //   null,
-  //   "Simple Fish Dishes",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Quest",
-  //   "Cooking Fire",
-  //   "Received from the Encroaching Heat quest in The Waking Shores.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const saltBakedFishcakeRecipe = await createRecipe(
-  //   null,
-  //   saltBakedFishcake,
-  //   4,
-  //   cooking,
-  //   [
-  //     [ceruleanSpinefish, 2],
-  //     [ribbedMolluskMeat, 2],
-  //     [assortedExoticSpices, 2],
-  //   ],
-  //   null,
-  //   "Simple Fish Dishes",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Quest",
-  //   "Cooking Fire",
-  //   "Received from the Encroaching Heat quest in The Waking Shores.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const seamothSurpriseRecipe = await createRecipe(
-  //   null,
-  //   seamothSurprise,
-  //   4,
-  //   cooking,
-  //   [
-  //     [aileronSeamoth, 2],
-  //     [ribbedMolluskMeat, 2],
-  //     [assortedExoticSpices, 2],
-  //   ],
-  //   null,
-  //   "Simple Fish Dishes",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Quest",
-  //   "Cooking Fire",
-  //   "Received from the Encroaching Heat quest in The Waking Shores.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const timelyDemiseRecipe = await createRecipe(
-  //   null,
-  //   timelyDemise,
-  //   4,
-  //   cooking,
-  //   [
-  //     [temporalDragonhead, 2],
-  //     [ribbedMolluskMeat, 2],
-  //     [pebbledRockSalts, 2],
-  //   ],
-  //   null,
-  //   "Simple Fish Dishes",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Quest",
-  //   "Cooking Fire",
-  //   "Received from the Encroaching Heat quest in The Waking Shores.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const aromaticSeafoodPlatterRecipe = await createRecipe(
-  //   null,
-  //   aromaticSeafoodPlatter,
-  //   4,
-  //   cooking,
-  //   [
-  //     [aileronSeamoth, 1],
-  //     [temporalDragonhead, 1],
-  //     [pebbledRockSalts, 3],
-  //     [islefinDorado, 1],
-  //   ],
-  //   null,
-  //   "Deluxe Fish Dishes",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Other Food",
-  //   "Cooking Fire",
-  //   "Can be learned when cooking Timely Demise or Seamoth Surprise.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const feistyFishSticksRecipe = await createRecipe(
-  //   null,
-  //   feistyFishSticks,
-  //   4,
-  //   cooking,
-  //   [
-  //     [temporalDragonhead, 1],
-  //     [thousandbitePiranha, 1],
-  //     [pebbledRockSalts, 3],
-  //     [islefinDorado, 1],
-  //   ],
-  //   null,
-  //   "Deluxe Fish Dishes",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Other Food",
-  //   "Cooking Fire",
-  //   "Can be learned when cooking Timely Demise or Filet of Fangs.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const greatCeruleanSeaRecipe = await createRecipe(
-  //   null,
-  //   greatCeruleanSea,
-  //   4,
-  //   cooking,
-  //   [
-  //     [aileronSeamoth, 1],
-  //     [ceruleanSpinefish, 1],
-  //     [pebbledRockSalts, 3],
-  //     [islefinDorado, 1],
-  //   ],
-  //   null,
-  //   "Deluxe Fish Dishes",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Other Food",
-  //   "Cooking Fire",
-  //   "Can be learned when cooking Seamoth Surprise or Salt-Baked Fishcake.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const revengeServedColdRecipe = await createRecipe(
-  //   null,
-  //   revengeServedCold,
-  //   4,
-  //   cooking,
-  //   [
-  //     [aileronSeamoth, 1],
-  //     [thousandbitePiranha, 1],
-  //     [assortedExoticSpices, 3],
-  //     [islefinDorado, 1],
-  //   ],
-  //   null,
-  //   "Deluxe Fish Dishes",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Other Food",
-  //   "Cooking Fire",
-  //   "Can be learned when cooking Filet of Fangs or Seamoth Surprise.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const sizzlingSeafoodMedleyRecipe = await createRecipe(
-  //   null,
-  //   sizzlingSeafoodMedley,
-  //   4,
-  //   cooking,
-  //   [
-  //     [temporalDragonhead, 1],
-  //     [ceruleanSpinefish, 1],
-  //     [assortedExoticSpices, 3],
-  //     [islefinDorado, 1],
-  //   ],
-  //   null,
-  //   "Deluxe Fish Dishes",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Other Food",
-  //   "Cooking Fire",
-  //   "Can be learned when cooking Timely Demise or Salt-Baked Fishcake.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const thousandboneTongueslicerRecipe = await createRecipe(
-  //   null,
-  //   thousandboneTongueslicer,
-  //   4,
-  //   cooking,
-  //   [
-  //     [thousandbitePiranha, 1],
-  //     [ceruleanSpinefish, 1],
-  //     [pebbledRockSalts, 3],
-  //     [islefinDorado, 1],
-  //   ],
-  //   null,
-  //   "Deluxe Fish Dishes",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Cooking Other Food",
-  //   "Cooking Fire",
-  //   "Can be learned when cooking Filet of Fangs or Salt-Baked Fishcake.",
-  //   [
-  //     ["Finishing Touches", {}],
-  //     ["Secret Ingredient", {}],
-  //   ]
-  // );
-  // const gralsDevotion = await createRecipe(
-  //   "Gral's Devotion",
-  //   grandBanquetOfTheKaluak,
-  //   2,
-  //   cooking,
-  //   [
-  //     [magmaThresher, 2],
-  //     [roastDuckDelight, 4],
-  //     [sizzlingSeafoodMedley, 6],
-  //     [revengeServedCold, 6],
-  //     [mightyMammothRibs, 6],
-  //     [celebratoryCake, 1],
-  //   ],
-  //   null,
-  //   "Great Feasts",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Quest",
-  //   "Cooking Fire",
-  //   "Received from the Community Feast world quest in The Azure Span.",
-  //   [["Finishing Touches", {}]]
-  // );
-  // const gralsReverence = await createRecipe(
-  //   "Gral's Reverence",
-  //   grandBanquetOfTheKaluak,
-  //   2,
-  //   cooking,
-  //   [
-  //     [prismaticLeaper, 2],
-  //     [braisedBruffalonBrisket, 4],
-  //     [feistyFishSticks, 6],
-  //     [greatCeruleanSea, 6],
-  //     [hornswogHunk, 6],
-  //     [blubberyMuffin, 3],
-  //   ],
-  //   null,
-  //   "Great Feasts",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Quest",
-  //   "Cooking Fire",
-  //   "Received from the Community Feast world quest in The Azure Span.",
-  //   [["Finishing Touches", {}]]
-  // );
-  // const gralsVeneration = await createRecipe(
-  //   "Gral's Veneration",
-  //   grandBanquetOfTheKaluak,
-  //   2,
-  //   cooking,
-  //   [
-  //     [rimefinTuna, 2],
-  //     [riversidePicnic, 4],
-  //     [aromaticSeafoodPlatter, 6],
-  //     [thousandbitePiranha, 6],
-  //     [basiliskEggs, 6],
-  //     [snowInACone, 3],
-  //   ],
-  //   null,
-  //   "Great Feasts",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Quest",
-  //   "Cooking Fire",
-  //   "Received from the Community Feast world quest in The Azure Span.",
-  //   [["Finishing Touches", {}]]
-  // );
-  // const hoardOfDraconicDelicaciesRecipe = await createRecipe(
-  //   null,
-  //   hoardOfDraconicDelicacies,
-  //   1,
-  //   cooking,
-  //   [
-  //     [islefinDorado, 3],
-  //     [braisedBruffalonBrisket, 3],
-  //     [roastDuckDelight, 3],
-  //     [pebbledRockSalts, 2],
-  //     [assortedExoticSpices, 2],
-  //   ],
-  //   null,
-  //   "Great Feasts",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "Quest",
-  //   "Cooking Fire",
-  //   "Received from the What a Long, Sweet Trip It's Been questline in Valdrakken.",
-  //   [["Finishing Touches", {}]]
-  // );
-  // const yusasHeartyStewRecipe = await createRecipe(
-  //   null,
-  //   yusasHeartyStew,
-  //   1,
-  //   cooking,
-  //   [
-  //     [islefinDorado, 1],
-  //     [thousandbitePiranha, 1],
-  //     [mightyMammothRibs, 1],
-  //     [ohnahranPotato, 1],
-  //     [assortedExoticSpices, 1],
-  //   ],
-  //   null,
-  //   "Great Feasts",
-  //   1,
-  //   null,
-  //   null,
-  //   null,
-  //   "World Drop",
-  //   "Cooking Fire",
-  //   "Elder Yusa discovery? In the Ohn'ahran Plains.",
-  //   [["Finishing Touches", {}]]
-  // );
-
-  // console.log('Data seeded successfully.'));
-
-  // const professions = await Profession.findAll());
-  // console.log("All professions:", JSON.stringify(professions, null, 2));
+  const ooeyGooeyChocolateRecipe = await createRecipe(
+    null,
+    ooeyGooeyChocolate,
+    1,
+    cooking,
+    [
+      [convenientlyPackagedIngredients, 3],
+      [thaldraszianCocoaPowder, 6],
+      [pastryPackets, 4],
+    ],
+    null,
+    "Ingredients",
+    1,
+    null,
+    { ArtisansConsortium: "Esteemed" },
+    null,
+    null,
+    "Cooking Fire"
+  );
+  const impossiblySharpCuttingKnifeRecipe = await createRecipe(
+    null,
+    impossiblySharpCuttingKnife,
+    2,
+    cooking,
+    [
+      [saltDeposit, 2],
+      [sereviteOre, 2],
+    ],
+    null,
+    "Ingredients",
+    1,
+    null,
+    { IskaaraTuskarr: 15 },
+    null,
+    null,
+    "Anvil"
+  );
+  const saladOnTheSideRecipe = await createRecipe(
+    null,
+    saladOnTheSide,
+    2,
+    cooking,
+    [
+      [lavaBeetle, 2],
+      [hochenblume, 1],
+      [saxifrage, 1],
+    ],
+    null,
+    "Ingredients",
+    1,
+    null,
+    { DragonscaleExpedition: 13 },
+    null,
+    null,
+    "Anvil"
+  );
+  const assortedExoticSpicesRecipe = await createRecipe(
+    null,
+    assortedExoticSpices,
+    "2-3",
+    cooking,
+    [
+      [lavaBeetle, 2],
+      [convenientlyPackagedIngredients, 1],
+    ],
+    1,
+    "Ingredients",
+    1
+  );
+  const pebbledRockSaltsRecipe = await createRecipe(
+    null,
+    pebbledRockSalts,
+    "2-3",
+    cooking,
+    [
+      [saltDeposit, 2],
+      [convenientlyPackagedIngredients, 1],
+    ],
+    1,
+    "Ingredients",
+    1
+  );
+  const breakfastOfDraconicChampionsRecipe = await createRecipe(
+    null,
+    breakfastOfDraconicChampions,
+    4,
+    cooking,
+    [
+      [waterfowlFilet, 2],
+      [hornswogHunk, 2],
+      [bruffalonFlank, 2],
+      [basiliskEggs, 2],
+      [mightyMammothRibs, 2],
+      [burlyBearHaunch, 2],
+    ],
+    45,
+    "Snacks",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Cooking Fire",
+    null,
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const mackerelSnackerelRecipe = await createRecipe(
+    null,
+    mackerelSnackerel,
+    4,
+    cooking,
+    [[scalebellyMackerel, 4]],
+    15,
+    "Snacks",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Cooking Fire",
+    null,
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const cheeseAndQuackersRecipe = await createRecipe(
+    null,
+    cheeseAndQuackers,
+    4,
+    cooking,
+    [
+      [waterfowlFilet, 2],
+      [threeCheeseBlend, 1],
+    ],
+    10,
+    "Snacks",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Cooking Fire",
+    null,
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const probablyProteinRecipe = await createRecipe(
+    null,
+    probablyProtein,
+    4,
+    cooking,
+    [
+      [maybeMeat, 2],
+      [convenientlyPackagedIngredients, 2],
+    ],
+    5,
+    "Snacks",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Cooking Fire",
+    null,
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const sweetAndSourClamChowderRecipe = await createRecipe(
+    null,
+    sweetAndSourClamChowder,
+    4,
+    cooking,
+    [
+      [ribbedMolluskMeat, 2],
+      [convenientlyPackagedIngredients, 2],
+      [ohnahranPotato, 5],
+    ],
+    35,
+    "Snacks",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Cooking Fire",
+    null,
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const twiceBakedPotatoRecipe = await createRecipe(
+    null,
+    twiceBakedPotato,
+    4,
+    cooking,
+    [
+      [ohnahranPotato, 4],
+      [threeCheeseBlend, 2],
+    ],
+    1,
+    "Snacks",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Cooking Fire",
+    "Learned by default.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const deliciousDragonSpittleRecipe = await createRecipe(
+    null,
+    deliciousDragonSpittle,
+    4,
+    cooking,
+    [
+      [artisanalBerryJuice, 1],
+      [ribbedMolluskMeat, 1],
+    ],
+    25,
+    "Snacks",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Cooking Fire",
+    null,
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const churnbellyTeaRecipe = await createRecipe(
+    null,
+    churnbellyTea,
+    1,
+    cooking,
+    [
+      [scalebellyMackerel, 1],
+      [islefinDorado, 1],
+      [zestyWater, 1],
+    ],
+    null,
+    "Snacks",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    null,
+    "Received from Draconic Recipe in a Bottle.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const zestyWaterRecipe = await createRecipe(
+    null,
+    zestyWater,
+    4,
+    cooking,
+    [
+      [ribbedMolluskMeat, 1],
+      [refreshingSpringWater, 1],
+    ],
+    10,
+    "Snacks",
+    1,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const fatedFortuneCookieRecipe = await createRecipe(
+    null,
+    fatedFortuneCookie,
+    1,
+    cooking,
+    [
+      [fatedFortuneCard, 1],
+      [thaldraszianCocoaPowder, 3],
+      [pastryPackets, 5],
+      [silkenGemdust, 2],
+    ],
+    null,
+    "Desserts",
+    1,
+    null,
+    null,
+    null,
+    "Fated Fortune Card",
+    "Cooking Fire",
+    "Chance to get from a Fated Fortune Card.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const blubberyMuffinRecipe = await createRecipe(
+    null,
+    blubberyMuffin,
+    3,
+    cooking,
+    [
+      [buttermilk, 1],
+      [basiliskEggs, 2],
+      [pastryPackets, 3],
+      [threeCheeseBlend, 1],
+    ],
+    null,
+    "Desserts",
+    1,
+    null,
+    null,
+    null,
+    "Fishing Vendor",
+    "Cooking Fire",
+    "Purchased with some wacky currency from Jinkutuk in The Azure Span.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const celebratoryCakeRecipe = await createRecipe(
+    null,
+    celebratoryCake,
+    1,
+    cooking,
+    [
+      [basiliskEggs, 5],
+      [pastryPackets, 3],
+      [thaldraszianCocoaPowder, 10],
+      [convenientlyPackagedIngredients, 3],
+    ],
+    null,
+    "Desserts",
+    1,
+    null,
+    null,
+    null,
+    "Quest",
+    "Cooking Fire",
+    "Received from the After My Own Heart questline in Ohn'ahran Plains.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const snowInAConeRecipe = await createRecipe(
+    null,
+    snowInACone,
+    4,
+    cooking,
+    [
+      [snowball, 3],
+      [pastryPackets, 1],
+      [thaldraszianCocoaPowder, 2],
+    ],
+    5,
+    "Desserts",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    null,
+    "Snow Covered Scroll in The Azure Span.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const tastyHatchlingsTreatRecipe = await createRecipe(
+    null,
+    tastyHatchlingsTreat,
+    2,
+    cooking,
+    [
+      [maybeMeat, 10],
+      [basiliskEggs, 3],
+      [pastryPackets, 2],
+      [thaldraszianCocoaPowder, 1],
+    ],
+    null,
+    "Desserts",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Cooking Fire",
+    "Drops from Barrel of Confiscated Treats in Valdrakken.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const braisedBruffalonBrisketRecipe = await createRecipe(
+    null,
+    braisedBruffalonBrisket,
+    4,
+    cooking,
+    [
+      [aileronSeamoth, 1],
+      [bruffalonFlank, 4],
+      [assortedExoticSpices, 1],
+    ],
+    null,
+    "Meat Meals",
+    1,
+    null,
+    null,
+    null,
+    "Cooking Other Food",
+    "Cooking Fire",
+    "Can be learned when cooking Charred Hornswog Steaks.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const charredHornswogSteaksRecipe = await createRecipe(
+    null,
+    charredHornswogSteaks,
+    4,
+    cooking,
+    [
+      [maybeMeat, 4],
+      [hornswogHunk, 4],
+      [ohnahranPotato, 2],
+    ],
+    null,
+    "Meat Meals",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Cooking Fire",
+    "Drops from Searing Flame Harchek in The Waking Shores.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const riversidePicnicRecipe = await createRecipe(
+    null,
+    riversidePicnic,
+    4,
+    cooking,
+    [
+      [ceruleanSpinefish, 1],
+      [burlyBearHaunch, 4],
+      [assortedExoticSpices, 1],
+    ],
+    null,
+    "Meat Meals",
+    1,
+    null,
+    null,
+    null,
+    "Cooking Other Food",
+    "Cooking Fire",
+    "Can be learned when cooking Scrambled Basilisk Eggs.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const roastDuckDelightRecipe = await createRecipe(
+    null,
+    roastDuckDelight,
+    4,
+    cooking,
+    [
+      [temporalDragonhead, 1],
+      [waterfowlFilet, 4],
+      [assortedExoticSpices, 1],
+    ],
+    null,
+    "Meat Meals",
+    1,
+    null,
+    null,
+    null,
+    "Cooking Other Food",
+    "Cooking Fire",
+    "Can be learned when cooking Thrice-Spiced Mammoth Kabob.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const saltedMeatMashRecipe = await createRecipe(
+    null,
+    saltedMeatMash,
+    4,
+    cooking,
+    [
+      [scalebellyMackerel, 1],
+      [maybeMeat, 6],
+      [pebbledRockSalts, 1],
+    ],
+    40,
+    "Meat Meals",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Cooking Fire",
+    null,
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const scrambledBasiliskEggsRecipe = await createRecipe(
+    null,
+    scrambledBasiliskEggs,
+    4,
+    cooking,
+    [
+      [maybeMeat, 2],
+      [basiliskEggs, 3],
+      [threeCheeseBlend, 2],
+    ],
+    30,
+    "Meat Meals",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Cooking Fire",
+    null,
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const thriceSpicedMammothKabobRecipe = await createRecipe(
+    null,
+    thriceSpicedMammothKabob,
+    4,
+    cooking,
+    [
+      [maybeMeat, 4],
+      [mightyMammothRibs, 4],
+    ],
+    null,
+    "Meat Meals",
+    1,
+    null,
+    null,
+    null,
+    "Quest",
+    "Cooking Fire",
+    "Received from the Honoring Our Ancestors questline in Ohn'ahran Plains.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const hopefullyHealthyRecipe = await createRecipe(
+    null,
+    hopefullyHealthy,
+    4,
+    cooking,
+    [
+      [maybeMeat, 3],
+      [convenientlyPackagedIngredients, 4],
+    ],
+    20,
+    "Meat Meals",
+    1,
+    null,
+    null,
+    null,
+    null,
+    "Cooking Fire",
+    null,
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const filetOfFangsRecipe = await createRecipe(
+    null,
+    filetOfFangs,
+    4,
+    cooking,
+    [
+      [thousandbitePiranha, 2],
+      [ribbedMolluskMeat, 2],
+      [assortedExoticSpices, 2],
+    ],
+    null,
+    "Simple Fish Dishes",
+    1,
+    null,
+    null,
+    null,
+    "Quest",
+    "Cooking Fire",
+    "Received from the Encroaching Heat quest in The Waking Shores.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const saltBakedFishcakeRecipe = await createRecipe(
+    null,
+    saltBakedFishcake,
+    4,
+    cooking,
+    [
+      [ceruleanSpinefish, 2],
+      [ribbedMolluskMeat, 2],
+      [assortedExoticSpices, 2],
+    ],
+    null,
+    "Simple Fish Dishes",
+    1,
+    null,
+    null,
+    null,
+    "Quest",
+    "Cooking Fire",
+    "Received from the Encroaching Heat quest in The Waking Shores.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const seamothSurpriseRecipe = await createRecipe(
+    null,
+    seamothSurprise,
+    4,
+    cooking,
+    [
+      [aileronSeamoth, 2],
+      [ribbedMolluskMeat, 2],
+      [assortedExoticSpices, 2],
+    ],
+    null,
+    "Simple Fish Dishes",
+    1,
+    null,
+    null,
+    null,
+    "Quest",
+    "Cooking Fire",
+    "Received from the Encroaching Heat quest in The Waking Shores.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const timelyDemiseRecipe = await createRecipe(
+    null,
+    timelyDemise,
+    4,
+    cooking,
+    [
+      [temporalDragonhead, 2],
+      [ribbedMolluskMeat, 2],
+      [pebbledRockSalts, 2],
+    ],
+    null,
+    "Simple Fish Dishes",
+    1,
+    null,
+    null,
+    null,
+    "Quest",
+    "Cooking Fire",
+    "Received from the Encroaching Heat quest in The Waking Shores.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const aromaticSeafoodPlatterRecipe = await createRecipe(
+    null,
+    aromaticSeafoodPlatter,
+    4,
+    cooking,
+    [
+      [aileronSeamoth, 1],
+      [temporalDragonhead, 1],
+      [pebbledRockSalts, 3],
+      [islefinDorado, 1],
+    ],
+    null,
+    "Deluxe Fish Dishes",
+    1,
+    null,
+    null,
+    null,
+    "Cooking Other Food",
+    "Cooking Fire",
+    "Can be learned when cooking Timely Demise or Seamoth Surprise.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const feistyFishSticksRecipe = await createRecipe(
+    null,
+    feistyFishSticks,
+    4,
+    cooking,
+    [
+      [temporalDragonhead, 1],
+      [thousandbitePiranha, 1],
+      [pebbledRockSalts, 3],
+      [islefinDorado, 1],
+    ],
+    null,
+    "Deluxe Fish Dishes",
+    1,
+    null,
+    null,
+    null,
+    "Cooking Other Food",
+    "Cooking Fire",
+    "Can be learned when cooking Timely Demise or Filet of Fangs.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const greatCeruleanSeaRecipe = await createRecipe(
+    null,
+    greatCeruleanSea,
+    4,
+    cooking,
+    [
+      [aileronSeamoth, 1],
+      [ceruleanSpinefish, 1],
+      [pebbledRockSalts, 3],
+      [islefinDorado, 1],
+    ],
+    null,
+    "Deluxe Fish Dishes",
+    1,
+    null,
+    null,
+    null,
+    "Cooking Other Food",
+    "Cooking Fire",
+    "Can be learned when cooking Seamoth Surprise or Salt-Baked Fishcake.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const revengeServedColdRecipe = await createRecipe(
+    null,
+    revengeServedCold,
+    4,
+    cooking,
+    [
+      [aileronSeamoth, 1],
+      [thousandbitePiranha, 1],
+      [assortedExoticSpices, 3],
+      [islefinDorado, 1],
+    ],
+    null,
+    "Deluxe Fish Dishes",
+    1,
+    null,
+    null,
+    null,
+    "Cooking Other Food",
+    "Cooking Fire",
+    "Can be learned when cooking Filet of Fangs or Seamoth Surprise.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const sizzlingSeafoodMedleyRecipe = await createRecipe(
+    null,
+    sizzlingSeafoodMedley,
+    4,
+    cooking,
+    [
+      [temporalDragonhead, 1],
+      [ceruleanSpinefish, 1],
+      [assortedExoticSpices, 3],
+      [islefinDorado, 1],
+    ],
+    null,
+    "Deluxe Fish Dishes",
+    1,
+    null,
+    null,
+    null,
+    "Cooking Other Food",
+    "Cooking Fire",
+    "Can be learned when cooking Timely Demise or Salt-Baked Fishcake.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const thousandboneTongueslicerRecipe = await createRecipe(
+    null,
+    thousandboneTongueslicer,
+    4,
+    cooking,
+    [
+      [thousandbitePiranha, 1],
+      [ceruleanSpinefish, 1],
+      [pebbledRockSalts, 3],
+      [islefinDorado, 1],
+    ],
+    null,
+    "Deluxe Fish Dishes",
+    1,
+    null,
+    null,
+    null,
+    "Cooking Other Food",
+    "Cooking Fire",
+    "Can be learned when cooking Filet of Fangs or Salt-Baked Fishcake.",
+    [
+      ["Finishing Touches", {}],
+      ["Secret Ingredient", {}],
+    ]
+  );
+  const gralsDevotion = await createRecipe(
+    "Gral's Devotion",
+    grandBanquetOfTheKaluak,
+    2,
+    cooking,
+    [
+      [magmaThresher, 2],
+      [roastDuckDelight, 4],
+      [sizzlingSeafoodMedley, 6],
+      [revengeServedCold, 6],
+      [mightyMammothRibs, 6],
+      [celebratoryCake, 1],
+    ],
+    null,
+    "Great Feasts",
+    1,
+    null,
+    null,
+    null,
+    "World Quest",
+    "Cooking Fire",
+    "Received from the Community Feast world quest in The Azure Span.",
+    [["Finishing Touches", {}]]
+  );
+  const gralsReverence = await createRecipe(
+    "Gral's Reverence",
+    grandBanquetOfTheKaluak,
+    2,
+    cooking,
+    [
+      [prismaticLeaper, 2],
+      [braisedBruffalonBrisket, 4],
+      [feistyFishSticks, 6],
+      [greatCeruleanSea, 6],
+      [hornswogHunk, 6],
+      [blubberyMuffin, 3],
+    ],
+    null,
+    "Great Feasts",
+    1,
+    null,
+    null,
+    null,
+    "World Quest",
+    "Cooking Fire",
+    "Received from the Community Feast world quest in The Azure Span.",
+    [["Finishing Touches", {}]]
+  );
+  const gralsVeneration = await createRecipe(
+    "Gral's Veneration",
+    grandBanquetOfTheKaluak,
+    2,
+    cooking,
+    [
+      [rimefinTuna, 2],
+      [riversidePicnic, 4],
+      [aromaticSeafoodPlatter, 6],
+      [thousandbitePiranha, 6],
+      [basiliskEggs, 6],
+      [snowInACone, 3],
+    ],
+    null,
+    "Great Feasts",
+    1,
+    null,
+    null,
+    null,
+    "World Quest",
+    "Cooking Fire",
+    "Received from the Community Feast world quest in The Azure Span.",
+    [["Finishing Touches", {}]]
+  );
+  const hoardOfDraconicDelicaciesRecipe = await createRecipe(
+    null,
+    hoardOfDraconicDelicacies,
+    1,
+    cooking,
+    [
+      [islefinDorado, 3],
+      [braisedBruffalonBrisket, 3],
+      [roastDuckDelight, 3],
+      [pebbledRockSalts, 2],
+      [assortedExoticSpices, 2],
+    ],
+    null,
+    "Great Feasts",
+    1,
+    null,
+    null,
+    null,
+    "Quest",
+    "Cooking Fire",
+    "Received from the What a Long, Sweet Trip It's Been questline in Valdrakken.",
+    [["Finishing Touches", {}]]
+  );
+  const yusasHeartyStewRecipe = await createRecipe(
+    null,
+    yusasHeartyStew,
+    1,
+    cooking,
+    [
+      [islefinDorado, 1],
+      [thousandbitePiranha, 1],
+      [mightyMammothRibs, 1],
+      [ohnahranPotato, 1],
+      [assortedExoticSpices, 1],
+    ],
+    null,
+    "Great Feasts",
+    1,
+    null,
+    null,
+    null,
+    "World Drop",
+    "Cooking Fire",
+    "Elder Yusa discovery? In the Ohn'ahran Plains.",
+    [["Finishing Touches", {}]]
+  );
 };
 
 makeTables();

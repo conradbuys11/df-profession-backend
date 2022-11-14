@@ -54,6 +54,8 @@ const Profession = sequelize.define(
   {
     name: { type: DataTypes.STRING, allowNull: false },
     icon: { type: DataTypes.STRING },
+    isPrimaryProfession: { type: DataTypes.BOOLEAN, defaultValue: true },
+    isCraftingProfession: { type: DataTypes.BOOLEAN, defaultValue: true },
     //has many Recipes, Specializations, Tools (Items), FirstAccessories (Items), SecondAccessories (Items)
   },
   {
